@@ -19,6 +19,10 @@ class AgentRunner
     end
   end
 
+  def environment
+    env
+  end
+
   def command(prompt, config_path = nil)
     case @backend
     when "cli" then cli_command(prompt)
@@ -51,8 +55,12 @@ class AgentRunner
     end
 
     # Don't let the agent think it's nested inside another Claude Code session.
+    # The agent is the only process that gets the Claude credentials (see ProjectShell).
+    # It must not think it's nested inside another Claude Code session either.
     def env
-      { "CLAUDECODE" => nil, "CLAUDE_CODE_ENTRYPOINT" => nil }
+      { "CLAUDECODE" => nil, "CLAUDE_CODE_ENTRYPOINT" => nil,
+        "CLAUDE_CODE_OAUTH_TOKEN" => Rails.configuration.x.claude_oauth_token,
+        "ANTHROPIC_API_KEY" => ENV["ANTHROPIC_API_KEY"] }
     end
 
     def with_config_file
