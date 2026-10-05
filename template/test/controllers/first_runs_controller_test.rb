@@ -4,7 +4,8 @@ class FirstRunsControllerTest < ActionDispatch::IntegrationTest
   test "a new app sends visitors to create the owner account" do
     User.delete_all
 
-    get root_path
+    # The home page may be public, so use a page that always needs an account.
+    get admin_users_path
     assert_redirected_to new_first_run_path
 
     get new_session_path
