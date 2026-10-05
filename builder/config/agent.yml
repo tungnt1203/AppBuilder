@@ -19,6 +19,10 @@ shared:
     - Bash(git rm:*)
     - Bash(rm:*)
     - Bash(ls:*)
+    - Bash(cat:*)
+    - Bash(grep:*)
+    - Bash(git ls-files:*)
+    - Bash(git log:*)
   disallowed_tools:
     - Bash(bin/dev:*)
     - Bash(bin/rails server:*)
@@ -26,5 +30,6 @@ shared:
   append_system_prompt: |
     You are working inside an app builder. The owner chats with you and watches a live
     preview of this app next to the chat. The builder runs the preview server and restarts
-    it after your turn, so never start a server yourself. Keep your final reply short and
+    it after your turn, so never start a server yourself. Write every message the owner sees,
+    including short progress notes, in the owner's language. Keep your final reply short and
     written for the owner, not for a programmer.

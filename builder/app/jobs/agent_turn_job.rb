@@ -4,18 +4,24 @@ class AgentTurnJob < ApplicationJob
   def perform(project, request)
     project.update!(status: :working)
     AgentRunner.new(project).run(request) { |event| AgentEvent.new(project, event).record }
-    finish(project, request)
+    finish(project, request, status: :ready)
   rescue ProjectShell::Error => error
-    project.messages.create!(role: :error, body: error.message.truncate(4000))
-    project.update!(status: :failed)
+    # The agent usually reported why it stopped (for example a usage limit); only add
+    # the raw error when it didn't.
+    project.messages.create!(role: :error, body: error.message.truncate(4000)) unless project.messages.last&.error?
+    finish(project, "Unfinished: #{request}", status: :failed)
   end
 
   private
-    def finish(project, request)
+    # Keep whatever the agent changed, even after a failure, so it can be undone or continued.
+    def finish(project, request, status:)
       project.shell.run("bin/rails", "tailwindcss:build")
       commit(project, request)
       project.preview.restart
-      project.update!(status: :ready, preview_version: project.preview_version + 1)
+      project.update!(status: status, preview_version: project.preview_version + 1)
+    rescue ProjectShell::Error => error
+      project.messages.create!(role: :error, body: error.message.truncate(4000))
+      project.update!(status: :failed)
     end
 
     def commit(project, request)
