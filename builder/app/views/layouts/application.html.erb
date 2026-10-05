@@ -14,11 +14,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
 
+    <script>
+      if (navigator.userAgentData?.brands?.some(({ brand }) => brand === "Chromium")) document.documentElement.classList.add("lens")
+    </script>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body data-controller="glass">
+    <%= render "layouts/lens" %>
     <div class="backdrop" data-turbo-permanent id="backdrop"></div>
     <%= yield %>
   </body>

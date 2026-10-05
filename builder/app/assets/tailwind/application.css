@@ -45,6 +45,7 @@
     --jade-glow: rgb(47 143 131 / 0.9);
     --sea-top: #13505a;
     --sea-bottom: var(--color-abyss);
+    --surface: color-mix(in srgb, var(--color-mist) 94%, transparent);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -74,6 +75,7 @@
       --jade-glow: rgb(20 90 82 / 0.7);
       --sea-top: #082a31;
       --sea-bottom: #04161a;
+      --surface: rgb(10 34 39 / 0.92);
     }
   }
 
@@ -104,6 +106,7 @@
     --jade-glow: rgb(20 90 82 / 0.7);
     --sea-top: #082a31;
     --sea-bottom: #04161a;
+    --surface: rgb(10 34 39 / 0.92);
   }
 
   html, body { height: 100%; }
@@ -146,17 +149,31 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* Clear glass: dock, composer, chips. The ::before is the specular sheen. */
+  /*
+    Liquid Glass, following Apple's rules: glass is only for controls that float
+    above content (dock, composer, menus, buttons); content sits on solid surfaces
+    underneath. The glass is mostly clear, bends what's behind it at the edges
+    (Chromium, see layouts/_lens), has a two-sided rim, and a highlight that
+    follows the pointer.
+  */
   .glass {
+    --mx: 30%;
+    --my: -20%;
     position: relative;
     background: var(--glass-clear);
-    backdrop-filter: blur(28px) saturate(170%);
-    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    backdrop-filter: blur(10px) saturate(180%) brightness(1.04);
+    -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.04);
     border: 1px solid var(--glass-edge);
-    box-shadow: var(--glass-shadow);
+    box-shadow:
+      inset 1px 1px 0 rgb(255 255 255 / 0.55),
+      inset -1px -1px 0 rgb(255 255 255 / 0.12),
+      inset 0 0 18px rgb(255 255 255 / 0.12),
+      0 18px 40px -18px rgb(6 36 41 / 0.5),
+      0 2px 6px -2px rgb(6 36 41 / 0.25);
     isolation: isolate;
   }
 
+  /* Specular highlight, positioned by the glass controller (pointer). */
   .glass::before {
     content: "";
     position: absolute;
@@ -164,16 +181,34 @@
     z-index: -1;
     border-radius: inherit;
     pointer-events: none;
-    background:
-      radial-gradient(120% 60% at 20% -10%, var(--sheen), transparent 55%),
-      linear-gradient(90deg, transparent 30%, rgb(255 255 255 / 0.18) 50%, transparent 70%) top / 100% 1px no-repeat;
+    background: radial-gradient(90% 120% at var(--mx) var(--my), var(--sheen), transparent 60%);
+    opacity: 0.9;
+    transition: background-position 120ms;
   }
 
-  /* Frosted glass: surfaces you read from, like the chat. */
+  /* Refraction where supported: the lens filter bends the backdrop at the rim. */
+  .lens .glass {
+    backdrop-filter: url(#lens) blur(8px) saturate(180%) brightness(1.04);
+  }
+
+  /* Denser glass for menus, where text has to stay readable over anything. */
   .glass-frost {
     background: var(--glass-frost);
-    backdrop-filter: blur(36px) saturate(150%);
-    -webkit-backdrop-filter: blur(36px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+  }
+  .lens .glass-frost { backdrop-filter: url(#lens) blur(22px) saturate(160%); }
+
+  /* Solid surface for content you read and scroll, beneath the glass. */
+  .surface {
+    background: var(--surface);
+    box-shadow: 0 24px 60px -24px rgb(6 36 41 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.5);
+  }
+
+  /* Menus grow out of the control that opened them. */
+  details[open] > .popover {
+    transform-origin: top right;
+    animation: grow 320ms cubic-bezier(0.2, 1.25, 0.35, 1);
   }
 
   .sheet { border-radius: 28px; }
@@ -322,10 +357,12 @@
     overflow-x: auto;
   }
 
-  /* The preview sits in a glass device bezel. */
+  /* The preview is content too: a solid frame, not glass. Radii are concentric (30 - 9). */
   .bezel {
-    padding: 10px;
+    padding: 9px;
     border-radius: 30px;
+    background: var(--surface);
+    box-shadow: 0 24px 60px -24px rgb(6 36 41 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.5);
   }
   .bezel iframe {
     border-radius: 21px;
@@ -373,11 +410,16 @@
   to { transform: translate3d(-3%, 2%, 0) scale(1.06); }
 }
 
+@keyframes grow {
+  from { opacity: 0; transform: scale(0.6) translateY(-6px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
 @keyframes pulse {
   50% { opacity: 0.35; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .backdrop, .status::before { animation: none !important; }
+  .backdrop, .status::before, details[open] > .popover { animation: none !important; }
   .btn { transition: none; }
 }
