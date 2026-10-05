@@ -13,7 +13,7 @@ module ApplicationHelper
 
   def markdown(text)
     renderer = Redcarpet::Render::HTML.new(filter_html: true, no_images: true, safe_links_only: true, link_attributes: { target: "_blank" })
-    Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true, strikethrough: true).render(text.to_s).html_safe
+    Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true, strikethrough: true, lax_spacing: true).render(text.to_s).html_safe
   end
 
   def turn_summary(message)
