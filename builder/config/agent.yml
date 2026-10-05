@@ -1,0 +1,30 @@
+# How the coding agent runs inside each project. Shared by both backends:
+# "cli" (the local `claude` command, uses your Claude Code login) and
+# "sdk" (runner/index.mjs with the Claude Agent SDK, needs ANTHROPIC_API_KEY).
+shared:
+  max_budget_usd: 8
+  allowed_tools:
+    - Read
+    - Edit
+    - Write
+    - Glob
+    - Grep
+    - Skill
+    - TodoWrite
+    - Bash(bin/rails:*)
+    - Bash(bin/rubocop:*)
+    - Bash(bundle exec:*)
+    - Bash(git status:*)
+    - Bash(git diff:*)
+    - Bash(git rm:*)
+    - Bash(rm:*)
+    - Bash(ls:*)
+  disallowed_tools:
+    - Bash(bin/dev:*)
+    - Bash(bin/rails server:*)
+    - Bash(bin/rails s:*)
+  append_system_prompt: |
+    You are working inside an app builder. The owner chats with you and watches a live
+    preview of this app next to the chat. The builder runs the preview server and restarts
+    it after your turn, so never start a server yourself. Keep your final reply short and
+    written for the owner, not for a programmer.

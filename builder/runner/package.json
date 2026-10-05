@@ -1,0 +1,9 @@
+{
+  "name": "builder-runner",
+  "private": true,
+  "type": "module",
+  "description": "Runs one agent turn with the Claude Agent SDK and prints each SDK message as a JSON line.",
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.289"
+  }
+}

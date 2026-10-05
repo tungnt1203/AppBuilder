@@ -1,0 +1,9 @@
+request:
+  project: clinic
+  role: user
+  body: Làm app đặt lịch
+
+reply:
+  project: clinic
+  role: assistant
+  body: "Xong. **Lịch hẹn** đã sẵn sàng."

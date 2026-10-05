@@ -1,0 +1,14 @@
+clinic:
+  name: Nha khoa
+  slug: nha-khoa
+  language: vi
+  port: 4001
+  status: ready
+  session_id: session-123
+
+shop:
+  name: Shop
+  slug: shop
+  language: en
+  port: 4002
+  status: working
