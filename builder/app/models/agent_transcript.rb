@@ -9,6 +9,7 @@
 # that and how long it thinks, not what.
 class AgentTranscript
   DRAFT_INTERVAL = 0.3 # seconds between live updates of the reply being written
+  QUESTIONS = /```questions\s*(\[.*?\])\s*```/m
 
   STEPS = {
     "Read" => ->(input) { "Read #{relative(input["file_path"])}" },
@@ -103,11 +104,29 @@ class AgentTranscript
         when "text"
           next if block["text"].blank?
           clear_draft
-          @project.messages.create!(role: :assistant, body: block["text"])
+          record_reply(block["text"])
         when "tool_use"
           record_tool_use(block)
         end
       end
+    end
+
+    # Questions come at the end of a reply in a ```questions block; they become buttons.
+    def record_reply(text)
+      questions = parse_questions(text[QUESTIONS, 1])
+      body = questions ? text.sub(QUESTIONS, "").strip : text
+      @project.messages.create!(role: :assistant, body: body, data: questions ? { "questions" => questions } : {})
+    end
+
+    def parse_questions(json)
+      return unless json
+
+      Array(JSON.parse(json)).filter_map do |item|
+        next unless item.is_a?(Hash) && item["question"].present?
+        { "question" => item["question"].to_s, "options" => Array(item["options"]).map(&:to_s).first(4) }
+      end.presence
+    rescue JSON::ParserError
+      nil
     end
 
     def record_tool_use(block)

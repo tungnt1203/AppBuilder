@@ -19,6 +19,12 @@
       <%= form.select :language, Project::LANGUAGES.map { |code, info| [ info[:name], code ] }, {}, "aria-label": "Language of the app", class: "field sm:w-40" %>
       <%= form.button "Build app", class: "btn btn-primary h-11 px-6 sm:h-auto" %>
     </div>
+
+    <label class="muted mt-4 flex items-center gap-2 text-sm">
+      <%= hidden_field_tag "project[plan]", "0", id: nil %>
+      <%= check_box_tag "project[plan]", "1", true, id: "project_plan", class: "size-4 accent-[var(--color-jade)]" %>
+      Show me a plan first, and ask me if anything is unclear
+    </label>
   <% end %>
 
   <% if @projects.any? %>

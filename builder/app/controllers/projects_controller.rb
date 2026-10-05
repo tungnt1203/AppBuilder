@@ -12,7 +12,7 @@ class ProjectsController < ApplicationController
     if @project.save
       request = params.dig(:project, :request).to_s.strip
       @project.messages.create!(role: :user, body: request) if request.present?
-      ProjectSetupJob.perform_later(@project, request.presence)
+      ProjectSetupJob.perform_later(@project, request.presence, params.dig(:project, :plan) == "0" ? "build" : "plan")
       redirect_to @project
     else
       @projects = Project.ordered

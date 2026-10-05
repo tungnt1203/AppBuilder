@@ -10,8 +10,9 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
   test "creating an app puts the request in the chat and starts setup" do
     assert_enqueued_with(job: ProjectSetupJob) do
-      post projects_path, params: { project: { name: "Phòng gym", language: "vi", request: "Quản lý hội viên" } }
+      post projects_path, params: { project: { name: "Phòng gym", language: "vi", request: "Quản lý hội viên", plan: "1" } }
     end
+    assert_equal "plan", enqueued_jobs.last["arguments"].last
 
     project = Project.find_by!(slug: "phong-gym")
     assert_redirected_to project_path(project)

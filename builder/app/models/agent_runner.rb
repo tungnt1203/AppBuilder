@@ -3,8 +3,9 @@ require "json"
 # Runs one turn of the coding agent in a project and yields each event
 # (a Claude Agent SDK message, parsed from a JSON line) as it happens.
 class AgentRunner
-  def initialize(project, backend: Rails.configuration.x.agent_backend, config: Rails.configuration.x.agent)
-    @project, @backend, @config = project, backend, config
+  # mode "plan" reads and proposes without changing anything; "build" makes the changes.
+  def initialize(project, mode: "build", backend: Rails.configuration.x.agent_backend, config: Rails.configuration.x.agent)
+    @project, @mode, @backend, @config = project, mode, backend, config
   end
 
   def run(prompt)
@@ -31,7 +32,7 @@ class AgentRunner
       [ "claude", "-p", prompt,
         "--output-format", "stream-json", "--verbose", "--include-partial-messages",
         "--setting-sources", "project",
-        "--permission-mode", "acceptEdits",
+        "--permission-mode", permission_mode,
         "--allowedTools", *@config[:allowed_tools],
         "--disallowedTools", *@config[:disallowed_tools],
         "--append-system-prompt", @config[:append_system_prompt],
@@ -41,8 +42,12 @@ class AgentRunner
 
     def sdk_command(prompt, config_path)
       [ "node", Rails.root.join("runner/index.mjs").to_s,
-        "--cwd", @project.path.to_s, "--prompt", prompt, "--config", config_path.to_s,
+        "--cwd", @project.path.to_s, "--prompt", prompt, "--config", config_path.to_s, "--permission-mode", permission_mode,
         *([ "--resume", @project.session_id ] if @project.session_id) ]
+    end
+
+    def permission_mode
+      @mode == "plan" ? "plan" : "acceptEdits"
     end
 
     # Don't let the agent think it's nested inside another Claude Code session.

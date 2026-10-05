@@ -2,14 +2,14 @@
 # time zone, starts the preview, then hands the owner's first request (already in
 # the chat) to the agent.
 class ProjectSetupJob < ApplicationJob
-  def perform(project, first_request = nil)
+  def perform(project, first_request = nil, mode = "plan")
     copy_template(project)
     configure(project)
     prepare(project)
     project.preview.start
     project.update!(status: :ready, preview_version: project.preview_version + 1)
 
-    AgentTurnJob.perform_later(project, first_request) if first_request.present?
+    AgentTurnJob.perform_later(project, first_request, mode) if first_request.present?
   rescue ProjectShell::Error => error
     project.messages.create!(role: :error, body: error.message.truncate(4000))
     project.update!(status: :failed)

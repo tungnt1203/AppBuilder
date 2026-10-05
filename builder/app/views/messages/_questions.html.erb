@@ -1,0 +1,20 @@
+<%= form_with url: project_messages_path(message.project), class: "questions", data: { controller: "answers", action: "answers#submit" } do |form| %>
+  <%= hidden_field_tag "message[body]", "", data: { answers_target: "body" }, id: nil %>
+  <%= hidden_field_tag "message[plan]", message.project.planning? ? "1" : "0", id: nil %>
+
+  <% message.data["questions"].each_with_index do |question, index| %>
+    <fieldset data-answers-target="question" data-question="<%= question["question"] %>">
+      <legend><%= question["question"] %></legend>
+      <div class="flex flex-wrap gap-1.5">
+        <% question["options"].each do |option| %>
+          <button type="button" class="chip-option" data-action="answers#choose" aria-pressed="false"><%= option %></button>
+        <% end %>
+      </div>
+    </fieldset>
+  <% end %>
+
+  <div class="flex items-center gap-3">
+    <%= form.button "Send answers", class: "btn btn-primary", disabled: !message.project.accepts_messages?, data: { answers_target: "send" } %>
+    <span class="faint text-xs">or type your own answer below</span>
+  </div>
+<% end %>

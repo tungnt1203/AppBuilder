@@ -1,7 +1,7 @@
 // Runs one agent turn with the Claude Agent SDK and prints every SDK message as
 // one JSON line on stdout, the same format as `claude -p --output-format stream-json`.
 //
-//   node runner/index.mjs --cwd DIR --prompt TEXT --config FILE [--resume SESSION_ID]
+//   node runner/index.mjs --cwd DIR --prompt TEXT --config FILE [--resume SESSION_ID] [--permission-mode plan]
 //
 // FILE is JSON with allowedTools, disallowedTools, appendSystemPrompt and maxBudgetUsd.
 // Needs ANTHROPIC_API_KEY in the environment.
@@ -14,7 +14,8 @@ const { values: args } = parseArgs({
     cwd: { type: "string" },
     prompt: { type: "string" },
     config: { type: "string" },
-    resume: { type: "string" }
+    resume: { type: "string" },
+    "permission-mode": { type: "string", default: "acceptEdits" }
   }
 })
 
@@ -25,7 +26,7 @@ for await (const message of query({
   options: {
     cwd: args.cwd,
     resume: args.resume,
-    permissionMode: "acceptEdits",
+    permissionMode: args["permission-mode"],
     includePartialMessages: true,
     allowedTools: config.allowedTools,
     disallowedTools: config.disallowedTools,

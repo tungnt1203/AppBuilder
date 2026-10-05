@@ -10,6 +10,11 @@ class AgentRunnerTest < ActiveSupport::TestCase
     assert_includes command, "Bash(bin/rails:*)"
   end
 
+  test "plan mode proposes without changing anything" do
+    assert_includes AgentRunner.new(projects(:clinic), mode: "plan", backend: "cli").command("Hi"), "plan"
+    assert_includes AgentRunner.new(projects(:clinic), mode: "build", backend: "cli").command("Hi"), "acceptEdits"
+  end
+
   test "first turn starts a new session" do
     assert_not_includes AgentRunner.new(projects(:shop), backend: "cli").command("Hi"), "--resume"
   end

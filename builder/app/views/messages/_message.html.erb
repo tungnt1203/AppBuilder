@@ -3,6 +3,14 @@
   <div class="bubble-user"><%= message.body %></div>
 <% when "assistant" %>
   <div class="reply"><%= markdown(message.body) %></div>
+  <% if message.data["questions"].present? && message == message.project.messages.last %>
+    <%= render "messages/questions", message: message %>
+  <% elsif message.data["proposal"] && message == message.project.latest_proposal %>
+    <div class="proposal">
+      <%= button_to message.project.approval_message, project_build_path(message.project), disabled: !message.project.accepts_messages?, class: "btn btn-primary" %>
+      <span class="faint text-xs">or ask for changes below</span>
+    </div>
+  <% end %>
 <% when "plan" %>
   <%= render "messages/plan", tasks: message.data["tasks"] if message.data["tasks"].present? %>
 <% when "action" %>

@@ -4,9 +4,7 @@ class Projects::MessagesController < ApplicationController
     request = params.dig(:message, :body).to_s.strip
 
     if @project.accepts_messages? && request.present?
-      @project.messages.create!(role: :user, body: request)
-      @project.update!(status: :working)
-      AgentTurnJob.perform_later(@project, request)
+      @project.ask(request, mode: params.dig(:message, :plan) == "1" ? "plan" : "build")
     end
 
     redirect_to @project

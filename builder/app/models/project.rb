@@ -79,6 +79,26 @@ class Project < ApplicationRecord
     ready? || failed?
   end
 
+  # The owner's message goes to the agent, in plan or build mode.
+  def ask(request, mode:)
+    messages.create!(role: :user, body: request)
+    update!(status: :working)
+    AgentTurnJob.perform_later(self, request, mode)
+  end
+
+  # Plan first for a new app, or while a plan is being discussed.
+  def plans_by_default?
+    planning? || history.versions.size <= 1
+  end
+
+  def latest_proposal
+    messages.assistant.last if messages.last&.assistant? && messages.last.data["proposal"]
+  end
+
+  def approval_message
+    language == "vi" ? "Làm theo kế hoạch này" : "Build this plan"
+  end
+
   private
     def assign_slug
       # Strip Vietnamese diacritics before parameterize, which would drop letters like "ữ".

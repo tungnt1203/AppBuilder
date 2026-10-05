@@ -54,6 +54,26 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_equal [ [ "Tạo bảng sản phẩm", "completed" ], [ "Làm trang đơn hàng", "pending" ] ], plan.data["tasks"].map { |task| task.values_at("subject", "status") }
   end
 
+  test "turns a questions block into buttons and hides it from the reply" do
+    record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => <<~TEXT } ] }
+      Mình cần hỏi trước khi lập kế hoạch.
+
+      ```questions
+      [{"question": "Khách có cần tài khoản không?", "options": ["Không", "Có"]}]
+      ```
+    TEXT
+
+    reply = @project.messages.last
+    assert_equal "Mình cần hỏi trước khi lập kế hoạch.", reply.body
+    assert_equal [ { "question" => "Khách có cần tài khoản không?", "options" => [ "Không", "Có" ] } ], reply.data["questions"]
+  end
+
+  test "keeps a malformed questions block as plain text" do
+    record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => "Hỏi:\n```questions\n[not json]\n```" } ] }
+
+    assert_includes @project.messages.last.body, "not json"
+  end
+
   test "ignores work done by subagents" do
     assert_no_difference -> { @project.messages.count } do
       record "type" => "assistant", "parent_tool_use_id" => "tool_1", "message" => { "content" => [ { "type" => "text", "text" => "inner" } ] }
