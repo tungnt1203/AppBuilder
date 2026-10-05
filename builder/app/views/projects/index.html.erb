@@ -3,7 +3,7 @@
 <main class="mx-auto flex min-h-full max-w-3xl flex-col gap-6 px-4 py-16 sm:py-24">
   <%= form_with model: @project, class: "glass glass-frost sheet p-6 sm:p-8" do |form| %>
     <h1 class="text-[1.75rem] leading-tight font-semibold tracking-[-0.02em]">Describe the app you need</h1>
-    <p class="mt-1.5 text-[0.9375rem] text-ink/60">It's built while you watch, and you run it on your own server.</p>
+    <p class="muted mt-1.5 text-[0.9375rem]">It's built while you watch, and you run it on your own server.</p>
 
     <% if @project.errors.any? %>
       <p class="alert mt-5"><%= @project.errors.full_messages.to_sentence %></p>
@@ -17,7 +17,7 @@
     <div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
       <%= form.text_field :name, required: true, placeholder: "App name", "aria-label": "App name", class: "field" %>
       <%= form.select :language, Project::LANGUAGES.map { |code, info| [ info[:name], code ] }, {}, "aria-label": "Language of the app", class: "field sm:w-40" %>
-      <%= form.button "Build app", class: "btn btn-primary h-auto px-6" %>
+      <%= form.button "Build app", class: "btn btn-primary h-11 px-6 sm:h-auto" %>
     </div>
   <% end %>
 
@@ -37,7 +37,7 @@
                   <% end %>
                 </span>
               </span>
-              <span class="rounded-full bg-white/80 px-3 py-1"><%= status_label(project) %></span>
+              <span class="chip rounded-full px-3 py-1"><%= status_label(project) %></span>
             <% end %>
           </li>
         <% end %>

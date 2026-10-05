@@ -1,4 +1,4 @@
-<details class="steps" <%= "open" if open %>>
+<details class="steps" data-controller="keep-open" <%= "open" if open %>>
   <summary><%= icon :steps, size: 14 %><span><%= steps_summary(actions) %></span><%= icon :chevron, size: 14 %></summary>
   <ol>
     <% actions.each do |action| %>

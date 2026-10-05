@@ -1,0 +1,26 @@
+<% versions = project.history.versions %>
+<% current_sha = versions.first&.sha %>
+<% published = project.deployments.live.pluck(:commit_sha, :version).to_h %>
+
+<p class="faint px-3 pt-2 pb-1 text-xs">Restoring adds a new version, so you can always come back.</p>
+<ol class="versions">
+  <% versions.each do |version| %>
+    <li>
+      <div class="min-w-0 flex-1">
+        <p class="subject truncate" title="<%= version.subject %>"><%= version.subject %></p>
+        <p class="meta"><%= time_ago_in_words(version.committed_at) %> ago</p>
+      </div>
+      <% if version.sha == current_sha %>
+        <span class="tag">Current</span>
+      <% end %>
+      <% if published[version.sha] %>
+        <span class="tag tag-live">Published v<%= published[version.sha] %></span>
+      <% end %>
+      <% unless version.sha == current_sha %>
+        <%= button_to "Restore", project_restorations_path(project), params: { sha: version.sha },
+              disabled: !project.accepts_messages?, class: "btn btn-ghost h-7 px-3 text-xs",
+              form: { data: { turbo_confirm: "Restore “#{version.subject}”? The preview restarts on that version." } } %>
+      <% end %>
+    </li>
+  <% end %>
+</ol>

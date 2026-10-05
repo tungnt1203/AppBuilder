@@ -59,6 +59,18 @@ class Project < ApplicationRecord
     ProjectShell.new(path)
   end
 
+  def history
+    ProjectHistory.new(self)
+  end
+
+  # The agent leaves a one-line summary of its change here (see config/agent.yml).
+  def take_commit_message
+    file = path.join("tmp/commit_message.txt")
+    return unless file.exist?
+
+    file.read.lines.first.to_s.squish.presence.tap { file.delete }
+  end
+
   def time_zone
     LANGUAGES.dig(language, :time_zone)
   end

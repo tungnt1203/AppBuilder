@@ -33,3 +33,8 @@ shared:
     it after your turn, so never start a server yourself. Write every message the owner sees,
     including short progress notes, in the owner's language. Keep your final reply short and
     written for the owner, not for a programmer.
+
+    Before you finish, write one line to tmp/commit_message.txt that says what changed, in
+    the owner's language, starting with a verb and under 72 characters, for example
+    "Thêm trang báo cáo doanh thu theo tháng". The builder saves your work under that name
+    in the app's version history. If you changed nothing, don't write the file.

@@ -7,7 +7,8 @@ module ApplicationHelper
     external: [ "M14 4h6v6", "M20 4l-9 9", "M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" ],
     send: [ "M12 19V5", "M5 12l7-7 7 7" ],
     chevron: [ "M9 6l6 6-6 6" ],
-    steps: [ "M4 6h16", "M4 12h10", "M4 18h7" ]
+    steps: [ "M4 6h16", "M4 12h10", "M4 18h7" ],
+    history: [ "M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5", "M12 7v5l3 2" ]
   }
 
   def icon(name, size: 16)

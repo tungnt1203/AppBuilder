@@ -29,6 +29,7 @@ class ProjectSetupJob < ApplicationJob
         .sub(/config\.i18n\.default_locale = :\w+/, "config.i18n.default_locale = :#{project.language}")
         .sub(/config\.time_zone = ".*"/) { %(config.time_zone = "#{project.time_zone}") })
       project.shell.run("git", "commit", "--quiet", "-am", "Set up #{project.name}")
+      project.update!(base_sha: project.history.current_sha)
     end
 
     def prepare(project)
