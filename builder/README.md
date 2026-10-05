@@ -25,4 +25,23 @@ Open http://localhost:3000.
   - `sdk`: `runner/index.mjs` with the Claude Agent SDK. Needs `ANTHROPIC_API_KEY`
     and `npm install` in `runner/`.
 
-Environment: `PROJECTS_ROOT`, `TEMPLATE_PATH`, `AGENT_BACKEND`, `FIRST_PREVIEW_PORT`.
+## Claude credentials
+
+Without any setup the agent uses your local `claude` login. To use a long-lived token instead,
+run `claude setup-token` and put it in the builder's encrypted credentials:
+
+```sh
+bin/rails credentials:edit
+```
+
+```yaml
+claude:
+  oauth_token: sk-ant-oat01-...
+```
+
+`CLAUDE_CODE_OAUTH_TOKEN` in the environment takes precedence. Only the agent process receives
+the token: preview servers, tests and image builds of the apps run without it. A token belongs
+to one Claude account; everyone running the builder uses their own.
+
+Environment: `PROJECTS_ROOT`, `TEMPLATE_PATH`, `AGENT_BACKEND`, `FIRST_PREVIEW_PORT`,
+`CLAUDE_CODE_OAUTH_TOKEN`.
