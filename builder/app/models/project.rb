@@ -3,6 +3,7 @@ class Project < ApplicationRecord
 
   has_many :messages, -> { order(:id) }, dependent: :destroy
   has_many :deployments, dependent: :destroy
+  has_many :agent_commands, dependent: :delete_all
 
   enum :status, %w[ setting_up ready working failed ].index_by(&:itself), default: "setting_up"
 
@@ -79,11 +80,31 @@ class Project < ApplicationRecord
     ready? || failed?
   end
 
-  # The owner's message goes to the agent, in plan or build mode.
+  # With the interactive agent, the owner can add to a request while it's being worked on.
+  def accepts_messages_while_working?
+    working? && Rails.configuration.x.agent_backend == "sdk"
+  end
+
+  def stop_requested?
+    working_since.present? && agent_commands.interrupt.where(created_at: working_since..).exists?
+  end
+
+  # The owner's message goes to the agent, in plan or build mode. While a turn is
+  # running (interactive agent only), it joins that turn instead.
   def ask(request, mode:)
     messages.create!(role: :user, body: request)
-    update!(status: :working)
-    AgentTurnJob.perform_later(self, request, mode)
+
+    if working?
+      agent_commands.create!(kind: :message, payload: { "text" => request })
+    else
+      update!(status: :working)
+      AgentTurnJob.perform_later(self, request, mode)
+    end
+  end
+
+  def answer(ask_id, answers)
+    messages.create!(role: :user, body: answers.map { |question, answer| "#{question} #{answer}" }.join("\n"))
+    agent_commands.create!(kind: :answer, payload: { "id" => ask_id, "answers" => answers })
   end
 
   # Plan first for a new app, or while a plan is being discussed.

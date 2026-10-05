@@ -53,21 +53,26 @@
           <span class="activity-dot"></span>
           <span id="activity-text" class="min-w-0 flex-1 truncate"><%= @project.setting_up? ? "Setting up the project" : (@project.activity || "Working") %></span>
           <span class="faint tabular-nums" data-elapsed-target="clock"></span>
+          <% if @project.working? %>
+            <%= button_to "Stop", project_stop_path(@project), class: "btn btn-ghost h-7 px-3 text-xs", title: "Stop the agent; what's done so far is kept",
+                  disabled: @project.stop_requested? %>
+          <% end %>
         </div>
       <% end %>
 
       <%= form_with model: [ @project, Message.new ], class: "absolute inset-x-3 bottom-3", data: { controller: "composer" } do |form| %>
         <div class="glass capsule flex items-end gap-2 py-1.5 pr-1.5 pl-4">
           <%= hidden_field_tag "message[plan]", "0", id: nil %>
-          <%= form.text_area :body, rows: 1, disabled: !@project.accepts_messages?, required: true, "aria-label": "Ask for a change",
-                placeholder: @project.accepts_messages? ? "Ask for a change" : "Wait for the current step to finish",
+          <% can_send = @project.accepts_messages? || @project.accepts_messages_while_working? %>
+          <%= form.text_area :body, rows: 1, disabled: !can_send, required: true, "aria-label": "Ask for a change",
+                placeholder: @project.accepts_messages? ? "Ask for a change" : (can_send ? "Add to the request while it works" : "Wait for the current step to finish"),
                 data: { action: "keydown->composer#submitOnShortcut input->composer#resize", composer_target: "input" },
                 class: "max-h-40 min-h-9 flex-1 resize-none bg-transparent py-2 text-[0.9375rem] leading-snug outline-none placeholder:text-[var(--text-faint)] disabled:opacity-60" %>
           <label class="plan-toggle" title="The agent proposes a plan first and builds it when you approve">
             <%= check_box_tag "message[plan]", "1", @project.plans_by_default?, id: "message_plan", disabled: !@project.accepts_messages? %>
             <span>Plan first</span>
           </label>
-          <%= form.button disabled: !@project.accepts_messages?, class: "btn btn-primary btn-icon", "aria-label": "Send", title: "Send (⌘↵)" do %><%= icon :send %><% end %>
+          <%= form.button disabled: !can_send, class: "btn btn-primary btn-icon", "aria-label": "Send", title: "Send (⌘↵)" do %><%= icon :send %><% end %>
         </div>
       <% end %>
     </aside>

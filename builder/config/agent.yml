@@ -41,10 +41,11 @@ shared:
     the owner sees the plan as a checklist.
 
     Asking: when the request leaves open something that changes what you'd build (who uses
-    it, what's public, what the main screen is), ask instead of guessing. Ask at most 3 short
-    questions, each with 2 to 4 answers, then stop. Put them at the very end of your reply in
-    this exact block, which the builder turns into buttons (write the text in the owner's
-    language):
+    it, what's public, what the main screen is), ask instead of guessing: at most 3 short
+    questions, each with 2 to 4 answers, written in the owner's language. Use the
+    AskUserQuestion tool when you have it; the owner answers in the studio and you carry on.
+    Without it, ask at the very end of your reply in this exact block, which the builder
+    turns into buttons, and stop:
 
     ```questions
     [{"question": "Khách có cần tài khoản để đặt lịch không?", "options": ["Không, ai cũng đặt được", "Có, phải đăng ký"]}]

@@ -1,20 +1,31 @@
-<%= form_with url: project_messages_path(message.project), class: "questions", data: { controller: "answers", action: "answers#submit" } do |form| %>
-  <%= hidden_field_tag "message[body]", "", data: { answers_target: "body" }, id: nil %>
-  <%= hidden_field_tag "message[plan]", message.project.planning? ? "1" : "0", id: nil %>
+<%# Questions from the agent. Live questions (ask_id) are answered while the agent waits;
+    the others start the next turn. %>
+<% project = message.project %>
+<% live = message.data["ask_id"].present? %>
+<% open = live ? project.working? : project.accepts_messages? %>
 
-  <% message.data["questions"].each_with_index do |question, index| %>
-    <fieldset data-answers-target="question" data-question="<%= question["question"] %>">
+<%= form_with url: project_messages_path(project), class: "questions", data: { controller: "answers", action: "answers#submit" } do |form| %>
+  <%= hidden_field_tag "message[body]", "", data: { answers_target: "body" }, id: nil %>
+  <%= hidden_field_tag "message[answers]", "", data: { answers_target: "json" }, id: nil %>
+  <%= hidden_field_tag "message[plan]", project.planning? ? "1" : "0", id: nil %>
+  <%= hidden_field_tag "message[ask_id]", message.data["ask_id"], id: nil if live %>
+
+  <% message.data["questions"].each do |question| %>
+    <fieldset data-answers-target="question" data-question="<%= question["question"] %>" data-multiple="<%= question["multiple"] == true %>">
       <legend><%= question["question"] %></legend>
       <div class="flex flex-wrap gap-1.5">
-        <% question["options"].each do |option| %>
-          <button type="button" class="chip-option" data-action="answers#choose" aria-pressed="false"><%= option %></button>
+        <% question["options"].each_with_index do |option, index| %>
+          <button type="button" class="chip-option" data-action="answers#choose" aria-pressed="false"
+                  title="<%= question.dig("descriptions", index) %>"><%= option %></button>
         <% end %>
       </div>
     </fieldset>
   <% end %>
 
   <div class="flex items-center gap-3">
-    <%= form.button "Send answers", class: "btn btn-primary", disabled: !message.project.accepts_messages?, data: { answers_target: "send" } %>
-    <span class="faint text-xs">or type your own answer below</span>
+    <%= form.button "Send answers", class: "btn btn-primary", disabled: !open, data: { answers_target: "send" } %>
+    <% unless live %>
+      <span class="faint text-xs">or type your own answer below</span>
+    <% end %>
   </div>
 <% end %>

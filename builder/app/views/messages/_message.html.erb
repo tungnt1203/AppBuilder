@@ -2,7 +2,9 @@
 <% when "user" %>
   <div class="bubble-user"><%= message.body %></div>
 <% when "assistant" %>
-  <div class="reply"><%= markdown(message.body) %></div>
+  <% if message.body.present? %>
+    <div class="reply"><%= markdown(message.body) %></div>
+  <% end %>
   <% if message.data["questions"].present? && message == message.project.open_reply %>
     <%= render "messages/questions", message: message %>
   <% elsif message.data["proposal"] && message == message.project.latest_proposal %>

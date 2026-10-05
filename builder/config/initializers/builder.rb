@@ -8,8 +8,12 @@ Rails.application.configure do
   # `claude` login is used. Only the agent process ever receives it (see ProjectShell).
   config.x.claude_oauth_token = ENV["CLAUDE_CODE_OAUTH_TOKEN"].presence || Rails.application.credentials.dig(:claude, :oauth_token)
 
-  # "cli" uses the local `claude` command; "sdk" uses runner/index.mjs and ANTHROPIC_API_KEY.
-  config.x.agent_backend = ENV.fetch("AGENT_BACKEND") { ENV["ANTHROPIC_API_KEY"].present? ? "sdk" : "cli" }
+  # "sdk" runs runner/index.mjs (the Claude Agent SDK) and is interactive: the agent can ask
+  # questions mid-turn, take extra messages and be stopped. It needs `npm install` in runner/
+  # and a token or API key. "cli" runs the local `claude -p` and can only be stopped.
+  sdk_ready = Rails.root.join("runner/node_modules/@anthropic-ai/claude-agent-sdk").exist? &&
+    (config.x.claude_oauth_token.present? || ENV["ANTHROPIC_API_KEY"].present?)
+  config.x.agent_backend = ENV.fetch("AGENT_BACKEND") { sdk_ready ? "sdk" : "cli" }
   config.x.agent = config_for(:agent)
 
   # Each project's preview server gets its own port, counting up from here.

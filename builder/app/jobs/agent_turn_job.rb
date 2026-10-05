@@ -5,6 +5,7 @@ class AgentTurnJob < ApplicationJob
   def perform(project, request, mode = "build")
     prompt = [ project.agent_note, request ].compact.join("\n\n")
     project.update!(status: :working, planning: mode == "plan", agent_note: nil, working_since: Time.current, activity: "Starting")
+    project.agent_commands.pending.where.not(kind: :message).update_all(delivered_at: Time.current) # left from an earlier turn
     transcript = AgentTranscript.new(project)
 
     AgentRunner.new(project, mode:).run(prompt) { |event| transcript.record(event) }
@@ -15,6 +16,7 @@ class AgentTurnJob < ApplicationJob
     else
       finish(project, project.take_commit_message || request, status: :ready)
     end
+    continue_with_late_messages(project)
   rescue ProjectShell::Error => error
     transcript&.finish
     # The agent usually reported why it stopped (for example a usage limit); only add
@@ -24,6 +26,16 @@ class AgentTurnJob < ApplicationJob
   end
 
   private
+    # Messages the owner sent while the agent was finishing up become the next turn.
+    def continue_with_late_messages(project)
+      late = project.agent_commands.message.pending.to_a
+      return if late.empty? || project.stop_requested?
+
+      AgentCommand.where(id: late).update_all(delivered_at: Time.current)
+      project.update!(status: :working)
+      AgentTurnJob.perform_later(project, late.map { |command| command.payload["text"] }.join("\n\n"), "build")
+    end
+
     # A plan reply without questions is a proposal the owner can approve.
     def propose(project)
       reply = project.messages.assistant.last

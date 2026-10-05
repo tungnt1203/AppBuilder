@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_074340) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_080756) do
+  create_table "agent_commands", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.string "kind", null: false
+    t.json "payload", default: {}, null: false
+    t.datetime "delivered_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_agent_commands_on_project_id"
+  end
+
   create_table "deployments", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "version", null: false
@@ -49,10 +59,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_074340) do
     t.string "activity"
     t.datetime "working_since"
     t.boolean "planning", default: false, null: false
+    t.integer "agent_pid"
     t.index ["port"], name: "index_projects_on_port", unique: true
     t.index ["slug"], name: "index_projects_on_slug", unique: true
   end
 
+  add_foreign_key "agent_commands", "projects"
   add_foreign_key "deployments", "projects"
   add_foreign_key "messages", "projects"
 end

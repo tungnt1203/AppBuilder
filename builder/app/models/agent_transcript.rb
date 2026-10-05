@@ -53,6 +53,7 @@ class AgentTranscript
     when "assistant" then record_message(event.dig("message", "content"))
     when "user" then record_tool_results(event.dig("message", "content"))
     when "result" then record_result(event)
+    when "builder_ask" then record_ask(event)
     end
   end
 
@@ -111,7 +112,23 @@ class AgentTranscript
       end
     end
 
-    # Questions come at the end of a reply in a ```questions block; they become buttons.
+    # The interactive agent asks with AskUserQuestion and waits for the answers.
+    def record_ask(event)
+      questions = Array(event["questions"]).map do |question|
+        options = Array(question["options"])
+        { "question" => question["question"].to_s, "header" => question["header"].to_s,
+          "options" => options.map { |option| option["label"].to_s },
+          "descriptions" => options.map { |option| option["description"].to_s },
+          "multiple" => question["multiSelect"] == true }
+      end
+
+      clear_draft
+      @project.messages.create!(role: :assistant, body: "", data: { "questions" => questions, "ask_id" => event["id"] })
+      show_activity "Waiting for your answer"
+    end
+
+    # Without the interactive agent, questions come at the end of a reply in a
+    # ```questions block; they become buttons too.
     def record_reply(text)
       questions = parse_questions(text[QUESTIONS, 1])
       body = questions ? text.sub(QUESTIONS, "").strip : text
