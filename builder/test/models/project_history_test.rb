@@ -38,6 +38,13 @@ class ProjectHistoryTest < ActiveSupport::TestCase
     assert_equal "patients", @project.path.join("patients.rb").read
   end
 
+  test "a repository still being copied has no versions" do
+    FileUtils.rm_rf(@project.path.join(".git"))
+    git "init", "--quiet"
+
+    assert_empty @project.history.versions
+  end
+
   test "projects without a repository yet have no versions" do
     FileUtils.rm_rf(@project.path.join(".git"))
     assert_empty @project.history.versions

@@ -17,6 +17,8 @@ class ProjectHistory
       sha, subject, time = line.chomp.split(SEPARATOR, 3)
       Version.new(sha:, subject:, committed_at: Time.iso8601(time))
     end
+  rescue ProjectShell::Error
+    [] # still being copied from the template, no commits yet
   end
 
   def current_sha

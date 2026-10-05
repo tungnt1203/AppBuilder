@@ -184,6 +184,11 @@ class AgentTranscript
     end
 
     def record_result(event)
+      # A failed turn often repeats its last reply as the error; show it once, as the error.
+      if event["is_error"] && (last = @project.messages.last)&.assistant? && last.body.strip == event["result"].to_s.strip
+        last.destroy
+      end
+
       @project.messages.create!(
         role: event["is_error"] ? :error : :result,
         body: event["is_error"] ? event["result"].to_s : "",

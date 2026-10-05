@@ -108,6 +108,13 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_equal [ "error", "Budget exceeded" ], [ @project.messages.last.role, @project.messages.last.body ]
   end
 
+  test "an error that repeats the last reply shows once" do
+    record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => "You've hit your session limit" } ] }
+    record "type" => "result", "is_error" => true, "result" => "You've hit your session limit"
+
+    assert_equal [ "error" ], @project.messages.where(body: "You've hit your session limit").pluck(:role)
+  end
+
   test "clears the activity when the turn ends" do
     stream "type" => "content_block_start", "index" => 0, "content_block" => { "type" => "text" }
     @transcript.finish
