@@ -1,60 +1,65 @@
 <% content_for :title, @project.name %>
 <%= turbo_stream_from @project %>
 
-<div class="grid h-full grid-cols-[minmax(340px,420px)_1fr]">
-  <aside class="flex min-h-0 flex-col border-r border-gray-200 bg-white">
-    <header class="flex items-center gap-3 border-b border-gray-200 px-4 py-3">
-      <%= link_to "←", root_path, class: "text-gray-400 hover:text-gray-700", title: "All apps" %>
-      <h1 class="flex-1 truncate font-semibold"><%= @project.name %></h1>
-      <%= status_badge(@project) %>
-    </header>
+<div class="flex h-full flex-col gap-3 p-3 sm:gap-4 sm:p-4">
+  <header class="glass capsule flex items-center gap-2 py-1.5 pr-1.5 pl-2" data-controller="preview" data-preview-version-value="<%= @project.preview_version %>">
+    <%= link_to root_path, class: "btn btn-ghost btn-icon text-white", "aria-label": "All apps" do %><%= icon :back %><% end %>
 
-    <div id="messages" class="flex-1 space-y-4 overflow-y-auto px-4 py-4" data-controller="autoscroll">
-      <%= render @project.messages %>
+    <div class="flex min-w-0 items-center gap-3 pr-2">
+      <h1 class="truncate font-semibold text-white"><%= @project.name %></h1>
+      <span class="hidden rounded-full bg-white/80 px-2.5 py-0.5 sm:inline-flex"><%= status_label(@project) %></span>
+    </div>
 
-      <% if @project.setting_up? || @project.working? %>
-        <p class="flex items-center gap-2 text-sm text-gray-500">
-          <span class="size-2 animate-pulse rounded-full bg-indigo-500"></span>
-          <%= @project.setting_up? ? "Setting up the project…" : "Working on it…" %>
-        </p>
+    <div class="mx-auto hidden min-w-0 items-center gap-1 rounded-full bg-white/55 py-1 pr-1 pl-4 md:flex">
+      <span class="url truncate"><%= @project.preview_url %></span>
+      <button type="button" class="btn btn-ghost btn-icon h-7 w-7" data-action="preview#reload" aria-label="Reload preview" title="Reload preview"><%= icon :reload, size: 14 %></button>
+      <%= link_to @project.preview_url, target: "_blank", class: "btn btn-ghost btn-icon h-7 w-7", "aria-label": "Open preview in a new tab", title: "Open preview in a new tab" do %><%= icon :external, size: 14 %><% end %>
+    </div>
+
+    <div class="ml-auto flex items-center gap-2 md:ml-0">
+      <% if deployment = @project.latest_deployment %>
+        <%= render "projects/deployment_status", project: @project, deployment: deployment %>
       <% end %>
+      <%= button_to "Publish", project_deployments_path(@project), disabled: !@project.publishable?, class: "btn btn-primary",
+            title: (@project.publish_url if @project.live_deployment) %>
     </div>
+  </header>
 
-    <%= form_with model: [ @project, Message.new ], class: "border-t border-gray-200 p-3", data: { controller: "composer" } do |form| %>
-      <%= form.text_area :body, rows: 3, disabled: !@project.accepts_messages?, required: true,
-            placeholder: @project.accepts_messages? ? "Ask for a change…  (⌘↵ to send)" : "Wait until the current step finishes…",
-            data: { action: "keydown->composer#submitOnShortcut" },
-            class: "block w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-2 focus:outline-indigo-500/20 disabled:bg-gray-50" %>
-      <div class="mt-2 flex justify-end">
-        <%= form.submit "Send", disabled: !@project.accepts_messages?,
-              class: "cursor-pointer rounded-lg bg-indigo-600 px-3.5 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-default disabled:opacity-40" %>
-      </div>
-    <% end %>
-  </aside>
-
-  <section class="flex min-h-0 flex-col">
-    <div class="flex items-center gap-2 border-b border-gray-200 bg-white px-4 py-2 text-sm"
-         data-controller="preview" data-preview-version-value="<%= @project.preview_version %>">
-      <span class="flex-1 truncate rounded-md bg-gray-100 px-3 py-1 font-mono text-xs text-gray-600"><%= @project.preview_url %></span>
-      <button type="button" class="rounded-md px-2 py-1 text-gray-600 hover:bg-gray-100" data-action="preview#reload">Reload</button>
-      <%= link_to "Open", @project.preview_url, target: "_blank", class: "rounded-md px-2 py-1 text-gray-600 hover:bg-gray-100" %>
-
-      <div class="flex items-center gap-2 border-l border-gray-200 pl-3">
-        <% if deployment = @project.latest_deployment %>
-          <%= render "projects/deployment_status", project: @project, deployment: deployment %>
+  <div class="grid min-h-0 flex-1 gap-3 sm:gap-4 lg:grid-cols-[minmax(340px,420px)_1fr]">
+    <aside class="glass glass-frost sheet flex min-h-[60vh] flex-col overflow-hidden lg:min-h-0" aria-label="Chat">
+      <div id="messages" class="flex-1 space-y-4 overflow-y-auto px-5 pt-5 pb-3" data-controller="autoscroll">
+        <% items = chat_items(@project.messages) %>
+        <% items.each_with_index do |item, index| %>
+          <% if item.is_a?(Array) %>
+            <%= render "projects/steps", actions: item, open: @project.working? && index == items.size - 1 %>
+          <% else %>
+            <%= render item %>
+          <% end %>
         <% end %>
-        <%= button_to "Publish", project_deployments_path(@project), disabled: !@project.publishable?,
-              class: "cursor-pointer rounded-md bg-gray-900 px-3 py-1 font-medium text-white hover:bg-gray-700 disabled:cursor-default disabled:opacity-40" %>
-      </div>
-    </div>
 
-    <div class="relative flex-1">
-      <div id="preview" class="absolute inset-0" data-turbo-permanent>
-        <iframe id="preview-frame" src="<%= @project.preview_url %>" class="h-full w-full bg-white"></iframe>
+        <% if @project.setting_up? || @project.working? %>
+          <p class="status status-working pt-1"><%= @project.setting_up? ? "Setting up the project" : "Working on it" %></p>
+        <% end %>
+      </div>
+
+      <%= form_with model: [ @project, Message.new ], class: "p-3", data: { controller: "composer" } do |form| %>
+        <div class="glass capsule flex items-end gap-2 py-1.5 pr-1.5 pl-4 !shadow-none">
+          <%= form.text_area :body, rows: 1, disabled: !@project.accepts_messages?, required: true, "aria-label": "Ask for a change",
+                placeholder: @project.accepts_messages? ? "Ask for a change" : "Wait for the current step to finish",
+                data: { action: "keydown->composer#submitOnShortcut input->composer#resize", composer_target: "input" },
+                class: "max-h-40 min-h-9 flex-1 resize-none bg-transparent py-2 text-[0.9375rem] leading-snug outline-none placeholder:text-ink/45 disabled:opacity-60" %>
+          <%= form.button disabled: !@project.accepts_messages?, class: "btn btn-primary btn-icon", "aria-label": "Send", title: "Send (⌘↵)" do %><%= icon :send %><% end %>
+        </div>
+      <% end %>
+    </aside>
+
+    <section class="glass bezel relative min-h-[70vh] lg:min-h-0" aria-label="Preview">
+      <div id="preview" class="absolute inset-[10px]" data-turbo-permanent>
+        <iframe id="preview-frame" src="<%= @project.preview_url %>" title="Preview of <%= @project.name %>" class="h-full w-full"></iframe>
       </div>
       <% if @project.setting_up? %>
-        <div class="absolute inset-0 flex items-center justify-center bg-gray-50 text-sm text-gray-500">The preview appears once the project is set up.</div>
+        <div class="absolute inset-[10px] flex items-center justify-center rounded-[21px] bg-mist/90 text-sm text-ink/60">The preview opens once the project is set up.</div>
       <% end %>
-    </div>
-  </section>
+    </section>
+  </div>
 </div>

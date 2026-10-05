@@ -1,58 +1,47 @@
 <% content_for :title, "Apps" %>
 
-<div class="mx-auto max-w-5xl px-4 py-12">
-  <h1 class="text-2xl font-semibold tracking-tight">Your apps</h1>
-  <p class="mt-1 text-sm text-gray-500">Describe an app, watch it get built, and run it on your own server with ONCE.</p>
+<main class="mx-auto flex min-h-full max-w-3xl flex-col gap-6 px-4 py-16 sm:py-24">
+  <%= form_with model: @project, class: "glass glass-frost sheet p-6 sm:p-8" do |form| %>
+    <h1 class="text-[1.75rem] leading-tight font-semibold tracking-[-0.02em]">Describe the app you need</h1>
+    <p class="mt-1.5 text-[0.9375rem] text-ink/60">It's built while you watch, and you run it on your own server.</p>
 
-  <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
-    <div>
-      <% if @projects.any? %>
-        <ul class="space-y-3">
-          <% @projects.each do |project| %>
-            <li>
-              <%= link_to project, class: "flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-xs hover:border-gray-300" do %>
-                <div>
-                  <p class="font-medium"><%= project.name %></p>
-                  <p class="text-sm text-gray-500">Updated <%= time_ago_in_words(project.updated_at) %> ago</p>
-                </div>
-                <%= status_badge(project) %>
-              <% end %>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <div class="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center text-sm text-gray-500">
-          No apps yet. Describe your first one.
-        </div>
-      <% end %>
+    <% if @project.errors.any? %>
+      <p class="alert mt-5"><%= @project.errors.full_messages.to_sentence %></p>
+    <% end %>
+
+    <%= text_area_tag "project[request]", params.dig(:project, :request), id: "project_request", rows: 5, autofocus: true,
+          "aria-label": "What the app should do",
+          placeholder: "Lễ tân quản lý bệnh nhân và đặt lịch hẹn với bác sĩ. Màn hình chính là lịch hẹn hôm nay.",
+          class: "field mt-6 resize-none text-base leading-relaxed" %>
+
+    <div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+      <%= form.text_field :name, required: true, placeholder: "App name", "aria-label": "App name", class: "field" %>
+      <%= form.select :language, Project::LANGUAGES.map { |code, info| [ info[:name], code ] }, {}, "aria-label": "Language of the app", class: "field sm:w-40" %>
+      <%= form.button "Build app", class: "btn btn-primary h-auto px-6" %>
     </div>
+  <% end %>
 
-    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
-      <h2 class="font-semibold">New app</h2>
-      <%= form_with model: @project, class: "mt-4 space-y-4" do |form| %>
-        <% if @project.errors.any? %>
-          <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"><%= @project.errors.full_messages.to_sentence %></p>
+  <% if @projects.any? %>
+    <section class="glass sheet overflow-hidden" aria-label="Your apps">
+      <ul class="divide-y divide-white/30">
+        <% @projects.each do |project| %>
+          <li>
+            <%= link_to project, class: "flex items-center gap-4 px-6 py-4 text-white transition-colors hover:bg-white/10" do %>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate font-semibold"><%= project.name %></span>
+                <span class="block text-sm text-white/65">
+                  <% if live = project.live_deployment %>
+                    Live at <%= project.publish_host %>, version <%= live.version %>
+                  <% else %>
+                    Not published yet
+                  <% end %>
+                </span>
+              </span>
+              <span class="rounded-full bg-white/80 px-3 py-1"><%= status_label(project) %></span>
+            <% end %>
+          </li>
         <% end %>
-
-        <div class="space-y-1.5">
-          <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
-          <%= form.text_field :name, required: true, placeholder: "Nha khoa An Bình", class: "block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-2 focus:outline-indigo-500/20" %>
-        </div>
-
-        <div class="space-y-1.5">
-          <%= form.label :language, "Language of the app", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.select :language, Project::LANGUAGES.map { |code, info| [ info[:name], code ] }, {}, class: "block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" %>
-        </div>
-
-        <div class="space-y-1.5">
-          <%= label_tag "project_request", "What should it do?", class: "block text-sm font-medium text-gray-700" %>
-          <%= text_area_tag "project[request]", params.dig(:project, :request), id: "project_request", rows: 6,
-                placeholder: "Lễ tân quản lý bệnh nhân và đặt lịch hẹn với bác sĩ. Màn hình chính là lịch hẹn hôm nay.",
-                class: "block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-2 focus:outline-indigo-500/20" %>
-        </div>
-
-        <%= form.submit "Build it", class: "w-full cursor-pointer rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
-      <% end %>
-    </div>
-  </div>
-</div>
+      </ul>
+    </section>
+  <% end %>
+</main>

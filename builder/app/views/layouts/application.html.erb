@@ -1,21 +1,25 @@
 <!DOCTYPE html>
-<html class="h-full">
+<html lang="en">
   <head>
-    <title><%= [ content_for(:title), "Builder" ].compact.join(" · ") %></title>
+    <title><%= [ content_for(:title), "Studio" ].compact.join(" – ") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="application-name" content="Builder">
+    <meta name="application-name" content="Studio">
+    <meta name="theme-color" content="#0e3b43">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="h-full bg-gray-50 text-gray-900 antialiased">
+  <body>
+    <div class="backdrop" data-turbo-permanent id="backdrop"></div>
     <%= yield %>
   </body>
 </html>

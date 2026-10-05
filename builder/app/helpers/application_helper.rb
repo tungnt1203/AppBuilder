@@ -1,14 +1,24 @@
 module ApplicationHelper
-  STATUS_STYLES = {
-    "setting_up" => [ "Setting up", "bg-yellow-50 text-yellow-800" ],
-    "ready" => [ "Ready", "bg-green-50 text-green-700" ],
-    "working" => [ "Working", "bg-indigo-50 text-indigo-700" ],
-    "failed" => [ "Needs attention", "bg-red-50 text-red-700" ]
+  STATUS_LABELS = { "setting_up" => "Setting up", "ready" => "Ready", "working" => "Working", "failed" => "Needs attention" }
+
+  ICONS = {
+    back: [ "M15 18l-6-6 6-6" ],
+    reload: [ "M21 12a9 9 0 1 1-2.64-6.36L21 8", "M21 3v5h-5" ],
+    external: [ "M14 4h6v6", "M20 4l-9 9", "M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" ],
+    send: [ "M12 19V5", "M5 12l7-7 7 7" ],
+    chevron: [ "M9 6l6 6-6 6" ],
+    steps: [ "M4 6h16", "M4 12h10", "M4 18h7" ]
   }
 
-  def status_badge(project)
-    label, classes = STATUS_STYLES.fetch(project.status)
-    tag.span(label, class: "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium #{classes}")
+  def icon(name, size: 16)
+    tag.svg(width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": 2,
+            "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": true, class: "shrink-0 #{name == :chevron ? "chevron" : ""}") do
+      safe_join(ICONS.fetch(name).map { |d| tag.path(d: d) })
+    end
+  end
+
+  def status_label(project)
+    tag.span(STATUS_LABELS.fetch(project.status), class: "status status-#{project.status}")
   end
 
   def markdown(text)
@@ -16,11 +26,23 @@ module ApplicationHelper
     Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true, strikethrough: true, lax_spacing: true).render(text.to_s).html_safe
   end
 
+  # Consecutive agent actions collapse into one group so the chat reads as a conversation.
+  def chat_items(messages)
+    messages.chunk_while { |a, b| a.action? && b.action? }.map { |group| group.first.action? ? group : group.first }
+  end
+
+  def steps_summary(actions)
+    counts = actions.group_by { |action| action.data["tool"] }.transform_values(&:size)
+    parts = []
+    parts << pluralize(counts.fetch("Write", 0) + counts.fetch("Edit", 0), "file") + " changed" if counts["Write"] || counts["Edit"]
+    parts << pluralize(counts["Bash"], "command") + " run" if counts["Bash"]
+    parts.to_sentence.upcase_first.presence || pluralize(actions.size, "step")
+  end
+
   def turn_summary(message)
     data = message.data
-    [ "Done",
-      ("#{data["num_turns"]} steps" if data["num_turns"]),
-      (number_to_currency(data["total_cost_usd"], precision: 2) if data["total_cost_usd"]),
-      (distance_of_time_in_words(data["duration_ms"] / 1000.0) if data["duration_ms"]) ].compact.join(" · ")
+    duration = distance_of_time_in_words(data["duration_ms"] / 1000.0) if data["duration_ms"]
+    cost = number_to_currency(data["total_cost_usd"], precision: 2) if data["total_cost_usd"]
+    [ ("Finished in #{duration}" if duration), ("#{data["num_turns"]} steps" if data["num_turns"]), cost ].compact.join(", ")
   end
 end

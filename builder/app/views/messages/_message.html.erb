@@ -1,12 +1,12 @@
 <% case message.role %>
 <% when "user" %>
-  <div class="ml-8 rounded-2xl rounded-br-sm bg-indigo-600 px-4 py-2.5 text-sm whitespace-pre-line text-white"><%= message.body %></div>
+  <div class="bubble-user"><%= message.body %></div>
 <% when "assistant" %>
-  <div class="prose-chat text-sm leading-relaxed text-gray-800"><%= markdown(message.body) %></div>
+  <div class="reply"><%= markdown(message.body) %></div>
 <% when "action" %>
-  <p class="truncate font-mono text-xs text-gray-400" title="<%= message.body %>">› <%= message.body %></p>
+  <p class="turn-done"><%= message.body %></p>
 <% when "result" %>
-  <p class="text-xs text-gray-400"><%= turn_summary(message) %></p>
+  <p class="turn-done"><%= turn_summary(message) %></p>
 <% when "error" %>
-  <pre class="overflow-x-auto rounded-lg bg-red-50 p-3 text-xs whitespace-pre-wrap text-red-700"><%= message.body %></pre>
+  <pre class="alert"><%= message.body %></pre>
 <% end %>
