@@ -1,14 +1,11 @@
 <%= page_header @user.name, @user.email_address do %>
-  <%= link_to "Back to people", admin_users_path, class: button_classes(:secondary) %>
+  <%= link_to t(".back"), admin_users_path, class: button_classes(:secondary) %>
 <% end %>
 
 <div class="max-w-2xl">
   <%= card do %>
-    <h2 class="text-sm font-semibold text-gray-900">Invitation link</h2>
-    <p class="mt-1 text-sm text-gray-500">
-      We emailed this link to <%= @user.email_address %>. If email isn't set up yet, send it to them yourself.
-      It works for 7 days, until they choose a password.
-    </p>
+    <h2 class="text-sm font-semibold text-gray-900"><%= t(".invitation_link") %></h2>
+    <p class="mt-1 text-sm text-gray-500"><%= t(".invitation_help", email: @user.email_address) %></p>
     <input type="text" readonly value="<%= @invitation_url %>" class="mt-4 block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-700">
   <% end %>
 </div>

@@ -1,21 +1,21 @@
-<% content_for :title, "Sign in" %>
+<% content_for :title, t(".title") %>
 
-<h1 class="mb-6 text-lg font-semibold">Sign in</h1>
+<h1 class="mb-6 text-lg font-semibold"><%= t(".title") %></h1>
 
 <%= form_with url: session_path, class: "space-y-4" do |form| %>
   <div class="space-y-1.5">
-    <%= form.label :email_address %>
+    <%= form.label :email_address, t(".email_address") %>
     <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address] %>
   </div>
 
   <div class="space-y-1.5">
-    <%= form.label :password %>
+    <%= form.label :password, t(".password") %>
     <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
   </div>
 
-  <%= form.submit "Sign in", class: "w-full" %>
+  <%= form.submit t(".submit"), class: "w-full" %>
 <% end %>
 
 <p class="mt-6 text-center text-sm">
-  <%= link_to "Forgot password?", new_password_path, class: "text-brand-600 hover:text-brand-500" %>
+  <%= link_to t(".forgot_password"), new_password_path, class: "text-brand-600 hover:text-brand-500" %>
 </p>

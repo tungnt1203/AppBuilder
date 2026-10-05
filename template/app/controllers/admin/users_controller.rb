@@ -18,7 +18,7 @@ class Admin::UsersController < Admin::BaseController
 
     if @user.persisted?
       InvitationsMailer.invite(@user).deliver_later
-      redirect_to admin_user_path(@user), notice: "#{@user.name} was invited."
+      redirect_to admin_user_path(@user), notice: t(".notice", name: @user.name)
     else
       render :new, status: :unprocessable_entity
     end
@@ -29,7 +29,7 @@ class Admin::UsersController < Admin::BaseController
 
   def update
     if @user.update(user_params)
-      redirect_to admin_users_path, notice: "#{@user.name} was updated."
+      redirect_to admin_users_path, notice: t(".notice", name: @user.name)
     else
       render :edit, status: :unprocessable_entity
     end
@@ -37,9 +37,9 @@ class Admin::UsersController < Admin::BaseController
 
   def destroy
     if @user == Current.user
-      redirect_to admin_users_path, alert: "You cannot remove yourself."
+      redirect_to admin_users_path, alert: t(".cannot_remove_self")
     elsif @user.destroy
-      redirect_to admin_users_path, notice: "#{@user.name} was removed.", status: :see_other
+      redirect_to admin_users_path, notice: t(".notice", name: @user.name), status: :see_other
     else
       redirect_to admin_users_path, alert: @user.errors.full_messages.to_sentence, status: :see_other
     end

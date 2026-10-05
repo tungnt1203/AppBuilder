@@ -2,7 +2,20 @@
 
 This is a Rails 8 app that its owner self-hosts with ONCE (https://github.com/basecamp/once).
 The people describing features are usually not programmers: build what they ask for as a
-complete, working feature, and explain the result in plain language.
+complete, working feature, and explain the result in plain language. Reply entirely in the
+language the owner writes in.
+
+## Language and time zone
+
+Set these once, at the start of a new app, to match the owner (`config/application.rb`):
+
+- `config.i18n.default_locale`: `:vi` for Vietnamese owners, otherwise `:en`.
+- `config.time_zone`: where the app's users are, e.g. `"Asia/Ho_Chi_Minh"` for Vietnam.
+
+The built-in screens (sign in, admin, emails) are already translated in `config/locales/en.yml` and
+`vi.yml`, and rails-i18n translates validation errors, dates and numbers, so don't write those again.
+Write new UI copy directly in the owner's language. Format with `l(date)`, `l(time, format: :short)`
+and `number_to_currency`, which follow the locale (for example `150.000 VNĐ` and `05/10/2026` in Vietnamese).
 
 ## Stack (fixed)
 
@@ -61,8 +74,10 @@ Screens must look consistent. Use the UI kit; see the `ui-kit` skill for details
 - Use the `brand-*` color for emphasis and `gray-*` for everything else. The brand color is defined once
   in `app/assets/tailwind/application.css`.
 - Interactivity comes from Turbo (Frames, Streams, morphing) and small Stimulus controllers.
-- Write UI copy in the language the owner uses when describing the app. Set the app's name in
-  `config.x.app_name` (`config/application.rb`).
+- Set the app's name in `config.x.app_name` (`config/application.rb`).
+- When the app gets its real main screen, point `root` at it and delete the placeholder
+  (`HomeController`, `app/views/home/`, `test/controllers/home_controller_test.rb`, and the `home:` keys
+  in both locale files).
 
 ## Definition of done
 

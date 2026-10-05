@@ -1,10 +1,10 @@
-<% content_for :title, "Join" %>
+<% content_for :title, t(".title") %>
 
-<h1 class="text-lg font-semibold">Welcome, <%= @user.name %></h1>
-<p class="mt-1 mb-6 text-sm text-gray-500">Choose a password to finish setting up <%= @user.email_address %>.</p>
+<h1 class="text-lg font-semibold"><%= t(".heading", name: @user.name) %></h1>
+<p class="mt-1 mb-6 text-sm text-gray-500"><%= t(".description", email: @user.email_address) %></p>
 
 <%= form_with model: @user, url: invitation_path(params[:token]), method: :put, class: "space-y-4" do |form| %>
   <%= form.errors %>
   <%= form.field :password, :password_field, required: true, autofocus: true, autocomplete: "new-password", maxlength: 72 %>
-  <%= form.submit "Join", class: "w-full" %>
+  <%= form.submit t(".submit"), class: "w-full" %>
 <% end %>

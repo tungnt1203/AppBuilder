@@ -1,3 +1,3 @@
-<%= page_header "Welcome, #{Current.user.name}" %>
+<%= page_header t(".welcome", name: Current.user.name) %>
 
-<%= empty_state "Nothing here yet", "This is where the app's main screen goes." %>
+<%= empty_state t(".empty_title"), t(".empty_description") %>

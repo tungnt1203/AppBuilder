@@ -30,14 +30,18 @@ class User < ApplicationRecord
     admin? || owner?
   end
 
+  def role_name
+    I18n.t(role, scope: "users.roles")
+  end
+
   private
     def owner_role_is_permanent
-      errors.add(:role, "of the owner cannot be changed") if role_changed? && role_was == "owner"
+      errors.add(:role, :owner_permanent) if role_changed? && role_was == "owner"
     end
 
     def prevent_owner_removal
       if role_in_database == "owner"
-        errors.add(:base, "The owner cannot be removed")
+        errors.add(:base, :owner_permanent)
         throw :abort
       end
     end

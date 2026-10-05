@@ -1,6 +1,6 @@
-Hi <%= @user.name %>,
+<%= t(".greeting", name: @user.name) %>
 
-You've been invited to <%= Rails.configuration.x.app_name %>.
-Choose a password to get started: <%= @invitation_url %>
+<%= t(".body", app: Rails.configuration.x.app_name) %>
+<%= t(".link") %>: <%= @invitation_url %>
 
-This link works for 7 days.
+<%= t(".expires") %>

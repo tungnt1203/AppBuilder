@@ -15,10 +15,10 @@
 
         <div class="flex items-center gap-1 text-sm">
           <% if Current.user.administrator? %>
-            <%= nav_link_to "Admin", admin_users_path %>
+            <%= nav_link_to t(".admin"), admin_users_path %>
           <% end %>
           <span class="hidden px-2 text-gray-500 sm:inline"><%= Current.user.name %></span>
-          <%= button_to "Sign out", session_path, method: :delete, class: button_classes(:ghost) %>
+          <%= button_to t(".sign_out"), session_path, method: :delete, class: button_classes(:ghost) %>
         </div>
       </div>
     </header>

@@ -1,6 +1,6 @@
-<%= page_header "Edit #{@user.name}" do %>
-  <%= button_to "Remove", admin_user_path(@user), method: :delete, class: button_classes(:danger),
-        form: { data: { turbo_confirm: "Remove #{@user.name}? They won't be able to sign in." } } %>
+<%= page_header t(".title", name: @user.name) do %>
+  <%= button_to t(".remove"), admin_user_path(@user), method: :delete, class: button_classes(:danger),
+        form: { data: { turbo_confirm: t(".confirm_remove", name: @user.name) } } %>
 <% end %>
 
 <div class="max-w-lg">

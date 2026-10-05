@@ -27,6 +27,12 @@ module Starter
     # Shown in the page title, navigation and emails.
     config.x.app_name = "Starter"
 
+    # Language and time zone of the people using the app. Built-in screens are
+    # translated in config/locales (en, vi); rails-i18n covers Rails' own messages.
+    config.i18n.available_locales = %i[ en vi ]
+    config.i18n.default_locale = :en
+    config.time_zone = "UTC"
+
     config.action_view.default_form_builder = "UiFormBuilder"
   end
 end
