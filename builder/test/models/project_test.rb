@@ -23,6 +23,16 @@ class ProjectTest < ActiveSupport::TestCase
     assert_equal "Asia/Ho_Chi_Minh", projects(:clinic).time_zone
   end
 
+  test "a reply stays open until the owner answers it" do
+    project = projects(:clinic)
+    reply = project.messages.create!(role: :assistant, body: "Câu hỏi?", data: { "questions" => [] })
+    project.messages.create!(role: :result)
+    assert_equal reply, project.open_reply
+
+    project.messages.create!(role: :user, body: "Trả lời")
+    assert_nil project.open_reply
+  end
+
   test "accepts messages when not busy" do
     assert projects(:clinic).accepts_messages?
     assert_not projects(:shop).accepts_messages?

@@ -4,6 +4,7 @@ class Projects::BuildsControllerTest < ActionDispatch::IntegrationTest
   test "approving the proposed plan builds it" do
     project = projects(:clinic)
     project.messages.create!(role: :assistant, body: "Kế hoạch…", data: { "proposal" => true })
+    project.messages.create!(role: :result, data: { "num_turns" => 3 })
 
     assert_enqueued_with(job: AgentTurnJob, args: [ project, "Làm theo kế hoạch này", "build" ]) do
       post project_build_path(project)

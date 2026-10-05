@@ -137,6 +137,11 @@ class AgentTranscript
         show_activity describe.(input)
       end
 
+      # Plan mode writes its plan file outside the app; it isn't a change to the app.
+      if name == "Write" && !inside_project?(input["file_path"])
+        return @project.messages.create!(role: :action, body: "Wrote the plan", data: { tool: "Plan" })
+      end
+
       case name
       when "TaskCreate" then @pending_tasks[block["id"]] = input["subject"].to_s
       when "TaskUpdate" then update_task(input["taskId"].to_s, input["status"])
@@ -145,6 +150,10 @@ class AgentTranscript
           @project.messages.create!(role: :action, body: step.(input), data: { tool: name })
         end
       end
+    end
+
+    def inside_project?(path)
+      path.to_s.start_with?("#{@project.path}/")
     end
 
     def record_tool_results(content)

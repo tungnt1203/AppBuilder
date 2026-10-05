@@ -91,8 +91,14 @@ class Project < ApplicationRecord
     planning? || history.versions.size <= 1
   end
 
+  # The agent's latest reply, while the owner hasn't answered it yet.
+  def open_reply
+    reply = messages.assistant.last
+    reply unless reply.nil? || messages.user.where("id > ?", reply.id).exists?
+  end
+
   def latest_proposal
-    messages.assistant.last if messages.last&.assistant? && messages.last.data["proposal"]
+    open_reply if open_reply&.data&.dig("proposal")
   end
 
   def approval_message

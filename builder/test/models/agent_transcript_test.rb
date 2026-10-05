@@ -17,14 +17,22 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_difference -> { @project.messages.count }, 4 do
       record "type" => "assistant", "message" => { "content" => [
         { "type" => "text", "text" => "Mình sẽ thêm bảng bệnh nhân." },
-        { "type" => "tool_use", "name" => "Read", "input" => { "file_path" => "/x/projects/shop/app/models/user.rb" } },
-        { "type" => "tool_use", "name" => "Write", "input" => { "file_path" => "/x/projects/shop/app/models/patient.rb" } },
+        { "type" => "tool_use", "name" => "Read", "input" => { "file_path" => "#{@project.path}/app/models/user.rb" } },
+        { "type" => "tool_use", "name" => "Write", "input" => { "file_path" => "#{@project.path}/app/models/patient.rb" } },
         { "type" => "tool_use", "name" => "Bash", "input" => { "command" => "bin/rails test" } }
       ] }
     end
 
     assert_equal [ "Read app/models/user.rb", "Created app/models/patient.rb", "Ran bin/rails test" ], @project.messages.action.last(3).map(&:body)
     assert_equal "Running the tests", @project.reload.activity
+  end
+
+  test "a plan file written outside the app isn't a change" do
+    record "type" => "assistant", "message" => { "content" => [
+      { "type" => "tool_use", "name" => "Write", "input" => { "file_path" => "/Users/x/.claude/plans/nail.md" } }
+    ] }
+
+    assert_equal [ "Wrote the plan", "Plan" ], [ @project.messages.last.body, @project.messages.last.data["tool"] ]
   end
 
   test "records how long it thought, without the content" do
