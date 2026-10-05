@@ -9,4 +9,11 @@ Rails.application.configure do
 
   # Each project's preview server gets its own port, counting up from here.
   config.x.first_preview_port = Integer(ENV.fetch("FIRST_PREVIEW_PORT", 4001))
+
+  # Publishing: images go to this registry, apps run on ONCE at <slug>.<publish domain>,
+  # and a backup is taken before every update.
+  config.x.registry = ENV.fetch("REGISTRY", "localhost:5050")
+  config.x.once_bin = ENV.fetch("ONCE_BIN", "once")
+  config.x.publish_domain = ENV.fetch("PUBLISH_DOMAIN", "localhost")
+  config.x.backups_root = Pathname(ENV.fetch("BACKUPS_ROOT", Rails.root.join("../backups")))
 end

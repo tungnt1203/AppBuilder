@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   resources :projects, only: %i[ index create show ] do
     resources :messages, only: :create, module: :projects
+    resources :deployments, only: :create, module: :projects
   end
 
   get "up" => "rails/health#show", as: :rails_health_check

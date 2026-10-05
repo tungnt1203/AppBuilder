@@ -38,6 +38,14 @@
       <span class="flex-1 truncate rounded-md bg-gray-100 px-3 py-1 font-mono text-xs text-gray-600"><%= @project.preview_url %></span>
       <button type="button" class="rounded-md px-2 py-1 text-gray-600 hover:bg-gray-100" data-action="preview#reload">Reload</button>
       <%= link_to "Open", @project.preview_url, target: "_blank", class: "rounded-md px-2 py-1 text-gray-600 hover:bg-gray-100" %>
+
+      <div class="flex items-center gap-2 border-l border-gray-200 pl-3">
+        <% if deployment = @project.latest_deployment %>
+          <%= render "projects/deployment_status", project: @project, deployment: deployment %>
+        <% end %>
+        <%= button_to "Publish", project_deployments_path(@project), disabled: !@project.publishable?,
+              class: "cursor-pointer rounded-md bg-gray-900 px-3 py-1 font-medium text-white hover:bg-gray-700 disabled:cursor-default disabled:opacity-40" %>
+      </div>
     </div>
 
     <div class="relative flex-1">

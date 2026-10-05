@@ -10,7 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_061614) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_063045) do
+  create_table "deployments", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "version", null: false
+    t.string "image", null: false
+    t.string "status", default: "building", null: false
+    t.string "commit_sha"
+    t.text "log", default: "", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "version"], name: "index_deployments_on_project_id_and_version", unique: true
+    t.index ["project_id"], name: "index_deployments_on_project_id"
+  end
+
   create_table "messages", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "role", null: false
@@ -35,5 +48,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_061614) do
     t.index ["slug"], name: "index_projects_on_slug", unique: true
   end
 
+  add_foreign_key "deployments", "projects"
   add_foreign_key "messages", "projects"
 end

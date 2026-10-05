@@ -2,6 +2,7 @@ class Project < ApplicationRecord
   LANGUAGES = { "vi" => { name: "Tiếng Việt", time_zone: "Asia/Ho_Chi_Minh" }, "en" => { name: "English", time_zone: "UTC" } }
 
   has_many :messages, -> { order(:id) }, dependent: :destroy
+  has_many :deployments, dependent: :destroy
 
   enum :status, %w[ setting_up ready working failed ].index_by(&:itself), default: "setting_up"
 
@@ -28,6 +29,30 @@ class Project < ApplicationRecord
 
   def preview
     PreviewServer.new(self)
+  end
+
+  def publish_host
+    "#{slug}.#{Rails.configuration.x.publish_domain}"
+  end
+
+  def publish_url
+    "http://#{publish_host}"
+  end
+
+  def latest_deployment
+    deployments.latest_first.first
+  end
+
+  def live_deployment
+    deployments.live.latest_first.first
+  end
+
+  def publishable?
+    ready? && !latest_deployment&.in_progress?
+  end
+
+  def publish
+    deployments.create!.tap { |deployment| PublishJob.perform_later(deployment) }
   end
 
   def shell
