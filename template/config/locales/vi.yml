@@ -27,6 +27,7 @@ vi:
   layouts:
     application:
       admin: Quản trị
+      sign_in: Đăng nhập
       sign_out: Đăng xuất
   ui:
     form_errors:

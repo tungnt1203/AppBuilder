@@ -11,7 +11,9 @@ feature ends up half-done.
 ## 1. Decide the shape
 
 - What records exist and how they relate (`Appointment belongs_to :customer`).
-- Who may see and change them: everyone signed in, only the record's creator, or only admins.
+- Who may see and change them: the public (customers, visitors), everyone signed in, only the
+  record's creator, or only admins. Public screens use `allow_unauthenticated_access` and must work
+  with no accounts in the app (see "Public pages and sign in" in CLAUDE.md).
 - What a person does on each screen. Prefer fewer screens: index with inline actions over many pages.
 
 If the request is ambiguous, pick the simplest reasonable interpretation and say so in your summary.

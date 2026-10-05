@@ -24,6 +24,7 @@ en:
   layouts:
     application:
       admin: Admin
+      sign_in: Sign in
       sign_out: Sign out
   ui:
     form_errors:

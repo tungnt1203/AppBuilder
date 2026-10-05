@@ -49,6 +49,22 @@ from the new version may already have run. The previous code must keep working o
   removing it is a separate, later change.
 - Never change existing data in a way the previous version can't read.
 
+## Public pages and sign in
+
+Decide for every screen who it's for. Not every app needs sign in:
+
+- **Public**, for customers and visitors: landing pages, booking or order forms, product
+  catalogs, menus, contact pages. Add `allow_unauthenticated_access` to the controller.
+- **Signed in**, for the owner and staff: managing records, schedules, reports, settings.
+  This is the default.
+
+A public page must work for any visitor, on a brand-new install with no accounts yet. Never
+redirect visitors from a public page to sign in or to the first-run setup; the owner reaches
+those through the "Sign in" link or `/session/new`, which starts the first-run setup when no
+account exists. Signed-in staff may be sent from a public page to their own screen with
+`redirect_to ... if authenticated?`. In views of public pages, check `authenticated?` before
+using `Current.user`. Test public pages with no users at all (`User.delete_all`).
+
 ## Accounts and permissions
 
 Built in, extend rather than replace:

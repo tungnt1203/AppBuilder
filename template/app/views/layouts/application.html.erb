@@ -14,11 +14,16 @@
         </nav>
 
         <div class="flex items-center gap-1 text-sm">
-          <% if Current.user.administrator? %>
-            <%= nav_link_to t(".admin"), admin_users_path %>
+          <%# Public pages render this layout for visitors too, so check before using Current.user. %>
+          <% if authenticated? %>
+            <% if Current.user.administrator? %>
+              <%= nav_link_to t(".admin"), admin_users_path %>
+            <% end %>
+            <span class="hidden px-2 text-gray-500 sm:inline"><%= Current.user.name %></span>
+            <%= button_to t(".sign_out"), session_path, method: :delete, class: button_classes(:ghost) %>
+          <% else %>
+            <%= link_to t(".sign_in"), new_session_path, class: button_classes(:ghost) %>
           <% end %>
-          <span class="hidden px-2 text-gray-500 sm:inline"><%= Current.user.name %></span>
-          <%= button_to t(".sign_out"), session_path, method: :delete, class: button_classes(:ghost) %>
         </div>
       </div>
     </header>
