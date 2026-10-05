@@ -6,7 +6,7 @@
 <% when "action" %>
   <p class="turn-done"><%= message.body %></p>
 <% when "notice" %>
-  <p class="notice"><%= message.body %></p>
+  <div class="notice reply"><%= markdown(message.body) %></div>
 <% when "result" %>
   <p class="turn-done"><%= turn_summary(message) %></p>
 <% when "error" %>

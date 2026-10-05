@@ -8,10 +8,12 @@ class Publisher
 
   def publish
     @deployment.update!(commit_sha: @project.shell.run("git", "rev-parse", "--short", "HEAD").strip)
+    first = first_publish?
     run_steps(build_steps)
     @deployment.deploying!
     run_steps(deploy_steps)
     @deployment.live!
+    announce_first_publish if first
   rescue ProjectShell::Error => error
     @deployment.append_log(error.message)
     @deployment.failed!
@@ -32,6 +34,12 @@ class Publisher
   end
 
   private
+    # The published app starts with no accounts; tell the owner where to create theirs.
+    def announce_first_publish
+      @project.messages.create!(role: :notice, body: "Published at #{@project.publish_url}. " \
+        "Create your owner account at #{@project.publish_url}/session/new before sharing it.")
+    end
+
     def first_publish?
       !@project.deployments.live.where.not(id: @deployment.id).exists?
     end

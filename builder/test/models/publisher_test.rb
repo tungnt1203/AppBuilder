@@ -21,4 +21,19 @@ class PublisherTest < ActiveSupport::TestCase
     assert backup.last.end_with?("nha-khoa/before-v2.tar.gz")
     assert_equal [ "once", "update", "nha-khoa.localhost", "--image", "localhost:5050/nha-khoa:v2" ], update
   end
+
+  test "the first publish tells the owner where to create their account" do
+    deployment = @project.deployments.create!
+    publisher = Publisher.new(deployment, once: "once")
+    def publisher.run_steps(*) = nil # no docker or ONCE in tests
+
+    shell = Object.new
+    def shell.run(*) = "abc1234\n"
+    @project.define_singleton_method(:shell) { shell }
+
+    publisher.publish
+
+    assert deployment.reload.live?
+    assert_match "http://nha-khoa.localhost/session/new", @project.messages.last.body
+  end
 end
