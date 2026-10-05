@@ -29,7 +29,7 @@ class AgentRunner
   private
     def cli_command(prompt)
       [ "claude", "-p", prompt,
-        "--output-format", "stream-json", "--verbose",
+        "--output-format", "stream-json", "--verbose", "--include-partial-messages",
         "--setting-sources", "project",
         "--permission-mode", "acceptEdits",
         "--allowedTools", *@config[:allowed_tools],

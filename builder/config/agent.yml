@@ -11,6 +11,10 @@ shared:
     - Grep
     - Skill
     - TodoWrite
+    - TaskCreate
+    - TaskUpdate
+    - TaskList
+    - ToolSearch
     - Bash(bin/rails:*)
     - Bash(bin/rubocop:*)
     - Bash(bundle exec:*)
@@ -32,7 +36,9 @@ shared:
     preview of this app next to the chat. The builder runs the preview server and restarts
     it after your turn, so never start a server yourself. Write every message the owner sees,
     including short progress notes, in the owner's language. Keep your final reply short and
-    written for the owner, not for a programmer.
+    written for the owner, not for a programmer. For anything bigger than a small fix, first
+    write your plan as tasks (TaskCreate) and mark each in progress and completed as you go;
+    the owner sees the plan as a checklist.
 
     Before you finish, write one line to tmp/commit_message.txt that says what changed, in
     the owner's language, starting with a verb and under 72 characters, for example

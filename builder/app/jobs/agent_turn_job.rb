@@ -3,11 +3,14 @@
 class AgentTurnJob < ApplicationJob
   def perform(project, request)
     prompt = [ project.agent_note, request ].compact.join("\n\n")
-    project.update!(status: :working, agent_note: nil)
+    project.update!(status: :working, agent_note: nil, working_since: Time.current, activity: "Starting")
+    transcript = AgentTranscript.new(project)
 
-    AgentRunner.new(project).run(prompt) { |event| AgentEvent.new(project, event).record }
+    AgentRunner.new(project).run(prompt) { |event| transcript.record(event) }
+    transcript.finish
     finish(project, project.take_commit_message || request, status: :ready)
   rescue ProjectShell::Error => error
+    transcript&.finish
     # The agent usually reported why it stopped (for example a usage limit); only add
     # the raw error when it didn't.
     project.messages.create!(role: :error, body: error.message.truncate(4000)) unless project.messages.last&.error?
@@ -20,7 +23,7 @@ class AgentTurnJob < ApplicationJob
       project.shell.run("bin/rails", "tailwindcss:build")
       commit(project, message)
       project.preview.restart
-      project.update!(status: status, preview_version: project.preview_version + 1)
+      project.update!(status: status, preview_version: project.preview_version + 1, activity: nil)
     rescue ProjectShell::Error => error
       project.messages.create!(role: :error, body: error.message.truncate(4000))
       project.update!(status: :failed)

@@ -8,7 +8,8 @@ module ApplicationHelper
     send: [ "M12 19V5", "M5 12l7-7 7 7" ],
     chevron: [ "M9 6l6 6-6 6" ],
     steps: [ "M4 6h16", "M4 12h10", "M4 18h7" ],
-    history: [ "M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5", "M12 7v5l3 2" ]
+    history: [ "M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5", "M12 7v5l3 2" ],
+    check: [ "M5 12l5 5L20 7" ]
   }
 
   def icon(name, size: 16)
@@ -34,10 +35,23 @@ module ApplicationHelper
 
   def steps_summary(actions)
     counts = actions.group_by { |action| action.data["tool"] }.transform_values(&:size)
+    changed = counts.fetch("Write", 0) + counts.fetch("Edit", 0)
+    looked = counts.fetch("Read", 0) + counts.fetch("Grep", 0) + counts.fetch("Glob", 0)
     parts = []
-    parts << pluralize(counts.fetch("Write", 0) + counts.fetch("Edit", 0), "file") + " changed" if counts["Write"] || counts["Edit"]
-    parts << pluralize(counts["Bash"], "command") + " run" if counts["Bash"]
+    thought = actions.sum { |action| action.data["seconds"].to_i }
+    parts << "thought for #{duration_in_words(thought)}" if thought.positive?
+    parts << "looked at #{pluralize(looked, "file")}" if looked.positive?
+    parts << "changed #{pluralize(changed, "file")}" if changed.positive?
+    parts << "ran #{pluralize(counts["Bash"], "command")}" if counts["Bash"]
     parts.to_sentence.upcase_first.presence || pluralize(actions.size, "step")
+  end
+
+  def duration_in_words(seconds)
+    seconds < 60 ? pluralize(seconds, "second") : pluralize((seconds / 60.0).round, "minute")
+  end
+
+  def plan_progress(tasks)
+    "#{tasks.count { |task| task["status"] == "completed" }} of #{tasks.size} done"
   end
 
   def turn_summary(message)

@@ -3,5 +3,5 @@
 class Message < ApplicationRecord
   belongs_to :project, touch: true
 
-  enum :role, %w[ user assistant action result notice error ].index_by(&:itself)
+  enum :role, %w[ user assistant action plan result notice error ].index_by(&:itself)
 end

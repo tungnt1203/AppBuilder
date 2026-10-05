@@ -34,7 +34,7 @@
 
   <div class="grid min-h-0 flex-1 gap-3 sm:gap-4 lg:grid-cols-[minmax(340px,420px)_1fr]">
     <aside class="surface sheet relative flex min-h-[60vh] flex-col overflow-hidden lg:min-h-0" aria-label="Chat">
-      <div id="messages" class="flex-1 space-y-4 overflow-y-auto px-5 pt-5 pb-24" data-controller="autoscroll">
+      <div id="messages" class="flex-1 space-y-4 overflow-y-auto px-5 pt-5 <%= @project.working? || @project.setting_up? ? "pb-36" : "pb-24" %>" data-controller="autoscroll">
         <% items = chat_items(@project.messages) %>
         <% items.each_with_index do |item, index| %>
           <% if item.is_a?(Array) %>
@@ -44,10 +44,17 @@
           <% end %>
         <% end %>
 
-        <% if @project.setting_up? || @project.working? %>
-          <p class="status status-working pt-1"><%= @project.setting_up? ? "Setting up the project" : "Working on it" %></p>
-        <% end %>
+        <div id="draft" class="reply draft" data-turbo-permanent></div>
       </div>
+
+      <% if @project.setting_up? || @project.working? %>
+        <div class="activity glass capsule absolute inset-x-3 bottom-[4.25rem] flex items-center gap-2.5 px-4 py-2"
+             data-controller="elapsed" data-elapsed-since-value="<%= (@project.working_since || @project.updated_at).to_i %>" aria-live="polite">
+          <span class="activity-dot"></span>
+          <span id="activity-text" class="min-w-0 flex-1 truncate"><%= @project.setting_up? ? "Setting up the project" : (@project.activity || "Working") %></span>
+          <span class="faint tabular-nums" data-elapsed-target="clock"></span>
+        </div>
+      <% end %>
 
       <%= form_with model: [ @project, Message.new ], class: "absolute inset-x-3 bottom-3", data: { controller: "composer" } do |form| %>
         <div class="glass capsule flex items-end gap-2 py-1.5 pr-1.5 pl-4">

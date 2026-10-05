@@ -26,6 +26,7 @@ for await (const message of query({
     cwd: args.cwd,
     resume: args.resume,
     permissionMode: "acceptEdits",
+    includePartialMessages: true,
     allowedTools: config.allowedTools,
     disallowedTools: config.disallowedTools,
     settingSources: [ "project" ],

@@ -3,6 +3,8 @@
   <div class="bubble-user"><%= message.body %></div>
 <% when "assistant" %>
   <div class="reply"><%= markdown(message.body) %></div>
+<% when "plan" %>
+  <%= render "messages/plan", tasks: message.data["tasks"] if message.data["tasks"].present? %>
 <% when "action" %>
   <p class="turn-done"><%= message.body %></p>
 <% when "notice" %>

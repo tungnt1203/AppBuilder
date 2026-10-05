@@ -1,0 +1,11 @@
+<section class="plan" aria-label="Plan">
+  <header><span>Plan</span><span class="faint"><%= plan_progress(tasks) %></span></header>
+  <ol>
+    <% tasks.each do |task| %>
+      <li class="task task-<%= task["status"] %>">
+        <span class="task-mark"><%= icon :check, size: 12 if task["status"] == "completed" %></span>
+        <span><%= task["subject"] %></span>
+      </li>
+    <% end %>
+  </ol>
+</section>

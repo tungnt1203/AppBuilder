@@ -11,4 +11,15 @@ class ApplicationHelperTest < ActionView::TestCase
   test "markdown drops raw HTML from replies" do
     assert_not_includes markdown("<script>alert(1)</script>"), "<script>"
   end
+
+  test "steps summary says how long it thought and what it touched" do
+    actions = [
+      Message.new(role: :action, data: { "tool" => "Thinking", "seconds" => 5 }),
+      Message.new(role: :action, data: { "tool" => "Read" }),
+      Message.new(role: :action, data: { "tool" => "Edit" }),
+      Message.new(role: :action, data: { "tool" => "Bash" })
+    ]
+
+    assert_equal "Thought for 5 seconds, looked at 1 file, changed 1 file, and ran 1 command", steps_summary(actions)
+  end
 end
