@@ -1,0 +1,12 @@
+<% content_for :title, "Set up" %>
+
+<h1 class="text-lg font-semibold">Create your account</h1>
+<p class="mt-1 mb-6 text-sm text-gray-500">You'll be the owner of this app and can invite others later.</p>
+
+<%= form_with model: @user, url: first_run_path, class: "space-y-4" do |form| %>
+  <%= form.errors %>
+  <%= form.field :name, required: true, autofocus: true, autocomplete: "name" %>
+  <%= form.field :email_address, :email_field, required: true, autocomplete: "username" %>
+  <%= form.field :password, :password_field, required: true, autocomplete: "new-password", maxlength: 72 %>
+  <%= form.submit "Create account", class: "w-full" %>
+<% end %>

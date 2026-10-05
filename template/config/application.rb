@@ -23,5 +23,10 @@ module Starter
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Shown in the page title, navigation and emails.
+    config.x.app_name = "Starter"
+
+    config.action_view.default_form_builder = "UiFormBuilder"
   end
 end

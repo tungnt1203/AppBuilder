@@ -1,0 +1,8 @@
+<p>Hi <%= @user.name %>,</p>
+
+<p>
+  You've been invited to <%= Rails.configuration.x.app_name %>.
+  <%= link_to "Choose a password to get started", @invitation_url %>.
+</p>
+
+<p>This link works for 7 days.</p>

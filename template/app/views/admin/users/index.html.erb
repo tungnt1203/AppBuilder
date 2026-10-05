@@ -1,0 +1,20 @@
+<%= page_header "People", "Who can sign in to #{Rails.configuration.x.app_name}." do %>
+  <%= link_to "Invite someone", new_admin_user_path, class: button_classes %>
+<% end %>
+
+<%= card padded: false do %>
+  <ul class="divide-y divide-gray-100">
+    <% @users.each do |user| %>
+      <li class="flex items-center justify-between gap-4 px-6 py-4">
+        <div class="min-w-0">
+          <p class="truncate text-sm font-medium text-gray-900"><%= user.name %></p>
+          <p class="truncate text-sm text-gray-500"><%= user.email_address %></p>
+        </div>
+        <div class="flex items-center gap-3">
+          <%= badge user.role.humanize, tone: user.member? ? :gray : :brand %>
+          <%= link_to "Edit", edit_admin_user_path(user), class: "text-sm font-medium text-brand-600 hover:text-brand-500" unless user.owner? %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

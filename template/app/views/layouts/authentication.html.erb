@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html class="h-full">
+  <head>
+    <%= render "layouts/head" %>
+  </head>
+
+  <body class="flex min-h-full items-center justify-center bg-gray-50 px-4 py-12 text-gray-900 antialiased">
+    <div class="w-full max-w-sm">
+      <p class="mb-6 text-center text-lg font-semibold"><%= Rails.configuration.x.app_name %></p>
+      <%= render "ui/flash" %>
+      <%= card { yield } %>
+    </div>
+  </body>
+</html>
