@@ -1,7 +1,32 @@
 @import "tailwindcss";
 
-/* Brand color used by buttons, links and focus rings. Change the scale here to rebrand the whole app. */
+/* Theme. Edit this block to give the whole app a new look. Components use these
+   names, so screens follow without a restyle:
+   - brand-50…950   emphasis, links, primary buttons
+   - canvas         page background
+   - surface        sidebar, cards, dialogs
+   - surface-muted  hovers, table headers, quiet badges
+   - ink            primary text
+   - muted          secondary text
+   - line           borders and dividers
+   - radius-lg      inputs and buttons (rounded-lg)
+   - radius-xl      cards and dialogs (rounded-xl)
+   - font-sans      typeface (self-hosted files only; no external font service)
+   Add a new color here when the product needs a second accent. Don't invent
+   one-off hex values in views. */
 @theme {
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  --color-canvas: oklch(98.5% 0.002 247.839);
+  --color-surface: oklch(100% 0 0);
+  --color-surface-muted: oklch(96.7% 0.003 264.542);
+  --color-ink: oklch(21% 0.034 264.665);
+  --color-muted: oklch(55.1% 0.027 264.364);
+  --color-line: oklch(92.8% 0.006 264.531);
+
   --color-brand-50: oklch(96.2% 0.018 272.314);
   --color-brand-100: oklch(93% 0.034 272.788);
   --color-brand-200: oklch(87% 0.065 274.039);

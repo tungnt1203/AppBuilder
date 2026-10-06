@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html class="h-full">
+  <head>
+    <%= render "layouts/head" %>
+  </head>
+
+  <%# Open canvas for a landing page or any screen that should not wear the app sidebar.
+      Product screens, including public booking or catalog pages, stay on the application layout. %>
+  <body class="min-h-full bg-canvas font-sans text-ink antialiased">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2"><%= t("ui.skip") %></a>
+
+    <header class="sticky top-0 z-20 border-b border-line bg-surface">
+      <div class="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
+        <%= link_to Rails.configuration.x.app_name, root_path, class: "font-semibold text-ink" %>
+        <% if content_for?(:public_nav) %>
+          <nav class="flex flex-1 items-center gap-1 overflow-x-auto" aria-label="<%= t("ui.navigation") %>">
+            <%= yield :public_nav %>
+          </nav>
+        <% else %>
+          <div class="flex-1"></div>
+        <% end %>
+        <%= render "layouts/account" %>
+      </div>
+    </header>
+
+    <main id="main">
+      <% if flash[:notice] || flash[:alert] %>
+        <div class="mx-auto max-w-6xl px-4 pt-8">
+          <%= render "ui/flash" %>
+        </div>
+      <% end %>
+      <%= yield %>
+    </main>
+  </body>
+</html>

@@ -26,10 +26,16 @@ vi:
       member: Thành viên
   layouts:
     application:
+      home: Trang chủ
       admin: Quản trị
       sign_in: Đăng nhập
       sign_out: Đăng xuất
   ui:
+    menu: Menu
+    close: Đóng
+    skip: Tới nội dung
+    navigation: Điều hướng
+    breadcrumbs: Đường dẫn
     form_errors:
       heading:
         other: "Có %{count} lỗi cần sửa:"

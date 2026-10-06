@@ -17,6 +17,9 @@ class LayoutTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_select "a[href='/session/new']"
+      assert_select "aside#app-nav"
+      assert_select "main#main"
+      assert_select "button[aria-controls=?]", "app-nav"
     end
   end
 end

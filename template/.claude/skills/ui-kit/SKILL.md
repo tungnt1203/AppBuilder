@@ -1,75 +1,170 @@
 ---
 name: ui-kit
-description: Reference for this app's UI building blocks (page header, card, empty state, badge, buttons, styled forms, navigation, flash) with copy-paste examples. Use when writing or changing any view.
+description: Reference for this app's theme, shells and UI building blocks (page header, card, stat, empty state, badge, alert, tabs, dialog, menu, buttons, forms, navigation) with copy-paste examples. Use when writing or changing any view.
 ---
 
 # UI kit
 
-Helpers live in `app/helpers/ui_helper.rb`, partials in `app/views/ui/`, the form builder in
-`app/form_builders/ui_form_builder.rb`. Compose screens from these; reach for raw Tailwind only for
-layout (grid, flex, spacing, widths).
+The app has one theme and a set of building blocks, so new screens can look different in layout
+without drifting into a new visual language. Helpers live in `app/helpers/ui_helper.rb`, partials in
+`app/views/ui/`, the form builder in `app/form_builders/ui_form_builder.rb`.
+
+Compose screens from these blocks. Use raw Tailwind for layout only: grid, flex, spacing, widths.
+Colors, type and corners come from the theme.
+
+## Theme
+
+`app/assets/tailwind/application.css` is the only place that sets the look. Editing it rebrands
+every screen. Change the brand scale, `canvas`, `surface`, `ink`, `muted`, `line`, `radius-lg`,
+`radius-xl` or `font-sans`. Add a named color there when the product needs a second accent.
+Self-host any font file; do not call an external font service.
+
+In views, use those names: `bg-canvas`, `bg-surface`, `bg-surface-muted`, `text-ink`, `text-muted`,
+`border-line`, `divide-line`, `brand-*`. Green, yellow and red are for status only.
+
+After a theme or view change, run `bin/rails tailwindcss:build`.
+
+## Shells
+
+- **application** (default). Sidebar for navigation, top bar for the account, content scrolls in
+  the main pane. Use it for the product, including a public booking form, catalog or menu.
+- **public**. Open page with a slim header and no sidebar, for a landing page. In the controller:
+  `layout "public"`. The yield is full-bleed; pad the sections that need it. Optional header links:
+
+```erb
+<% content_for :public_nav do %>
+  <%= bar_link_to "Menu", menu_path %>
+<% end %>
+```
+
+- **authentication**. Centered card. Already used by sign in, and not for product screens.
+
+Add a top-level screen in `app/views/layouts/_navigation.html.erb`:
+
+```erb
+<%= nav_link_to "Customers", customers_path, match: "/customers" %>
+```
+
+`match:` keeps the link active on show and edit. Leave it off for an exact match (the home link).
+
+When the sidebar has more than a handful of links, group them:
+
+```erb
+<%= nav_section "Shop" do %>
+  <%= nav_link_to "Orders", orders_path, match: "/orders" %>
+  <%= nav_link_to "Products", products_path, match: "/products" %>
+<% end %>
+```
 
 ## Page header
 
-Sets the page `<title>` too. Actions are optional.
+Sets the page `<title>` too. Actions and breadcrumbs are optional.
 
 ```erb
-<%= page_header "Customers", "Everyone who has booked with you." do %>
+<%= page_header "Customers", "Everyone who has booked with you.",
+      breadcrumbs: [["Customers", customers_path]] do %>
   <%= link_to "Add customer", new_customer_path, class: button_classes %>
 <% end %>
 ```
 
-## Buttons
+## Buttons, links, toolbar
 
-`button_classes(variant)` with `:primary` (default), `:secondary`, `:danger`, `:ghost`.
-Use it on `link_to`, `button_to`, and plain `<button>`; `form.submit` is already primary.
+`button_classes(variant, size: :md)` with `:primary` (default), `:secondary`, `:danger`, `:ghost`.
+`size: :sm` is for a dense toolbar, not the main action. One primary button per area.
+Destructive actions always confirm. `form.submit` is already primary. `link_classes` is the text link.
 
 ```erb
+<%= toolbar do %>
+  <%= link_to "Add customer", new_customer_path, class: button_classes %>
+  <div class="flex gap-2">
+    <%= link_to "Export", customers_path(format: :csv), class: button_classes(:secondary, size: :sm) %>
+  </div>
+<% end %>
+
 <%= link_to "Edit", edit_customer_path(customer), class: button_classes(:secondary) %>
+<%= link_to "View", customer_path(customer), class: link_classes %>
 <%= button_to "Delete", customer, method: :delete, class: button_classes(:danger),
       form: { data: { turbo_confirm: "Delete #{customer.name}?" } } %>
 ```
 
-One primary button per screen area. Destructive actions always confirm.
-
-## Card
-
-White panel. `padded: false` when the content (like a list) brings its own padding.
+## Card, stat, empty state
 
 ```erb
+<div class="grid gap-4 sm:grid-cols-3">
+  <%= stat @visits.size, "Visits this week", hint: "Booked and completed" %>
+</div>
+
 <%= card do %>
-  <h2 class="text-sm font-semibold text-gray-900">Details</h2>
-  ...
+  <h2 class="text-sm font-semibold text-ink">Details</h2>
 <% end %>
 
 <%= card padded: false do %>
-  <ul class="divide-y divide-gray-100">
-    <li class="flex items-center justify-between px-6 py-4">...</li>
+  <ul class="divide-y divide-line">
+    <li class="flex items-center justify-between gap-4 px-6 py-4">...</li>
   </ul>
 <% end %>
-```
 
-## Empty state
-
-Every list needs one.
-
-```erb
 <%= empty_state "No customers yet", "They'll appear here after their first booking." do %>
   <%= link_to "Add a customer", new_customer_path, class: button_classes %>
 <% end %>
 ```
 
-## Badge
+Every list needs an empty state. Put a person next to their name with `avatar(user.name)`.
 
-Tones: `:gray` (default), `:brand`, `:green`, `:yellow`, `:red`.
+## Badge and alert
+
+Badge tones: `:gray` (default), `:brand`, `:green`, `:yellow`, `:red`.
+Alert tones: `:info` (default), `:success`, `:warning`, `:danger`. Flash (`notice:` / `alert:`)
+already renders; `alert` is for guidance that is part of the page.
 
 ```erb
 <%= badge appointment.status.humanize, tone: { "confirmed" => :green, "cancelled" => :red }.fetch(appointment.status, :gray) %>
+<%= alert "This week is fully booked.", tone: :warning %>
+```
+
+## Tabs and description list
+
+Tabs are links, so each tab is a real page.
+
+```erb
+<%= tabs do %>
+  <%= tab_to "Upcoming", appointments_path %>
+  <%= tab_to "Past", past_appointments_path %>
+<% end %>
+
+<%= card do %>
+  <%= description_list [
+        ["Phone", customer.phone],
+        ["Plan", badge(customer.plan.humanize, tone: :brand)]
+      ] %>
+<% end %>
+```
+
+## Tables
+
+```erb
+<%= card padded: false do %>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-line text-sm">
+      <thead class="bg-surface-muted text-left text-muted">
+        <tr><th class="px-6 py-3 font-medium">Name</th><th class="px-6 py-3 font-medium">Phone</th></tr>
+      </thead>
+      <tbody class="divide-y divide-line">
+        <% @customers.each do |customer| %>
+          <tr>
+            <td class="px-6 py-4 font-medium text-ink"><%= customer.name %></td>
+            <td class="px-6 py-4 text-muted"><%= customer.phone %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
 ```
 
 ## Forms
 
-Every `form_with` uses `UiFormBuilder`, so inputs are styled and show errors automatically.
+Every `form_with` uses `UiFormBuilder`. Inputs are styled. Pass `class:` only for layout (`w-full`).
 
 ```erb
 <%= form_with model: customer, class: "space-y-4" do |form| %>
@@ -93,36 +188,39 @@ Every `form_with` uses `UiFormBuilder`, so inputs are styled and show errors aut
 
 Put forms in a narrow column: `<div class="max-w-lg"><%= card { render "form", customer: @customer } %></div>`.
 
-## Tables
+## Dialog and menu
 
-For data with several columns, use a table inside an unpadded card:
+A dialog is for a short confirm or a small form that doesn't deserve its own page.
+A menu is a short list of row actions.
 
 ```erb
-<%= card padded: false do %>
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200 text-sm">
-      <thead class="bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-        <tr><th class="px-6 py-3">Name</th><th class="px-6 py-3">Phone</th></tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100">
-        <% @customers.each do |customer| %>
-          <tr><td class="px-6 py-4 font-medium text-gray-900"><%= customer.name %></td><td class="px-6 py-4 text-gray-500"><%= customer.phone %></td></tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
+<%= dialog_button "New note", "new-note" %>
+<%= dialog id: "new-note", title: "New note" do %>
+  <%= form_with model: @note, class: "space-y-4" do |form| %>
+    <%= form.field :body, :text_area, rows: 3 %>
+    <%= form.submit %>
+  <% end %>
+<% end %>
+
+<%= menu "Actions" do %>
+  <%= menu_link_to "Edit", edit_customer_path(customer) %>
+  <%= menu_button_to "Delete", customer_path(customer), method: :delete,
+        class: "text-red-700 hover:bg-red-50",
+        form: { data: { turbo_confirm: "Delete #{customer.name}?" } } %>
 <% end %>
 ```
 
-## Navigation and flash
+## Adding a block
 
-- Top-level screens: `nav_link_to "Customers", customers_path` in `app/views/layouts/_navigation.html.erb`.
-- Flash messages render automatically; set them with `redirect_to ..., notice: "Saved."` or `alert:`.
+When the same arrangement shows up on a second screen, add a method to `UiHelper` and a partial in
+`app/views/ui/`, built from theme colors. Mention it in this skill. Don't copy a chunk of markup
+from screen to screen, and don't add a second stylesheet.
 
-## Look and feel
+## Layout, type, phones
 
-- Colors: `brand-*` for emphasis and links, `gray-*` for text and borders, `red/green/yellow` only for status.
-- Text: `text-sm` body, `text-gray-500` secondary, `font-semibold` headings. Page titles come from `page_header`.
-- Spacing: `space-y-4` in forms, `gap-2` between buttons, `mb-6` between page sections.
-- Everything must work on a phone: use `flex-wrap`, `overflow-x-auto` for tables, and avoid fixed widths.
+- Body text is `text-sm`. Secondary text is `text-muted`. Headings are `font-semibold text-ink`.
+  Page titles come from `page_header`.
+- `space-y-4` in forms, `gap-2` between buttons, `mb-6` between page sections.
+- Everything works on a phone: the sidebar collapses behind Menu, tables sit in `overflow-x-auto`,
+  actions use `flex-wrap`. Don't use a fixed pixel width for a page.
 - Live updates use Turbo Streams (`broadcasts_refreshes` on the model, `turbo_stream_from` in the view).

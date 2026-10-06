@@ -1,7 +1,7 @@
 # Default form builder (see config/application.rb): every form_with gets styled
 # fields, so views only add classes for layout, never for looks.
 class UiFormBuilder < ActionView::Helpers::FormBuilder
-  INPUT_CLASSES = "block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs placeholder:text-gray-400 focus:border-brand-500 focus:outline-2 focus:outline-brand-500/20"
+  INPUT_CLASSES = UiHelper::FIELD_CLASSES
   INVALID_CLASSES = "border-red-400 focus:border-red-500 focus:outline-red-500/20"
 
   %i[ text_field email_field password_field number_field telephone_field url_field search_field
@@ -20,11 +20,11 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
   end
 
   def check_box(method, options = {}, checked_value = "1", unchecked_value = "0")
-    super(method, with_classes(options, "size-4 rounded border-gray-300 accent-brand-600"), checked_value, unchecked_value)
+    super(method, with_classes(options, "size-4 rounded border-line accent-brand-600"), checked_value, unchecked_value)
   end
 
   def label(method, text = nil, options = {}, &block)
-    super(method, text, with_classes(options, "block text-sm font-medium text-gray-700"), &block)
+    super(method, text, with_classes(options, "block text-sm font-medium text-ink"), &block)
   end
 
   def submit(value = nil, options = {})
@@ -38,7 +38,7 @@ class UiFormBuilder < ActionView::Helpers::FormBuilder
       @template.safe_join([
         label(method, label),
         public_send(type, method, options),
-        (@template.tag.p(hint, class: "text-xs text-gray-500") if hint),
+        (@template.tag.p(hint, class: "text-xs text-muted") if hint),
         error_message(method)
       ].compact)
     end

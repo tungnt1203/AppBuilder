@@ -1,5 +1,6 @@
-<% { notice: "border-green-200 bg-green-50 text-green-800", alert: "border-red-200 bg-red-50 text-red-700" }.each do |type, classes| %>
-  <% if message = flash[type] %>
-    <div id="<%= type %>" class="mb-6 rounded-lg border px-4 py-3 text-sm font-medium <%= classes %>" role="status"><%= message %></div>
-  <% end %>
+<% if flash[:notice] || flash[:alert] %>
+  <div class="mb-6 space-y-2">
+    <%= alert flash[:notice], tone: :success, id: "notice" if flash[:notice] %>
+    <%= alert flash[:alert], tone: :danger, id: "alert" if flash[:alert] %>
+  </div>
 <% end %>

@@ -1,0 +1,8 @@
+<div class="relative" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape">
+  <button type="button" class="<%= button_class || button_classes(:secondary, size: :sm) %>" data-menu-target="button" data-action="menu#toggle" aria-expanded="false" aria-haspopup="menu">
+    <%= label %>
+  </button>
+  <div data-menu-target="panel" class="absolute right-0 z-20 mt-1 hidden min-w-44 rounded-lg border border-line bg-surface p-1 shadow-lg" role="menu">
+    <%= items %>
+  </div>
+</div>

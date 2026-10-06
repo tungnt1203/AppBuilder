@@ -80,20 +80,29 @@ Built in, extend rather than replace:
 
 ## UI
 
-Screens must look consistent. Use the UI kit; see the `ui-kit` skill for details and examples.
+Screens share one theme and one shell, so the product can grow without each page inventing a look.
+Details and copy-paste examples are in the `ui-kit` skill.
 
-- `page_header`, `card`, `empty_state`, `badge`, `button_classes(:primary | :secondary | :danger | :ghost)`
-  from `app/helpers/ui_helper.rb`.
-- Forms are styled automatically by `UiFormBuilder`: use `form.field :name`, `form.errors`, `form.submit`.
+- Theme (color, type, corners): `app/assets/tailwind/application.css`. Change it once to rebrand every screen.
+- Shells: `application` (sidebar + top bar; the default, including public booking or catalog pages) and
+  `public` (open canvas for a landing page). Sign-in screens use `authentication`.
+- Building blocks live in `app/helpers/ui_helper.rb`: `page_header`, `card`, `stat`, `empty_state`,
+  `badge`, `alert`, `tabs` / `tab_to`, `toolbar`, `description_list`, `avatar`, `dialog`, `menu`,
+  `nav_link_to`, `nav_section`, `button_classes`, `link_classes`.
+- Forms are styled by `UiFormBuilder`: use `form.field :name`, `form.errors`, `form.submit`.
   Don't add visual classes to inputs.
-- Add a `nav_link_to` in `app/views/layouts/_navigation.html.erb` for each new top-level screen.
-- Use the `brand-*` color for emphasis and `gray-*` for everything else. The brand color is defined once
-  in `app/assets/tailwind/application.css`.
-- Interactivity comes from Turbo (Frames, Streams, morphing) and small Stimulus controllers.
+- Add each top-level screen with `nav_link_to` in `app/views/layouts/_navigation.html.erb`.
+  Group links with `nav_section` once there are more than a handful.
+- Looks use theme names: `bg-canvas`, `bg-surface`, `text-ink`, `text-muted`, `border-line`, `brand-*`.
+  Green, yellow and red are for status only. Layout (grid, flex, spacing, widths) is ordinary Tailwind.
+- Interactivity comes from Turbo (Frames, Streams, morphing) and the Stimulus controllers
+  `shell`, `dialog` and `menu`. Add a small controller when a screen needs its own behavior.
+- When the same arrangement shows up on a second screen, add a helper and a partial under `app/views/ui/`
+  instead of copying markup.
 - Set the app's name in `config.x.app_name` (`config/application.rb`).
 - When the app gets its real main screen, point `root` at it and delete the placeholder
   (`HomeController`, `app/views/home/`, `test/controllers/home_controller_test.rb`, and the `home:` keys
-  in both locale files).
+  in both locale files). Keep the `layouts.application.home` key only if the nav still says "Home".
 
 ## Definition of done
 

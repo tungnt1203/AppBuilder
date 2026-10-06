@@ -1,7 +1,7 @@
 <% content_for :title, t(".title") %>
 
 <h1 class="text-lg font-semibold"><%= t(".heading", name: @user.name) %></h1>
-<p class="mt-1 mb-6 text-sm text-gray-500"><%= t(".description", email: @user.email_address) %></p>
+<p class="mt-1 mb-6 text-sm text-muted"><%= t(".description", email: @user.email_address) %></p>
 
 <%= form_with model: @user, url: invitation_path(params[:token]), method: :put, class: "space-y-4" do |form| %>
   <%= form.errors %>

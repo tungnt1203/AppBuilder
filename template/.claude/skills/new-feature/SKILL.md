@@ -77,6 +77,8 @@ inherit from `Admin::BaseController`.
 ## 4. Views
 
 Use the UI kit (`ui-kit` skill). Every index needs an empty state; every form shows errors.
+A public landing page uses `layout "public"`. A public booking, catalog or menu stays on the
+application layout so it keeps the shell.
 
 ```erb
 <%= page_header "Appointments", "Upcoming visits." do %>
@@ -85,7 +87,7 @@ Use the UI kit (`ui-kit` skill). Every index needs an empty state; every form sh
 
 <% if @appointments.any? %>
   <%= card padded: false do %>
-    <ul class="divide-y divide-gray-100">
+    <ul class="divide-y divide-line">
       <%= render @appointments %>
     </ul>
   <% end %>
@@ -116,7 +118,9 @@ write the `label` and input separately inside `<div class="space-y-1.5">`.
 ## 5. Routes and navigation
 
 - `resources :appointments` in `config/routes.rb`.
-- `<%= nav_link_to "Appointments", appointments_path %>` in `app/views/layouts/_navigation.html.erb`.
+- `<%= nav_link_to "Appointments", appointments_path, match: "/appointments" %>` in
+  `app/views/layouts/_navigation.html.erb`. `match:` keeps the link active on the nested pages.
+  Wrap groups of links in `nav_section` once the sidebar has more than a handful.
 - If this is now the app's main screen, point `root` at it.
 
 ## 6. Tests

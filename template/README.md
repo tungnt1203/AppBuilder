@@ -5,7 +5,7 @@ The Rails 8 app that every generated app starts from. It runs on
 
 - Sign in, first-run owner setup, invitations, and roles (owner, admin, member)
 - `/admin/users` to manage people
-- A small UI kit (`app/helpers/ui_helper.rb`, `app/views/ui/`, `UiFormBuilder`) on Tailwind 4
+- A UI kit that can grow with the product: one theme file, an app shell with a sidebar, a public layout, and building blocks (`app/helpers/ui_helper.rb`, `app/views/ui/`, `UiFormBuilder`) on Tailwind 4
 - `CLAUDE.md` and `.claude/skills/` so Claude Code builds features the same way every time
 
 ## Develop
