@@ -28,6 +28,7 @@ class ProjectManagementTest < ActiveSupport::TestCase
     assert_enqueued_with(job: RenameJob, args: [ @project ]) { assert @project.rename("  Nha khoa  Mai ") }
     assert_equal "Nha khoa Mai", @project.reload.name
     assert_equal "nha-khoa", @project.slug
+    assert_equal "nha-khoa", @project.subdomain
     assert @project.working?
 
     stub_preview(@project) { RenameJob.perform_now(@project) }
@@ -51,7 +52,8 @@ class ProjectManagementTest < ActiveSupport::TestCase
   test "duplicating copies code, history and data but not the running server" do
     copy = nil
     assert_enqueued_with(job: DuplicateJob) { copy = @project.duplicate }
-    assert_equal [ "Nha khoa (bản sao)", "nha-khoa-ban-sao", "vi" ], [ copy.name, copy.slug, copy.language ]
+    assert_equal [ "Nha khoa (bản sao)", "vi", nil ], [ copy.name, copy.language, copy.subdomain ]
+    assert_not_equal @project.slug, copy.slug
     assert copy.setting_up?
     assert_not_equal @project.port, copy.port
 

@@ -1,25 +1,37 @@
 require "test_helper"
 
 class ProjectTest < ActiveSupport::TestCase
-  test "gets a slug from its name and the next free preview port" do
+  test "gets a fixed id of its own, not taken from its name, and the next free preview port" do
     project = Project.create!(name: "Trung tâm Anh ngữ", language: "vi")
 
-    assert_equal "trung-tam-anh-ngu", project.slug
+    assert_match(/\A[a-z0-9]{8}\z/, project.slug)
     assert_equal 4003, project.port
     assert project.setting_up?
-    assert_equal Rails.configuration.x.projects_root.join("trung-tam-anh-ngu"), project.path
+    assert_equal Rails.configuration.x.projects_root.join(project.slug), project.path
     assert_equal "http://localhost:4003", project.preview_url
   end
 
-  test "slugs stay unique" do
+  test "is published at a subdomain from its name, kept from the first publish on" do
+    project = Project.create!(name: "Trung tâm Anh ngữ", language: "vi")
+    assert_equal "trung-tam-anh-ngu.localhost", project.publish_host
+    assert_nil project.subdomain
+
+    project.publish
+    project.update!(name: "Anh ngữ Mai")
+
+    assert_equal "trung-tam-anh-ngu", project.subdomain
+    assert_equal "trung-tam-anh-ngu.localhost", project.publish_host
+  end
+
+  test "subdomains stay unique" do
     project = Project.create!(name: "Shop", language: "en")
 
-    assert_match(/\Ashop-\h{4}\z/, project.slug)
+    assert_match(/\Ashop-\h{4}\.localhost\z/, project.publish_host)
   end
 
   test "only known languages" do
     assert_not Project.new(name: "X", language: "fr").valid?
-    assert_equal "duong-pho", Project.create!(name: "Đường phố", language: "vi").slug
+    assert_equal "duong-pho.localhost", Project.create!(name: "Đường phố", language: "vi").publish_host
     assert_equal "Asia/Ho_Chi_Minh", projects(:clinic).time_zone
   end
 
@@ -38,17 +50,16 @@ class ProjectTest < ActiveSupport::TestCase
     assert_not projects(:shop).accepts_messages?
   end
 
-  test "adopting a suggested name moves the slug and remembers the old one" do
+  test "adopting a suggested name leaves the app's address alone" do
     project = Project.new(language: "vi")
     project.name_after("Quản lý hội viên phòng gym quận 3")
     project.save!
-    assert_equal "quan-ly-hoi-vien", project.slug
+    slug = project.slug
 
     project.adopt_name("Gym Quận 3")
 
-    assert_equal [ "Gym Quận 3", "gym-quan-3", "quan-ly-hoi-vien" ], [ project.name, project.slug, project.former_slug ]
+    assert_equal [ "Gym Quận 3", slug ], [ project.name, project.slug ]
     assert_not project.name_pending?
-    assert_equal project, Project.find_by_slug!("quan-ly-hoi-vien")
   end
 
   test "keeps the provisional name when none was suggested" do
@@ -58,6 +69,6 @@ class ProjectTest < ActiveSupport::TestCase
 
     project.adopt_name(nil)
 
-    assert_equal [ "Quản lý hội viên", "quan-ly-hoi-vien", nil ], [ project.name, project.slug, project.former_slug ]
+    assert_equal "Quản lý hội viên", project.name
   end
 end

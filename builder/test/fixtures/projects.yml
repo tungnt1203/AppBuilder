@@ -1,6 +1,7 @@
 clinic:
   name: Nha khoa
   slug: nha-khoa
+  subdomain: nha-khoa
   language: vi
   port: 4001
   status: ready
@@ -9,6 +10,7 @@ clinic:
 shop:
   name: Shop
   slug: shop
+  subdomain: shop
   language: en
   port: 4002
   status: working

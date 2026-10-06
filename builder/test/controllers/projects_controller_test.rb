@@ -23,7 +23,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_equal "plan", enqueued_jobs.last["arguments"].last
 
-    project = Project.find_by!(slug: "phong-gym")
+    project = Project.find_by!(name: "Phòng gym")
     assert_redirected_to project_path(project)
     assert_equal [ "user", "Quản lý hội viên" ], [ project.messages.first.role, project.messages.first.body ]
   end
@@ -43,14 +43,6 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to project_path(project)
   end
 
-  test "an app's old address leads to its new one" do
-    project = projects(:clinic)
-    project.update!(former_slug: "le-tan")
-
-    get project_path("le-tan")
-
-    assert_redirected_to project_path(project)
-  end
 
   test "shows the chat and the preview" do
     get project_path(projects(:clinic))

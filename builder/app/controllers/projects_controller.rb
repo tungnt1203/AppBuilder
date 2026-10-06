@@ -37,8 +37,7 @@ class ProjectsController < ApplicationController
 
   private
     def set_project
-      @project = Project.find_by_slug!(params[:id])
-      redirect_to @project, status: :moved_permanently if request.get? && @project.slug != params[:id]
+      @project = Project.find_by!(slug: params[:id])
     end
 
     def project_params

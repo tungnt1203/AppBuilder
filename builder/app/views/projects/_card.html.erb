@@ -35,7 +35,7 @@
       <h2 id="<%= dom_id(project, :rename) %>" class="text-lg font-semibold">Rename app</h2>
       <div class="flex flex-col gap-1.5">
         <%= form.text_field :name, required: true, autofocus: true, class: "field", "aria-label": "App name" %>
-        <p class="faint text-[0.8125rem]">The app shows this name to its visitors. Its address stays <%= project.slug %>.</p>
+        <p class="faint text-[0.8125rem]">The app shows this name to its visitors.<% if project.subdomain %> Its address stays <%= project.publish_host %>.<% end %></p>
       </div>
       <div class="flex justify-end gap-2">
         <button type="button" class="btn btn-ghost" data-action="app-menu#close">Cancel</button>

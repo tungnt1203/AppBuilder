@@ -33,21 +33,8 @@ class Project < ApplicationRecord
     self.name_pending = true
   end
 
-  # Before anything is on disk, so the folder (and the address it's published at)
-  # can still follow the name. The old address keeps leading here.
   def adopt_name(new_name)
-    self.name = new_name.presence || name.delete_suffix("…")
-    self.name_pending = false
-    if name_changed?
-      old_slug = slug
-      assign_slug
-      self.former_slug = old_slug unless slug == old_slug
-    end
-    save!
-  end
-
-  def self.find_by_slug!(slug)
-    find_by(slug:) || find_by!(former_slug: slug)
+    update!(name: new_name.presence || name.delete_suffix("…"), name_pending: false)
   end
 
   def path
@@ -101,8 +88,10 @@ class Project < ApplicationRecord
     end
   end
 
+  # Picked from the name when the app is first published, then kept: renaming the
+  # app doesn't move it away from the address its visitors know.
   def publish_host
-    "#{slug}.#{Rails.configuration.x.publish_domain}"
+    "#{subdomain || subdomain_for(name)}.#{Rails.configuration.x.publish_domain}"
   end
 
   def publish_url
@@ -123,6 +112,7 @@ class Project < ApplicationRecord
   end
 
   def publish
+    update!(subdomain: subdomain_for(name)) unless subdomain
     deployments.create!.tap { |deployment| PublishJob.perform_later(deployment) }
   end
 
@@ -246,11 +236,17 @@ class Project < ApplicationRecord
       error.message
     end
 
+    # The studio address and folder: fixed for the app's life, whatever it's called.
     def assign_slug
+      self.slug = SecureRandom.base36(8) while slug.nil? || Project.exists?(slug: slug)
+    end
+
+    def subdomain_for(name)
       # Strip Vietnamese diacritics before parameterize, which would drop letters like "ữ".
-      base = name.to_s.unicode_normalize(:nfkd).gsub(/\p{Mn}/, "").tr("đĐ", "dD").parameterize.presence || "app"
-      self.slug = base
-      self.slug = "#{base}-#{SecureRandom.hex(2)}" while Project.where.not(id: id).exists?(slug: slug)
+      base = name.to_s.unicode_normalize(:nfkd).gsub(/\p{Mn}/, "").tr("đĐ", "dD").parameterize.first(40).delete_suffix("-").presence || "app"
+      candidate = base
+      candidate = "#{base}-#{SecureRandom.hex(2)}" while Project.where.not(id: id).exists?(subdomain: candidate)
+      candidate
     end
 
     def assign_port

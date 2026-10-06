@@ -64,9 +64,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_090000) do
     t.string "preview_status", default: "running", null: false
     t.text "preview_error"
     t.boolean "name_pending", default: false, null: false
-    t.string "former_slug"
+    t.string "subdomain"
     t.index ["port"], name: "index_projects_on_port", unique: true
     t.index ["slug"], name: "index_projects_on_slug", unique: true
+    t.index ["subdomain"], name: "index_projects_on_subdomain", unique: true
   end
 
   add_foreign_key "agent_commands", "projects"
