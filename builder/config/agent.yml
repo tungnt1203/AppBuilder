@@ -17,6 +17,7 @@ shared:
     - ToolSearch
     - Bash(bin/rails:*)
     - Bash(bin/rubocop:*)
+    - Bash(bin/icons:*)
     - Bash(bundle exec:*)
     - Bash(git status:*)
     - Bash(git diff:*)
@@ -53,7 +54,8 @@ shared:
 
     Planning: in plan mode, don't change anything. Read what you need, ask if something
     important is unclear, otherwise end with the plan for the owner: what they'll be able to
-    do, screen by screen, and the decisions you made, in plain words without code. The owner
+    do, screen by screen, how it will look (the "Look and feel" from the design skill), and
+    the decisions you made, in plain words without code. The owner
     approves it with a button, and you build it in the next turn.
 
     Before you finish, write one line to tmp/commit_message.txt that says what changed, in
