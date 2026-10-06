@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+# Builds the sample requests in eval/cases.yml as real projects and measures them:
+# build outcome, cost, time, the app's tests, which pages open, and a model's scores
+# for fit, look and phone. Results go to storage/evals/<run>/ (report.html).
+#
+#   bin/eval                     every case (costs roughly $2-4 of agent usage per case)
+#   bin/eval nail cafe -j 2      some cases, two at a time (default 3)
+#   bin/eval -m "shorter prompt" note what changed in this run
+#   bin/eval report [run]        print a run's summary again (default: the latest)
+#   bin/eval clean               delete the apps of every run but the latest
+require "optparse"
+
+options = { concurrency: 3 }
+OptionParser.new do |parser|
+  parser.banner = "Usage: bin/eval [case ids] [-j N] [-m note] | report [run] | clean"
+  parser.on("-j N", Integer, "Cases built at the same time") { |value| options[:concurrency] = value }
+  parser.on("-m NOTE", "What changed in this run") { |value| options[:note] = value }
+end.parse!
+
+require_relative "../config/environment"
+
+case ARGV.first
+when "report"
+  id = ARGV[1] || Evaluation::Run.ids.last or abort("No eval runs yet.")
+  report = Evaluation::Report.for(id)
+  report.write(Evaluation::Run::ROOT.join(id))
+  puts report.to_text, "", Evaluation::Run::ROOT.join(id, "report.html")
+when "clean"
+  latest = Evaluation::Run.ids.last
+  Project.where.not(eval_run: [ nil, latest ]).find_each do |project|
+    puts "Deleting #{project.name} (#{project.eval_run})"
+    project.remove
+  end
+else
+  cases = Evaluation::Run.cases
+  cases = cases.select { |eval_case| ARGV.include?(eval_case[:id]) } if ARGV.any?
+  abort "No cases match #{ARGV.join(", ")}. Cases: #{Evaluation::Run.cases.map { |c| c[:id] }.join(", ")}" if cases.empty?
+
+  run = Evaluation::Run.new(cases:, concurrency: options[:concurrency], note: options[:note])
+  puts "Eval #{run.id}: #{cases.size} cases, #{options[:concurrency]} at a time"
+  run.call do |result|
+    judge = result["judge"] || {}
+    puts "  #{result["id"]}: #{result["outcome"]}, $#{result["cost_usd"]}, fit #{judge["fit"]} look #{judge["look"]} phone #{judge["phone"]}"
+  end
+
+  report = Evaluation::Report.for(run.id)
+  report.write(run.dir)
+  puts "", report.to_text, "", run.dir.join("report.html")
+end

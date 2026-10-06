@@ -8,6 +8,13 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: /Nha khoa/
   end
 
+  test "apps built by bin/eval stay off the home page" do
+    projects(:clinic).update!(eval_run: "20261006-1000")
+
+    get root_path
+    assert_select "a[href='#{project_path(projects(:clinic))}']", 0
+  end
+
   test "home page offers ideas and shows each app as a card" do
     get root_path
 

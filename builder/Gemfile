@@ -56,6 +56,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Drives Chrome to sign in to generated apps and screenshot them in bin/eval
+  gem "ferrum", require: false
 end
 
 group :test do

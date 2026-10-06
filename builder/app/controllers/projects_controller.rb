@@ -2,7 +2,7 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: %i[ show update destroy ]
 
   def index
-    @projects = Project.ordered
+    @projects = Project.listed.ordered
     @project = Project.new(language: "vi")
   end
 
@@ -16,7 +16,7 @@ class ProjectsController < ApplicationController
       ProjectSetupJob.perform_later(@project, request.presence, params.dig(:project, :plan) == "0" ? "build" : "plan")
       redirect_to @project
     else
-      @projects = Project.ordered
+      @projects = Project.listed.ordered
       render :index, status: :unprocessable_entity
     end
   end

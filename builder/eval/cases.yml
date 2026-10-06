@@ -1,0 +1,74 @@
+# Sample requests for bin/eval, written the way owners write them in the studio.
+# Keep them fixed: results are only comparable between runs on the same cases.
+# Change a case by giving it a new id.
+
+- id: nail
+  name: Tiệm nail Hoa
+  language: vi
+  request: >
+    Tiệm nail của mình cần app để khách đặt lịch online, chọn dịch vụ (sơn gel, đắp bột,
+    chăm sóc da tay…) và chọn thợ. Nhân viên xem lịch hôm nay, đánh dấu khách đã đến,
+    đã làm xong. Cuối ngày xem doanh thu.
+
+- id: gym
+  name: Gym Phú Nhuận
+  language: vi
+  request: >
+    Quản lý hội viên phòng gym: gói tập 1 tháng, 3 tháng, 12 tháng, ngày hết hạn, nhắc ai
+    sắp hết hạn. Lễ tân check-in hội viên khi đến tập. Xem có bao nhiêu người tập mỗi ngày.
+
+- id: clinic
+  name: Nha khoa Minh An
+  language: vi
+  request: >
+    Phòng khám nha khoa nhỏ, 2 bác sĩ. Lễ tân quản lý hồ sơ bệnh nhân và lịch hẹn với bác sĩ.
+    Bác sĩ ghi lại mỗi lần khám: răng nào, làm gì, giá bao nhiêu. Màn hình chính là lịch hẹn hôm nay.
+
+- id: cafe
+  name: Cà phê Gió
+  language: vi
+  request: >
+    Quán cà phê cần app gọi món tại bàn: khách quét mã QR ở bàn, xem menu có hình, gọi món.
+    Quầy pha chế thấy các order mới theo thời gian thực và bấm xong từng món. Chủ quán sửa menu và giá.
+
+- id: rooms
+  name: Nhà trọ Bình Minh
+  language: vi
+  request: >
+    Mình có 12 phòng trọ. Cần ghi người thuê từng phòng, tiền phòng, chỉ số điện nước mỗi tháng,
+    tự tính tiền và in phiếu thu. Biết phòng nào còn trống, ai chưa đóng tiền.
+
+- id: garage
+  name: Sửa xe Tâm
+  language: vi
+  request: >
+    Tiệm sửa xe máy. Ghi lại xe vào sửa (biển số, chủ xe, số điện thoại), làm những gì, phụ tùng thay,
+    tiền công. Tra lịch sử sửa của một xe theo biển số. Quản lý tồn kho phụ tùng.
+
+- id: tutoring
+  name: Lớp học thêm cô Lan
+  language: vi
+  request: >
+    Mình dạy thêm toán, có 5 lớp. Cần điểm danh học sinh mỗi buổi, theo dõi học phí đã đóng
+    theo tháng, ghi điểm kiểm tra. Phụ huynh có thể xem tình hình con mình.
+
+- id: shop
+  name: Shop áo Mây
+  language: vi
+  request: >
+    Shop quần áo bán qua Facebook. Cần trang để khách xem sản phẩm theo size, màu và đặt hàng
+    (không cần thanh toán online, giao COD). Mình quản lý đơn hàng: mới, đang giao, đã giao, hoàn.
+
+- id: invoices
+  name: Freelance Invoices
+  language: en
+  request: >
+    I'm a freelance designer. I need to keep track of clients, projects and the hours I log on them,
+    then turn the hours into invoices I can send as a PDF-looking page. Show what's unpaid and overdue.
+
+- id: events
+  name: Meetup RSVP
+  language: en
+  request: >
+    We run a monthly tech meetup. Organizers create events with a venue and a capacity, people RSVP
+    on a public page, and there's a waitlist when it's full. At the door we check people in from a list.

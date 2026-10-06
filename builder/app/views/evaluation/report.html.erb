@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eval <%= @data["id"] %></title>
+  <style>
+    :root { --bg: #f6f7f6; --card: #fff; --text: #17201e; --faint: #66736f; --line: #e2e6e4; --good: #1f7a6c; --bad: #b4412f; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #111615; --card: #1a2120; --text: #e8eeec; --faint: #93a29d; --line: #2a3331; --good: #5cc2b0; --bad: #ec8a76; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 -apple-system, system-ui, sans-serif; }
+    main { max-width: 1200px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { font-size: 1.6rem; margin: 0 0 4px; }
+    .faint { color: var(--faint); font-size: 0.85rem; }
+    .totals { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 32px; }
+    .total { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; min-width: 110px; }
+    .total b { display: block; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+    .up { color: var(--good); } .down { color: var(--bad); }
+    section { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    section h2 { margin: 0; font-size: 1.15rem; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+    .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+    .badge.built { color: var(--good); border-color: currentColor; } .badge.bad { color: var(--bad); border-color: currentColor; }
+    dl { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 12px 0; } dt { color: var(--faint); font-size: 0.8rem; } dd { margin: 0; font-variant-numeric: tabular-nums; }
+    .notes { margin: 8px 0 16px; }
+    .shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    figure { margin: 0; } figure img { width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block; }
+    figcaption { font-size: 0.8rem; color: var(--faint); margin-top: 4px; overflow-wrap: anywhere; } figcaption.error { color: var(--bad); }
+    pre { white-space: pre-wrap; font-size: 0.8rem; background: var(--bg); padding: 10px; border-radius: 8px; max-height: 240px; overflow: auto; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Eval <%= @data["id"] %></h1>
+  <p class="faint">
+    builder <%= @data["builder"] %> · template <%= @data["template"] %> · prompt <%= @data["prompt"] %> · <%= @data["agent_backend"] %>
+    <% if @data["note"].present? %> · <%= @data["note"] %><% end %>
+    <% if @previous %> · compared with <%= @previous["id"] %><% end %>
+  </p>
+
+  <div class="totals">
+    <% before = @previous && @report.totals(@previous) %>
+    <% @report.totals.each do |name, value| %>
+      <div class="total">
+        <span class="faint"><%= name %></span>
+        <b><%= value || "–" %></b>
+        <% if before && value && before[name] && before[name] != value %>
+          <% better = name.in?([ "cost $", "median min" ]) ? value < before[name] : value > before[name] %>
+          <span class="<%= better ? "up" : "down" %> faint">was <%= before[name] %></span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <% @data["cases"].each do |result| %>
+    <% judge = result["judge"] || {} %>
+    <section>
+      <h2>
+        <%= result["name"] %>
+        <span class="badge <%= result["outcome"] == "built" ? "built" : "bad" %>"><%= result["outcome"] %></span>
+        <a class="faint" href="http://localhost:3000/projects/<%= result["project"] %>">open in studio</a>
+      </h2>
+      <dl>
+        <div><dt>tests</dt><dd><%= @report.tests_text(result).presence || "–" %></dd></div>
+        <div><dt>pages ok</dt><dd><%= @report.ok_pages(result) %>/<%= result.dig("pages", "visited")&.size.to_i %></dd></div>
+        <div><dt>signed in</dt><dd><%= result.dig("pages", "signed_in") ? "yes" : "no" %></dd></div>
+        <div><dt>fit · look · phone</dt><dd><%= [ judge["fit"], judge["look"], judge["phone"] ].map { |score| score || "–" }.join(" · ") %></dd></div>
+        <div><dt>cost</dt><dd>$<%= result["cost_usd"] || "–" %></dd></div>
+        <div><dt>time</dt><dd><%= result["build_seconds"] ? "#{(result["build_seconds"] / 60.0).round(1)} min" : "–" %></dd></div>
+        <div><dt>agent steps</dt><dd><%= result["agent_turns"] || "–" %></dd></div>
+        <div><dt>files changed</dt><dd><%= result["files_changed"] || "–" %></dd></div>
+        <div><dt>rubocop</dt><dd><%= result["rubocop"] || "–" %></dd></div>
+      </dl>
+      <% if judge["notes"].present? %><p class="notes"><%= judge["notes"] %></p><% end %>
+      <% [ result["error"], result["preview_error"], judge["error"], result.dig("tests", "output") ].compact_blank.each do |problem| %>
+        <pre><%= problem %></pre>
+      <% end %>
+      <div class="shots">
+        <% Array(result.dig("pages", "visited")).each do |page| %>
+          <figure>
+            <a href="<%= page["file"] %>"><img src="<%= page["file"] %>" alt="<%= page["path"] %>" loading="lazy"></a>
+            <figcaption class="<%= "error" if page["error"] %>"><%= page["name"] %> · <%= page["path"] %> · <%= page["status"] %><%= " · #{page["error"].truncate(160)}" if page["error"] %></figcaption>
+          </figure>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</main>
+</body>
+</html>

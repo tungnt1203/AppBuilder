@@ -21,6 +21,14 @@ class ProjectShell
     raise Error, "#{command.join(" ")} failed: #{error.message}"
   end
 
+  # Like #run, but a failing command isn't an error: returns its output and whether it succeeded.
+  def capture(*command, env: {})
+    output, status = Bundler.with_unbundled_env { Open3.capture2e(environment(env), *command, chdir: @path.to_s) }
+    [ output, status.success? ]
+  rescue SystemCallError => error
+    [ error.message, false ]
+  end
+
   def spawn(*command, log:, env: {})
     Bundler.with_unbundled_env do
       Process.spawn(environment(env), *command, chdir: @path.to_s, out: log.to_s, err: log.to_s, pgroup: true).tap { |pid| Process.detach(pid) }

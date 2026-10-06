@@ -23,6 +23,8 @@ class Project < ApplicationRecord
   after_destroy_commit -> { thumbnail.delete; broadcast_refresh_later_to(:projects) }
 
   scope :ordered, -> { order(updated_at: :desc) }
+  # Apps built by bin/eval stay off the home page; its report links to them.
+  scope :listed, -> { where(eval_run: nil) }
 
   def to_param
     slug
