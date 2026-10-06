@@ -3,6 +3,7 @@
 # the chat) to the agent. Safe to run again if the job process restarted halfway.
 class ProjectSetupJob < ApplicationJob
   def perform(project, first_request = nil, mode = "plan")
+    name(project, first_request)
     copy_template(project)
     configure(project)
     project.shell.run("bundle", "install", "--quiet")
@@ -16,6 +17,10 @@ class ProjectSetupJob < ApplicationJob
   end
 
   private
+    def name(project, request)
+      project.adopt_name(AppNamer.new(request, language: project.language).name) if project.name_pending?
+    end
+
     def copy_template(project)
       return if project.path.join(".git").exist?
 

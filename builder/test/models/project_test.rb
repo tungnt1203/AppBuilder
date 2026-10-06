@@ -37,4 +37,27 @@ class ProjectTest < ActiveSupport::TestCase
     assert projects(:clinic).accepts_messages?
     assert_not projects(:shop).accepts_messages?
   end
+
+  test "adopting a suggested name moves the slug and remembers the old one" do
+    project = Project.new(language: "vi")
+    project.name_after("Quản lý hội viên phòng gym quận 3")
+    project.save!
+    assert_equal "quan-ly-hoi-vien", project.slug
+
+    project.adopt_name("Gym Quận 3")
+
+    assert_equal [ "Gym Quận 3", "gym-quan-3", "quan-ly-hoi-vien" ], [ project.name, project.slug, project.former_slug ]
+    assert_not project.name_pending?
+    assert_equal project, Project.find_by_slug!("quan-ly-hoi-vien")
+  end
+
+  test "keeps the provisional name when none was suggested" do
+    project = Project.new(language: "vi")
+    project.name_after("Quản lý hội viên phòng gym quận 3")
+    project.save!
+
+    project.adopt_name(nil)
+
+    assert_equal [ "Quản lý hội viên", "quan-ly-hoi-vien", nil ], [ project.name, project.slug, project.former_slug ]
+  end
 end

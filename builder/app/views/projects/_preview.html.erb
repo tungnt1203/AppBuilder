@@ -43,8 +43,13 @@
     <div class="stage-screen" role="status">
       <div class="stage-card">
         <span class="spinner spinner-lg"></span>
-        <h2>Setting up <%= project.name %></h2>
-        <p>Copying the starter app, installing gems and preparing the database. This takes about a minute.</p>
+        <% if project.name_pending? %>
+          <h2>Thinking of a name</h2>
+          <p>From your description. You can rename the app later from its card.</p>
+        <% else %>
+          <h2>Setting up <%= project.name %></h2>
+          <p>Copying the starter app, installing gems and preparing the database. This takes about a minute.</p>
+        <% end %>
       </div>
     </div>
   <% when "building" %>

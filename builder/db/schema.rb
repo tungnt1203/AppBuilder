@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_014732) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_090000) do
   create_table "agent_commands", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "kind", null: false
@@ -63,6 +63,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_014732) do
     t.string "agent_job_id"
     t.string "preview_status", default: "running", null: false
     t.text "preview_error"
+    t.boolean "name_pending", default: false, null: false
+    t.string "former_slug"
     t.index ["port"], name: "index_projects_on_port", unique: true
     t.index ["slug"], name: "index_projects_on_slug", unique: true
   end

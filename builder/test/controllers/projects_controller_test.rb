@@ -28,10 +28,28 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "user", "Quản lý hội viên" ], [ project.messages.first.role, project.messages.first.body ]
   end
 
-  test "an app needs a name" do
-    post projects_path, params: { project: { name: "", language: "vi" } }
+  test "an app needs a name or a description" do
+    post projects_path, params: { project: { name: "", language: "vi", request: "" } }
 
     assert_response :unprocessable_entity
+  end
+
+  test "without a name, the app is called after its request until setup names it" do
+    post projects_path, params: { project: { name: "", language: "vi", request: "Lễ tân quản lý bệnh nhân và đặt lịch hẹn" } }
+
+    project = Project.last
+    assert_equal "Lễ tân quản lý…", project.name
+    assert project.name_pending?
+    assert_redirected_to project_path(project)
+  end
+
+  test "an app's old address leads to its new one" do
+    project = projects(:clinic)
+    project.update!(former_slug: "le-tan")
+
+    get project_path("le-tan")
+
+    assert_redirected_to project_path(project)
   end
 
   test "shows the chat and the preview" do

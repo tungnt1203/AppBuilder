@@ -7,10 +7,11 @@ class ProjectsController < ApplicationController
   end
 
   def create
+    request = params.dig(:project, :request).to_s.strip
     @project = Project.new(project_params)
+    @project.name_after(request)
 
     if @project.save
-      request = params.dig(:project, :request).to_s.strip
       @project.messages.create!(role: :user, body: request) if request.present?
       ProjectSetupJob.perform_later(@project, request.presence, params.dig(:project, :plan) == "0" ? "build" : "plan")
       redirect_to @project
@@ -36,7 +37,8 @@ class ProjectsController < ApplicationController
 
   private
     def set_project
-      @project = Project.find_by!(slug: params[:id])
+      @project = Project.find_by_slug!(params[:id])
+      redirect_to @project, status: :moved_permanently if request.get? && @project.slug != params[:id]
     end
 
     def project_params

@@ -23,6 +23,33 @@ class Project < ApplicationRecord
     slug
   end
 
+  # Without a name, the app is called after the start of the owner's request until
+  # the setup job thinks of a real one (see #adopt_name).
+  def name_after(request)
+    return if name.present? || request.blank?
+
+    words = request.squish.split
+    self.name = words.first(4).join(" ").truncate(40, separator: " ") + (words.size > 4 ? "…" : "")
+    self.name_pending = true
+  end
+
+  # Before anything is on disk, so the folder (and the address it's published at)
+  # can still follow the name. The old address keeps leading here.
+  def adopt_name(new_name)
+    self.name = new_name.presence || name.delete_suffix("…")
+    self.name_pending = false
+    if name_changed?
+      old_slug = slug
+      assign_slug
+      self.former_slug = old_slug unless slug == old_slug
+    end
+    save!
+  end
+
+  def self.find_by_slug!(slug)
+    find_by(slug:) || find_by!(former_slug: slug)
+  end
+
   def path
     Rails.configuration.x.projects_root.join(slug)
   end
@@ -223,7 +250,7 @@ class Project < ApplicationRecord
       # Strip Vietnamese diacritics before parameterize, which would drop letters like "ữ".
       base = name.to_s.unicode_normalize(:nfkd).gsub(/\p{Mn}/, "").tr("đĐ", "dD").parameterize.presence || "app"
       self.slug = base
-      self.slug = "#{base}-#{SecureRandom.hex(2)}" while Project.exists?(slug: slug)
+      self.slug = "#{base}-#{SecureRandom.hex(2)}" while Project.where.not(id: id).exists?(slug: slug)
     end
 
     def assign_port
