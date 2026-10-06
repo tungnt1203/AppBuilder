@@ -1,0 +1,9 @@
+<%# What the agent suggests asking for next. Choosing one puts it in the message box to send or change. %>
+<div class="next-steps" data-controller="next-step">
+  <p class="faint text-xs">Next, you could ask for</p>
+  <div class="flex flex-wrap gap-1.5">
+    <% steps.each do |step| %>
+      <button type="button" class="chip-option" data-action="next-step#use"><%= step %></button>
+    <% end %>
+  </div>
+</div>

@@ -82,6 +82,27 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_includes @project.messages.last.body, "not json"
   end
 
+  test "turns a next block into suggested requests and hides it from the reply" do
+    record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => <<~TEXT } ] }
+      Đã thêm trang đặt lịch.
+
+      ```next
+      ["Thêm trang báo cáo doanh thu", "Cho khách đặt lịch online", "Gửi nhắc lịch qua Zalo", "Thứ tư"]
+      ```
+    TEXT
+
+    reply = @project.messages.last
+    assert_equal "Đã thêm trang đặt lịch.", reply.body
+    assert_equal [ "Thêm trang báo cáo doanh thu", "Cho khách đặt lịch online", "Gửi nhắc lịch qua Zalo" ], reply.data["next_steps"]
+  end
+
+  test "keeps a malformed next block as plain text" do
+    record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => "Xong.\n```next\n[oops\n```" } ] }
+
+    assert_includes @project.messages.last.body, "oops"
+    assert_nil @project.messages.last.data["next_steps"]
+  end
+
   test "a question from AskUserQuestion becomes buttons and ends the turn" do
     record "type" => "builder_ask", "id" => "toolu_1", "questions" => [
       { "question" => "Khách có cần tài khoản không?", "header" => "Tài khoản", "multiSelect" => false,

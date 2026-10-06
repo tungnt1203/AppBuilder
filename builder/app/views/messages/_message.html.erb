@@ -12,6 +12,8 @@
       <%= button_to message.project.approval_message, project_build_path(message.project), disabled: !message.project.accepts_messages?, class: "btn btn-primary" %>
       <span class="faint text-xs">or ask for changes below</span>
     </div>
+  <% elsif message.data["next_steps"].present? && message == message.project.open_reply %>
+    <%= render "messages/next_steps", steps: message.data["next_steps"] %>
   <% end %>
 <% when "plan" %>
   <%= render "messages/plan", tasks: message.data["tasks"] if message.data["tasks"].present? %>

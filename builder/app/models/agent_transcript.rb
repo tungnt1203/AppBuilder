@@ -10,6 +10,7 @@
 class AgentTranscript
   DRAFT_INTERVAL = 0.3 # seconds between live updates of the reply being written
   QUESTIONS = /```questions\s*(\[.*?\])\s*```/m
+  NEXT_STEPS = /```next\s*(\[.*?\])\s*```/m
 
   STEPS = {
     "Read" => ->(input) { "Read #{relative(input["file_path"])}" },
@@ -133,11 +134,27 @@ class AgentTranscript
     end
 
     # Without the interactive agent, questions come at the end of a reply in a
-    # ```questions block; they become buttons too.
+    # ```questions block; they become buttons too. After building, the agent suggests
+    # what to ask for next in a ```next block, which becomes buttons as well.
     def record_reply(text)
-      questions = parse_questions(text[QUESTIONS, 1])
-      body = questions ? text.sub(QUESTIONS, "").strip : text
-      @project.messages.create!(role: :assistant, body: body, data: questions ? { "questions" => questions } : {})
+      data = {}
+      if (questions = parse_questions(text[QUESTIONS, 1]))
+        data["questions"] = questions
+        text = text.sub(QUESTIONS, "")
+      end
+      if (next_steps = parse_next_steps(text[NEXT_STEPS, 1]))
+        data["next_steps"] = next_steps
+        text = text.sub(NEXT_STEPS, "")
+      end
+      @project.messages.create!(role: :assistant, body: data.any? ? text.strip : text, data: data)
+    end
+
+    def parse_next_steps(json)
+      return unless json
+
+      Array(JSON.parse(json)).filter_map { |step| step.strip.truncate(120) if step.is_a?(String) && step.present? }.first(3).presence
+    rescue JSON::ParserError
+      nil
     end
 
     def parse_questions(json)

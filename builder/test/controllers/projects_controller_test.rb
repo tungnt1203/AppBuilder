@@ -56,6 +56,18 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".stage .preview-error[hidden] form[action='#{project_messages_path(projects(:clinic))}'] input[data-preview-target='errorRequest']"
   end
 
+  test "suggests what to ask for next until the owner sends something" do
+    project = projects(:clinic)
+    project.messages.create!(role: :assistant, body: "Xong.", data: { "next_steps" => [ "Thêm báo cáo doanh thu", "Nhắc lịch qua Zalo" ] })
+
+    get project_path(project)
+    assert_select ".next-steps button[data-action='next-step#use']", 2
+
+    project.messages.create!(role: :user, body: "Thêm báo cáo doanh thu")
+    get project_path(project)
+    assert_select ".next-steps", 0
+  end
+
   test "each card has a menu to rename, change the address, duplicate or delete, off while the app is busy" do
     get root_path
 

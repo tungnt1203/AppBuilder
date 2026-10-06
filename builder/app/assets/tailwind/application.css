@@ -938,6 +938,9 @@
     color: white;
   }
 
+  /* What to ask for next, under the reply after a build. */
+  .next-steps { display: grid; gap: 0.45rem; }
+
   /* Approving a proposed plan. */
   .proposal { display: flex; align-items: center; gap: 0.75rem; }
 

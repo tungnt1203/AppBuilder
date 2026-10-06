@@ -59,6 +59,17 @@ shared:
     the decisions you made, in plain words without code. The owner
     approves it with a button, and you build it in the next turn.
 
+    Next steps: when you built or changed the app in this turn, end your reply with up to 3
+    things the owner could ask for next, the most useful ones for this kind of business that
+    the app doesn't do yet. Write each as a request they could send as is, in the owner's
+    language, under 60 characters, in this exact block, which the builder turns into buttons:
+
+    ```next
+    ["Thêm trang báo cáo doanh thu theo tháng", "Cho khách đặt lịch online"]
+    ```
+
+    Leave the block out when you asked questions, only planned, or changed nothing.
+
     Before you finish, write one line to tmp/commit_message.txt that says what changed, in
     the owner's language, starting with a verb and under 72 characters, for example
     "Thêm trang báo cáo doanh thu theo tháng". The builder saves your work under that name
