@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" <%= tag.attributes(data: { theme: chosen_theme }) %>>
   <head>
     <title><%= [ content_for(:title), "Studio" ].compact.join(" – ") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">

@@ -1,6 +1,8 @@
 <% content_for :title, "Apps" %>
 <%= turbo_stream_from :projects %>
 
+<%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon on-glass glass capsule fixed top-4 right-4 z-30" %>
+
 <main class="mx-auto flex min-h-full max-w-6xl flex-col gap-14 px-4 pt-[12vh] pb-16 sm:px-6">
   <section class="mx-auto w-full max-w-3xl" data-controller="suggestion">
     <h1 class="on-glass text-center text-[2rem] leading-tight font-semibold tracking-[-0.025em] text-balance sm:text-[2.75rem]">What do you want to build?</h1>

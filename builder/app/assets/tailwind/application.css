@@ -274,6 +274,12 @@
 
   .btn-icon { width: 2.25rem; padding: 0; }
 
+  /* Shows the icon of the theme in use: system, light or dark. */
+  .theme-toggle [data-when] { display: none; }
+  .theme-toggle[data-theme-choice="system"] [data-when="system"],
+  .theme-toggle[data-theme-choice="light"] [data-when="light"],
+  .theme-toggle[data-theme-choice="dark"] [data-when="dark"] { display: contents; }
+
   /* Jade-tinted glass for the one primary action on screen. */
   .btn-primary {
     color: white;

@@ -8,6 +8,17 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: /Nha khoa/
   end
 
+  test "draws the studio in the theme the owner chose" do
+    get root_path
+    assert_select "html:not([data-theme])"
+    assert_select "button[data-controller='theme'][data-theme-choice='system']"
+
+    cookies[:theme] = "dark"
+    get project_path(projects(:clinic))
+    assert_select "html[data-theme='dark']"
+    assert_select "header button[data-controller='theme'][data-theme-choice='dark']"
+  end
+
   test "apps built by bin/eval stay off the home page" do
     projects(:clinic).update!(eval_run: "20261006-1000")
 

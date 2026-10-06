@@ -1,0 +1,7 @@
+<%# Cycles the studio between following the system, light and dark. %>
+<button type="button" class="theme-toggle <%= local_assigns[:class] %>" data-controller="theme" data-action="theme#cycle"
+        data-theme-choice="<%= chosen_theme || "system" %>" aria-label="Theme" title="Theme">
+  <span data-when="system"><%= icon :contrast %></span>
+  <span data-when="light"><%= icon :sun %></span>
+  <span data-when="dark"><%= icon :moon %></span>
+</button>

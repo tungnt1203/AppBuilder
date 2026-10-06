@@ -24,6 +24,9 @@ module ApplicationHelper
     code: [ "M16 18l6-6-6-6", "M8 6l-6 6 6 6" ],
     play: [ "M7 4.5v15a.5.5 0 0 0 .77.42l11.5-7.5a.5.5 0 0 0 0-.84L7.77 4.08A.5.5 0 0 0 7 4.5z" ],
     eye: [ "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z", "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" ],
+    sun: [ "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z", "M12 2v2", "M12 20v2", "M4.9 4.9l1.4 1.4", "M17.7 17.7l1.4 1.4", "M2 12h2", "M20 12h2", "M4.9 19.1l1.4-1.4", "M17.7 6.3l1.4-1.4" ],
+    moon: [ "M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z" ],
+    contrast: [ "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z", "M12 3v18a9 9 0 0 0 0-18z" ],
     eye_off: [ "M3 3l18 18", "M10.6 6.1A9.8 9.8 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.9", "M6.6 6.6C3.9 8.3 2 12 2 12s3.5 6 10 6a9.6 9.6 0 0 0 4.4-1", "M9.9 9.9a3 3 0 0 0 4.2 4.2" ]
   }
 
@@ -53,6 +56,13 @@ module ApplicationHelper
     elsif project.preview_broken? then "Fix the preview before publishing"
     elsif project.live_deployment then project.publish_url
     end
+  end
+
+  THEMES = %w[ light dark ]
+
+  # The studio's light or dark look, when the owner chose one; otherwise it follows the system.
+  def chosen_theme
+    cookies[:theme] if THEMES.include?(cookies[:theme])
   end
 
   def markdown(text)
