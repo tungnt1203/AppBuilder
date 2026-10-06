@@ -52,6 +52,8 @@ class ProjectPreviewTest < ActiveSupport::TestCase
   end
 
   test "what the preview pane shows" do
+    [ @project, projects(:shop) ].each { |project| project.define_singleton_method(:built?) { true } }
+
     assert_equal "live", @project.preview_state
     assert_equal "building", projects(:shop).preview_state
 
@@ -63,6 +65,17 @@ class ProjectPreviewTest < ActiveSupport::TestCase
     @project.update!(preview_status: :broken)
     assert_equal "broken", @project.preview_state
     assert_equal "setup", Project.new(status: :setting_up).preview_state
+  end
+
+  test "before the first build the starter app stays covered" do
+    project = projects(:clinic)
+    project.define_singleton_method(:built?) { false }
+    assert_equal "blank", project.preview_state
+
+    project.update!(status: :working, planning: true)
+    assert_equal "blank", project.preview_state
+    project.update!(planning: false)
+    assert_equal "building", project.preview_state
   end
 
   private

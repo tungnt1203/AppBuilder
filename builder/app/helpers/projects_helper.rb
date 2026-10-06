@@ -19,6 +19,21 @@ module ProjectsHelper
     tag.div(project.name.to_s.strip.first.to_s.upcase, class: "monogram", style: "--hue: #{hue}", "aria-hidden": true)
   end
 
+  # Where a new app is before its first build (Describe, Plan, Build) and what to do next.
+  def blank_preview_status(project)
+    if project.working?
+      [ 1, "The agent is reading your request and working out a plan. Nothing changes in the app yet." ]
+    elsif project.latest_proposal
+      [ 1, "The plan is ready. Read it in the chat, then press “#{project.approval_message}” and it gets built here." ]
+    elsif project.open_reply&.data&.dig("questions").present?
+      [ 1, "The agent has a few questions. Answer them in the chat and it carries on." ]
+    elsif project.failed?
+      [ 0, "The last step didn't finish. Tell the agent in the chat what to try." ]
+    else
+      [ 0, "Describe the app you want in the chat. The agent plans it with you, then builds it here." ]
+    end
+  end
+
   def project_subtitle(project)
     if live = project.live_deployment
       "Live at #{project.publish_host}"

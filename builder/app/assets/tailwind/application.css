@@ -663,6 +663,86 @@
     & .btn { margin-top: 0.2rem; }
   }
   .stage-card-wide { max-width: 36rem; }
+
+  /* A new app before its first build: its name, a sketch of the page to come and where it is in
+     Describe, Plan, Build. */
+  .stage-blank {
+    background:
+      radial-gradient(60% 50% at 50% 0%, color-mix(in srgb, var(--color-lagoon) 22%, transparent), transparent 70%),
+      radial-gradient(50% 40% at 85% 100%, color-mix(in srgb, var(--color-dawn) 20%, transparent), transparent 70%),
+      var(--surface);
+  }
+  .blank {
+    display: grid;
+    justify-items: center;
+    gap: 0.9rem;
+    width: min(100%, 30rem);
+    text-align: center;
+  }
+  .blank-sketch {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    width: min(100%, 17rem);
+    margin-bottom: 0.6rem;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface-solid);
+    box-shadow: 0 18px 40px -22px rgb(6 36 41 / 0.45);
+    transform: rotate(-2deg);
+
+    & span {
+      border-radius: 5px;
+      background: linear-gradient(100deg, var(--well) 40%, var(--well-strong) 50%, var(--well) 60%) 0 0 / 300% 100%;
+      animation: shimmer 2.6s ease-in-out infinite;
+    }
+    & .sk-bar { grid-column: 1 / -1; height: 9px; width: 45%; }
+    & .sk-hero { grid-column: 1 / -1; height: 54px; background-color: var(--well); }
+    & .sk-card { height: 34px; }
+  }
+  .blank-title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .blank-steps {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.25rem;
+    border-radius: 999px;
+    background: var(--well);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    counter-reset: step;
+
+    & li {
+      counter-increment: step;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      color: var(--text-faint);
+    }
+    & li::before { content: counter(step) "  "; white-space: pre; opacity: 0.7; }
+    & li.done { color: var(--ready); }
+    & li.done::before { content: "✓  "; opacity: 1; }
+    & li.current { color: var(--text); background: var(--surface-solid); box-shadow: 0 1px 3px rgb(6 36 41 / 0.14); }
+  }
+  .blank-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .blank-hint {
+    max-width: 24rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
   .on-card { background: var(--well); }
 
   .stage-icon {
@@ -818,8 +898,13 @@
   from { opacity: 0; }
 }
 
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .activity-dot, .task-in_progress .task-mark, .stage-screen { animation: none !important; }
+  .activity-dot, .task-in_progress .task-mark, .stage-screen, .blank-sketch span { animation: none !important; }
   .spinner { animation-duration: 2.4s !important; }
 }
 

@@ -83,14 +83,22 @@ class Project < ApplicationRecord
     PreviewStartJob.perform_later(self)
   end
 
-  # What the preview pane shows: the app, or a screen saying why not.
+  # What the preview pane shows: the app, or a screen saying why not. Before the first
+  # build there's only the starter app (its sign-up screen), so it stays covered.
   def preview_state
     if setting_up? then "setup"
     elsif working? && !planning? then "building"
-    elsif preview_starting? then "starting"
     elsif preview_broken? then "broken"
+    elsif !built? then "blank"
+    elsif preview_starting? then "starting"
     else "live"
     end
+  end
+
+  # Whether anything was made yet: the first version is the starter app.
+  def built?
+    return @built if defined?(@built)
+    @built = history.versions(limit: 2).size > 1
   end
 
   # Picked from the name when the app is first published, then kept: renaming the

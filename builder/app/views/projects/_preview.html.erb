@@ -52,8 +52,35 @@
         <% end %>
       </div>
     </div>
+  <% when "blank" %>
+    <% step, status = blank_preview_status(project) %>
+    <div class="stage-screen stage-blank" role="status">
+      <div class="blank">
+        <div class="blank-sketch" aria-hidden="true">
+          <span class="sk-bar"></span>
+          <span class="sk-hero"></span>
+          <span class="sk-card"></span><span class="sk-card"></span><span class="sk-card"></span>
+        </div>
+        <h2 class="blank-title"><%= project.name %></h2>
+        <ol class="blank-steps">
+          <% [ "Describe", "Plan", "Build" ].each_with_index do |label, index| %>
+            <li class="<%= index < step ? "done" : ("current" if index == step) %>"><%= label %></li>
+          <% end %>
+        </ol>
+        <% if project.working? %>
+          <p class="blank-status"><span class="activity-dot"></span><span class="live-activity"><%= project.activity || "Planning" %></span></p>
+        <% end %>
+        <p class="blank-hint"><%= status %></p>
+        <button type="button" class="btn btn-ghost on-card" data-action="preview#peek"><%= icon :eye %>See the starter app</button>
+      </div>
+    </div>
+    <div class="peek-pill glass capsule" role="status">
+      <span>The starter app, before anything is built</span>
+      <button type="button" class="btn btn-ghost h-7 px-3 text-xs" data-action="preview#unpeek"><%= icon :eye_off, size: 14 %>Hide</button>
+    </div>
   <% when "building" %>
-    <div class="stage-screen stage-screen-clear" role="status">
+    <%# The first build has no earlier version worth showing through. %>
+    <div class="stage-screen <%= "stage-screen-clear" if project.built? %>" role="status">
       <div class="stage-card">
         <span class="spinner spinner-lg"></span>
         <h2>Building your changes</h2>
