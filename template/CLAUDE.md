@@ -87,7 +87,8 @@ first and write it there. A plan for a new app includes a short "Look and feel" 
 
 - Theme (colors, fonts, corners): `app/assets/tailwind/application.css`. The template's theme is a
   neutral placeholder; replace it with the app's direction. Fonts are self-hosted (`fonts.css`, all with
-  Vietnamese); icons are Lucide via `icon "name"` (find names with `bin/icons <word>`).
+  Vietnamese); icons are Lucide via `icon "name"` (find names with `bin/icons <word>`); free stock
+  photos come from `bin/images <english words>` (see the `design` skill).
 - **Customer-facing pages** (home, catalog, menu, booking, anything visitors use) use `layout "public"`
   and are designed freely: header, footer, sections, imagery, motion. See the `design` skill.
 - **The owner's and staff's screens** (managing records, schedules, reports, settings) use the

@@ -109,9 +109,24 @@ Visitors' pages use `layout "public"` and are designed, not assembled from admin
 - **Composition**: vary the sections: split layouts, full-bleed bands of brand color, a big number,
   an asymmetric grid, a horizontal scroller of cards. Generous space (`py-16 md:py-24` between
   sections), one clear max width, text `text-base`/`text-lg`.
-- **Images**: use what the owner gives (Active Storage uploads, attach in seeds when they provide
-  files). Without photos, design with type, color, gradients, shapes and icons, or inline SVG
-  illustration. Don't hotlink stock photo URLs; they break and they aren't the owner's.
+- **Images**: use what the owner gives first (Active Storage uploads, attach in seeds when they
+  provide files). When a page needs photos they haven't given (a hero, the services, the classes),
+  get free stock photos with `bin/images`:
+  - Unsplash photos you know fit (`images.unsplash.com/photo-…`): check them first with
+    `bin/images --check <links>`; it drops links that don't exist and Unsplash+ photos, which
+    aren't free.
+  - Otherwise search: `bin/images "nail salon"` (English words; `--count 5`,
+    `--orientation portrait|square`).
+
+  Unsplash photos (`LINK`) are used by their URL exactly as printed, with a small copy in
+  `tmp/images/` to look at; the others are saved to `app/assets/images/stock/` for
+  `image_tag "stock/<file>"` or attaching in seeds. All are listed in `stock/CREDITS.md`. Look at
+  each one (Read the file) and use only those that show what you meant and fit the app's direction;
+  delete the rest and their lines in CREDITS.md. Photos found by search on Unsplash or under CC BY
+  need their credit on the page as listed, with its links (a small caption, or a "Photos" line in
+  the footer). Never put a photo URL on a page that `bin/images` hasn't printed: unchecked links
+  break or show something else, and other sites' photos aren't the owner's. Without fitting
+  photos, design with type, color, gradients, shapes and icons, or inline SVG.
 - **Detail**: hover and focus states on everything clickable, `transition` on color and transform,
   one tasteful entrance or hover motion. Prices with `number_to_currency`, big and clear.
 - **Phones first**: most visitors are on a phone. Design at 390px wide, then widen. Put the main
