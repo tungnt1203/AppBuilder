@@ -9,6 +9,14 @@
     <div class="veil" aria-hidden="true"><span class="spinner"></span></div>
   </div>
 
+  <%# The Code tab, over the app. Loaded when first shown (preview_controller.js) and left out of page refreshes like the stage;
+      it reloads when the preview restarts on new code. %>
+  <div class="code-pane">
+    <%= turbo_frame_tag "code", data: { preview_target: "code", src: project_code_path(project) } do %>
+      <div class="grid h-full place-items-center"><span class="spinner"></span></div>
+    <% end %>
+  </div>
+
   <%# Only in full screen, where the header is out of sight. %>
   <div class="fullscreen-bar glass capsule">
     <%= render "projects/devices" %>

@@ -1,0 +1,17 @@
+<ul class="code-tree">
+  <% sorted_tree(node).each do |name, child| %>
+    <% path = [ prefix, name ].compact.join("/") %>
+    <li>
+      <% if child.is_a?(Hash) %>
+        <details <%= "open" if folder_open?(path, @path) %>>
+          <summary class="code-link"><%= icon :chevron, size: 12 %><span class="truncate"><%= name %></span></summary>
+          <%= render "projects/codes/tree", node: child, prefix: path %>
+        </details>
+      <% else %>
+        <%= link_to project_code_path(@project, path: child), class: "code-link", title: child, "aria-current": (child == @path ? "page" : nil) do %>
+          <span class="truncate"><%= name %></span><%= change_mark(@code.changes[child]) %>
+        <% end %>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

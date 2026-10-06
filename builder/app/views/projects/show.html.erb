@@ -11,6 +11,11 @@
       <span class="chip hidden rounded-full px-2.5 py-0.5 sm:inline-flex"><%= status_label(@project) %></span>
     </div>
 
+    <div class="segmented segmented-labels hidden sm:inline-flex" role="tablist" aria-label="Show">
+      <button type="button" role="tab" aria-selected="true" data-preview-target="tab" data-preview-tab-param="preview" data-action="preview#showTab"><%= icon :play, size: 13 %>Preview</button>
+      <button type="button" role="tab" aria-selected="false" data-preview-target="tab" data-preview-tab-param="code" data-action="preview#showTab"><%= icon :code, size: 14 %>Code</button>
+    </div>
+
     <div class="well mx-auto hidden min-w-0 items-center gap-1 rounded-full py-1 pr-1 pl-1 md:flex">
       <%= render "projects/devices" %>
       <span class="url ml-2 truncate"><%= @project.preview_url %></span>

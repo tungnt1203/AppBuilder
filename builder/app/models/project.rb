@@ -111,6 +111,10 @@ class Project < ApplicationRecord
     ProjectHistory.new(self)
   end
 
+  def code
+    ProjectCode.new(self)
+  end
+
   # The agent leaves a one-line summary of its change here (see config/agent.yml).
   def take_commit_message
     file = path.join("tmp/commit_message.txt")

@@ -1,0 +1,44 @@
+<%= turbo_frame_tag "code" do %>
+  <div class="code-panel">
+    <nav class="code-files" aria-label="Files" data-preview-target="codeFiles">
+      <% if @code.changes.any? %>
+        <h3><%= @project.working? ? "Changing now" : "Changed in the latest version" %> <span><%= @code.changes.size %></span></h3>
+        <ul class="code-list">
+          <% @code.changes.each do |path, status| %>
+            <li>
+              <% if status == "deleted" %>
+                <span class="code-link is-deleted" title="<%= path %>"><%= change_mark(status) %><%= file_label(path) %></span>
+              <% else %>
+                <%= link_to project_code_path(@project, path:), class: "code-link", title: path, "aria-current": (path == @path ? "page" : nil) do %>
+                  <%= change_mark(status) %><%= file_label(path) %>
+                <% end %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+
+      <h3>All files <span><%= @code.paths.size %></span></h3>
+      <%= render "projects/codes/tree", node: @code.tree, prefix: nil %>
+    </nav>
+
+    <section class="code-view" aria-label="<%= @path %>">
+      <header class="code-head">
+        <span class="url truncate"><%= @path %></span>
+        <%= change_mark(@code.changes[@path]) %>
+        <% if @source&.content && @source.added_lines.any? && @code.changes[@path] == "changed" %>
+          <span class="faint text-xs whitespace-nowrap">Highlighted lines are new</span>
+        <% end %>
+        <%= link_to project_code_path(@project, path: @path), class: "btn btn-ghost btn-icon ml-auto h-7 w-7", "aria-label": "Reload file", title: "Reload" do %><%= icon :reload, size: 14 %><% end %>
+      </header>
+
+      <% if @source.nil? %>
+        <p class="code-empty"><%= @path ? "This file was deleted." : "No files yet." %></p>
+      <% elsif @source.binary? %>
+        <p class="code-empty">This file is binary or too large to show.</p>
+      <% else %>
+        <ol class="code-lines highlight"><% highlighted_lines(@source).each_with_index do |line, index| %><li class="<%= "is-new" if @source.added_lines.include?(index + 1) %>"><%= line.presence || "\n" %></li><% end %></ol>
+      <% end %>
+    </section>
+  </div>
+<% end %>

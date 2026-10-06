@@ -10,6 +10,7 @@ Rails.application.routes.draw do
     resource :preview, only: :create, module: :projects
     resource :thumbnail, only: :show, module: :projects
     resource :duplicate, only: :create, module: :projects
+    resource :code, only: :show, module: :projects
   end
 
   get "up" => "rails/health#show", as: :rails_health_check
