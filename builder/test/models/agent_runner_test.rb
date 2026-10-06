@@ -36,6 +36,16 @@ class AgentRunnerTest < ActiveSupport::TestCase
     Rails.configuration.x.stock_photo_keys = keys
   end
 
+  test "claude doesn't inherit the Claude Code session the builder was started from" do
+    ENV["CLAUDE_CODE_SESSION_ID"] = "parent-session"
+
+    environment = AgentRunner.new(projects(:clinic)).environment
+    assert environment.key?("CLAUDE_CODE_SESSION_ID")
+    assert_nil environment["CLAUDE_CODE_SESSION_ID"]
+  ensure
+    ENV.delete("CLAUDE_CODE_SESSION_ID")
+  end
+
   test "unknown backends are rejected" do
     assert_raises(ArgumentError) { AgentRunner.new(projects(:clinic), backend: "nope").command("Hi") }
   end

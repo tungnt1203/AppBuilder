@@ -19,6 +19,16 @@ class AgentRunner
   rescue Errno::ESRCH
   end
 
+  # What a `claude` process needs: the Claude credentials, and none of the variables of a
+  # Claude Code session the builder may have been started from (CLAUDECODE,
+  # CLAUDE_CODE_SESSION_ID, CLAUDE_CODE_MESSAGING_SOCKET…), which make it act as that
+  # session's child and hang.
+  def self.claude_env
+    ENV.keys.grep(/\ACLAUDE/).index_with(nil).merge(
+      "CLAUDE_CODE_OAUTH_TOKEN" => Rails.configuration.x.claude_oauth_token,
+      "ANTHROPIC_API_KEY" => ENV["ANTHROPIC_API_KEY"])
+  end
+
   # An agent process that outlived the job running it (the job process restarted).
   def self.end_leftover(project)
     Process.kill("TERM", project.agent_pid) if project.agent_pid
@@ -84,13 +94,9 @@ class AgentRunner
     end
 
     # The agent is the only process that gets the Claude credentials and the stock photo
-    # keys for bin/images (see ProjectShell). It must not think it's nested inside another
-    # Claude Code session either.
+    # keys for bin/images (see ProjectShell).
     def env
-      { "CLAUDECODE" => nil, "CLAUDE_CODE_ENTRYPOINT" => nil,
-        "CLAUDE_CODE_OAUTH_TOKEN" => Rails.configuration.x.claude_oauth_token,
-        "ANTHROPIC_API_KEY" => ENV["ANTHROPIC_API_KEY"],
-        **Rails.configuration.x.stock_photo_keys }
+      self.class.claude_env.merge(Rails.configuration.x.stock_photo_keys)
     end
 
     def end_process(wait)

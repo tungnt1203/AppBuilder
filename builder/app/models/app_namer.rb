@@ -39,11 +39,9 @@ class AppNamer
       ProjectShell.new(Dir.tmpdir).run(*command, env: env)
     end
 
-    # Same credentials as the agent (see AgentRunner), never the project's processes.
+    # Same credentials as the agent, never the project's processes.
     def env
-      { "CLAUDECODE" => nil, "CLAUDE_CODE_ENTRYPOINT" => nil,
-        "CLAUDE_CODE_OAUTH_TOKEN" => Rails.configuration.x.claude_oauth_token,
-        "ANTHROPIC_API_KEY" => ENV["ANTHROPIC_API_KEY"] }
+      AgentRunner.claude_env
     end
 
     def clean(output)
