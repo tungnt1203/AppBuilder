@@ -38,6 +38,7 @@ Redis, or external services. Add a gem only when Rails cannot reasonably do the 
 - Configuration comes from environment variables ONCE sets: `BASE_URL`, `SMTP_*`,
   `MAILER_FROM_ADDRESS`, `DISABLE_SSL`, `SECRET_KEY_BASE`. Never hard-code hosts, credentials or secrets.
 - `hooks/pre-backup` and `hooks/post-restore` keep backups consistent; leave them alone.
+- `config/initializers/preview_probe.rb` reports errors to the builder's preview in development; leave it as it is.
 
 ## Migrations must be backward compatible
 
