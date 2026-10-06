@@ -96,6 +96,14 @@ module ApplicationHelper
     "#{tasks.count { |task| task["status"] == "completed" }} of #{tasks.size} done"
   end
 
+  # Whether the app is on a version the chat mentions already: same files, even when a
+  # restore made them a new version.
+  def current_version?(project, data)
+    @current_versions ||= {}
+    sha, tree = @current_versions[project.id] ||= [ project.history.versions(limit: 1).first&.sha, project.history.current_tree ]
+    data["sha"] == sha || (data["tree"].present? && data["tree"] == tree)
+  end
+
   def turn_summary(message)
     data = message.data
     duration = distance_of_time_in_words(data["duration_ms"] / 1000.0) if data["duration_ms"]

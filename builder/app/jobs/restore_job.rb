@@ -6,7 +6,7 @@ class RestoreJob < ApplicationJob
     project.history.restore(version)
     project.restart_preview
 
-    project.messages.create!(role: :notice, body: "Restored “#{version.subject}”")
+    project.messages.create!(role: :notice, body: "Restored “#{version.subject}”", data: { "sha" => project.history.current_sha, "tree" => project.history.current_tree })
     project.update!(status: :ready,
       agent_note: "Since your last turn the owner restored the app to an earlier version (“#{version.subject}”). " \
                   "Re-read any file before you change it.")

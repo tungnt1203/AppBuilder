@@ -25,6 +25,13 @@ class ProjectHistory
     shell.run("git", "rev-parse", "--short", "HEAD").strip
   end
 
+  # The files of the current version: a restore makes a new version with the same files.
+  def current_tree
+    shell.run("git", "rev-parse", "--short", "HEAD^{tree}").strip
+  rescue ProjectShell::Error
+    nil
+  end
+
   def find(sha)
     versions(limit: 200).find { |version| version.sha == sha } or raise ActiveRecord::RecordNotFound, "No version #{sha}"
   end

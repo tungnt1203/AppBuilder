@@ -21,8 +21,10 @@
   <p class="turn-done"><%= message.body %></p>
 <% when "notice" %>
   <div class="notice reply"><%= markdown(message.body) %></div>
+  <%= render "messages/version", message: message %>
 <% when "result" %>
-  <p class="turn-done"><%= turn_summary(message) %></p>
+  <div class="turn-done"><%= turn_summary(message) %> <%= render "messages/version", message: message %></div>
 <% when "error" %>
   <pre class="alert"><%= message.body %></pre>
+  <%= render "messages/version", message: message %>
 <% end %>

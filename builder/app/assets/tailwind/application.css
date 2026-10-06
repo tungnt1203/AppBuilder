@@ -377,6 +377,16 @@
     color: var(--text-faint);
   }
 
+  /* Going back to the version a turn left, from the chat. */
+  .restore-link {
+    font-size: 0.75rem;
+    color: var(--link);
+    cursor: pointer;
+    &:hover:not(:disabled) { text-decoration: underline; }
+    &:disabled { color: var(--text-faint); cursor: default; }
+  }
+  .turn-done .restore-link::before { content: "· "; color: var(--text-faint); }
+
   .notice {
     align-self: center;
     margin: 0 auto;

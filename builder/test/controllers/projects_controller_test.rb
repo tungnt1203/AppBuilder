@@ -8,6 +8,22 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: /Nha khoa/
   end
 
+  test "a turn's summary offers to go back to the version it left, unless the app is on it" do
+    project = projects(:clinic)
+    project.messages.create!(role: :result, data: { "num_turns" => 3, "sha" => "aaa1111", "tree" => "tree-aaa1111" })
+    project.messages.create!(role: :result, data: { "num_turns" => 4, "sha" => "bbb2222", "tree" => "tree-bbb2222" })
+    project.messages.create!(role: :notice, body: "Restored “Version aaa1111”", data: { "sha" => "ccc3333", "tree" => "tree-aaa1111" })
+
+    with_versions("ccc3333") do
+      ProjectHistory.define_method(:current_tree) { "tree-aaa1111" }
+      get project_path(project)
+    end
+
+    assert_select ".turn-done form[action='#{project_restorations_path(project)}'] input[name=sha][value=bbb2222]"
+    assert_select "input[name=sha][value=aaa1111]", 0 # restored, so the app has these files now
+    assert_select "input[name=sha][value=ccc3333]", 0
+  end
+
   test "draws the studio in the theme the owner chose" do
     get root_path
     assert_select "html:not([data-theme])"

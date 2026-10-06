@@ -1,0 +1,7 @@
+<%# Goes back to the version a turn or a restore left, unless the app is on it already. %>
+<% project = message.project %>
+<% if (sha = message.data["sha"]) && !current_version?(project, message.data) %>
+  <%= button_to "Restore this version", project_restorations_path(project), params: { sha: sha },
+        disabled: !project.accepts_messages?, class: "restore-link",
+        form: { class: "inline", data: { turbo_confirm: "Go back to the app as it was here? The preview restarts on that version, and you can come back from History." } } %>
+<% end %>

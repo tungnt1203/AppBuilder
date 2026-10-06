@@ -60,6 +60,26 @@ class AgentTurnJobTest < ActiveSupport::TestCase
     assert @project.messages.assistant.last.data["questions"].present?
   end
 
+  test "a finished build remembers the version it left, to go back to from the chat" do
+    root = Pathname(Dir.mktmpdir)
+    original_root, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, root
+    @project.path.mkpath
+    @project.shell.run("git", "init", "--quiet")
+    @project.shell.run("git", "commit", "--quiet", "--allow-empty", "-m", "Set up")
+    @project.define_singleton_method(:restart_preview) { |**| }
+    @runner = FakeRunner.new([ { "type" => "result", "total_cost_usd" => 0.5, "num_turns" => 3 } ])
+    @runner.define_singleton_method(:run) { |prompt, &block| @prompts << prompt; File.write(File.join(Rails.configuration.x.projects_root, "nha-khoa", "app.rb"), "v1"); @events.each(&block) }
+
+    with_runner { AgentTurnJob.perform_now(@project, "Thêm trang báo cáo", "build") }
+
+    assert_equal @project.history.current_sha, @project.messages.result.last.data["sha"]
+    assert_equal @project.history.current_tree, @project.messages.result.last.data["tree"]
+    assert_equal "Thêm trang báo cáo", @project.history.versions.first.subject
+  ensure
+    Rails.configuration.x.projects_root = original_root
+    FileUtils.rm_rf(root)
+  end
+
   private
     def with_runner
       runner = @runner

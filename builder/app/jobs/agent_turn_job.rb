@@ -54,6 +54,12 @@ class AgentTurnJob < ApplicationJob
       end
     end
 
+    # The summary of this turn remembers the version it left, so the owner can go back to it from the chat.
+    def mark_version(project)
+      summary = project.messages.where(role: %w[ result error ], created_at: project.working_since..).last
+      summary&.update!(data: summary.data.merge("sha" => project.history.current_sha, "tree" => project.history.current_tree))
+    end
+
     # Messages the owner sent while the agent was finishing up become the next turn.
     def continue_with_late_messages(project)
       late = project.agent_commands.message.pending.to_a
@@ -80,6 +86,7 @@ class AgentTurnJob < ApplicationJob
     # Keep whatever the agent changed, even after a failure, so it can be undone or continued.
     def finish(project, message, status:)
       project.history.commit(message)
+      mark_version(project)
       project.update!(activity: "Restarting the preview")
       project.restart_preview
       project.update!(status: status, planning: false, activity: nil)
