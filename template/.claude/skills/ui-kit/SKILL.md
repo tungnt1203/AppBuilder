@@ -1,23 +1,25 @@
 ---
 name: ui-kit
-description: Reference for this app's theme, shells and UI building blocks (page header, card, stat, empty state, badge, alert, tabs, dialog, menu, buttons, forms, navigation) with copy-paste examples. Use when writing or changing any view.
+description: Reference for the building blocks of the owner's and staff's screens (shells, page header, card, stat, empty state, badge, alert, tabs, dialog, menu, buttons, forms, navigation, icons) with copy-paste examples. Use when writing those screens or any form. For the app's look and customer-facing pages, use the design skill.
 ---
 
 # UI kit
 
-The app has one theme and a set of building blocks, so new screens can look different in layout
-without drifting into a new visual language. Helpers live in `app/helpers/ui_helper.rb`, partials in
-`app/views/ui/`, the form builder in `app/form_builders/ui_form_builder.rb`.
+Building blocks for the screens the owner and staff work in (records, schedules, reports, settings),
+so those screens stay consistent as the app grows. They follow the theme, so they wear the app's
+look. Customer-facing pages are designed freely instead (`design` skill), though they can use these
+blocks where they fit, and every form uses the form builder. Helpers live in `app/helpers/ui_helper.rb`,
+partials in `app/views/ui/`, the form builder in `app/form_builders/ui_form_builder.rb`.
 
-Compose screens from these blocks. Use raw Tailwind for layout only: grid, flex, spacing, widths.
-Colors, type and corners come from the theme.
+On owner screens, compose from these blocks and use Tailwind mostly for layout: grid, flex, spacing,
+widths. Colors, type and corners come from the theme.
 
 ## Theme
 
-`app/assets/tailwind/application.css` is the only place that sets the look. Editing it rebrands
-every screen. Change the brand scale, `canvas`, `surface`, `ink`, `muted`, `line`, `radius-lg`,
-`radius-xl` or `font-sans`. Add a named color there when the product needs a second accent.
-Self-host any font file; do not call an external font service.
+`app/assets/tailwind/application.css` sets the look (choosing it is in the `design` skill). Editing
+it rebrands every screen: the brand scale, `accent`, `canvas`, `surface`, `ink`, `muted`, `line`,
+`radius-lg`, `radius-xl`, `font-display`, `font-sans`. Fonts come from `fonts.css`; don't call an
+external font service.
 
 In views, use those names: `bg-canvas`, `bg-surface`, `bg-surface-muted`, `text-ink`, `text-muted`,
 `border-line`, `divide-line`, `brand-*`. Green, yellow and red are for status only.
@@ -27,9 +29,10 @@ After a theme or view change, run `bin/rails tailwindcss:build`.
 ## Shells
 
 - **application** (default). Sidebar for navigation, top bar for the account, content scrolls in
-  the main pane. Use it for the product, including a public booking form, catalog or menu.
-- **public**. Open page with a slim header and no sidebar, for a landing page. In the controller:
-  `layout "public"`. The yield is full-bleed; pad the sections that need it. Optional header links:
+  the main pane. For the owner's and staff's screens.
+- **public**. The customer-facing site: home, catalog, menu, booking. In the controller:
+  `layout "public"`. Its header and footer are partials in `app/views/layouts/public/` to redesign
+  per app; the yield is full-bleed. Pages can add header links:
 
 ```erb
 <% content_for :public_nav do %>
@@ -54,6 +57,15 @@ When the sidebar has more than a handful of links, group them:
   <%= nav_link_to "Orders", orders_path, match: "/orders" %>
   <%= nav_link_to "Products", products_path, match: "/products" %>
 <% end %>
+```
+
+## Icons
+
+`icon "calendar-check"` draws a Lucide icon in the current text color; `size:` (20), `stroke:` (2) and
+`class:` are optional. Find names with `bin/icons <word>`.
+
+```erb
+<%= link_to new_appointment_path, class: button_classes do %><%= icon "plus", size: 16 %> New appointment<% end %>
 ```
 
 ## Page header
@@ -214,11 +226,12 @@ A menu is a short list of row actions.
 
 When the same arrangement shows up on a second screen, add a method to `UiHelper` and a partial in
 `app/views/ui/`, built from theme colors. Mention it in this skill. Don't copy a chunk of markup
-from screen to screen, and don't add a second stylesheet.
+from screen to screen. Styles of the app's own design go at the end of application.css, not in a
+second stylesheet.
 
 ## Layout, type, phones
 
-- Body text is `text-sm`. Secondary text is `text-muted`. Headings are `font-semibold text-ink`.
+- On owner screens body text is `text-sm`. Secondary text is `text-muted`. Headings are `font-semibold text-ink`.
   Page titles come from `page_header`.
 - `space-y-4` in forms, `gap-2` between buttons, `mb-6` between page sections.
 - Everything works on a phone: the sidebar collapses behind Menu, tables sit in `overflow-x-auto`,

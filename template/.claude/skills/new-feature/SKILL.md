@@ -76,9 +76,9 @@ inherit from `Admin::BaseController`.
 
 ## 4. Views
 
-Use the UI kit (`ui-kit` skill). Every index needs an empty state; every form shows errors.
-A public landing page uses `layout "public"`. A public booking, catalog or menu stays on the
-application layout so it keeps the shell.
+Pages visitors use (catalog, menu, booking, the home page) use `layout "public"` and follow
+DESIGN.md (`design` skill). The owner's and staff's screens stay on the application layout and use
+the UI kit (`ui-kit` skill). Every index needs an empty state; every form shows errors.
 
 ```erb
 <%= page_header "Appointments", "Upcoming visits." do %>

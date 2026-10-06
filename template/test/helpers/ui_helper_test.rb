@@ -24,4 +24,11 @@ class UiHelperTest < ActionView::TestCase
 
     assert_select "span", text: "AL"
   end
+
+  test "icons are inline Lucide SVGs in the text color" do
+    render inline: "<%= icon 'calendar-check', size: 18, class: 'text-brand-600' %>"
+
+    assert_select "svg.shrink-0.text-brand-600[width='18'][stroke='currentColor'][aria-hidden='true'] path"
+    assert_raises(ArgumentError) { icon "not-an-icon" }
+  end
 end

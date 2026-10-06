@@ -79,27 +79,24 @@ Built in, extend rather than replace:
 - Records that belong to someone use `belongs_to :user` (or a clearer name like `:author`) and scope
   queries through it when members should only see their own data.
 
-## UI
+## Design and UI
 
-Screens share one theme and one shell, so the product can grow without each page inventing a look.
-Details and copy-paste examples are in the `ui-kit` skill.
+Every app gets a look of its own, chosen for its business and its customers. Read `DESIGN.md` before
+touching views; on a new app it says "Not decided yet": choose the direction with the `design` skill
+first and write it there. A plan for a new app includes a short "Look and feel" section.
 
-- Theme (color, type, corners): `app/assets/tailwind/application.css`. Change it once to rebrand every screen.
-- Shells: `application` (sidebar + top bar; the default, including public booking or catalog pages) and
-  `public` (open canvas for a landing page). Sign-in screens use `authentication`.
-- Building blocks live in `app/helpers/ui_helper.rb`: `page_header`, `card`, `stat`, `empty_state`,
-  `badge`, `alert`, `tabs` / `tab_to`, `toolbar`, `description_list`, `avatar`, `dialog`, `menu`,
-  `nav_link_to`, `nav_section`, `button_classes`, `link_classes`.
-- Forms are styled by `UiFormBuilder`: use `form.field :name`, `form.errors`, `form.submit`.
-  Don't add visual classes to inputs.
-- Add each top-level screen with `nav_link_to` in `app/views/layouts/_navigation.html.erb`.
-  Group links with `nav_section` once there are more than a handful.
-- Looks use theme names: `bg-canvas`, `bg-surface`, `text-ink`, `text-muted`, `border-line`, `brand-*`.
-  Green, yellow and red are for status only. Layout (grid, flex, spacing, widths) is ordinary Tailwind.
-- Interactivity comes from Turbo (Frames, Streams, morphing) and the Stimulus controllers
-  `shell`, `dialog` and `menu`. Add a small controller when a screen needs its own behavior.
-- When the same arrangement shows up on a second screen, add a helper and a partial under `app/views/ui/`
-  instead of copying markup.
+- Theme (colors, fonts, corners): `app/assets/tailwind/application.css`. The template's theme is a
+  neutral placeholder; replace it with the app's direction. Fonts are self-hosted (`fonts.css`, all with
+  Vietnamese); icons are Lucide via `icon "name"` (find names with `bin/icons <word>`).
+- **Customer-facing pages** (home, catalog, menu, booking, anything visitors use) use `layout "public"`
+  and are designed freely: header, footer, sections, imagery, motion. See the `design` skill.
+- **The owner's and staff's screens** (managing records, schedules, reports, settings) use the
+  `application` layout (sidebar) and the UI kit in `app/helpers/ui_helper.rb` (`ui-kit` skill):
+  `page_header`, `card`, `stat`, `empty_state`, `badge`, `alert`, `tabs`, `dialog`, `menu`,
+  `button_classes`… Forms everywhere use `form.field`, `form.errors`, `form.submit` (`UiFormBuilder`).
+- Sign-in screens use `authentication`. Add each owner screen to `app/views/layouts/_navigation.html.erb`.
+- Interactivity comes from Turbo (Frames, Streams, morphing) and Stimulus (`shell`, `dialog`, `menu`,
+  plus small controllers of your own).
 - Set the app's name in `config.x.app_name` (`config/application.rb`).
 - When the app gets its real main screen, point `root` at it and delete the placeholder
   (`HomeController`, `app/views/home/`, `test/controllers/home_controller_test.rb`, and the `home:` keys
@@ -114,4 +111,4 @@ Details and copy-paste examples are in the `ui-kit` skill.
 - Your summary says what changed in terms the owner understands, and flags anything that affects
   existing data.
 
-Use the `new-feature` skill when adding a screen or resource.
+Use the `new-feature` skill when adding a screen or resource, and the `design` skill for how it looks.

@@ -1,21 +1,24 @@
 @import "tailwindcss";
+@import "./fonts.css";
 
-/* Theme. Edit this block to give the whole app a new look. Components use these
-   names, so screens follow without a restyle:
-   - brand-50…950   emphasis, links, primary buttons
+/* Theme. This is a neutral starting point, not the app's look: replace it with the
+   direction in DESIGN.md (see the `design` skill). The UI kit, the owner's screens
+   and the sign-in pages all read these names, so they follow the new look:
+   - brand-50…950   the main color: actions, links, highlights
+   - accent         an optional second color for the customer-facing pages
    - canvas         page background
-   - surface        sidebar, cards, dialogs
+   - surface        cards, sidebar, dialogs
    - surface-muted  hovers, table headers, quiet badges
    - ink            primary text
    - muted          secondary text
    - line           borders and dividers
-   - radius-lg      inputs and buttons (rounded-lg)
-   - radius-xl      cards and dialogs (rounded-xl)
-   - font-sans      typeface (self-hosted files only; no external font service)
-   Add a new color here when the product needs a second accent. Don't invent
-   one-off hex values in views. */
+   - radius-lg      inputs and buttons (rounded-lg); radius-xl cards and dialogs (rounded-xl)
+   - font-display   headings; font-sans body text. Families come from fonts.css (self-hosted,
+                    all with Vietnamese); don't link an external font service. */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
@@ -26,6 +29,7 @@
   --color-ink: oklch(21% 0.034 264.665);
   --color-muted: oklch(55.1% 0.027 264.364);
   --color-line: oklch(92.8% 0.006 264.531);
+  --color-accent: oklch(76.9% 0.188 70.08);
 
   --color-brand-50: oklch(96.2% 0.018 272.314);
   --color-brand-100: oklch(93% 0.034 272.788);
@@ -39,3 +43,10 @@
   --color-brand-900: oklch(35.9% 0.144 278.697);
   --color-brand-950: oklch(25.7% 0.09 281.288);
 }
+
+@layer base {
+  h1, h2, h3 { font-family: var(--font-display); }
+}
+
+/* Components and effects of the app's own design (a hero, a ticket stub, a grain
+   overlay, keyframes) go below, named after what they are. */

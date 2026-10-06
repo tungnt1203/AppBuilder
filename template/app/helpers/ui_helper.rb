@@ -1,5 +1,6 @@
-# Building blocks for every screen. Prefer these over hand-written Tailwind so
-# the app looks consistent as it grows. Partials live in app/views/ui.
+# Building blocks for the owner's and staff's screens, so they stay consistent as
+# the app grows; customer-facing pages are designed freely (design skill). Partials
+# live in app/views/ui.
 # Looks come from the theme in app/assets/tailwind/application.css.
 module UiHelper
   FIELD_CLASSES = "block w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink shadow-xs placeholder:text-muted focus:border-brand-500 focus:outline-2 focus:outline-brand-500/20"
@@ -33,6 +34,19 @@ module UiHelper
 
   LINK_CLASSES = "font-medium text-brand-700 hover:text-brand-600"
   MENU_ITEM_CLASSES = "block w-full rounded-md px-3 py-2 text-left text-sm text-ink hover:bg-surface-muted"
+
+  # Any Lucide icon (https://lucide.dev), drawn in the current text color:
+  # icon "calendar-check", size: 18, class: "text-brand-600". Find names with bin/icons.
+  def icon(name, size: 20, stroke: 2, **options)
+    paths = UiHelper.icons.fetch(name.to_s) { raise ArgumentError, "No icon named #{name.inspect}. Search with: bin/icons #{name}" }
+    options[:class] = class_names("shrink-0", options[:class])
+    tag.svg(paths.html_safe, xmlns: "http://www.w3.org/2000/svg", width: size, height: size, viewBox: "0 0 24 24", fill: "none",
+      stroke: "currentColor", "stroke-width": stroke, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": true, **options)
+  end
+
+  def self.icons
+    @icons ||= JSON.parse(Rails.root.join("vendor/icons/lucide.json").read)
+  end
 
   # For link_to and button_to: link_to "New", new_thing_path, class: button_classes(:secondary)
   # size is :md (default) or :sm for dense toolbars.
