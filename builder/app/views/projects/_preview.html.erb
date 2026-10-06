@@ -7,6 +7,21 @@
             data-preview-target="frame" data-action="load->preview#loaded"
             onload="this.parentElement.removeAttribute('data-loading')"><%# a first load can beat the controller %></iframe>
     <div class="veil" aria-hidden="true"><span class="spinner"></span></div>
+
+    <%# Errors the app reports while the owner tries it (the template's preview probe), filled in by preview_controller.js. %>
+    <div class="preview-error glass glass-frost" role="alert" hidden data-preview-target="errorBox">
+      <span class="stage-icon stage-icon-danger"><%= icon :alert, size: 18 %></span>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-semibold"><span data-preview-target="errorTitle"></span> <span class="faint font-normal" data-preview-target="errorPage"></span></p>
+        <p class="error-message" data-preview-target="errorMessage"></p>
+      </div>
+      <%= form_with model: [ project, Message.new ], class: "flex-none", data: { action: "submit->preview#errorSent" } do |form| %>
+        <%= form.hidden_field :body, id: nil, data: { preview_target: "errorRequest" } %>
+        <%= hidden_field_tag "message[plan]", "0", id: nil %>
+        <%= form.button "Fix this error", class: "btn btn-primary h-8 px-3.5 text-[0.8125rem]", data: { preview_target: "errorFix" } %>
+      <% end %>
+      <button type="button" class="btn btn-ghost btn-icon h-8 w-8 flex-none" data-action="preview#dismissErrors" aria-label="Dismiss" title="Dismiss">&times;</button>
+    </div>
   </div>
 
   <%# The Code tab, over the app. Loaded when first shown (preview_controller.js) and left out of page refreshes like the stage;

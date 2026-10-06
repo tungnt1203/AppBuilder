@@ -42,6 +42,8 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "#messages strong", "Lịch hẹn"
     assert_select "header .segmented button[data-preview-size-param]", 3
     assert_select "header [data-action='preview#toggleFullscreen']"
+    assert_select "[data-preview-accepts-value='true']"
+    assert_select ".stage .preview-error[hidden] form[action='#{project_messages_path(projects(:clinic))}'] input[data-preview-target='errorRequest']"
   end
 
   test "each card has a menu to rename, duplicate or delete, off while the app is busy" do

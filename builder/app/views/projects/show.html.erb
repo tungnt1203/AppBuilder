@@ -2,7 +2,8 @@
 <%= turbo_stream_from @project %>
 
 <div class="flex min-h-full flex-col gap-3 p-3 sm:gap-4 sm:p-4 lg:h-full" data-controller="preview"
-     data-preview-version-value="<%= @project.preview_version %>" data-preview-state-value="<%= @project.preview_state %>">
+     data-preview-version-value="<%= @project.preview_version %>" data-preview-state-value="<%= @project.preview_state %>"
+     data-preview-accepts-value="<%= @project.accepts_messages? || @project.accepts_messages_while_working? %>">
   <header class="glass capsule z-30 flex items-center gap-2 py-1.5 pr-1.5 pl-2">
     <%= link_to root_path, class: "btn btn-ghost btn-icon text-white", "aria-label": "All apps" do %><%= icon :back %><% end %>
 

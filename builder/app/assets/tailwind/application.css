@@ -557,6 +557,34 @@
     & :is(.si, .err) { color: var(--code-text); }
   }
 
+  /* An error the app reported while the owner tried it, floating over the app. */
+  .preview-error {
+    position: absolute;
+    left: 50%;
+    bottom: 1.25rem;
+    z-index: 12;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: min(40rem, 100% - 2rem);
+    padding: 0.6rem 0.6rem 0.6rem 0.7rem;
+    border-radius: 22px;
+    transform: translateX(-50%);
+    animation: appear 240ms ease-out;
+
+    &[hidden] { display: none; }
+    & .stage-icon { width: 2.25rem; height: 2.25rem; flex: none; }
+  }
+  .error-message {
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bezel:fullscreen .preview-error { bottom: 4.75rem; }
+
   /* A row of icon buttons where one is on. */
   .segmented {
     display: inline-flex;
