@@ -1,7 +1,7 @@
-# Starts a project's preview again, for example after the builder restarted.
+# Starts a project's preview again: after the builder restarted, or when the owner
+# asks to try a broken preview again.
 class PreviewStartJob < ApplicationJob
-  def perform(project)
-    project.preview.start
-    project.update!(preview_version: project.preview_version + 1)
+  def perform(project, restart: false)
+    project.restart_preview(restart: restart)
   end
 end

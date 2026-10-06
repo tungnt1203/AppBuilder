@@ -71,10 +71,10 @@ class AgentTurnJob < ApplicationJob
 
     # Keep whatever the agent changed, even after a failure, so it can be undone or continued.
     def finish(project, message, status:)
-      project.shell.run("bin/rails", "tailwindcss:build")
       commit(project, message)
-      project.preview.restart
-      project.update!(status: status, planning: false, preview_version: project.preview_version + 1, activity: nil)
+      project.update!(activity: "Restarting the preview")
+      project.restart_preview
+      project.update!(status: status, planning: false, activity: nil)
     rescue ProjectShell::Error => error
       project.messages.create!(role: :error, body: error.message.truncate(4000))
       project.update!(status: :failed)

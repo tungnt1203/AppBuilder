@@ -1,8 +1,9 @@
 <% content_for :title, @project.name %>
 <%= turbo_stream_from @project %>
 
-<div class="flex min-h-full flex-col gap-3 p-3 sm:gap-4 sm:p-4 lg:h-full">
-  <header class="glass capsule z-30 flex items-center gap-2 py-1.5 pr-1.5 pl-2" data-controller="preview" data-preview-version-value="<%= @project.preview_version %>">
+<div class="flex min-h-full flex-col gap-3 p-3 sm:gap-4 sm:p-4 lg:h-full" data-controller="preview"
+     data-preview-version-value="<%= @project.preview_version %>" data-preview-state-value="<%= @project.preview_state %>">
+  <header class="glass capsule z-30 flex items-center gap-2 py-1.5 pr-1.5 pl-2">
     <%= link_to root_path, class: "btn btn-ghost btn-icon text-white", "aria-label": "All apps" do %><%= icon :back %><% end %>
 
     <div class="flex min-w-0 flex-1 items-center gap-3 pr-2 md:flex-none">
@@ -28,7 +29,7 @@
         <%= render "projects/deployment_status", project: @project, deployment: deployment %>
       <% end %>
       <%= button_to "Publish", project_deployments_path(@project), disabled: !@project.publishable?, class: "btn btn-primary",
-            title: (@project.publish_url if @project.live_deployment) %>
+            title: (@project.preview_broken? ? "Fix the preview before publishing" : (@project.publish_url if @project.live_deployment)) %>
     </div>
   </header>
 
@@ -51,7 +52,7 @@
         <div class="activity glass capsule absolute inset-x-3 bottom-[4.25rem] flex items-center gap-2.5 px-4 py-2"
              data-controller="elapsed" data-elapsed-since-value="<%= (@project.working_since || @project.updated_at).to_i %>" aria-live="polite">
           <span class="activity-dot"></span>
-          <span id="activity-text" class="min-w-0 flex-1 truncate"><%= @project.setting_up? ? "Setting up the project" : (@project.activity || "Working") %></span>
+          <span id="activity-text" class="live-activity min-w-0 flex-1 truncate"><%= @project.setting_up? ? "Setting up the project" : (@project.activity || "Working") %></span>
           <span class="faint tabular-nums" data-elapsed-target="clock"></span>
           <% if @project.working? %>
             <%= button_to "Stop", project_stop_path(@project), class: "btn btn-ghost h-7 px-3 text-xs", title: "Stop the agent; what's done so far is kept",
@@ -77,13 +78,6 @@
       <% end %>
     </aside>
 
-    <section class="bezel relative min-h-[70vh] lg:min-h-0" aria-label="Preview">
-      <div id="preview" class="absolute inset-[9px]" data-turbo-permanent>
-        <iframe id="preview-frame" src="<%= @project.preview_url %>" title="Preview of <%= @project.name %>" class="h-full w-full"></iframe>
-      </div>
-      <% if @project.setting_up? %>
-        <div class="cover absolute inset-[9px] flex items-center justify-center rounded-[21px] text-sm">The preview opens once the project is set up.</div>
-      <% end %>
-    </section>
+    <%= render "projects/preview", project: @project %>
   </div>
 </div>

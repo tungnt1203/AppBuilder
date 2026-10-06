@@ -227,7 +227,7 @@ class AgentTranscript
 
       @activity = text
       @project.update_column(:activity, text)
-      Turbo::StreamsChannel.broadcast_update_to(@project, target: "activity-text", html: ERB::Util.html_escape(text.to_s))
+      Turbo::StreamsChannel.broadcast_update_to(@project, targets: ".live-activity", html: ERB::Util.html_escape(text.to_s))
     end
 
     def flush_draft

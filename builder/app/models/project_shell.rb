@@ -16,6 +16,8 @@ class ProjectShell
     output, status = Bundler.with_unbundled_env { Open3.capture2e(environment(env), *command, chdir: @path.to_s) }
     raise Error, "#{command.join(" ")} failed:\n#{output}" unless status.success?
     output
+  rescue SystemCallError => error # the command or the project folder is missing
+    raise Error, "#{command.join(" ")} failed: #{error.message}"
   end
 
   def spawn(*command, log:, env: {})

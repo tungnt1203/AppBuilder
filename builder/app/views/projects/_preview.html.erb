@@ -1,0 +1,68 @@
+<%# The app itself, and a screen over it whenever it isn't ready to look at. The stage is
+    never morphed (see preview_controller.js), so page refreshes don't reload the app. %>
+<% state = project.preview_state %>
+<section class="bezel relative min-h-[70vh] lg:min-h-0" aria-label="Preview">
+  <div id="preview" class="stage" data-preview-target="stage" data-loading>
+    <iframe src="<%= project.preview_url %>" title="Preview of <%= project.name %>" class="h-full w-full"
+            data-preview-target="frame" data-action="load->preview#loaded"
+            onload="this.parentElement.removeAttribute('data-loading')"><%# a first load can beat the controller %></iframe>
+    <div class="veil" aria-hidden="true"><span class="spinner"></span></div>
+  </div>
+
+  <% case state %>
+  <% when "setup" %>
+    <div class="stage-screen" role="status">
+      <div class="stage-card">
+        <span class="spinner spinner-lg"></span>
+        <h2>Setting up <%= project.name %></h2>
+        <p>Copying the starter app, installing gems and preparing the database. This takes about a minute.</p>
+      </div>
+    </div>
+  <% when "building" %>
+    <div class="stage-screen stage-screen-clear" role="status">
+      <div class="stage-card">
+        <span class="spinner spinner-lg"></span>
+        <h2>Building your changes</h2>
+        <p class="live-activity"><%= project.activity || "Working" %></p>
+        <p class="faint">The preview comes back when this step is done. Until then the app may be halfway through a change.</p>
+        <button type="button" class="btn btn-ghost on-card" data-action="preview#peek"><%= icon :eye %>Look at it anyway</button>
+      </div>
+    </div>
+    <div class="peek-pill glass capsule" role="status">
+      <span class="activity-dot"></span>
+      <span>Still building, so this may look broken</span>
+      <button type="button" class="btn btn-ghost h-7 px-3 text-xs" data-action="preview#unpeek"><%= icon :eye_off, size: 14 %>Hide</button>
+    </div>
+  <% when "starting" %>
+    <div class="stage-screen" role="status">
+      <div class="stage-card">
+        <span class="spinner spinner-lg"></span>
+        <h2>Starting the preview</h2>
+        <p>Running any new migrations and booting the app.</p>
+      </div>
+    </div>
+  <% when "broken" %>
+    <div class="stage-screen" role="alert">
+      <div class="stage-card stage-card-wide">
+        <span class="stage-icon stage-icon-danger"><%= icon :alert, size: 22 %></span>
+        <h2>The preview has a problem</h2>
+        <p>The app didn't open. The agent can usually fix this on its own.</p>
+        <pre class="alert text-left"><%= project.preview_error %></pre>
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <%= form_with model: [ project, Message.new ] do |form| %>
+            <%= form.hidden_field :body, value: fix_request(project) %>
+            <%= hidden_field_tag "message[plan]", "0", id: nil %>
+            <%= form.button "Ask the agent to fix it", class: "btn btn-primary", disabled: !project.accepts_messages? %>
+          <% end %>
+          <%= button_to "Try again", project_preview_path(project), class: "btn btn-ghost on-card", disabled: !project.accepts_messages? %>
+          <button type="button" class="btn btn-ghost on-card" data-action="preview#peek"><%= icon :eye %>Show the page</button>
+        </div>
+      </div>
+    </div>
+    <div class="peek-pill glass capsule" role="status">
+      <span class="stage-dot-danger"></span>
+      <span>The preview has a problem</span>
+      <button type="button" class="btn btn-ghost h-7 px-3 text-xs" data-action="preview#unpeek">Details</button>
+    </div>
+  <% end %>
+</section>

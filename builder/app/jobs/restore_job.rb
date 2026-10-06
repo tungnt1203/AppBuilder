@@ -4,12 +4,10 @@ class RestoreJob < ApplicationJob
   def perform(project, sha)
     version = project.history.find(sha)
     project.history.restore(version)
-    project.shell.run("bin/rails", "db:prepare")
-    project.shell.run("bin/rails", "tailwindcss:build")
-    project.preview.restart
+    project.restart_preview
 
     project.messages.create!(role: :notice, body: "Restored “#{version.subject}”")
-    project.update!(status: :ready, preview_version: project.preview_version + 1,
+    project.update!(status: :ready,
       agent_note: "Since your last turn the owner restored the app to an earlier version (“#{version.subject}”). " \
                   "Re-read any file before you change it.")
   rescue ProjectShell::Error => error

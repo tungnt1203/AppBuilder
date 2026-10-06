@@ -9,7 +9,10 @@ module ApplicationHelper
     chevron: [ "M9 6l6 6-6 6" ],
     steps: [ "M4 6h16", "M4 12h10", "M4 18h7" ],
     history: [ "M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5", "M12 7v5l3 2" ],
-    check: [ "M5 12l5 5L20 7" ]
+    check: [ "M5 12l5 5L20 7" ],
+    alert: [ "M12 9v4", "M12 17h.01", "M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" ],
+    eye: [ "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z", "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" ],
+    eye_off: [ "M3 3l18 18", "M10.6 6.1A9.8 9.8 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.9", "M6.6 6.6C3.9 8.3 2 12 2 12s3.5 6 10 6a9.6 9.6 0 0 0 4.4-1", "M9.9 9.9a3 3 0 0 0 4.2 4.2" ]
   }
 
   def icon(name, size: 16)
@@ -19,8 +22,17 @@ module ApplicationHelper
     end
   end
 
+  # Asks the agent to fix what the preview check found.
+  def fix_request(project)
+    "The preview shows an error:\n\n#{project.preview_error}\n\nPlease find the cause and fix it."
+  end
+
   def status_label(project)
-    tag.span(STATUS_LABELS.fetch(project.status), class: "status status-#{project.status}")
+    if project.ready? && project.preview_broken?
+      tag.span("Preview has a problem", class: "status status-failed")
+    else
+      tag.span(STATUS_LABELS.fetch(project.status), class: "status status-#{project.status}")
+    end
   end
 
   def markdown(text)

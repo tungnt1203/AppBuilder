@@ -5,9 +5,9 @@ class ProjectSetupJob < ApplicationJob
   def perform(project, first_request = nil, mode = "plan")
     copy_template(project)
     configure(project)
-    prepare(project)
-    project.preview.start
-    project.update!(status: :ready, preview_version: project.preview_version + 1)
+    project.shell.run("bundle", "install", "--quiet")
+    project.restart_preview(restart: false)
+    project.update!(status: :ready)
 
     AgentTurnJob.perform_later(project, first_request, mode) if first_request.present?
   rescue ProjectShell::Error => error
@@ -34,11 +34,5 @@ class ProjectSetupJob < ApplicationJob
         .sub(/config\.time_zone = ".*"/) { %(config.time_zone = "#{project.time_zone}") })
       project.shell.run("git", "commit", "--quiet", "-am", "Set up #{project.name}")
       project.update!(base_sha: project.history.current_sha)
-    end
-
-    def prepare(project)
-      project.shell.run("bundle", "install", "--quiet")
-      project.shell.run("bin/rails", "db:prepare")
-      project.shell.run("bin/rails", "tailwindcss:build")
     end
 end

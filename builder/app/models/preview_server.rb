@@ -1,8 +1,10 @@
 require "socket"
+require "net/http"
 
 # The project's own `bin/rails server`, shown in the builder's preview iframe.
 class PreviewServer
   BOOT_TIMEOUT = 30.seconds
+  CHECK_TIMEOUT = 30 # seconds; the first request in development compiles a lot
 
   def initialize(project)
     @project = project
@@ -16,7 +18,7 @@ class PreviewServer
   end
 
   def stop
-    pid = pid_path.exist? && pid_path.read.to_i
+    pid = pid_path.read.to_i if pid_path.exist?
     Process.kill("TERM", pid) if pid&.positive?
     wait_until { !running? }
   rescue Errno::ESRCH
@@ -35,6 +37,27 @@ class PreviewServer
     false
   end
 
+  # Opens the home page the way the owner would. Returns what went wrong, or nil
+  # when the app answers (a redirect to sign in counts as working).
+  def check
+    return "The preview server didn't start.\n\n#{log_tail}".strip unless running?
+
+    response = Net::HTTP.start("127.0.0.1", @project.port, open_timeout: 2, read_timeout: CHECK_TIMEOUT) { |http| http.get("/") }
+    self.class.error_from(response.body) || "The home page answered #{response.code}." if response.code.to_i >= 500
+  rescue Net::ReadTimeout
+    "The preview didn't answer within #{CHECK_TIMEOUT} seconds."
+  rescue SystemCallError, IOError => error
+    "The preview couldn't be reached: #{error.message}"
+  end
+
+  # The heading, template location and message of Rails' development error page.
+  def self.error_from(html)
+    page = Nokogiri::HTML(html.to_s)
+    template = page.css("p").find { |node| node.text.strip.start_with?("Showing") } # "Showing app/views/… where line #3 raised:"
+    parts = [ page.at_css("header h1"), template, page.at_css(".exception-message .message") ]
+    parts.filter_map { |node| node&.text&.squish.presence }.uniq.join("\n").presence
+  end
+
   private
     def pid_path
       @project.path.join("tmp/pids/server.pid")
@@ -42,6 +65,10 @@ class PreviewServer
 
     def log_path
       @project.path.join("log/preview.log")
+    end
+
+    def log_tail
+      log_path.exist? ? log_path.readlines.last(15).join : ""
     end
 
     def wait_until(timeout: BOOT_TIMEOUT)

@@ -6,6 +6,7 @@ class Project < ApplicationRecord
   has_many :agent_commands, dependent: :delete_all
 
   enum :status, %w[ setting_up ready working failed ].index_by(&:itself), default: "setting_up"
+  enum :preview_status, %w[ starting running broken ].index_by(&:itself), prefix: :preview
 
   validates :name, presence: true
   validates :language, inclusion: { in: LANGUAGES.keys }
@@ -32,6 +33,44 @@ class Project < ApplicationRecord
     PreviewServer.new(self)
   end
 
+  # Brings the preview up on the current code: migrations and styles first, then a
+  # fresh server, then a look at the home page. What went wrong is kept for the owner
+  # (and the agent) instead of failing the step that called this.
+  def restart_preview(restart: true)
+    update!(preview_status: :starting, preview_error: nil)
+    problem = prepare_preview
+    begin
+      restart ? preview.restart : preview.start
+    rescue SystemCallError => error
+      problem ||= "The preview server couldn't start: #{error.message}"
+    end
+    problem ||= preview.check
+  rescue => error
+    problem = "#{error.class}: #{error.message}"
+    raise
+  ensure
+    update!(preview_status: problem ? :broken : :running, preview_error: problem&.truncate(4000), preview_version: preview_version + 1)
+  end
+
+  # Opening the studio starts a preview that isn't running, for example after the builder restarted.
+  def ensure_preview
+    return unless ready? || failed?
+    return if preview_starting? || preview.running?
+
+    update!(preview_status: :starting)
+    PreviewStartJob.perform_later(self)
+  end
+
+  # What the preview pane shows: the app, or a screen saying why not.
+  def preview_state
+    if setting_up? then "setup"
+    elsif working? && !planning? then "building"
+    elsif preview_starting? then "starting"
+    elsif preview_broken? then "broken"
+    else "live"
+    end
+  end
+
   def publish_host
     "#{slug}.#{Rails.configuration.x.publish_domain}"
   end
@@ -48,8 +87,9 @@ class Project < ApplicationRecord
     deployments.live.latest_first.first
   end
 
+  # Not while the app doesn't open: fix it first, then ship it.
   def publishable?
-    ready? && !latest_deployment&.in_progress?
+    ready? && !preview_broken? && !latest_deployment&.in_progress?
   end
 
   def publish
@@ -127,6 +167,14 @@ class Project < ApplicationRecord
   end
 
   private
+    def prepare_preview
+      shell.run("bin/rails", "db:prepare")
+      shell.run("bin/rails", "tailwindcss:build")
+      nil
+    rescue ProjectShell::Error => error
+      error.message
+    end
+
     def assign_slug
       # Strip Vietnamese diacritics before parameterize, which would drop letters like "ữ".
       base = name.to_s.unicode_normalize(:nfkd).gsub(/\p{Mn}/, "").tr("đĐ", "dD").parameterize.presence || "app"

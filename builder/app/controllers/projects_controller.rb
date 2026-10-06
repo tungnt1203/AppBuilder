@@ -21,7 +21,7 @@ class ProjectsController < ApplicationController
   end
 
   def show
-    PreviewStartJob.perform_later(@project) if @project.ready? && !@project.preview.running?
+    @project.ensure_preview
   end
 
   private

@@ -7,7 +7,8 @@
     <meta name="theme-color" content="#0e3b43">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
+    <%= turbo_refresh_method_tag :morph %>
+    <%= turbo_refresh_scroll_tag :preserve %>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
