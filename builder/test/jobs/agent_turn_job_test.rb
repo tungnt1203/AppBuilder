@@ -4,8 +4,12 @@ class AgentTurnJobTest < ActiveSupport::TestCase
   class FakeRunner
     attr_reader :prompts
 
-    def initialize = @prompts = []
-    def run(prompt) = @prompts << prompt
+    def initialize(events = []) = (@prompts, @events = [], events)
+
+    def run(prompt)
+      @prompts << prompt
+      @events.each { |event| yield event }
+    end
   end
 
   setup do
@@ -43,6 +47,17 @@ class AgentTurnJobTest < ActiveSupport::TestCase
 
     assert_empty @runner.prompts
     assert @project.reload.ready?
+  end
+
+  test "a turn that ends with questions waits for the answers without committing" do
+    @runner = FakeRunner.new([ { "type" => "builder_ask", "id" => "toolu_1", "questions" => [ { "question" => "Khách có cần tài khoản không?", "options" => [] } ] } ])
+    @project.define_singleton_method(:history) { raise "committed" }
+
+    with_runner { AgentTurnJob.perform_now(@project, "Làm trang đặt lịch", "build") }
+
+    assert @project.reload.ready?
+    assert_nil @project.activity
+    assert @project.messages.assistant.last.data["questions"].present?
   end
 
   private

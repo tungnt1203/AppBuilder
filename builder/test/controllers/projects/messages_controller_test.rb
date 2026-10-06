@@ -38,12 +38,9 @@ class Projects::MessagesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Thêm cả số Zalo", projects(:shop).messages.last.body
   end
 
-  test "answers go to the waiting agent" do
-    post project_messages_path(projects(:shop)), params: { message: {
-      ask_id: "toolu_1", body: "ignored", answers: { "Khách có cần tài khoản không?" => "Không" }.to_json } }
-
-    command = projects(:shop).agent_commands.answer.sole
-    assert_equal({ "id" => "toolu_1", "answers" => { "Khách có cần tài khoản không?" => "Không" } }, command.payload)
-    assert_equal({ "type" => "answer", "id" => "toolu_1", "answers" => { "Khách có cần tài khoản không?" => "Không" } }, JSON.parse(command.to_line))
+  test "answers to the agent's questions start the next turn" do
+    assert_enqueued_with(job: AgentTurnJob, args: [ projects(:clinic), "Khách có cần tài khoản không? Không", "plan" ]) do
+      post project_messages_path(projects(:clinic)), params: { message: { body: "Khách có cần tài khoản không? Không", plan: "1" } }
+    end
   end
 end

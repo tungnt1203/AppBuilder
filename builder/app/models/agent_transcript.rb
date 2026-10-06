@@ -62,6 +62,11 @@ class AgentTranscript
     clear_draft
   end
 
+  # The agent asked the owner something, which ends the turn until they answer.
+  def asked?
+    @asked
+  end
+
   private
     def record_session(event)
       @project.update!(session_id: event["session_id"]) if event["subtype"] == "init" && event["session_id"]
@@ -82,7 +87,7 @@ class AgentTranscript
           show_activity ACTIVITIES.key?(block["name"]) ? "Working" : "Using #{block["name"]}"
         end
       when "content_block_delta"
-        if stream.dig("delta", "type") == "text_delta"
+        if stream.dig("delta", "type") == "text_delta" && !asked?
           @draft << stream.dig("delta", "text").to_s
           flush_draft
         end
@@ -103,7 +108,7 @@ class AgentTranscript
       Array(content).each do |block|
         case block["type"]
         when "text"
-          next if block["text"].blank?
+          next if block["text"].blank? || asked? # the agent's sign-off after its questions
           clear_draft
           record_reply(block["text"])
         when "tool_use"
@@ -112,7 +117,7 @@ class AgentTranscript
       end
     end
 
-    # The interactive agent asks with AskUserQuestion and waits for the answers.
+    # The interactive agent asks with AskUserQuestion; the answers start the next turn.
     def record_ask(event)
       questions = Array(event["questions"]).map do |question|
         options = Array(question["options"])
@@ -123,8 +128,8 @@ class AgentTranscript
       end
 
       clear_draft
-      @project.messages.create!(role: :assistant, body: "", data: { "questions" => questions, "ask_id" => event["id"] })
-      show_activity "Waiting for your answer"
+      @project.messages.create!(role: :assistant, body: "", data: { "questions" => questions })
+      @asked = true
     end
 
     # Without the interactive agent, questions come at the end of a reply in a

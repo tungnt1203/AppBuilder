@@ -4,10 +4,10 @@
 //
 // stdout: every SDK message as one JSON line (the same format as
 //   `claude -p --output-format stream-json`), plus builder events:
-//   {"type":"builder_ask","id":"…","questions":[…]}   the agent asks the owner something
+//   {"type":"builder_ask","id":"…","questions":[…]}   the agent asks the owner something;
+//                                                     the turn ends and the answers start the next one
 //
 // stdin: commands from the builder, one JSON line each:
-//   {"type":"answer","id":"…","answers":{"question":"answer"}}
 //   {"type":"message","text":"…"}                      the owner adds to the request mid-turn
 //   {"type":"interrupt"}                               the owner pressed Stop
 //
@@ -53,15 +53,17 @@ const inbox = {
   }
 }
 
-// Questions waiting for the owner's answers, by tool use id.
-const waiting = new Map()
+const QUESTIONS_SHOWN = "The studio is showing your questions to the owner. End your turn now without " +
+  "writing anything else; their answers will come as their next message."
 
+// Questions don't keep the turn (and a job worker) waiting for the owner, who may
+// answer hours later: the studio shows them, the turn ends, and the answers come
+// back as the owner's next message in this session. (Denying with interrupt: true
+// would end the turn as an error.)
 async function canUseTool(toolName, input, { toolUseID }) {
   if (toolName === "AskUserQuestion") {
-    const id = toolUseID ?? crypto.randomUUID()
-    emit({ type: "builder_ask", id, questions: input.questions })
-    const answers = await new Promise((resolve) => waiting.set(id, resolve))
-    return { behavior: "allow", updatedInput: { ...input, answers } }
+    emit({ type: "builder_ask", id: toolUseID ?? crypto.randomUUID(), questions: input.questions })
+    return { behavior: "deny", message: QUESTIONS_SHOWN }
   }
 
   if (toolName === "ExitPlanMode") {
@@ -93,10 +95,8 @@ createInterface({ input: process.stdin }).on("line", (line) => {
   let command
   try { command = JSON.parse(line) } catch { return }
 
-  if (command.type === "answer") waiting.get(command.id)?.(command.answers)
   if (command.type === "message") inbox.push(command.text)
   if (command.type === "interrupt") {
-    for (const answer of waiting.values()) answer({})
     conversation.interrupt()
     inbox.close()
   }

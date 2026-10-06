@@ -1,10 +1,10 @@
-# Something the owner tells the agent while it's working: an answer to its
-# question, an extra message, or Stop. The running turn delivers these to the
-# agent process (see AgentRunner), so they work across processes.
+# Something the owner tells the agent while it's working: an extra message, or
+# Stop. The running turn delivers these to the agent process (see AgentRunner),
+# so they work across processes.
 class AgentCommand < ApplicationRecord
   belongs_to :project
 
-  enum :kind, %w[ answer message interrupt ].index_by(&:itself)
+  enum :kind, %w[ message interrupt ].index_by(&:itself)
 
   scope :pending, -> { where(delivered_at: nil).order(:id) }
 

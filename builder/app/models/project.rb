@@ -233,11 +233,6 @@ class Project < ApplicationRecord
     end
   end
 
-  def answer(ask_id, answers)
-    messages.create!(role: :user, body: answers.map { |question, answer| "#{question} #{answer}" }.join("\n"))
-    agent_commands.create!(kind: :answer, payload: { "id" => ask_id, "answers" => answers })
-  end
-
   # Plan first for a new app, or while a plan is being discussed.
   def plans_by_default?
     planning? || history.versions.size <= 1

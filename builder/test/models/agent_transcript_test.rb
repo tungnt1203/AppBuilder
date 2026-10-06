@@ -82,16 +82,25 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_includes @project.messages.last.body, "not json"
   end
 
-  test "a live question from AskUserQuestion waits for the owner" do
+  test "a question from AskUserQuestion becomes buttons and ends the turn" do
     record "type" => "builder_ask", "id" => "toolu_1", "questions" => [
       { "question" => "Khách có cần tài khoản không?", "header" => "Tài khoản", "multiSelect" => false,
         "options" => [ { "label" => "Không", "description" => "Ai cũng đặt được" }, { "label" => "Có", "description" => "Phải đăng ký" } ] }
     ]
 
     ask = @project.messages.last
-    assert_equal "toolu_1", ask.data["ask_id"]
     assert_equal [ "Không", "Có" ], ask.data["questions"].first["options"]
-    assert_equal "Waiting for your answer", @project.reload.activity
+    assert_equal [ "Ai cũng đặt được", "Phải đăng ký" ], ask.data["questions"].first["descriptions"]
+    assert @transcript.asked?
+  end
+
+  test "hides what the agent writes after asking" do
+    record "type" => "builder_ask", "id" => "toolu_1", "questions" => [ { "question" => "Khách có cần tài khoản không?", "options" => [] } ]
+
+    assert_no_difference -> { @project.messages.count } do
+      record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => "Đã gửi câu hỏi, chờ bạn trả lời." } ] }
+    end
+    assert @project.messages.last.data["questions"].present?
   end
 
   test "ignores work done by subagents" do

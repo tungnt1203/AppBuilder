@@ -22,7 +22,9 @@ class AgentTurnJob < ApplicationJob
     AgentRunner.new(project, mode:).run(prompt) { |event| transcript.record(event) }
     transcript.finish
 
-    if mode == "plan"
+    if transcript.asked?
+      wait_for_answers(project)
+    elsif mode == "plan"
       propose(project)
     else
       finish(project, project.take_commit_message || request, status: :ready)
@@ -60,6 +62,12 @@ class AgentTurnJob < ApplicationJob
       AgentCommand.where(id: late).update_all(delivered_at: Time.current)
       project.update!(status: :working)
       AgentTurnJob.perform_later(project, late.map { |command| command.payload["text"] }.join("\n\n"), "build")
+    end
+
+    # The agent asked the owner something; their answers start the next turn, in the same
+    # session. Work done so far is committed with the turn that finishes it.
+    def wait_for_answers(project)
+      project.update!(status: :ready, activity: nil)
     end
 
     # A plan reply without questions is a proposal the owner can approve.

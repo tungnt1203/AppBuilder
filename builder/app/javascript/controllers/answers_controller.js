@@ -1,9 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Picks answers (one per question, or several when the question allows it) and
-// sends them as one chat message plus a JSON map of question to answer.
+// sends them as one chat message.
 export default class extends Controller {
-  static targets = [ "question", "body", "json", "send" ]
+  static targets = [ "question", "body", "send" ]
 
   connect() {
     this.blocked = this.hasSendTarget && this.sendTarget.disabled // nothing is waiting for answers
@@ -34,7 +34,6 @@ export default class extends Controller {
 
     this.complete = answers.every(([ , answer ]) => answer)
     this.bodyTarget.value = answers.map(([ question, answer ]) => `${question} ${answer}`.trim()).join("\n")
-    this.jsonTarget.value = JSON.stringify(Object.fromEntries(answers))
     if (this.hasSendTarget) this.sendTarget.disabled = this.blocked || !this.complete
   }
 }
