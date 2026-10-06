@@ -46,6 +46,8 @@
     --sea-top: #13505a;
     --sea-bottom: var(--color-abyss);
     --surface: color-mix(in srgb, var(--color-mist) 94%, transparent);
+    --surface-solid: var(--color-mist);
+    --device-rim: #1d3b40;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -76,6 +78,8 @@
       --sea-top: #082a31;
       --sea-bottom: #04161a;
       --surface: rgb(10 34 39 / 0.92);
+      --surface-solid: rgb(10 34 39);
+      --device-rim: rgb(255 255 255 / 0.16);
     }
   }
 
@@ -107,6 +111,8 @@
     --sea-top: #082a31;
     --sea-bottom: #04161a;
     --surface: rgb(10 34 39 / 0.92);
+    --surface-solid: rgb(10 34 39);
+    --device-rim: rgb(255 255 255 / 0.16);
   }
 
   html, body { height: 100%; }
@@ -365,13 +371,59 @@
     box-shadow: 0 24px 60px -24px rgb(6 36 41 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.5);
   }
   .bezel iframe {
+    width: 100%;
+    height: 100%;
     border-radius: 21px;
     background: white;
     box-shadow: 0 0 0 1px var(--line);
+    transition: width 320ms cubic-bezier(0.2, 0.9, 0.3, 1), height 320ms cubic-bezier(0.2, 0.9, 0.3, 1), border-radius 320ms;
   }
 
   /* The app, and what covers it while it can't be looked at. */
-  .stage { position: absolute; inset: 9px; }
+  .stage { position: absolute; inset: 9px; display: grid; place-items: center; }
+
+  /* Tablet and phone sizes: the app at that width, centered, shrunk to fit if the window is smaller. */
+  .stage[data-size] iframe { box-shadow: 0 0 0 1px var(--line), 0 0 0 7px var(--device-rim), 0 24px 50px -20px rgb(6 36 41 / 0.5); }
+  .stage[data-size="tablet"] iframe { width: min(820px, 100% - 32px); height: min(1180px, 100% - 32px); border-radius: 26px; }
+  .stage[data-size="phone"] iframe { width: min(390px, 100% - 32px); height: min(844px, 100% - 32px); border-radius: 36px; }
+
+  /* Full screen: the preview fills the display, with its controls floating at the bottom. */
+  .bezel:fullscreen { padding: 9px; border-radius: 0; background: var(--surface-solid); }
+  .fullscreen-bar {
+    position: absolute;
+    left: 50%;
+    bottom: 1.5rem;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem;
+    transform: translateX(-50%);
+  }
+  .bezel:fullscreen .fullscreen-bar { display: flex; }
+  .bezel:fullscreen .peek-pill { bottom: 4.75rem; }
+
+  /* A row of icon buttons where one is on. */
+  .segmented {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 999px;
+    background: var(--well);
+
+    & button {
+      display: grid;
+      place-items: center;
+      width: 1.9rem;
+      height: 1.6rem;
+      border-radius: 999px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background-color 150ms, color 150ms;
+    }
+    & button:hover { color: var(--text); }
+    & button[aria-pressed="true"] { color: var(--text); background: var(--well-strong); box-shadow: 0 1px 3px rgb(6 36 41 / 0.18); }
+  }
 
   .veil {
     position: absolute;
@@ -769,6 +821,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .idea, .app-card, .card-menu > summary { transition: none; }
+  .idea, .app-card, .card-menu > summary, .bezel iframe { transition: none; }
   .modal[open] { animation: none; }
 }

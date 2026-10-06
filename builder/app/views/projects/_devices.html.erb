@@ -1,0 +1,7 @@
+<%# Screen sizes for the preview. Which one is on is the owner's choice, kept in the browser (preview_controller.js). %>
+<div class="segmented" role="group" aria-label="Preview size">
+  <% { "desktop" => [ :monitor, "Desktop" ], "tablet" => [ :tablet, "Tablet (820 × 1180)" ], "phone" => [ :phone, "Phone (390 × 844)" ] }.each do |size, (name, label)| %>
+    <button type="button" aria-pressed="<%= size == "desktop" %>" aria-label="<%= label %>" title="<%= label %>"
+            data-preview-target="device" data-preview-size-param="<%= size %>" data-action="preview#resize"><%= icon name, size: 15 %></button>
+  <% end %>
+</div>

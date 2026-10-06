@@ -40,6 +40,8 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "iframe[src='http://localhost:4001']"
     assert_select "#messages strong", "Lịch hẹn"
+    assert_select "header .segmented button[data-preview-size-param]", 3
+    assert_select "header [data-action='preview#toggleFullscreen']"
   end
 
   test "each card has a menu to rename, duplicate or delete, off while the app is busy" do

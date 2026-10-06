@@ -9,19 +9,26 @@ import { Controller } from "@hotwired/stimulus"
 //
 // - version changes after the preview restarts: reload behind the veil
 // - state "building", "broken": the owner can peek at the app under the screen
+//
+// The screen size (desktop, tablet, phone) lives on the stage too, and the
+// owner's last choice is remembered in this browser.
 export default class extends Controller {
-  static targets = [ "stage", "frame" ]
+  static targets = [ "stage", "frame", "device", "bezel" ]
   static values = { version: Number, state: String }
   static LOAD_TIMEOUT = 15000
 
   connect() {
     this.skipMorph = (event) => { if (event.target === this.stageTarget) event.preventDefault() }
     document.addEventListener("turbo:before-morph-element", this.skipMorph)
+    this.restoreSize = () => this.showSize(this.size)
+    document.addEventListener("turbo:morph", this.restoreSize)
+    this.showSize(this.savedSize())
     this.waitForLoad()
   }
 
   disconnect() {
     document.removeEventListener("turbo:before-morph-element", this.skipMorph)
+    document.removeEventListener("turbo:morph", this.restoreSize)
     clearTimeout(this.loadTimeout)
   }
 
@@ -50,6 +57,27 @@ export default class extends Controller {
 
   unpeek() {
     this.stageTarget.removeAttribute("data-peek")
+  }
+
+  resize({ params: { size } }) {
+    this.showSize(size)
+    try { localStorage.setItem("preview-size", size) } catch {}
+  }
+
+  toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen()
+    else this.bezelTarget.requestFullscreen?.().catch(() => {}) // refused, for example outside a click
+  }
+
+  showSize(size) {
+    this.size = [ "tablet", "phone" ].includes(size) ? size : "desktop"
+    if (this.size === "desktop") this.stageTarget.removeAttribute("data-size")
+    else this.stageTarget.setAttribute("data-size", this.size)
+    this.deviceTargets.forEach((button) => button.setAttribute("aria-pressed", button.dataset.previewSizeParam === this.size))
+  }
+
+  savedSize() {
+    try { return localStorage.getItem("preview-size") } catch { return null }
   }
 
   // Cross-origin, so the only signal is the load event; a page that never loads

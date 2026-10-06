@@ -1,12 +1,18 @@
 <%# The app itself, and a screen over it whenever it isn't ready to look at. The stage is
     never morphed (see preview_controller.js), so page refreshes don't reload the app. %>
 <% state = project.preview_state %>
-<section class="bezel relative min-h-[70vh] lg:min-h-0" aria-label="Preview">
+<section class="bezel relative min-h-[70vh] lg:min-h-0" aria-label="Preview" data-preview-target="bezel">
   <div id="preview" class="stage" data-preview-target="stage" data-loading>
-    <iframe src="<%= project.preview_url %>" title="Preview of <%= project.name %>" class="h-full w-full"
+    <iframe src="<%= project.preview_url %>" title="Preview of <%= project.name %>"
             data-preview-target="frame" data-action="load->preview#loaded"
             onload="this.parentElement.removeAttribute('data-loading')"><%# a first load can beat the controller %></iframe>
     <div class="veil" aria-hidden="true"><span class="spinner"></span></div>
+  </div>
+
+  <%# Only in full screen, where the header is out of sight. %>
+  <div class="fullscreen-bar glass capsule">
+    <%= render "projects/devices" %>
+    <button type="button" class="btn btn-ghost h-7 px-3 text-xs" data-action="preview#toggleFullscreen"><%= icon :shrink, size: 14 %>Exit full screen</button>
   </div>
 
   <% case state %>

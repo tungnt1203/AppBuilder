@@ -11,10 +11,12 @@
       <span class="chip hidden rounded-full px-2.5 py-0.5 sm:inline-flex"><%= status_label(@project) %></span>
     </div>
 
-    <div class="well mx-auto hidden min-w-0 items-center gap-1 rounded-full py-1 pr-1 pl-4 md:flex">
-      <span class="url truncate"><%= @project.preview_url %></span>
+    <div class="well mx-auto hidden min-w-0 items-center gap-1 rounded-full py-1 pr-1 pl-1 md:flex">
+      <%= render "projects/devices" %>
+      <span class="url ml-2 truncate"><%= @project.preview_url %></span>
       <button type="button" class="btn btn-ghost btn-icon h-7 w-7" data-action="preview#reload" aria-label="Reload preview" title="Reload preview"><%= icon :reload, size: 14 %></button>
       <%= link_to @project.preview_url, target: "_blank", class: "btn btn-ghost btn-icon h-7 w-7", "aria-label": "Open preview in a new tab", title: "Open preview in a new tab" do %><%= icon :external, size: 14 %><% end %>
+      <button type="button" class="btn btn-ghost btn-icon h-7 w-7" data-action="preview#toggleFullscreen" aria-label="Full screen preview" title="Full screen (Esc to leave)"><%= icon :expand, size: 14 %></button>
     </div>
 
     <div class="ml-auto flex items-center gap-1 sm:gap-2 md:ml-0">
