@@ -25,6 +25,10 @@ export default class extends Controller {
     this.dialogTargets.forEach((dialog) => dialog.open && dialog.close())
   }
 
+  closeOnSuccess({ detail: { success } }) {
+    if (success) this.close()
+  }
+
   closeOnBackdrop(event) {
     if (event.target === event.currentTarget) event.currentTarget.close()
   }

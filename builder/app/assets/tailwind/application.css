@@ -316,7 +316,7 @@
     transition: border-color 150ms, background-color 150ms;
   }
   .field::placeholder { color: var(--text-faint); }
-  .field:focus { outline: none; border-color: var(--color-jade); background: var(--well-strong); }
+  .field:focus, .field:focus-within { outline: none; border-color: var(--color-jade); background: var(--well-strong); }
 
   /* Chat */
   .bubble-user {

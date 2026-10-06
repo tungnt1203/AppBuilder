@@ -1,4 +1,5 @@
 class Project < ApplicationRecord
+  RESERVED_SUBDOMAINS = %w[ www admin api app mail ]
   LANGUAGES = { "vi" => { name: "Tiếng Việt", time_zone: "Asia/Ho_Chi_Minh" }, "en" => { name: "English", time_zone: "UTC" } }
 
   has_many :messages, -> { order(:id) }, dependent: :destroy
@@ -10,6 +11,10 @@ class Project < ApplicationRecord
 
   validates :name, presence: true
   validates :language, inclusion: { in: LANGUAGES.keys }
+  validates :subdomain, uniqueness: true, exclusion: { in: RESERVED_SUBDOMAINS, message: "is reserved" },
+    format: { with: /\A[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\z/, message: "can only use a-z, 0-9 and dashes, not at either end" }, allow_nil: true
+
+  normalizes :subdomain, with: ->(subdomain) { subdomain.strip.downcase }
 
   before_validation :assign_slug, :assign_port, on: :create
 
@@ -91,7 +96,32 @@ class Project < ApplicationRecord
   # Picked from the name when the app is first published, then kept: renaming the
   # app doesn't move it away from the address its visitors know.
   def publish_host
-    "#{subdomain || subdomain_for(name)}.#{Rails.configuration.x.publish_domain}"
+    host_for(subdomain || subdomain_for(name))
+  end
+
+  def host_for(subdomain)
+    "#{subdomain}.#{Rails.configuration.x.publish_domain}"
+  end
+
+  # Before the first publish this only picks the address. A published app is moved
+  # on ONCE in MoveJob, and the record follows once it's there; links to the old
+  # address stop working.
+  def change_subdomain(new_subdomain)
+    previous = subdomain
+    self.subdomain = new_subdomain
+    return true unless subdomain_changed?
+    return false unless valid?
+    return save unless live_deployment
+
+    self.subdomain = previous
+    update!(status: :working, activity: "Moving to #{host_for(new_subdomain.strip.downcase)}")
+    MoveJob.perform_later(self, new_subdomain.strip.downcase)
+    true
+  end
+
+  # Not while it works, publishes or moves.
+  def movable?
+    !busy? && !latest_deployment&.in_progress?
   end
 
   def publish_url

@@ -56,12 +56,13 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".stage .preview-error[hidden] form[action='#{project_messages_path(projects(:clinic))}'] input[data-preview-target='errorRequest']"
   end
 
-  test "each card has a menu to rename, duplicate or delete, off while the app is busy" do
+  test "each card has a menu to rename, change the address, duplicate or delete, off while the app is busy" do
     get root_path
 
-    assert_select "##{ActionView::RecordIdentifier.dom_id(projects(:clinic))} .menu-item:not([disabled])", 3
-    assert_select "##{ActionView::RecordIdentifier.dom_id(projects(:shop))} .menu-item[disabled]", 3
+    assert_select "##{ActionView::RecordIdentifier.dom_id(projects(:clinic))} .menu-item:not([disabled])", 4
+    assert_select "##{ActionView::RecordIdentifier.dom_id(projects(:shop))} .menu-item[disabled]", 4
     assert_select "dialog.modal input[name='project[name]'][value='Nha khoa']"
+    assert_select "dialog.modal input[name='project[subdomain]'][value='nha-khoa']"
   end
 
   test "renaming from the card" do
@@ -79,5 +80,24 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal "Shop", shop.reload.name
     assert_equal 2, Project.count
+  end
+
+  test "changing the address shows what's wrong in the dialog" do
+    project = projects(:clinic)
+
+    patch project_address_path(project), params: { project: { subdomain: "www" } }, as: :turbo_stream
+
+    assert_response :unprocessable_entity
+    assert_match "is reserved", response.body
+    assert_equal "nha-khoa", project.reload.subdomain
+  end
+
+  test "changing the address of an unpublished app saves it" do
+    project = projects(:clinic)
+
+    patch project_address_path(project), params: { project: { subdomain: "rang-dep" } }, headers: { "HTTP_REFERER" => root_url }
+
+    assert_redirected_to root_url
+    assert_equal "rang-dep", project.reload.subdomain
   end
 end

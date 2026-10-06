@@ -1,0 +1,26 @@
+<%= form_with model: project, url: project_address_path(project), method: :patch, id: dom_id(project, :address),
+      class: "flex flex-col gap-4 p-6", data: { action: "turbo:submit-end->app-menu#closeOnSuccess" } do |form| %>
+  <h2 id="<%= dom_id(project, :address_title) %>" class="text-lg font-semibold">Change address</h2>
+  <div class="flex flex-col gap-1.5">
+    <div class="field flex items-center gap-0 pr-3">
+      <%= form.text_field :subdomain, value: project.subdomain || project.publish_host.delete_suffix(".#{Rails.configuration.x.publish_domain}"), required: true, autofocus: true, maxlength: 63,
+            pattern: "[a-zA-Z0-9]([a-zA-Z0-9\\-]*[a-zA-Z0-9])?", autocapitalize: "off", spellcheck: false,
+            class: "min-w-0 flex-1 bg-transparent outline-none", "aria-label": "Subdomain", "aria-invalid": project.errors[:subdomain].any? %>
+      <span class="faint shrink-0">.<%= Rails.configuration.x.publish_domain %></span>
+    </div>
+    <% if project.errors[:subdomain].any? %>
+      <p class="text-[0.8125rem] text-[var(--danger)]" role="alert">This address <%= project.errors[:subdomain].to_sentence %>.</p>
+    <% end %>
+    <p class="faint text-[0.8125rem]">
+      <% if project.live_deployment %>
+        The app moves now and keeps its data. Links to <%= project.host_for(project.subdomain_in_database) %> stop working, and people signed in to it need to sign in again.
+      <% else %>
+        The app will be published here. Letters, numbers and dashes.
+      <% end %>
+    </p>
+  </div>
+  <div class="flex justify-end gap-2">
+    <button type="button" class="btn btn-ghost" data-action="app-menu#close">Cancel</button>
+    <%= form.button project.live_deployment ? "Move app" : "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>
