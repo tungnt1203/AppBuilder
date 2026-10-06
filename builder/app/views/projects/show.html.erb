@@ -37,7 +37,7 @@
         <%= render "projects/deployment_status", project: @project, deployment: deployment %>
       <% end %>
       <%= button_to "Publish", project_deployments_path(@project), disabled: !@project.publishable?, class: "btn btn-primary",
-            title: (@project.preview_broken? ? "Fix the preview before publishing" : (@project.publish_url if @project.live_deployment)) %>
+            title: publish_hint(@project) %>
     </div>
   </header>
 

@@ -146,9 +146,10 @@ class Project < ApplicationRecord
     deployments.live.latest_first.first
   end
 
-  # Not while the app doesn't open: fix it first, then ship it.
+  # Not before anything was built (it would ship the starter app), nor while the app
+  # doesn't open: fix it first, then ship it.
   def publishable?
-    ready? && !preview_broken? && !latest_deployment&.in_progress?
+    ready? && built? && !preview_broken? && !latest_deployment&.in_progress?
   end
 
   def publish

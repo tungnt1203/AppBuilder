@@ -47,6 +47,14 @@ module ApplicationHelper
     end
   end
 
+  # Why Publish is off, or where the app is live.
+  def publish_hint(project)
+    if !project.built? then "Build the app before publishing"
+    elsif project.preview_broken? then "Fix the preview before publishing"
+    elsif project.live_deployment then project.publish_url
+    end
+  end
+
   def markdown(text)
     renderer = Redcarpet::Render::HTML.new(filter_html: true, no_images: true, safe_links_only: true, link_attributes: { target: "_blank" })
     Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true, strikethrough: true, lax_spacing: true).render(text.to_s).html_safe
