@@ -1,10 +1,21 @@
 # One round of the owner's request. In "plan" mode the agent only reads and
 # proposes (or asks); in "build" mode it changes the app, and the result is
 # committed and the preview restarted. Every step shows up in the chat.
+#
+# If the job process restarts mid-turn, Solid Queue runs the job again; the agent
+# then resumes its session and continues instead of starting over.
 class AgentTurnJob < ApplicationJob
+  RESUME_NOTE = "The builder restarted while you were working on this and your turn was cut off. " \
+                "Check what is already done before you continue."
+
   def perform(project, request, mode = "build")
+    if project.agent_job_id == job_id
+      return unless resume_interrupted(project, request, mode)
+      request = [ RESUME_NOTE, request ].join("\n\n")
+    end
+
     prompt = [ project.agent_note, request ].compact.join("\n\n")
-    project.update!(status: :working, planning: mode == "plan", agent_note: nil, working_since: Time.current, activity: "Starting")
+    project.update!(status: :working, planning: mode == "plan", agent_note: nil, working_since: Time.current, activity: "Starting", agent_job_id: job_id)
     project.agent_commands.pending.where.not(kind: :message).update_all(delivered_at: Time.current) # left from an earlier turn
     transcript = AgentTranscript.new(project)
 
@@ -26,6 +37,21 @@ class AgentTurnJob < ApplicationJob
   end
 
   private
+    # Clears what the cut-off run left behind. Returns false when the owner had
+    # already pressed Stop, so the turn ends here with its work kept.
+    def resume_interrupted(project, request, mode)
+      AgentRunner.end_leftover(project)
+      AgentTranscript.new(project).finish
+
+      if project.stop_requested?
+        mode == "plan" ? project.update!(status: :ready, activity: nil) : finish(project, "Unfinished: #{project.take_commit_message || request}", status: :ready)
+        false
+      else
+        project.messages.create!(role: :notice, body: "The builder restarted during this step. Picking up where it left off.")
+        true
+      end
+    end
+
     # Messages the owner sent while the agent was finishing up become the next turn.
     def continue_with_late_messages(project)
       late = project.agent_commands.message.pending.to_a

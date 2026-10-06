@@ -19,6 +19,14 @@ class AgentRunner
   rescue Errno::ESRCH
   end
 
+  # An agent process that outlived the job running it (the job process restarted).
+  def self.end_leftover(project)
+    Process.kill("TERM", project.agent_pid) if project.agent_pid
+  rescue Errno::ESRCH
+  ensure
+    project.update_column(:agent_pid, nil)
+  end
+
   def run(prompt)
     with_config_file do |config_path|
       @project.shell.popen(*command(prompt, config_path), env: env) do |stdin, stdout, stderr, wait|
@@ -30,6 +38,7 @@ class AgentRunner
         raise ProjectShell::Error, "Agent exited with #{status.exitstatus}: #{errors.value.last(2000)}" unless status.success? || @project.stop_requested?
       ensure
         courier.kill if courier.is_a?(Thread)
+        end_process(wait) # the job is being cut off, for example by a restart
         @project.update_column(:agent_pid, nil)
       end
     end
@@ -80,6 +89,11 @@ class AgentRunner
       { "CLAUDECODE" => nil, "CLAUDE_CODE_ENTRYPOINT" => nil,
         "CLAUDE_CODE_OAUTH_TOKEN" => Rails.configuration.x.claude_oauth_token,
         "ANTHROPIC_API_KEY" => ENV["ANTHROPIC_API_KEY"] }
+    end
+
+    def end_process(wait)
+      Process.kill("TERM", wait.pid) if wait.alive?
+    rescue Errno::ESRCH
     end
 
     def deliver_commands(stdin, wait)

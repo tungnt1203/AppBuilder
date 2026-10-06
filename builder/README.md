@@ -7,8 +7,18 @@ preview on the right. Every project is a copy of `../template` in `../projects/<
 
 ```sh
 bin/setup --skip-server
+bin/dev
+```
+
+`bin/dev` runs the web server and the job worker (`bin/jobs`) as separate processes. Jobs go
+through Solid Queue and reach the browser through Solid Cable, so restarting the web server
+never interrupts the agent. If the worker restarts mid-turn, the turn runs again and the agent
+resumes its session where it left off. To run them yourself:
+
+```sh
 bin/rails tailwindcss:build
-bin/rails server
+bin/rails server -d
+bin/jobs
 ```
 
 Open http://localhost:3000.

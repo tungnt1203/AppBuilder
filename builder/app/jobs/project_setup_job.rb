@@ -1,6 +1,6 @@
 # Copies the template into a new project, configures its name, language and
 # time zone, starts the preview, then hands the owner's first request (already in
-# the chat) to the agent.
+# the chat) to the agent. Safe to run again if the job process restarted halfway.
 class ProjectSetupJob < ApplicationJob
   def perform(project, first_request = nil, mode = "plan")
     copy_template(project)
@@ -17,12 +17,16 @@ class ProjectSetupJob < ApplicationJob
 
   private
     def copy_template(project)
+      return if project.path.join(".git").exist?
+
       project.path.dirname.mkpath
       ProjectShell.new(project.path.dirname).run("git", "clone", "--quiet", Rails.configuration.x.template_path.to_s, project.path.to_s)
       project.shell.run("git", "remote", "remove", "origin")
     end
 
     def configure(project)
+      return if project.base_sha
+
       application = project.path.join("config/application.rb")
       application.write(application.read
         .sub(/config\.x\.app_name = ".*"/) { %(config.x.app_name = #{project.name.inspect}) }
