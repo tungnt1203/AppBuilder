@@ -14,6 +14,8 @@ class Project < ApplicationRecord
   before_validation :assign_slug, :assign_port, on: :create
 
   broadcasts_refreshes
+  after_update_commit -> { broadcast_refresh_later_to(:projects) }, if: -> { saved_change_to_status? || saved_change_to_preview_status? }
+  after_destroy_commit -> { thumbnail.delete }
 
   scope :ordered, -> { order(updated_at: :desc) }
 
@@ -50,6 +52,7 @@ class Project < ApplicationRecord
     raise
   ensure
     update!(preview_status: problem ? :broken : :running, preview_error: problem&.truncate(4000), preview_version: preview_version + 1)
+    ThumbnailJob.perform_later(self) unless problem
   end
 
   # Opening the studio starts a preview that isn't running, for example after the builder restarted.
@@ -94,6 +97,10 @@ class Project < ApplicationRecord
 
   def publish
     deployments.create!.tap { |deployment| PublishJob.perform_later(deployment) }
+  end
+
+  def thumbnail
+    Thumbnail.new(self)
   end
 
   def shell

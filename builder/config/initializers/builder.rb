@@ -25,4 +25,8 @@ Rails.application.configure do
   config.x.once_bin = ENV.fetch("ONCE_BIN", "once")
   config.x.publish_domain = ENV.fetch("PUBLISH_DOMAIN", "localhost")
   config.x.backups_root = Pathname(ENV.fetch("BACKUPS_ROOT", Rails.root.join(Rails.env.test? ? "tmp/backups" : "../backups")))
+
+  # Screenshots of each preview for the apps grid, taken with headless Chrome when it is installed.
+  config.x.chrome_bin = ENV.fetch("CHROME_BIN", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+  config.x.thumbnails_root = Pathname(ENV.fetch("THUMBNAILS_ROOT", Rails.root.join(Rails.env.test? ? "tmp/thumbnails" : "storage/thumbnails")))
 end

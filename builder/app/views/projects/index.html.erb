@@ -1,49 +1,75 @@
 <% content_for :title, "Apps" %>
+<%= turbo_stream_from :projects %>
 
-<main class="mx-auto flex min-h-full max-w-3xl flex-col gap-6 px-4 py-16 sm:py-24">
-  <%= form_with model: @project, class: "glass glass-frost sheet p-6 sm:p-8" do |form| %>
-    <h1 class="text-[1.75rem] leading-tight font-semibold tracking-[-0.02em]">Describe the app you need</h1>
-    <p class="muted mt-1.5 text-[0.9375rem]">It's built while you watch, and you run it on your own server.</p>
+<main class="mx-auto flex min-h-full max-w-6xl flex-col gap-14 px-4 pt-[12vh] pb-16 sm:px-6">
+  <section class="mx-auto w-full max-w-3xl" data-controller="suggestion">
+    <h1 class="on-glass text-center text-[2rem] leading-tight font-semibold tracking-[-0.025em] text-balance sm:text-[2.75rem]">What do you want to build?</h1>
+    <p class="mt-3 text-center text-[0.9375rem] text-white/75">Describe it in your own words. It's built while you watch, and it runs on your own server.</p>
 
-    <% if @project.errors.any? %>
-      <p class="alert mt-5"><%= @project.errors.full_messages.to_sentence %></p>
+    <%= form_with model: @project, class: "prompt glass glass-frost sheet mt-8",
+          data: { controller: "composer", action: "keydown->composer#submitOnShortcut" } do |form| %>
+      <% if @project.errors.any? %>
+        <p class="alert mx-5 mt-5"><%= @project.errors.full_messages.to_sentence %></p>
+      <% end %>
+
+      <%= text_area_tag "project[request]", params.dig(:project, :request), id: "project_request", rows: 3, autofocus: true,
+            "aria-label": "What the app should do",
+            placeholder: "Lễ tân quản lý bệnh nhân và đặt lịch hẹn với bác sĩ. Màn hình chính là lịch hẹn hôm nay.",
+            data: { suggestion_target: "request", composer_target: "input", action: "input->composer#resize" },
+            class: "prompt-input" %>
+
+      <div class="flex flex-wrap items-center gap-2 border-t border-[var(--line)] px-3 py-3">
+        <%= form.text_field :name, required: true, placeholder: "App name", "aria-label": "App name",
+              data: { suggestion_target: "name" }, class: "field h-9 w-auto min-w-0 flex-1 py-0 text-sm sm:max-w-56" %>
+        <%= form.select :language, Project::LANGUAGES.map { |code, info| [ info[:name], code ] }, {},
+              "aria-label": "Language of the app", class: "field h-9 w-auto py-0 text-sm" %>
+        <label class="plan-toggle" title="Show me a plan first, and ask me if anything is unclear">
+          <%= hidden_field_tag "project[plan]", "0", id: nil %>
+          <%= check_box_tag "project[plan]", "1", params.dig(:project, :plan) != "0", id: "project_plan" %>
+          Plan first
+        </label>
+        <%= form.button class: "btn btn-primary ml-auto h-9 px-4", title: "Build app (⌘↵)" do %>
+          Build <%= icon :send, size: 15 %>
+        <% end %>
+      </div>
     <% end %>
 
-    <%= text_area_tag "project[request]", params.dig(:project, :request), id: "project_request", rows: 5, autofocus: true,
-          "aria-label": "What the app should do",
-          placeholder: "Lễ tân quản lý bệnh nhân và đặt lịch hẹn với bác sĩ. Màn hình chính là lịch hẹn hôm nay.",
-          class: "field mt-6 resize-none text-base leading-relaxed" %>
-
-    <div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-      <%= form.text_field :name, required: true, placeholder: "App name", "aria-label": "App name", class: "field" %>
-      <%= form.select :language, Project::LANGUAGES.map { |code, info| [ info[:name], code ] }, {}, "aria-label": "Language of the app", class: "field sm:w-40" %>
-      <%= form.button "Build app", class: "btn btn-primary h-11 px-6 sm:h-auto" %>
-    </div>
-
-    <label class="muted mt-4 flex items-center gap-2 text-sm">
-      <%= hidden_field_tag "project[plan]", "0", id: nil %>
-      <%= check_box_tag "project[plan]", "1", true, id: "project_plan", class: "size-4 accent-[var(--color-jade)]" %>
-      Show me a plan first, and ask me if anything is unclear
-    </label>
-  <% end %>
+    <ul class="mt-5 flex flex-wrap justify-center gap-2" aria-label="Ideas to start from">
+      <% suggestions.each do |idea| %>
+        <li>
+          <button type="button" class="idea glass capsule" title="<%= idea[:request] %>"
+                  data-action="suggestion#use" data-suggestion-name-param="<%= idea[:name] %>" data-suggestion-request-param="<%= idea[:request] %>">
+            <%= idea[:name] %>
+          </button>
+        </li>
+      <% end %>
+    </ul>
+  </section>
 
   <% if @projects.any? %>
-    <section class="glass sheet overflow-hidden" aria-label="Your apps">
-      <ul class="divide-y divide-white/30">
+    <section aria-labelledby="apps_heading">
+      <h2 id="apps_heading" class="on-glass mb-4 flex items-baseline gap-2 px-1 text-lg font-semibold">
+        Your apps <span class="text-sm font-medium text-white/60"><%= @projects.size %></span>
+      </h2>
+
+      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <% @projects.each do |project| %>
-          <li>
-            <%= link_to project, class: "flex items-center gap-4 px-6 py-4 text-white transition-colors hover:bg-white/10" do %>
-              <span class="min-w-0 flex-1">
-                <span class="block truncate font-semibold"><%= project.name %></span>
-                <span class="block text-sm text-white/65">
-                  <% if live = project.live_deployment %>
-                    Live at <%= project.publish_host %>, version <%= live.version %>
-                  <% else %>
-                    Not published yet
-                  <% end %>
-                </span>
-              </span>
-              <span class="chip rounded-full px-3 py-1"><%= status_label(project) %></span>
+          <li id="<%= dom_id(project) %>">
+            <%= link_to project, class: "app-card surface" do %>
+              <div class="app-shot">
+                <% if version = project.thumbnail.version %>
+                  <%= image_tag project_thumbnail_path(project, v: version), alt: "", loading: "lazy" %>
+                <% else %>
+                  <%= monogram(project) %>
+                <% end %>
+              </div>
+              <div class="flex items-start gap-3 px-4 py-3.5">
+                <div class="min-w-0 flex-1">
+                  <h3 class="truncate font-semibold"><%= project.name %></h3>
+                  <p class="faint truncate text-[0.8125rem]"><%= project_subtitle(project) %></p>
+                </div>
+                <%= status_label(project) %>
+              </div>
             <% end %>
           </li>
         <% end %>

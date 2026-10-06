@@ -8,6 +8,15 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: /Nha khoa/
   end
 
+  test "home page offers ideas and shows each app as a card" do
+    get root_path
+
+    assert_select "h1", "What do you want to build?"
+    assert_select ".idea", ProjectsHelper::SUGGESTIONS.size
+    assert_select ".app-card", Project.count
+    assert_select ".app-card .monogram", "N"
+  end
+
   test "creating an app puts the request in the chat and starts setup" do
     assert_enqueued_with(job: ProjectSetupJob) do
       post projects_path, params: { project: { name: "Phòng gym", language: "vi", request: "Quản lý hội viên", plan: "1" } }
