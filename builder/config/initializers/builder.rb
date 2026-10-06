@@ -24,5 +24,5 @@ Rails.application.configure do
   config.x.registry = ENV.fetch("REGISTRY", "localhost:5050")
   config.x.once_bin = ENV.fetch("ONCE_BIN", "once")
   config.x.publish_domain = ENV.fetch("PUBLISH_DOMAIN", "localhost")
-  config.x.backups_root = Pathname(ENV.fetch("BACKUPS_ROOT", Rails.root.join("../backups")))
+  config.x.backups_root = Pathname(ENV.fetch("BACKUPS_ROOT", Rails.root.join(Rails.env.test? ? "tmp/backups" : "../backups")))
 end
