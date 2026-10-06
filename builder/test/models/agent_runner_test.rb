@@ -26,6 +26,16 @@ class AgentRunnerTest < ActiveSupport::TestCase
     assert_includes command, "/tmp/agent.json"
   end
 
+  test "only the agent gets the stock photo keys" do
+    keys = Rails.configuration.x.stock_photo_keys
+    Rails.configuration.x.stock_photo_keys = { "PEXELS_API_KEY" => "pexels-key" }
+
+    assert_equal "pexels-key", AgentRunner.new(projects(:clinic)).environment["PEXELS_API_KEY"]
+    assert_includes ProjectShell::SECRETS, "PEXELS_API_KEY"
+  ensure
+    Rails.configuration.x.stock_photo_keys = keys
+  end
+
   test "unknown backends are rejected" do
     assert_raises(ArgumentError) { AgentRunner.new(projects(:clinic), backend: "nope").command("Hi") }
   end

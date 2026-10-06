@@ -83,12 +83,14 @@ class AgentRunner
       @mode == "plan" ? "plan" : "acceptEdits"
     end
 
-    # The agent is the only process that gets the Claude credentials (see ProjectShell).
-    # It must not think it's nested inside another Claude Code session either.
+    # The agent is the only process that gets the Claude credentials and the stock photo
+    # keys for bin/images (see ProjectShell). It must not think it's nested inside another
+    # Claude Code session either.
     def env
       { "CLAUDECODE" => nil, "CLAUDE_CODE_ENTRYPOINT" => nil,
         "CLAUDE_CODE_OAUTH_TOKEN" => Rails.configuration.x.claude_oauth_token,
-        "ANTHROPIC_API_KEY" => ENV["ANTHROPIC_API_KEY"] }
+        "ANTHROPIC_API_KEY" => ENV["ANTHROPIC_API_KEY"],
+        **Rails.configuration.x.stock_photo_keys }
     end
 
     def end_process(wait)

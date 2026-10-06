@@ -18,6 +18,7 @@ shared:
     - Bash(bin/rails:*)
     - Bash(bin/rubocop:*)
     - Bash(bin/icons:*)
+    - Bash(bin/images:*)
     - Bash(bundle exec:*)
     - Bash(git status:*)
     - Bash(git diff:*)

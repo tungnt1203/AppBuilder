@@ -16,6 +16,16 @@ Rails.application.configure do
   config.x.agent_backend = ENV.fetch("AGENT_BACKEND") { sdk_ready ? "sdk" : "cli" }
   config.x.agent = config_for(:agent)
 
+  # Free stock photo searches for the agent's bin/images: from the environment or
+  # `bin/rails credentials:edit` with unsplash: { access_key: ... }, pexels: { api_key: ... }
+  # and pixabay: { api_key: ... }. Without them it uses Openverse, which needs no key but
+  # has fewer good photos.
+  config.x.stock_photo_keys = {
+    "UNSPLASH_ACCESS_KEY" => ENV["UNSPLASH_ACCESS_KEY"].presence || Rails.application.credentials.dig(:unsplash, :access_key),
+    "PEXELS_API_KEY" => ENV["PEXELS_API_KEY"].presence || Rails.application.credentials.dig(:pexels, :api_key),
+    "PIXABAY_API_KEY" => ENV["PIXABAY_API_KEY"].presence || Rails.application.credentials.dig(:pixabay, :api_key)
+  }.compact
+
   # Each project's preview server gets its own port, counting up from here.
   config.x.first_preview_port = Integer(ENV.fetch("FIRST_PREVIEW_PORT", 4001))
 

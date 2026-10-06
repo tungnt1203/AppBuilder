@@ -4,9 +4,10 @@ require "open3"
 # not the builder's. Claude credentials are removed from every command's
 # environment, so the apps being built (their preview servers, tests and
 # image builds) can never read them; only the agent gets them back, explicitly.
+# The stock photo keys are kept from the apps the same way.
 class ProjectShell
   Error = Class.new(StandardError)
-  SECRETS = %w[ CLAUDE_CODE_OAUTH_TOKEN ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ]
+  SECRETS = %w[ CLAUDE_CODE_OAUTH_TOKEN ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN UNSPLASH_ACCESS_KEY PEXELS_API_KEY PIXABAY_API_KEY ]
 
   def initialize(path)
     @path = path
