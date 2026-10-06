@@ -1,0 +1,63 @@
+<li id="<%= dom_id(project) %>" class="relative" data-controller="app-menu">
+  <%= link_to project, class: "app-card surface" do %>
+    <div class="app-shot">
+      <% if version = project.thumbnail.version %>
+        <%= image_tag project_thumbnail_path(project, v: version), alt: "", loading: "lazy" %>
+      <% else %>
+        <%= monogram(project) %>
+      <% end %>
+    </div>
+    <div class="flex items-start gap-3 px-4 py-3.5">
+      <div class="min-w-0 flex-1">
+        <h3 class="truncate font-semibold"><%= project.name %></h3>
+        <p class="faint truncate text-[0.8125rem]"><%= project_subtitle(project) %></p>
+      </div>
+      <%= status_label(project) %>
+    </div>
+  <% end %>
+
+  <% busy = project.busy? ? "Wait until #{project.setting_up? ? "it's set up" : "the current step finishes"}" : nil %>
+  <details class="card-menu" data-controller="keep-open" data-keep-open-dismissible-value="true">
+    <summary aria-label="Manage <%= project.name %>" title="Rename, duplicate or delete"><%= icon :more, size: 18 %></summary>
+    <div class="popover glass glass-frost absolute top-11 right-0 z-20 w-52 rounded-[20px] p-1.5" role="menu">
+      <button type="button" class="menu-item" role="menuitem" <%= tag.attributes(disabled: busy.present?, title: busy) %>
+              data-action="app-menu#open" data-app-menu-name-param="rename"><%= icon :pencil %> Rename</button>
+      <%= button_to project_duplicate_path(project), class: "menu-item", role: "menuitem", disabled: busy.present?, title: busy,
+            form: { class: "contents" } do %><%= icon :copy %> Duplicate<% end %>
+      <button type="button" class="menu-item menu-item-danger" role="menuitem" <%= tag.attributes(disabled: busy.present?, title: busy) %>
+              data-action="app-menu#open" data-app-menu-name-param="delete"><%= icon :trash %> Delete…</button>
+    </div>
+  </details>
+
+  <dialog class="modal" data-app-menu-target="dialog" data-name="rename" aria-labelledby="<%= dom_id(project, :rename) %>"
+          data-action="click->app-menu#closeOnBackdrop">
+    <%= form_with model: project, method: :patch, class: "flex flex-col gap-4 p-6", data: { action: "submit->app-menu#close" } do |form| %>
+      <h2 id="<%= dom_id(project, :rename) %>" class="text-lg font-semibold">Rename app</h2>
+      <div class="flex flex-col gap-1.5">
+        <%= form.text_field :name, required: true, autofocus: true, class: "field", "aria-label": "App name" %>
+        <p class="faint text-[0.8125rem]">The app shows this name to its visitors. Its address stays <%= project.slug %>.</p>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" class="btn btn-ghost" data-action="app-menu#close">Cancel</button>
+        <%= form.button "Rename", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </dialog>
+
+  <dialog class="modal" data-app-menu-target="dialog" data-name="delete" aria-labelledby="<%= dom_id(project, :delete) %>"
+          data-action="click->app-menu#closeOnBackdrop">
+    <div class="flex flex-col gap-4 p-6">
+      <h2 id="<%= dom_id(project, :delete) %>" class="text-lg font-semibold">Delete “<%= project.name %>”?</h2>
+      <p class="muted text-[0.9375rem] leading-relaxed">
+        Its code, versions, chat and preview data are deleted. This can't be undone.
+        <% if project.live_deployment %>
+          The published app at <strong><%= project.publish_host %></strong> keeps running on your server.
+        <% end %>
+      </p>
+      <div class="flex justify-end gap-2">
+        <button type="button" class="btn btn-ghost" data-action="app-menu#close" autofocus>Cancel</button>
+        <%= button_to "Delete app", project, method: :delete, class: "btn btn-danger", form: { class: "contents", data: { action: "submit->app-menu#close" } } %>
+      </div>
+    </div>
+  </dialog>
+</li>

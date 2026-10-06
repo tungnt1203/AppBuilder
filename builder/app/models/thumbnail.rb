@@ -27,7 +27,7 @@ class Thumbnail
     return false unless File.executable?(chrome)
 
     path.dirname.mkpath
-    shot = path.sub_ext(".tmp.png")
+    shot = partial_path
     Dir.mktmpdir("thumbnail") do |profile|
       command = [ chrome, "--headless", "--disable-gpu", "--hide-scrollbars", "--no-first-run", "--user-data-dir=#{profile}",
                   "--window-size=#{SIZE}", "--virtual-time-budget=3000", "--screenshot=#{shot}", @project.preview_url ]
@@ -42,10 +42,14 @@ class Thumbnail
   end
 
   def delete
-    path.delete if exist?
+    [ path, partial_path ].each { |file| file.delete if file.exist? }
   end
 
   private
+    def partial_path
+      path.sub_ext(".tmp.png")
+    end
+
     # Chrome sometimes hangs on a page that never settles; it is stopped after TIMEOUT.
     def run(command)
       Open3.popen2e(*command, pgroup: true) do |stdin, output, waiter|

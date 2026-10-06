@@ -29,6 +29,12 @@ class ProjectHistory
     versions(limit: 200).find { |version| version.sha == sha } or raise ActiveRecord::RecordNotFound, "No version #{sha}"
   end
 
+  # Keeps every change in the working tree as one version, if there is any.
+  def commit(message)
+    shell.run("git", "add", "--all")
+    shell.run("git", "commit", "--quiet", "-m", message.squish.truncate(72)) unless shell.run("git", "status", "--porcelain").blank?
+  end
+
   def restore(version)
     shell.run("git", "restore", "--source", version.sha, "--staged", "--worktree", ":/")
     shell.run("git", "commit", "--quiet", "--allow-empty", "-m", "Restore “#{version.subject.truncate(56)}”")

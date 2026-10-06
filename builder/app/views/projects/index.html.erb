@@ -54,24 +54,7 @@
 
       <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <% @projects.each do |project| %>
-          <li id="<%= dom_id(project) %>">
-            <%= link_to project, class: "app-card surface" do %>
-              <div class="app-shot">
-                <% if version = project.thumbnail.version %>
-                  <%= image_tag project_thumbnail_path(project, v: version), alt: "", loading: "lazy" %>
-                <% else %>
-                  <%= monogram(project) %>
-                <% end %>
-              </div>
-              <div class="flex items-start gap-3 px-4 py-3.5">
-                <div class="min-w-0 flex-1">
-                  <h3 class="truncate font-semibold"><%= project.name %></h3>
-                  <p class="faint truncate text-[0.8125rem]"><%= project_subtitle(project) %></p>
-                </div>
-                <%= status_label(project) %>
-              </div>
-            <% end %>
-          </li>
+          <%= render "projects/card", project: project %>
         <% end %>
       </ul>
     </section>

@@ -15,7 +15,7 @@ class Project < ApplicationRecord
 
   broadcasts_refreshes
   after_update_commit -> { broadcast_refresh_later_to(:projects) }, if: -> { saved_change_to_status? || saved_change_to_preview_status? }
-  after_destroy_commit -> { thumbnail.delete }
+  after_destroy_commit -> { thumbnail.delete; broadcast_refresh_later_to(:projects) }
 
   scope :ordered, -> { order(updated_at: :desc) }
 
@@ -121,6 +121,39 @@ class Project < ApplicationRecord
 
   def time_zone
     LANGUAGES.dig(language, :time_zone)
+  end
+
+  # While setting up or working, the app's files are changing: no renaming, copying or deleting.
+  def busy?
+    setting_up? || working?
+  end
+
+  # The builder's record changes now; the name the app itself shows, in RenameJob.
+  def rename(new_name)
+    self.name = new_name.to_s.squish
+    return true unless name_changed?
+
+    self.status = :working
+    save.tap { |saved| RenameJob.perform_later(self) if saved }
+  end
+
+  # The name the app shows its visitors lives in its config.
+  def write_app_name
+    application = path.join("config/application.rb")
+    application.write(application.read.sub(/config\.x\.app_name = ".*"/) { %(config.x.app_name = #{name.inspect}) })
+  end
+
+  # A new app with this one's code, version history and preview data, but a fresh chat.
+  def duplicate
+    copy_name = language == "vi" ? "#{name} (bản sao)" : "#{name} (copy)"
+    Project.create!(name: copy_name, language:, base_sha:).tap { |copy| DuplicateJob.perform_later(copy, self) }
+  end
+
+  # Deletes the preview, code and chat. A published copy keeps running on ONCE.
+  def remove
+    preview.stop
+    destroy!
+    FileUtils.rm_rf(path)
   end
 
   def accepts_messages?

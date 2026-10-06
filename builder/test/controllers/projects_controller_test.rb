@@ -41,4 +41,29 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "iframe[src='http://localhost:4001']"
     assert_select "#messages strong", "Lịch hẹn"
   end
+
+  test "each card has a menu to rename, duplicate or delete, off while the app is busy" do
+    get root_path
+
+    assert_select "##{ActionView::RecordIdentifier.dom_id(projects(:clinic))} .menu-item:not([disabled])", 3
+    assert_select "##{ActionView::RecordIdentifier.dom_id(projects(:shop))} .menu-item[disabled]", 3
+    assert_select "dialog.modal input[name='project[name]'][value='Nha khoa']"
+  end
+
+  test "renaming from the card" do
+    patch project_path(projects(:clinic)), params: { project: { name: "Nha khoa Mai" } }
+
+    assert_redirected_to root_path
+    assert_equal "Nha khoa Mai", projects(:clinic).reload.name
+  end
+
+  test "a busy app isn't renamed, copied or deleted" do
+    shop = projects(:shop)
+    patch project_path(shop), params: { project: { name: "Other" } }
+    post project_duplicate_path(shop)
+    delete project_path(shop)
+
+    assert_equal "Shop", shop.reload.name
+    assert_equal 2, Project.count
+  end
 end

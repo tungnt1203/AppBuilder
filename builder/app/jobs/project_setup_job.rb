@@ -27,9 +27,9 @@ class ProjectSetupJob < ApplicationJob
     def configure(project)
       return if project.base_sha
 
+      project.write_app_name
       application = project.path.join("config/application.rb")
       application.write(application.read
-        .sub(/config\.x\.app_name = ".*"/) { %(config.x.app_name = #{project.name.inspect}) }
         .sub(/config\.i18n\.default_locale = :\w+/, "config.i18n.default_locale = :#{project.language}")
         .sub(/config\.time_zone = ".*"/) { %(config.time_zone = "#{project.time_zone}") })
       project.shell.run("git", "commit", "--quiet", "-am", "Set up #{project.name}")

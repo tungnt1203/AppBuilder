@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  before_action :set_project, only: :show
+  before_action :set_project, only: %i[ show update destroy ]
 
   def index
     @projects = Project.ordered
@@ -22,6 +22,16 @@ class ProjectsController < ApplicationController
 
   def show
     @project.ensure_preview
+  end
+
+  def update
+    @project.rename(params.expect(project: [ :name ])[:name]) unless @project.busy?
+    redirect_back_or_to root_path
+  end
+
+  def destroy
+    @project.remove unless @project.busy?
+    redirect_to root_path, status: :see_other
   end
 
   private
