@@ -8,10 +8,10 @@ class Projects::BuildsControllerTest < ActionDispatch::IntegrationTest
     project.messages.create!(role: :assistant, body: "Kế hoạch…", data: { "proposal" => true })
     project.messages.create!(role: :result, data: { "num_turns" => 3 })
 
-    assert_enqueued_with(job: AgentTurnJob, args: [ project, "Làm theo kế hoạch này", "build" ]) do
+    assert_enqueued_with(job: AgentTurnJob, args: [ project, "Build this plan", "build" ]) do
       post project_build_path(project)
     end
-    assert_equal "Làm theo kế hoạch này", project.messages.user.last.body
+    assert_equal "Build this plan", project.messages.user.last.body
   end
 
   test "nothing to build without a proposal waiting" do

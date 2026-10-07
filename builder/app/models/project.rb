@@ -1,6 +1,7 @@
 class Project < ApplicationRecord
   RESERVED_SUBDOMAINS = %w[ www admin api app mail ]
-  LANGUAGES = { "vi" => { name: "Tiếng Việt", time_zone: "Asia/Ho_Chi_Minh" }, "en" => { name: "English", time_zone: "UTC" } }
+  # The language the owner chats with the agent in (the builder itself and the apps are English).
+  LANGUAGES = { "en" => { name: "English", time_zone: "UTC" }, "vi" => { name: "Tiếng Việt", time_zone: "Asia/Ho_Chi_Minh" } }
 
   # Optional only for apps made before there were accounts (see AddOwnerToProjects).
   belongs_to :owner, class_name: "User", optional: true
@@ -340,7 +341,7 @@ class Project < ApplicationRecord
   end
 
   def approval_message
-    language == "vi" ? "Làm theo kế hoạch này" : "Build this plan"
+    "Build this plan"
   end
 
   private

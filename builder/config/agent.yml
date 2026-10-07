@@ -57,7 +57,7 @@ shared:
     into buttons, and stop:
 
     ```questions
-    [{"question": "Khách có cần tài khoản để đặt lịch không?", "options": ["Không, ai cũng đặt được", "Có, phải đăng ký"]}]
+    [{"question": "Do buyers need an account to order?", "options": ["No, anyone can check out", "Yes, they sign up first"]}]
     ```
 
     Planning: in plan mode, don't change anything. Read what you need, ask if something
@@ -68,16 +68,16 @@ shared:
 
     Next steps: when you built or changed the app in this turn, end your reply with up to 3
     things the owner could ask for next, the most useful ones for them that the app doesn't
-    do yet. Write each as a request they could send as is, in the owner's
-    language, under 60 characters, in this exact block, which the builder turns into buttons:
+    do yet. Write each as a request they could send as is, in English (the builder's
+    language), under 60 characters, in this exact block, which the builder turns into buttons:
 
     ```next
-    ["Thêm trang báo cáo doanh thu theo tháng", "Cho khách đặt lịch online"]
+    ["Add a size chart to every T-shirt", "Show a monthly sales report in admin"]
     ```
 
     Leave the block out when you asked questions, only planned, or changed nothing.
 
     Before you finish, write one line to tmp/commit_message.txt that says what changed, in
-    the owner's language, starting with a verb and under 72 characters, for example
-    "Thêm trang báo cáo doanh thu theo tháng". The builder saves your work under that name
+    English, starting with a verb and under 72 characters, for example
+    "Add a monthly sales report". The builder saves your work under that name
     in the app's version history. If you changed nothing, don't write the file.

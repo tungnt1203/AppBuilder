@@ -1,12 +1,12 @@
 module ProjectsHelper
   # Ideas to start from on the home page: a name and a request the agent can build.
   SUGGESTIONS = [
-    { name: "Tiệm nail Hoa", request: "Khách đặt lịch làm nail online, chọn dịch vụ và thợ. Chủ tiệm xem lịch theo ngày và doanh thu tháng." },
-    { name: "Phòng khám nha khoa", request: "Lễ tân quản lý bệnh nhân và đặt lịch hẹn với bác sĩ. Màn hình chính là lịch hẹn hôm nay." },
-    { name: "Quán cà phê", request: "Khách quét mã QR ở bàn để gọi món, quầy pha chế thấy đơn ngay, thu ngân tính tiền và in hoá đơn." },
-    { name: "Lớp học thêm", request: "Quản lý học sinh và lớp, điểm danh từng buổi, học phí hàng tháng và danh sách phụ huynh chưa đóng tiền." },
-    { name: "Nhà trọ", request: "Quản lý phòng trọ, người thuê và hợp đồng. Mỗi tháng nhập số điện nước, tự tính tiền và in phiếu thu." },
-    { name: "Kho hàng", request: "Nhập kho, xuất kho, tồn kho theo từng sản phẩm, và cảnh báo khi hàng sắp hết." }
+    { name: "Retro Cat Tees", request: "A print-on-demand shop for funny retro cat T-shirts and hoodies, sizes S to 3XL, in black, white and sand." },
+    { name: "Custom Pet Portraits", request: "Buyers upload a photo of their pet and pick a canvas, mug or blanket; we print their pet in a cartoon style." },
+    { name: "Fishing Dad Gear", request: "Gifts for dads who love fishing: tees, caps and mugs with fishing jokes. Bundles for Father's Day." },
+    { name: "Nurse Life Store", request: "Shirts, tumblers and tote bags for nurses, grouped by specialty (ER, ICU, pediatrics), with a gift section." },
+    { name: "Hometown Pride", request: "Tees and posters with US state and city designs. Buyers browse by state and pick shirt color and size." },
+    { name: "Christmas Ornaments", request: "Personalized family Christmas ornaments: buyers type up to 6 names and pick a design. Ships before Dec 15." }
   ]
 
   def suggestions

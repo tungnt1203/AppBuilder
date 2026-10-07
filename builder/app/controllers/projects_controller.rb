@@ -3,7 +3,7 @@ class ProjectsController < ApplicationController
 
   def index
     set_listing
-    @project = Project.new(language: "vi")
+    @project = Project.new(language: "en")
   end
 
   def create
