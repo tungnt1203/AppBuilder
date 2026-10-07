@@ -1344,3 +1344,48 @@
   .idea, .app-card, .card-menu > summary, .bezel iframe, .code-tree .chevron { transition: none; }
   .modal[open] { animation: none; }
 }
+
+/* The studio tour (driver.js): frosted glass like the dialogs. Outside any layer, because
+   driver.css isn't in one and would win over layered rules. */
+.driver-popover.tour {
+  font-family: var(--font-sans);
+  color: var(--text);
+  min-width: 17rem;
+  max-width: min(21rem, calc(100vw - 2rem));
+  padding: 1.1rem 1.15rem 0.9rem;
+  border-radius: 22px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-frost);
+  backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: var(--glass-shadow), 0 24px 60px -24px rgb(6 36 41 / 0.55);
+
+  .driver-popover-title { font-size: 1rem; font-weight: 600; line-height: 1.4; padding-right: 1.5rem; }
+  .driver-popover-description { margin-top: 0.3rem; font-size: 0.875rem; line-height: 1.55; color: var(--text-muted); }
+  .driver-popover-arrow { display: none; }
+  .driver-popover-close-btn { top: 0.55rem; right: 0.55rem; width: 1.75rem; height: 1.75rem; border-radius: 999px; color: var(--text-faint); }
+  .driver-popover-close-btn:hover { color: var(--text); background: var(--hover); }
+  .driver-popover-footer { margin-top: 1rem; gap: 0.5rem; }
+  .driver-popover-progress-text { font-size: 0.75rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+  .driver-popover-navigation-btns button + button { margin-left: 0.35rem; }
+  .driver-popover-btn-disabled { display: none; }
+
+  .driver-popover-footer-btn {
+    height: 2rem;
+    padding: 0 0.9rem;
+    border: 0;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 2rem;
+    text-shadow: none;
+    color: var(--text);
+    background: var(--well);
+  }
+  .driver-popover-footer-btn:hover { background: var(--well-strong); }
+  .driver-popover-next-btn, .driver-popover-done-btn {
+    color: white;
+    background: linear-gradient(180deg, rgb(63 168 154 / 0.95), rgb(37 118 108 / 0.95));
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.45) inset, 0 8px 20px -8px rgb(20 90 82 / 0.8);
+  }
+  .driver-popover-next-btn:hover, .driver-popover-done-btn:hover { background: linear-gradient(180deg, rgb(72 182 167), rgb(41 128 117)); }
+}

@@ -3,7 +3,8 @@
 
 <%# Two panels edge to edge on wide screens (chat, then the app), each with its own slim bar,
     so the preview gets as much of the window as it can. On phones they stack. %>
-<div class="studio" data-controller="preview"
+<div class="studio" data-controller="preview tour"
+     data-tour-auto-value="<%= !Current.user.toured_at? %>" data-tour-seen-url-value="<%= tour_path %>"
      data-preview-version-value="<%= @project.preview_version %>" data-preview-state-value="<%= @project.preview_state %>"
      data-preview-accepts-value="<%= @project.accepts_messages? || @project.accepts_messages_while_working? %>">
     <aside class="studio-panel studio-chat" aria-label="Chat">
@@ -14,9 +15,12 @@
         <div class="flex min-w-0 flex-1 items-center">
           <span class="chip inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs"><%= status_label(@project) %></span>
         </div>
+        <button type="button" class="btn btn-ghost btn-icon h-8 w-8" data-action="tour#start" aria-label="Show the tour" title="Show the tour"><%= icon :help %></button>
         <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon h-8 w-8" %>
         <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="history">
-          <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Version history" aria-label="Version history"><%= icon :history %></summary>
+          <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Version history" aria-label="Version history"
+                   data-tour-step="5" data-tour-title="Nothing is lost"
+                   data-tour-text="Every change is saved as a version. Open this to go back to any of them."><%= icon :history %></summary>
           <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-[22px] p-2 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[26rem] lg:right-auto lg:left-0">
             <%= render "projects/versions", project: @project %>
           </div>
@@ -25,7 +29,9 @@
           <%= render "projects/deployment_status", project: @project, deployment: deployment %>
         <% end %>
         <%= button_to "Publish", project_deployments_path(@project), disabled: !@project.publishable?, class: "btn btn-primary h-8 px-3.5",
-              title: publish_hint(@project) %>
+              title: publish_hint(@project),
+              form: { data: { tour_step: 6, tour_title: "Put it online",
+                              tour_text: "Once the first build is done, Publish gives your app its own address. Publish again whenever you want the latest changes live." } } %>
       </header>
 
       <div id="messages" class="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pt-4 pb-4" data-controller="autoscroll">
@@ -65,7 +71,8 @@
           </div>
           <%= hidden_field_tag "message[pointed]", "", id: nil, data: { preview_target: "pointed" } %>
           <% can_send = @project.accepts_messages? || @project.accepts_messages_while_working? %>
-          <div class="composer glass">
+          <div class="composer glass" data-tour-step="1" data-tour-title="Ask in your own words"
+               data-tour-text="Describe what you want: a new page, other colors, a booking form. The agent builds it while you watch, and you can keep chatting to change anything.">
             <%= form.text_area :body, rows: 1, disabled: !can_send, required: true, "aria-label": "Ask for a change",
                   placeholder: @project.accepts_messages? ? "Ask for a change" : (can_send ? "Add to the request while it works" : "Wait for the current step to finish"),
                   data: { action: "keydown->composer#submitOnShortcut input->composer#resize paste->attachments#paste", composer_target: "input", attachments_target: "body" },
@@ -75,6 +82,8 @@
               <%= form.file_field :files, multiple: true, accept: "image/png,image/jpeg,image/gif,image/webp,image/svg+xml,application/pdf,text/plain,text/csv",
                     hidden: true, disabled: !can_send, data: { attachments_target: "input", action: "change->attachments#add" } %>
               <button type="button" class="btn btn-ghost btn-icon h-8 w-8" data-action="attachments#pick" <%= "disabled" unless can_send %>
+                      data-tour-step="2" data-tour-title="Show, don't just tell"
+                      data-tour-text="Attach your logo, photos or a menu as a PDF. You can also paste a screenshot straight into the message."
                       aria-label="Attach files" title="Attach a logo, photos, a menu (PDF)… or paste a screenshot"><%= icon :paperclip, size: 18 %></button>
               <label class="plan-toggle" title="The agent proposes a plan first and builds it when you approve">
                 <%= check_box_tag "message[plan]", "1", @project.plans_by_default?, id: "message_plan", disabled: !@project.accepts_messages? %>
@@ -88,7 +97,8 @@
       </div>
     </aside>
 
-    <section class="studio-panel studio-main" aria-label="App">
+    <section class="studio-panel studio-main" aria-label="App" data-tour-step="3" data-tour-side="left" data-tour-align="center" data-tour-title="Your app, live"
+             data-tour-text="This is the real app, running. Click around and try it the way your customers will.">
       <header class="studio-bar">
         <div class="segmented segmented-labels" role="tablist" aria-label="Show">
           <button type="button" role="tab" aria-selected="true" data-preview-target="tab" data-preview-tab-param="preview" data-action="preview#showTab"><%= icon :play, size: 13 %>Preview</button>
@@ -98,6 +108,8 @@
         <span class="url ml-1 hidden min-w-0 flex-1 truncate md:block"><%= @project.preview_url %></span>
         <div class="ml-auto flex items-center gap-0.5">
           <button type="button" class="btn btn-ghost btn-icon h-8 w-8" data-action="preview#togglePick" data-preview-target="pickButton" aria-pressed="false"
+                  data-tour-step="4" data-tour-title="Point at it"
+                  data-tour-text="Click this, then click any part of the preview. Your next message will be about exactly that part."
                   aria-label="Point at something in the preview" title="Point at a part of the page to ask about it"><%= icon :target, size: 15 %></button>
           <button type="button" class="btn btn-ghost btn-icon h-8 w-8" data-action="preview#reload" aria-label="Reload preview" title="Reload preview"><%= icon :reload, size: 15 %></button>
           <%= link_to @project.preview_url, target: "_blank", class: "btn btn-ghost btn-icon h-8 w-8", "aria-label": "Open preview in a new tab", title: "Open preview in a new tab" do %><%= icon :external, size: 15 %><% end %>

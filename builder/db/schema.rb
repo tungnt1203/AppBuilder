@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_063146) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_071857) do
   create_table "agent_commands", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "kind", null: false
@@ -103,6 +103,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_063146) do
     t.datetime "updated_at", null: false
     t.string "name", default: "", null: false
     t.string "role", default: "member", null: false
+    t.datetime "toured_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 

@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
+  resource :tour, only: :create
   resources :passwords, param: :token
   root "projects#index"
 
