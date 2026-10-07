@@ -11,9 +11,10 @@ Rails.application.configure do
   # "sdk" runs runner/index.mjs (the Claude Agent SDK) and is interactive: the agent can ask
   # questions mid-turn, take extra messages and be stopped. It needs `npm install` in runner/
   # and a token or API key. "cli" runs the local `claude -p` and can only be stopped.
-  # Where each project's code and agent run: "local" (this machine) or "docker" (a container
-  # per project, see app/models/sandbox.rb and `bin/sandbox build`).
-  config.x.sandbox = ENV.fetch("SANDBOX", "local")
+  # Where each project's code and agent run: "docker" (a container per project, see
+  # app/models/sandbox.rb and `bin/sandbox build`) or "local" (this machine). Tests run
+  # locally unless they pick one.
+  config.x.sandbox = ENV.fetch("SANDBOX", Rails.env.test? ? "local" : "docker")
   config.x.sandbox_image = ENV.fetch("SANDBOX_IMAGE", "appbuilder-sandbox")
   config.x.sandbox_cpus = ENV.fetch("SANDBOX_CPUS", "2")
   config.x.sandbox_memory = ENV.fetch("SANDBOX_MEMORY", "2g")

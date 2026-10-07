@@ -32,13 +32,13 @@ class ProjectPreviewTest < ActiveSupport::TestCase
     assert_equal "NameError in ShopsController#show", @project.preview_error
   end
 
-  test "a failed migration is the problem, even if the server comes up" do
+  test "a failed preparation is the problem, even if the server comes up" do
     with_preview(FakePreview.new)
 
-    @project.restart_preview # the fixture's folder doesn't exist, so db:prepare fails
+    @project.restart_preview # the fixture's folder doesn't exist, so preparing it fails
 
     assert @project.preview_broken?
-    assert_match "bin/rails db:prepare failed", @project.preview_error
+    assert_match "bundle install --quiet failed", @project.preview_error
   end
 
   test "an unexpected error never leaves the preview starting" do

@@ -312,7 +312,10 @@ class Project < ApplicationRecord
         "tmp/ isn't part of the app: copy any file the app should use, such as a logo or photos, into the app.\n#{list.join("\n")}"
     end
 
+    # Gems first: the Gemfile may have changed since they were installed where the app
+    # runs, or the app may have moved there (from this machine into a container, say).
     def prepare_preview
+      sandbox.run("sh", "-c", "bundle check > /dev/null || bundle install --quiet")
       sandbox.run("bin/rails", "db:prepare")
       sandbox.run("bin/rails", "tailwindcss:build")
       nil

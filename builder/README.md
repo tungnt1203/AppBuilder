@@ -53,16 +53,17 @@ the agent resumes its session.
 
 ## Sandbox: where projects run
 
-By default (`SANDBOX=local`) each project's preview server, gems, tests and the coding agent run
-directly on this machine, as your user: quick to work with, but the agent can reach anything
-you can. With `SANDBOX=docker` every project gets a container of its own that only sees the
-project's folder:
+Each project's preview server, gems, tests and the coding agent run in a Docker container of
+its own that only sees the project's folder (`SANDBOX=docker`, the default):
 
 ```sh
 bin/sandbox build            # once, and after changing sandbox/Dockerfile or runner/
-SANDBOX=docker bin/dev
+bin/dev
 bin/sandbox list             # the projects' containers
 ```
+
+`SANDBOX=local` runs them directly on this machine, as your user: quicker when working on the
+builder itself, but the agent can reach anything you can. Tests use `local`.
 
 - The container is made when the project first needs it and kept; deleting the app removes it.
   The project's folder is mounted at the same path, so files, git history and the Code tab work
@@ -77,8 +78,8 @@ bin/sandbox list             # the projects' containers
 
 ## Claude credentials
 
-Without any setup the agent uses your local `claude` login. To use a long-lived token instead,
-run `claude setup-token` and put it in the builder's encrypted credentials:
+The agent in a container needs a long-lived token (it can't use your Claude Code login): run
+`claude setup-token` and put it in the builder's encrypted credentials:
 
 ```sh
 bin/rails credentials:edit
@@ -91,7 +92,8 @@ claude:
 
 `CLAUDE_CODE_OAUTH_TOKEN` in the environment takes precedence. Only the agent process receives
 the token: preview servers, tests and image builds of the apps run without it. A token belongs
-to one Claude account; everyone running the builder uses their own.
+to one Claude account; everyone running the builder uses their own. With `SANDBOX=local` and no
+token, the agent uses your local `claude` login.
 
 ## Eval
 
