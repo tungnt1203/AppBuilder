@@ -1,0 +1,22 @@
+<%# Hero, full-bleed photo: the place or the product fills the first screen, the words sit on a
+    dark gradient at the bottom where thumbs are. Good when there's a strong photo (a dish, the
+    room, a class in motion). Keep the text short; the photo does the talking. %>
+<section class="relative isolate flex min-h-[85svh] items-end overflow-hidden bg-ink">
+  <div class="absolute inset-0 -z-10 bg-gradient-to-br from-brand-700 via-brand-900 to-ink">
+    <%# image_tag "stock/…", alt: "", class: "size-full object-cover" %>
+  </div>
+  <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+  <div class="mx-auto w-full max-w-6xl px-4 pt-32 pb-12 md:pb-20">
+    <p class="text-sm font-semibold tracking-widest text-white/80 uppercase">Phở bò gia truyền từ 1987</p>
+    <h1 class="mt-3 max-w-2xl text-5xl leading-[1.05] font-bold text-balance text-white md:text-7xl">Nước dùng ninh 12 tiếng</h1>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href="#thuc-don" class="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 font-semibold text-ink transition hover:bg-white/90">
+        Xem thực đơn <%= icon "arrow-right", size: 18 %>
+      </a>
+      <a href="tel:0901234567" class="inline-flex items-center gap-2 rounded-lg px-5 py-3 font-semibold text-white ring-1 ring-white/40 transition ring-inset hover:bg-white/10">
+        <%= icon "phone", size: 18 %> 0901 234 567
+      </a>
+    </div>
+  </div>
+</section>

@@ -99,7 +99,20 @@ buttons scannable; don't use emoji as icons.
 
 ## 5. Customer-facing pages
 
-Visitors' pages use `layout "public"` and are designed, not assembled from admin blocks:
+Visitors' pages use `layout "public"` and are designed, not assembled from admin blocks.
+
+**Start from the page blocks** in `app/views/blocks/`: hero (split, full-bleed photo), features,
+price list or menu, gallery, timetable, testimonials, stats, FAQ, find-us (address, hours, call,
+Zalo, map), closing call to action, and a bottom action bar for phones. They use only the theme's
+names, so they wear the app's look, and they already work at 390px. See them all in this app's theme
+at `/_blocks` on the preview (development only; `?only=price_list` for one). To use one, **copy its
+markup into the page's own view and make it this app's**: real content and records instead of the
+samples, the app's wording, its photos, and changes to layout and detail that the direction asks for
+(a serif price list, a ticket-stub card, square corners). Don't `render "blocks/…"` from pages, and
+don't edit the blocks themselves: they are the starting point for every page. Pick the few blocks
+this business needs, in the order a visitor wants them; a page with every block is a template, not a
+design.
+
 
 - **Header and footer** (`app/views/layouts/public/_header.html.erb`, `_footer.html.erb`): redesign
   them for the app. The footer carries what visitors look for: address, hours, phone, Zalo, map link.

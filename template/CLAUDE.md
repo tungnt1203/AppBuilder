@@ -90,7 +90,8 @@ first and write it there. A plan for a new app includes a short "Look and feel" 
   Vietnamese); icons are Lucide via `icon "name"` (find names with `bin/icons <word>`); free stock
   photos come from `bin/images <english words>` (see the `design` skill).
 - **Customer-facing pages** (home, catalog, menu, booking, anything visitors use) use `layout "public"`
-  and are designed freely: header, footer, sections, imagery, motion. See the `design` skill.
+  and are designed freely: header, footer, sections, imagery, motion. Start from the page blocks in
+  `app/views/blocks/` (seen at `/_blocks`), copied into the page and made the app's own. See the `design` skill.
 - **The owner's and staff's screens** (managing records, schedules, reports, settings) use the
   `application` layout (sidebar) and the UI kit in `app/helpers/ui_helper.rb` (`ui-kit` skill):
   `page_header`, `card`, `stat`, `empty_state`, `badge`, `alert`, `tabs`, `dialog`, `menu`,

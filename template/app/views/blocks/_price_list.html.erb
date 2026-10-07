@@ -1,0 +1,33 @@
+<%# Price list or menu: groups of services or dishes, each with a dotted line to its price, like
+    a printed menu. Fits salons, spas, cafés, restaurants, repair shops. In a real page loop over
+    the owner's records and format with number_to_currency (unit "đ" in Vietnamese apps). Two
+    columns on wide screens, one on phones. %>
+<section id="bang-gia" class="bg-surface py-16 md:py-24">
+  <div class="mx-auto max-w-6xl px-4">
+    <div class="max-w-2xl">
+      <h2 class="text-3xl font-bold text-ink md:text-4xl">Bảng giá</h2>
+      <p class="mt-3 text-lg leading-relaxed text-muted">Giá đã gồm dưỡng móng. Vẽ thêm tính theo mẫu.</p>
+    </div>
+
+    <div class="mt-10 grid gap-x-16 gap-y-12 md:grid-cols-2">
+      <% { "Tay" => [ [ "Sơn gel trơn", "45 phút", 150_000 ], [ "Sơn gel + vẽ đơn giản", "60 phút", 220_000 ], [ "Đắp bột", "90 phút", 350_000 ] ],
+           "Chân" => [ [ "Sơn gel trơn", "45 phút", 170_000 ], [ "Chà gót + sơn", "60 phút", 250_000 ] ] }.each do |group, items| %>
+        <div>
+          <h3 class="border-b border-line pb-3 text-sm font-semibold tracking-wide text-brand-700 uppercase"><%= group %></h3>
+          <ul class="mt-2">
+            <% items.each do |name, duration, price| %>
+              <li class="py-3">
+                <div class="flex items-baseline gap-3">
+                  <p class="font-medium text-ink"><%= name %></p>
+                  <span class="flex-1 translate-y-[-0.3em] border-b-2 border-dotted border-muted/40" aria-hidden="true"></span>
+                  <span class="font-display text-lg font-semibold whitespace-nowrap text-ink"><%= number_to_currency(price, unit: "đ", precision: 0, delimiter: ".", format: "%n%u") %></span>
+                </div>
+                <p class="text-sm text-muted"><%= duration %></p>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
