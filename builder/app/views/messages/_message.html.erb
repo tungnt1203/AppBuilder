@@ -1,6 +1,23 @@
 <% case message.role %>
 <% when "user" %>
-  <div class="bubble-user"><%= message.body %></div>
+  <% if (attachments = Attachment.for(message)).any? %>
+    <ul class="sent-attachments" aria-label="Attached files">
+      <% attachments.each do |attachment| %>
+        <li>
+          <%= link_to project_attachment_path(message.project, message_id: message.id, name: attachment.name), target: "_blank", title: attachment.name do %>
+            <% if attachment.image? %>
+              <%= image_tag project_attachment_path(message.project, message_id: message.id, name: attachment.name), alt: attachment.name, loading: "lazy" %>
+            <% else %>
+              <span class="attachment-file"><%= icon :file, size: 14 %><span class="truncate"><%= attachment.name %></span></span>
+            <% end %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+  <% if message.body.present? %>
+    <div class="bubble-user"><%= message.body %></div>
+  <% end %>
 <% when "assistant" %>
   <% if message.body.present? %>
     <div class="reply"><%= markdown(message.body) %></div>

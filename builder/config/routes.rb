@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     resource :duplicate, only: :create, module: :projects
     resource :code, only: :show, module: :projects
     resource :address, only: :update, module: :projects
+    get "messages/:message_id/attachments/:name", to: "projects/attachments#show", as: :attachment, constraints: { name: %r{[^/]+} }
   end
 
   get "up" => "rails/health#show", as: :rails_health_check

@@ -70,13 +70,18 @@
         </div>
       <% end %>
 
-      <%= form_with model: [ @project, Message.new ], class: "absolute inset-x-3 bottom-3", data: { controller: "composer" } do |form| %>
-        <div class="glass capsule flex items-end gap-2 py-1.5 pr-1.5 pl-4">
+      <%= form_with model: [ @project, Message.new ], class: "absolute inset-x-3 bottom-3", data: { controller: "composer attachments", action: "dragover->attachments#dragOver dragleave->attachments#dragLeave drop->attachments#drop" } do |form| %>
+        <ul class="attachment-list" data-attachments-target="list" hidden></ul>
+        <div class="glass capsule flex items-end gap-2 py-1.5 pr-1.5 pl-1.5">
           <%= hidden_field_tag "message[plan]", "0", id: nil %>
           <% can_send = @project.accepts_messages? || @project.accepts_messages_while_working? %>
+          <%= form.file_field :files, multiple: true, accept: "image/png,image/jpeg,image/gif,image/webp,image/svg+xml,application/pdf,text/plain,text/csv",
+                hidden: true, disabled: !can_send, data: { attachments_target: "input", action: "change->attachments#add" } %>
+          <button type="button" class="btn btn-ghost btn-icon h-9 w-9" data-action="attachments#pick" <%= "disabled" unless can_send %>
+                  aria-label="Attach files" title="Attach a logo, photos, a menu (PDF)… or paste a screenshot"><%= icon :paperclip, size: 18 %></button>
           <%= form.text_area :body, rows: 1, disabled: !can_send, required: true, "aria-label": "Ask for a change",
                 placeholder: @project.accepts_messages? ? "Ask for a change" : (can_send ? "Add to the request while it works" : "Wait for the current step to finish"),
-                data: { action: "keydown->composer#submitOnShortcut input->composer#resize", composer_target: "input" },
+                data: { action: "keydown->composer#submitOnShortcut input->composer#resize paste->attachments#paste", composer_target: "input", attachments_target: "body" },
                 class: "max-h-40 min-h-9 flex-1 resize-none bg-transparent py-2 text-[0.9375rem] leading-snug outline-none placeholder:text-[var(--text-faint)] disabled:opacity-60" %>
           <label class="plan-toggle" title="The agent proposes a plan first and builds it when you approve">
             <%= check_box_tag "message[plan]", "1", @project.plans_by_default?, id: "message_plan", disabled: !@project.accepts_messages? %>

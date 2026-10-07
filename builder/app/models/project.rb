@@ -231,10 +231,13 @@ class Project < ApplicationRecord
     working_since.present? && agent_commands.interrupt.where(created_at: working_since..).exists?
   end
 
-  # The owner's message goes to the agent, in plan or build mode. While a turn is
-  # running (interactive agent only), it joins that turn instead.
-  def ask(request, mode:)
-    messages.create!(role: :user, body: request)
+  # The owner's message goes to the agent, in plan or build mode, with the files they
+  # attached. While a turn is running (interactive agent only), it joins that turn instead.
+  def ask(request, mode:, files: [])
+    message = messages.create!(role: :user, body: request)
+    attachments = Attachment.save(message, files)
+    message.update!(data: { "attachments" => attachments.map(&:to_h) }) if attachments.any?
+    request = [ request.presence, attachments_note(attachments) ].compact.join("\n\n")
 
     if working?
       agent_commands.create!(kind: :message, payload: { "text" => request })
@@ -264,6 +267,14 @@ class Project < ApplicationRecord
   end
 
   private
+    def attachments_note(attachments)
+      return if attachments.empty?
+
+      list = attachments.map { |attachment| "- #{attachment.relative_path} (#{attachment.content_type})" }
+      "The owner attached these files. Look at each one (Read shows images and PDFs). " \
+        "tmp/ isn't part of the app: copy any file the app should use, such as a logo or photos, into the app.\n#{list.join("\n")}"
+    end
+
     def prepare_preview
       shell.run("bin/rails", "db:prepare")
       shell.run("bin/rails", "tailwindcss:build")

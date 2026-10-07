@@ -43,4 +43,57 @@ class Projects::MessagesControllerTest < ActionDispatch::IntegrationTest
       post project_messages_path(projects(:clinic)), params: { message: { body: "Khách có cần tài khoản không? Không", plan: "1" } }
     end
   end
+
+  test "attached files go to the agent and show in the chat" do
+    project = projects(:clinic)
+    with_projects_root do
+      assert_enqueued_jobs 1, only: AgentTurnJob do
+        post project_messages_path(project), params: { message: { body: "Dùng logo này", plan: "0",
+          files: [ fixture_file_upload("logo.png", "image/png"), fixture_file_upload("menu.txt", "text/plain"), fixture_file_upload("run.sh", "application/x-sh") ] } }
+      end
+
+      message = project.messages.user.last
+      assert_equal [ "logo.png", "menu.txt" ], message.data["attachments"].map { |attachment| attachment["name"] }
+      assert project.path.join("tmp/attachments/#{message.id}/logo.png").exist?
+
+      request = enqueued_jobs.last["arguments"][1]
+      assert request.start_with?("Dùng logo này")
+      assert_includes request, "- tmp/attachments/#{message.id}/logo.png (image/png)"
+
+      get project_path(project)
+      assert_select ".sent-attachments img[src='#{project_attachment_path(project, message_id: message.id, name: "logo.png")}']"
+
+      get project_attachment_path(project, message_id: message.id, name: "logo.png")
+      assert_response :success
+      assert_equal "image/png", response.media_type
+      assert_equal "sandbox", response.headers["Content-Security-Policy"]
+    end
+  end
+
+  test "files alone are a message" do
+    with_projects_root do
+      post project_messages_path(projects(:clinic)), params: { message: { body: "", files: [ fixture_file_upload("logo.png", "image/png") ] } }
+    end
+
+    assert_equal "", projects(:clinic).messages.user.last.body
+    assert projects(:clinic).reload.working?
+  end
+
+  test "only attached files can be opened" do
+    with_projects_root do
+      message = projects(:clinic).messages.create!(role: :user, body: "Hi")
+      get project_attachment_path(projects(:clinic), message_id: message.id, name: "..%2F..%2Fconfig%2Fmaster.key")
+      assert_response :not_found
+    end
+  end
+
+  private
+    def with_projects_root
+      root = Pathname(Dir.mktmpdir)
+      original, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, root
+      yield
+    ensure
+      Rails.configuration.x.projects_root = original
+      FileUtils.rm_rf(root)
+    end
 end
