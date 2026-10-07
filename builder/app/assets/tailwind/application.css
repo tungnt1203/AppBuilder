@@ -1065,10 +1065,20 @@
 
 @layer components {
   /* What the agent is doing right now, floating above the composer. */
+  /* What the agent is doing, in one small line over the message box. */
   .activity {
-    font-size: 0.8125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 1.75rem;
+    padding: 0 0.25rem 0 0.75rem;
+    border-radius: 999px;
+    background: var(--well);
+    font-size: 0.75rem;
     font-weight: 500;
-    color: var(--text);
+    color: var(--text-muted);
+
+    & .activity-dot { width: 0.4rem; height: 0.4rem; }
   }
   .activity-dot {
     width: 0.5rem;

@@ -43,13 +43,13 @@
       <%# In the flow under the chat: as the message grows, the chat above gets shorter instead of hidden. %>
       <div class="composer-dock">
         <% if @project.setting_up? || @project.working? %>
-          <div class="activity glass capsule flex items-center gap-2.5 px-4 py-2"
+          <div class="activity"
                data-controller="elapsed" data-elapsed-since-value="<%= (@project.working_since || @project.updated_at).to_i %>" aria-live="polite">
             <span class="activity-dot"></span>
             <span id="activity-text" class="live-activity min-w-0 flex-1 truncate"><%= @project.setting_up? ? "Setting up the project" : (@project.activity || "Working") %></span>
             <span class="faint tabular-nums" data-elapsed-target="clock"></span>
             <% if @project.working? %>
-              <%= button_to "Stop", project_stop_path(@project), class: "btn btn-ghost h-7 px-3 text-xs", title: "Stop the agent; what's done so far is kept",
+              <%= button_to "Stop", project_stop_path(@project), class: "btn btn-ghost h-6 px-2 text-xs", title: "Stop the agent; what's done so far is kept",
                     disabled: @project.stop_requested? %>
             <% end %>
           </div>
