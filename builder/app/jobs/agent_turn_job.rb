@@ -78,7 +78,7 @@ class AgentTurnJob < ApplicationJob
     # The session to resume is gone, for example after the app moved into a container: the
     # turn starts over in a new one, on the app as it is.
     def start_new_session(project)
-      project.update!(session_id: nil)
+      project.update!(session_id: nil, session_cost_usd: 0)
       project.messages.create!(role: :notice, body: "Started a new conversation with the agent; your app is unchanged.")
     end
 

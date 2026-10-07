@@ -145,6 +145,20 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_equal [ @project.id, 1.23 ], [ Usage.last.project_id, Usage.last.cost_usd.to_f ]
   end
 
+  test "a resumed session is charged only what each turn added" do
+    record "type" => "system", "subtype" => "init", "session_id" => "s1"
+    record "type" => "result", "is_error" => false, "total_cost_usd" => 6.53, "num_turns" => 200
+    record "type" => "system", "subtype" => "init", "session_id" => "s1"
+    record "type" => "result", "is_error" => false, "total_cost_usd" => 6.60, "num_turns" => 1
+
+    assert_equal [ 6.53, 0.07 ], @project.owner.usages.where(project: @project).order(:id).last(2).map { |usage| usage.cost_usd.to_f.round(2) }
+    assert_equal 0.07, @project.messages.result.last.data["cost_usd"].round(2)
+
+    record "type" => "system", "subtype" => "init", "session_id" => "s2"
+    record "type" => "result", "is_error" => false, "total_cost_usd" => 0.16, "num_turns" => 3
+    assert_equal 0.16, @project.owner.usages.last.cost_usd.to_f
+  end
+
   test "a stopped turn is summed up, not shown as an empty error" do
     @project.agent_commands.create!(kind: :interrupt)
     @project.update!(working_since: 1.minute.ago)

@@ -81,7 +81,10 @@ class AgentTranscript
 
   private
     def record_session(event)
-      @project.update!(session_id: event["session_id"]) if event["subtype"] == "init" && event["session_id"]
+      return unless event["subtype"] == "init" && event["session_id"]
+      return if event["session_id"] == @project.session_id
+
+      @project.update!(session_id: event["session_id"], session_cost_usd: 0)
     end
 
     # Partial events arrive while a block is being written.
@@ -230,14 +233,22 @@ class AgentTranscript
         last.destroy
       end
 
-      charge event["total_cost_usd"]
       data = event.slice("total_cost_usd", "num_turns", "duration_ms", "subtype")
+      data["cost_usd"] = charge_turn(event["total_cost_usd"])
       data["stopped"] = true if event["is_error"] && !error
       @project.messages.create!(role: error ? :error : :result, body: error ? problem : "", data:)
     end
 
-    def charge(cost)
-      @project.owner.usages.create!(project: @project, cost_usd: cost) if @project.owner && cost.to_f.positive?
+    # A resumed session reports what it has cost in all, from its first turn: this turn
+    # costs what was added since the last one counted.
+    def charge_turn(session_total)
+      return unless session_total
+
+      counted = @project.session_cost_usd.to_f
+      cost = session_total.to_f >= counted ? session_total.to_f - counted : session_total.to_f
+      @project.update!(session_cost_usd: session_total)
+      @project.owner.usages.create!(project: @project, cost_usd: cost) if @project.owner && cost.positive?
+      cost.round(4)
     end
 
     # The plan for this turn is one message whose tasks get ticked off.

@@ -117,7 +117,8 @@ module ApplicationHelper
   def turn_summary(message)
     data = message.data
     duration = distance_of_time_in_words(data["duration_ms"] / 1000.0) if data["duration_ms"]
-    cost = number_to_currency(data["total_cost_usd"], precision: 2) if data["total_cost_usd"]
+    turn_cost = data.fetch("cost_usd", data["total_cost_usd"]) # turns recorded before costs were per turn
+    cost = number_to_currency(turn_cost, precision: 2) if turn_cost
     [ ("#{data["stopped"] ? "Stopped after" : "Finished in"} #{duration}" if duration), (pluralize(data["num_turns"], "step") if data["num_turns"]), cost ].compact.join(", ")
   end
 end
