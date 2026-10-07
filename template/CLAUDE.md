@@ -34,7 +34,7 @@ Set these once, at the start of a new app, to match the owner (`config/applicati
 - `config.i18n.default_locale`: `:vi` for Vietnamese owners, otherwise `:en`.
 - `config.time_zone`: where the app's users are, e.g. `"Asia/Ho_Chi_Minh"` for Vietnam.
 
-The built-in screens (sign in, admin, emails) are already translated in `config/locales/en.yml` and
+The built-in screens (sign in, accounts, /admin, emails) are already translated in `config/locales/en.yml` and
 `vi.yml`, and rails-i18n translates validation errors, dates and numbers, so don't write those again.
 Write new UI copy directly in the owner's language. Format with `l(date)`, `l(time, format: :short)`
 and `number_to_currency`, which follow the locale (for example `150.000 VNĐ` and `05/10/2026` in Vietnamese).
@@ -49,8 +49,9 @@ Redis, or external services. Add a gem only when Rails cannot reasonably do the 
 
 - `bin/rails test` — all tests; must pass before you report a task as done
 - `bin/rails test:system` — the main flows in headless Chrome (`test/system/`); must pass too
-- `bin/look /path --as owner` — look at pages of the running app: screenshots at phone and desktop
-  width (Read them) and the problems a visitor would hit
+- `bin/look /path` — look at pages of the running app: screenshots at phone and desktop width (Read
+  them) and the problems a visitor would hit. `--as customer` signs in a customer, `--as owner` (or
+  `admin`, `staff`) signs in to `/admin`
 - `bin/rubocop` — style; must be clean
 - `bin/rails db:migrate` — after adding a migration
 - `bin/rails tailwindcss:build` — after changing views, so the preview picks up new classes
@@ -77,34 +78,42 @@ from the new version may already have run. The previous code must keep working o
   removing it is a separate, later change.
 - Never change existing data in a way the previous version can't read.
 
-## Public pages and sign in
+## Two halves: the customers' site and /admin
 
-Decide for every screen who it's for. Not every app needs sign in:
+Every app has two halves that share the database and nothing else: their own accounts, sign in,
+layout and look. Decide for every screen which half it belongs to.
 
-- **Public**, for customers and visitors: landing pages, booking or order forms, product
-  catalogs, menus, contact pages. Add `allow_unauthenticated_access` to the controller.
-- **Signed in**, for the owner and staff: managing records, schedules, reports, settings.
-  This is the default.
+- **The customers' site**: everything outside `/admin`. Home, catalog, product pages, cart,
+  checkout, booking, order status, and customers' own accounts. Controllers inherit from
+  `ApplicationController`; pages are **public** by default. Designed freely (`design` skill).
+- **/admin**: where the owner and staff run the app. Managing products, orders, customers,
+  schedules, reports, settings. Controllers live in `app/controllers/admin/`, inherit from
+  `Admin::BaseController`, and route under `namespace :admin`. Sign in is required; they use the
+  UI kit (`ui-kit` skill). A staff screen never goes outside `/admin`, and a customer's screen
+  never goes inside it.
 
-A public page must work for any visitor, on a brand-new install with no accounts yet. Never
-redirect visitors from a public page to sign in or to the first-run setup; the owner reaches
-those through the "Sign in" link or `/session/new`, which starts the first-run setup when no
-account exists. Signed-in staff may be sent from a public page to their own screen with
-`redirect_to ... if authenticated?`. In views of public pages, check `authenticated?` before
-using `Current.user`. Test public pages with no users at all (`User.delete_all`).
+The customers' site must work for any visitor on a brand-new install with no accounts at all.
+It never sends visitors to `/admin`, and has no link to it; the owner goes to `/admin` directly
+(a new install starts the owner's first-run setup there). Test site pages with no users
+(`User.delete_all`).
 
-## Accounts and permissions
+## Accounts
 
-Built in, extend rather than replace:
+Two kinds, never mixed: a customer can't sign in to `/admin`, and a staff account isn't a customer.
 
-- `Current.user` is the signed-in user. Every controller requires sign in unless it calls
-  `allow_unauthenticated_access`.
-- Roles: `owner` (created on first run, permanent), `admin`, `member`. `user.administrator?` is true
-  for owner and admin.
-- People are managed in `/admin/users` (invite, change role, remove). Controllers that only admins
-  may use inherit from `Admin::BaseController`.
-- Records that belong to someone use `belongs_to :user` (or a clearer name like `:author`) and scope
-  queries through it when members should only see their own data.
+- **Customers** (`Customer`, `CustomerSession`): sign up at `/registration/new`, sign in at
+  `/session/new`, reset a password at `/passwords/new`, see and edit their details at `/account`.
+  `Current.customer` is the signed-in customer (nil for visitors); views check `customer_signed_in?`.
+  A site page only for signed-in customers adds `before_action :require_customer`, which sends
+  visitors to sign in and back. Records a customer owns use `belongs_to :customer`, and site
+  controllers look them up through it: `Current.customer.orders.find(params[:id])`. Put what
+  customers come back for (orders, downloads, bookings) on `/account`. When the owner wants no
+  customer accounts (a guest checkout, a landing page), take the sign-in link out of the site header.
+- **Owner and staff** (`User`, `Session`): `Current.user`, in `/admin` only. Roles: `owner` (created
+  on first run, permanent), `admin`, `staff`; `user.administrator?` is true for owner and admin.
+  Admins invite and manage staff at `/admin/users`. A controller only admins may use adds
+  `before_action :require_administrator`. When staff should see only their own records, use
+  `belongs_to :user` (or a clearer name like `:assignee`) and scope lookups through it.
 
 ## Design and UI
 
@@ -116,20 +125,19 @@ first and write it there. A plan for a new app includes a short "Look and feel" 
   neutral placeholder; replace it with the app's direction. Fonts are self-hosted (`fonts.css`, all with
   Vietnamese); icons are Lucide via `icon "name"` (find names with `bin/icons <word>`); free stock
   photos come from `bin/images <english words>` (see the `design` skill).
-- **Customer-facing pages** (home, catalog, menu, booking, anything visitors use) use `layout "public"`
-  and are designed freely: header, footer, sections, imagery, motion. Start from the page blocks in
+- **The customers' site** (everything outside `/admin`) uses the `application` layout, the default
+  for `ApplicationController`, and is designed freely: header, footer, sections, imagery, motion. Start from the page blocks in
   `app/views/blocks/` (seen at `/_blocks`), copied into the page and made the app's own. See the `design` skill.
-- **The owner's and staff's screens** (managing records, schedules, reports, settings) use the
-  `application` layout (sidebar) and the UI kit in `app/helpers/ui_helper.rb` (`ui-kit` skill):
-  `page_header`, `card`, `stat`, `empty_state`, `badge`, `alert`, `tabs`, `dialog`, `menu`,
-  `button_classes`… Forms everywhere use `form.field`, `form.errors`, `form.submit` (`UiFormBuilder`).
-- Sign-in screens use `authentication`. Add each owner screen to `app/views/layouts/_navigation.html.erb`.
+- **/admin** uses the `admin` layout (sidebar), set by `Admin::BaseController`, and the UI kit in
+  `app/helpers/ui_helper.rb` (`ui-kit` skill): `page_header`, `card`, `stat`, `empty_state`, `badge`,
+  `alert`, `tabs`, `dialog`, `menu`, `button_classes`… Forms everywhere use `form.field`, `form.errors`,
+  `form.submit` (`UiFormBuilder`). Add each admin screen to `app/views/layouts/admin/_navigation.html.erb`.
+  Staff sign-in screens use `admin_authentication`.
 - Interactivity comes from Turbo (Frames, Streams, morphing) and Stimulus (`shell`, `dialog`, `menu`,
   plus small controllers of your own).
 - Set the app's name in `config.x.app_name` (`config/application.rb`).
-- When the app gets its real main screen, point `root` at it and delete the placeholder
-  (`HomeController`, `app/views/home/`, `test/controllers/home_controller_test.rb`, and the `home:` keys
-  in both locale files). Keep the `layouts.application.home` key only if the nav still says "Home".
+- `root` is the site's home page (`HomeController`, a "coming soon" placeholder) and `/admin`'s is
+  `Admin::DashboardsController`. Replace both with the app's real ones.
 
 ## Definition of done
 
@@ -138,8 +146,8 @@ first and write it there. A plan for a new app includes a short "Look and feel" 
 - Model tests for validations and business rules; integration tests for each controller action,
   including who may and may not access it; a system test for each main flow (`new-feature` skill).
 - `bin/rails test`, `bin/rails test:system` and `bin/rubocop` pass.
-- You looked at every page you changed with `bin/look`, at phone and desktop width, and fixed what
-  it reported and what looked wrong.
+- You looked at every page you changed with `bin/look`, at phone and desktop width, both halves
+  (owners run their shop from a phone too), and fixed what it reported and what looked wrong.
 - Your summary says what changed in terms the owner understands, and flags anything that affects
   existing data.
 

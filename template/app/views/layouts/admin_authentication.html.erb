@@ -4,14 +4,14 @@
     <%= render "layouts/head" %>
   </head>
 
-  <%# Sign in, first run, invitations and passwords. The brand panel is drawn from the
+  <%# Staff sign in to /admin: sign in, first run, invitations and passwords. The brand panel is drawn from the
       theme's brand colors and display font, so it takes on each app's own look. %>
   <body class="min-h-full bg-canvas font-sans text-ink antialiased md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
     <aside class="relative isolate flex flex-col justify-between gap-6 overflow-hidden bg-linear-to-br from-brand-500 via-brand-700 to-brand-950 px-6 py-7 text-white md:min-h-screen md:p-12">
       <div class="absolute -top-24 -right-24 -z-10 size-80 rounded-full bg-brand-300/40 blur-3xl" aria-hidden="true"></div>
       <div class="absolute -bottom-32 -left-16 -z-10 size-96 rounded-full bg-accent/25 blur-3xl" aria-hidden="true"></div>
       <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_1px_1px,rgb(255_255_255/0.12)_1px,transparent_0)] bg-size-[22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" aria-hidden="true"></div>
-      <%= link_to root_path, class: "flex items-center gap-3 text-white" do %>
+      <%= link_to new_admin_session_path, class: "flex items-center gap-3 text-white" do %>
         <span class="grid size-10 place-items-center rounded-lg bg-white/15 font-display text-lg font-semibold ring-1 ring-white/25 backdrop-blur-sm">
           <%= Rails.configuration.x.app_name.to_s.strip.first.to_s.upcase %>
         </span>

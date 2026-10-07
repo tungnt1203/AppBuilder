@@ -10,7 +10,7 @@ class UserTest < ActiveSupport::TestCase
     user = User.invite(name: "New Person", email_address: "new@example.com")
 
     assert user.persisted?
-    assert user.member?
+    assert user.staff?
     assert_not user.authenticate("password")
   end
 
@@ -25,19 +25,19 @@ class UserTest < ActiveSupport::TestCase
   test "administrators are admins and the owner" do
     assert users(:owner).administrator?
     assert users(:admin).administrator?
-    assert_not users(:member).administrator?
+    assert_not users(:staff).administrator?
   end
 
   test "the owner cannot be demoted or removed" do
     owner = users(:owner)
 
-    assert_not owner.update(role: "member")
+    assert_not owner.update(role: "staff")
     assert_not owner.destroy
     assert User.exists?(owner.id)
   end
 
   test "invitation token stops working once a password is chosen" do
-    user = users(:member)
+    user = users(:staff)
     token = user.generate_token_for(:invitation)
     assert_equal user, User.find_by_token_for(:invitation, token)
 

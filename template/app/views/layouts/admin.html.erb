@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html class="h-full">
+  <head>
+    <%= render "layouts/head" %>
+  </head>
+
+  <body class="h-dvh overflow-hidden bg-canvas font-sans text-ink antialiased" data-controller="shell" data-action="keydown@window->shell#closeOnEscape">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2"><%= t("ui.skip") %></a>
+
+    <div class="fixed inset-0 z-30 hidden bg-ink/40 lg:hidden" data-shell-target="backdrop" data-action="click->shell#close"></div>
+
+    <div class="flex h-full">
+      <aside id="app-nav" class="fixed inset-y-0 left-0 z-40 flex w-60 max-lg:hidden flex-col border-r border-line bg-surface max-lg:shadow-xl lg:static" data-shell-target="nav">
+        <div class="flex h-14 shrink-0 items-center border-b border-line px-4">
+          <%= link_to Rails.configuration.x.app_name, admin_root_path, class: "truncate font-semibold text-ink" %>
+        </div>
+
+        <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4" data-action="click->shell#follow" aria-label="<%= t("ui.navigation") %>">
+          <%= render "layouts/admin/navigation" %>
+        </nav>
+
+        <% if authenticated? && Current.user.administrator? %>
+          <div class="shrink-0 border-t border-line px-3 py-3">
+            <%= nav_link_to t("layouts.admin.people"), admin_users_path, match: "/admin/users" %>
+          </div>
+        <% end %>
+      </aside>
+
+      <div class="flex h-full min-w-0 flex-1 flex-col">
+        <header class="flex h-14 shrink-0 items-center gap-2 border-b border-line bg-surface px-4">
+          <button type="button" class="<%= button_classes(:ghost) %> lg:hidden" data-shell-target="menu" data-action="shell#toggle" aria-expanded="false" aria-controls="app-nav">
+            <%= t("ui.menu") %>
+          </button>
+          <%= link_to Rails.configuration.x.app_name, admin_root_path, class: "truncate font-semibold text-ink lg:hidden" %>
+          <div class="flex-1"></div>
+          <%= render "layouts/admin/account" %>
+        </header>
+
+        <main id="main" class="min-h-0 flex-1 overflow-y-auto px-4 py-6 lg:px-8">
+          <%= render "ui/flash" %>
+          <%= yield %>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

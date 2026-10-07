@@ -1,3 +1,5 @@
-<%= page_header t(".welcome", name: Current.user.name) %>
-
-<%= empty_state t(".empty_title"), t(".empty_description") %>
+<%# Placeholder home page of the customers' site. Replace it with the app's real one. %>
+<section class="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-4 py-24 text-center">
+  <h1 class="font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl"><%= Rails.configuration.x.app_name %></h1>
+  <p class="mt-4 text-lg text-muted"><%= t(".coming_soon") %></p>
+</section>

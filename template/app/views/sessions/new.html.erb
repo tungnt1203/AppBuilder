@@ -1,21 +1,26 @@
 <% content_for :title, t(".title") %>
 
-<h1 class="mb-8 text-2xl font-semibold tracking-tight"><%= t(".title") %></h1>
+<div class="mx-auto max-w-sm px-4 py-12 sm:py-20">
+  <h1 class="mb-8 font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
 
-<%= form_with url: session_path, class: "space-y-4" do |form| %>
-  <div class="space-y-1.5">
-    <%= form.label :email_address, t(".email_address") %>
-    <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address] %>
-  </div>
+  <%= form_with url: session_path, class: "space-y-4" do |form| %>
+    <div class="space-y-1.5">
+      <%= form.label :email_address, t(".email_address") %>
+      <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address] %>
+    </div>
 
-  <div class="space-y-1.5">
-    <%= form.label :password, t(".password") %>
-    <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
-  </div>
+    <div class="space-y-1.5">
+      <%= form.label :password, t(".password") %>
+      <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
+    </div>
 
-  <%= form.submit t(".submit"), class: "w-full" %>
-<% end %>
+    <%= form.submit t(".submit"), class: "w-full" %>
+  <% end %>
 
-<p class="mt-6 text-center text-sm">
-  <%= link_to t(".forgot_password"), new_password_path, class: link_classes %>
-</p>
+  <p class="mt-6 text-center text-sm">
+    <%= link_to t(".forgot_password"), new_password_path, class: link_classes %>
+  </p>
+  <p class="mt-2 text-center text-sm text-muted">
+    <%= t(".no_account") %> <%= link_to t(".sign_up"), new_registration_path, class: link_classes %>
+  </p>
+</div>

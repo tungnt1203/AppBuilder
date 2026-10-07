@@ -6,7 +6,8 @@
 #
 #   bin/look                      the home page, as a visitor
 #   bin/look / /menu /booking     several pages
-#   bin/look /bookings --as owner signed in (owner, admin or member)
+#   bin/look /account --as customer          signed in as a customer on the site
+#   bin/look /admin/orders --as owner        signed in to /admin (owner, admin or staff)
 #   bin/look / --phone            only at phone width (or --desktop)
 #   bin/look / --screens 6        more of a long page (default: the first 3 screens)
 #
@@ -20,8 +21,8 @@ require "fileutils"
 
 options = { screens: 3, sizes: { "phone" => [ 390, 844 ], "desktop" => [ 1280, 800 ] } }
 OptionParser.new do |parser|
-  parser.banner = "Usage: bin/look [paths] [--as owner|admin|member] [--phone|--desktop]"
-  parser.on("--as ROLE", %w[owner admin member], "Signed in with this role") { |role| options[:as] = role }
+  parser.banner = "Usage: bin/look [paths] [--as customer|owner|admin|staff] [--phone|--desktop]"
+  parser.on("--as WHO", %w[customer owner admin staff], "Signed in as a customer, or to /admin with this role") { |who| options[:as] = who }
   parser.on("--phone", "Only at phone width (390)") { options[:sizes] = options[:sizes].slice("phone") }
   parser.on("--desktop", "Only at desktop width (1280)") { options[:sizes] = options[:sizes].slice("desktop") }
   parser.on("--screens N", Integer, "Screens to capture per page, from the top (default 3)") { |count| options[:screens] = count.clamp(1, 20) }
@@ -42,28 +43,36 @@ end
 require "ferrum"
 require "openssl"
 
-# Signing in: a session for an account of that role, put straight into the browser's cookie.
-# With no such account (a new app), a temporary one is made and removed afterwards, so the
-# owner's own first-run setup is still there.
+# Signing in: a session for a customer, or for a staff account of that role, put straight into the
+# browser's cookie. With no such account (a new app), a temporary one is made and removed
+# afterwards, so the owner's own first-run setup is still there.
 sign_in = nil
 if options[:as]
   ENV["RAILS_ENV"] ||= "development"
   require File.join(root, "config/environment")
   require "action_dispatch/testing/test_request"
 
-  user = User.where(role: options[:as]).order(:id).first
-  temporary = user.nil?
-  user ||= User.create!(name: "Preview #{options[:as]}", email_address: "look-#{options[:as]}@example.test",
-    password: SecureRandom.base58(24), role: options[:as])
-  session = user.sessions.create!(user_agent: "bin/look")
+  password = SecureRandom.base58(24)
+  if options[:as] == "customer"
+    account = Customer.order(:id).first
+    temporary = account.nil?
+    account ||= Customer.create!(name: "Preview Customer", email_address: "look-customer@example.test", password:)
+    cookie_name = "customer_session_id"
+  else
+    account = User.where(role: options[:as]).order(:id).first
+    temporary = account.nil?
+    account ||= User.create!(name: "Preview #{options[:as]}", email_address: "look-#{options[:as]}@example.test", password:, role: options[:as])
+    cookie_name = "admin_session_id"
+  end
+  session = account.sessions.create!(user_agent: "bin/look")
   jar = ActionDispatch::TestRequest.create.cookie_jar
-  jar.signed[:session_id] = session.id
-  sign_in = { cookie: jar[:session_id], user:, session:, temporary: }
+  jar.signed[cookie_name.to_sym] = session.id
+  sign_in = { name: cookie_name, cookie: jar[cookie_name.to_sym], account:, session:, temporary: }
   at_exit do
     session.delete
     if temporary
-      user.sessions.delete_all
-      user.delete
+      account.sessions.delete_all
+      account.delete
     end
   end
 end
@@ -77,7 +86,7 @@ pass = OpenSSL::HMAC.hexdigest("SHA256", File.read(secret_path).strip, "preview-
 if pass
   browser.cookies.set(name: "_preview_#{pass[0, 12]}", value: pass, domain: host, path: "/", httponly: true)
 end
-browser.cookies.set(name: "session_id", value: sign_in[:cookie], domain: host, path: "/", httponly: true) if sign_in
+browser.cookies.set(name: sign_in[:name], value: sign_in[:cookie], domain: host, path: "/", httponly: true) if sign_in
 
 problems = 0
 errors = []
@@ -85,7 +94,7 @@ browser.page.on("Runtime.exceptionThrown") { |params| errors << params.dig("exce
 browser.page.on("Runtime.consoleAPICalled") do |params|
   errors << params["args"].map { |arg| arg["value"] || arg["description"] }.join(" ").strip if params["type"] == "error"
 end
-puts "Signed in as #{sign_in[:user].name} (#{options[:as]}#{", temporary account" if sign_in[:temporary]})" if sign_in
+puts "Signed in as #{sign_in[:account].name} (#{options[:as]}#{", temporary account" if sign_in[:temporary]})" if sign_in
 
 paths.each do |path|
   options[:sizes].each do |size, (width, height)|
@@ -104,10 +113,15 @@ paths.each do |path|
     document = browser.network.traffic.find { |exchange| exchange.request&.type == "Document" && exchange.response }
     status = document&.response&.status
     notes = []
-    if landed == "/session/new" && !sign_in
-      notes << "needs sign in (sent to /session/new): right for staff pages, wrong for a page visitors use. Look at staff pages with --as owner"
-    elsif landed != URI(base + path).path
-      notes << "redirected to #{landed}"
+    if landed != URI(base + path).path
+      notes << case landed
+      when "/admin/session/new", "/admin/first_run/new"
+        "needs a staff sign in (sent to #{landed}): look at /admin pages with --as owner"
+      when "/session/new"
+        "needs a customer sign in (sent to /session/new): right for a customer's own pages, wrong for a page visitors use. Look at it with --as customer"
+      else
+        "redirected to #{landed}"
+      end
     end
     if status.to_i >= 400
       heading = browser.evaluate("document.querySelector('header h1, h1')?.innerText?.trim()").to_s
@@ -178,7 +192,7 @@ paths.each do |path|
         [...new Set([...document.querySelectorAll("a[href]")].map((link) => link.getAttribute("href"))
           .filter((href) => href.startsWith("/") && !href.startsWith("//") && !href.startsWith("/_")).map((href) => href.split("#")[0]).filter(Boolean))].slice(0, 25)
       JS
-      cookie = sign_in && "session_id=#{sign_in[:cookie]}"
+      cookie = sign_in && "#{sign_in[:name]}=#{sign_in[:cookie]}"
       links.each do |link|
         response = Net::HTTP.start(URI(base).host, URI(base).port, open_timeout: 2, read_timeout: 20) do |http|
           http.get(link, { "Cookie" => cookie, "X-Preview-Pass" => pass }.compact)

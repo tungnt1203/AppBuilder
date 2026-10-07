@@ -12,8 +12,8 @@ admin:
   password_digest: <%= password_digest %>
   role: admin
 
-member:
-  name: Mia Member
-  email_address: member@example.com
+staff:
+  name: Sam Staff
+  email_address: staff@example.com
   password_digest: <%= password_digest %>
-  role: member
+  role: staff

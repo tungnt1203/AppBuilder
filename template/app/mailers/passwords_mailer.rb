@@ -1,6 +1,6 @@
 class PasswordsMailer < ApplicationMailer
-  def reset(user)
-    @user = user
-    mail subject: t(".subject"), to: user.email_address
+  def reset(customer)
+    @customer = customer
+    mail subject: t(".subject", app: Rails.configuration.x.app_name), to: customer.email_address
   end
 end

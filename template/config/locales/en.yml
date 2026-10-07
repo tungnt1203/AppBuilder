@@ -8,6 +8,11 @@ en:
         email_address: Email address
         password: Password
         role: Role
+      customer:
+        name: Name
+        email_address: Email address
+        password: Password
+        password_challenge: Current password
     errors:
       models:
         user:
@@ -20,12 +25,14 @@ en:
     roles:
       owner: Owner
       admin: Admin
-      member: Member
+      staff: Staff
   layouts:
-    application:
-      home: Home
-      admin: Admin
+    site:
       sign_in: Sign in
+    admin:
+      dashboard: Dashboard
+      people: Staff
+      view_site: View site
       sign_out: Sign out
   ui:
     menu: Menu
@@ -39,26 +46,7 @@ en:
         other: "%{count} problems to fix:"
   home:
     show:
-      welcome: Welcome, %{name}
-      empty_title: Nothing here yet
-      empty_description: This is where the app's main screen goes.
-  first_runs:
-    new:
-      title: Set up
-      heading: Create your account
-      description: You'll be the owner of this app and can invite others later.
-      submit: Create account
-    create:
-      notice: Welcome! Your account is ready.
-  invitations:
-    show:
-      title: Join
-      heading: Welcome, %{name}
-      description: Choose a password to finish setting up %{email}.
-      submit: Join
-    update:
-      notice: Welcome, %{name}!
-    invalid: This invitation link is invalid or has already been used.
+      coming_soon: Something new is on its way. Check back soon.
   sessions:
     new:
       title: Sign in
@@ -66,9 +54,20 @@ en:
       password: Password
       submit: Sign in
       forgot_password: Forgot password?
+      no_account: New here?
+      sign_up: Create an account
     create:
       alert: Try another email address or password.
     rate_limited: Try again later.
+  registrations:
+    new:
+      title: Create an account
+      description: Sign in next time to see your orders and details.
+      submit: Create account
+      have_account: Already have an account?
+      sign_in: Sign in
+    create:
+      notice: Welcome, %{name}!
   passwords:
     new:
       title: Forgot password
@@ -84,32 +83,104 @@ en:
       password_confirmation: Repeat new password
       submit: Save
     create:
-      notice: Password reset instructions sent (if user with that email address exists).
+      notice: If that email address has an account, we've sent it a reset link.
     update:
-      notice: Password has been reset.
-      alert: Passwords did not match.
+      notice: Your password has been reset. Sign in with it.
     invalid: Password reset link is invalid or has expired.
     rate_limited: Try again later.
+  accounts:
+    show:
+      title: Your account
+      edit: Edit details
+      sign_out: Sign out
+    edit:
+      title: Edit details
+      password_help: To change your password, enter a new one and your current one.
+      new_password: New password
+      current_password: Current password
+      submit: Save changes
+      cancel: Cancel
+    update:
+      notice: Your details were saved.
   passwords_mailer:
     reset:
-      subject: Reset your password
+      subject: Reset your password for %{app}
       body: You can reset your password on %{link}.
       link: this password reset page
       expires: This link will expire in %{time}.
-  invitations_mailer:
-    invite:
-      subject: You're invited to %{app}
-      greeting: Hi %{name},
-      body: You've been invited to %{app}.
-      link: Choose a password to get started
-      expires: This link works for 7 days.
   admin:
     base:
       only_admins: Only admins can do that.
+    dashboards:
+      show:
+        welcome: Welcome, %{name}
+        empty_title: Nothing here yet
+        empty_description: This is where you'll run the app.
+    first_runs:
+      new:
+        title: Set up
+        heading: Create your account
+        description: You'll be the owner of this app and can invite your staff later.
+        submit: Create account
+      create:
+        notice: Welcome! Your account is ready.
+    invitations:
+      show:
+        title: Join
+        heading: Welcome, %{name}
+        description: Choose a password to finish setting up %{email}.
+        submit: Join
+      update:
+        notice: Welcome, %{name}!
+      invalid: This invitation link is invalid or has already been used.
+    sessions:
+      new:
+        title: Sign in
+        email_address: Email address
+        password: Password
+        submit: Sign in
+        forgot_password: Forgot password?
+      create:
+        alert: Try another email address or password.
+      rate_limited: Try again later.
+    passwords:
+      new:
+        title: Forgot password
+        heading: Forgot your password?
+        description: We'll email you a link to reset it.
+        email_address: Email address
+        submit: Email reset link
+        back: Back to sign in
+      edit:
+        title: New password
+        heading: Choose a new password
+        password: New password
+        password_confirmation: Repeat new password
+        submit: Save
+      create:
+        notice: Password reset instructions sent (if user with that email address exists).
+      update:
+        notice: Password has been reset.
+        alert: Passwords did not match.
+      invalid: Password reset link is invalid or has expired.
+      rate_limited: Try again later.
+    passwords_mailer:
+      reset:
+        subject: Reset your password
+        body: You can reset your password on %{link}.
+        link: this password reset page
+        expires: This link will expire in %{time}.
+    invitations_mailer:
+      invite:
+        subject: You're invited to %{app}
+        greeting: Hi %{name},
+        body: You've been invited to help run %{app}.
+        link: Choose a password to get started
+        expires: This link works for 7 days.
     users:
       index:
-        title: People
-        description: Who can sign in to %{app}.
+        title: Staff
+        description: Who can sign in to run %{app}.
         invite: Invite someone
         edit: Edit
       new:
@@ -120,12 +191,12 @@ en:
         remove: Remove
         confirm_remove: Remove %{name}? They won't be able to sign in.
       show:
-        back: Back to people
+        back: Back to staff
         invitation_link: Invitation link
         invitation_help: We emailed this link to %{email}. If email isn't set up yet, send it to them yourself. It works for 7 days, until they choose a password.
       form:
-        member: Member
-        admin: Admin — can manage people
+        staff: Staff
+        admin: Admin — can manage staff
         invite: Send invitation
         save: Save changes
         cancel: Cancel

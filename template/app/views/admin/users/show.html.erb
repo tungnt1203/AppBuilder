@@ -6,6 +6,6 @@
   <%= card do %>
     <h2 class="text-sm font-semibold text-ink"><%= t(".invitation_link") %></h2>
     <p class="mt-1 text-sm text-muted"><%= t(".invitation_help", email: @user.email_address) %></p>
-    <input type="text" readonly value="<%= @invitation_url %>" class="mt-4 font-mono <%= field_classes %>">>
+    <input type="text" readonly value="<%= @invitation_url %>" class="mt-4 font-mono <%= field_classes %>">
   <% end %>
 </div>

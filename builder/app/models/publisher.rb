@@ -37,7 +37,7 @@ class Publisher
     # The published app starts with no accounts; tell the owner where to create theirs.
     def announce_first_publish
       @project.messages.create!(role: :notice, body: "Published at #{@project.publish_url}. " \
-        "Create your owner account at #{@project.publish_url}/session/new before sharing it.")
+        "Create your owner account at #{@project.publish_url}#{@project.staff_sign_in_path} before sharing it.")
     end
 
     def first_publish?

@@ -1,0 +1,9 @@
+<%# The signed-in staff member, a way to the customers' site, and sign out. %>
+<div class="flex items-center gap-1">
+  <%= link_to t("layouts.admin.view_site"), root_path, class: button_classes(:ghost), target: "_blank" %>
+  <span class="inline-flex items-center gap-2 px-2 text-sm text-muted">
+    <%= avatar Current.user.name, size: :sm %>
+    <span class="hidden max-w-40 truncate sm:inline"><%= Current.user.name %></span>
+  </span>
+  <%= button_to t("layouts.admin.sign_out"), admin_session_path, method: :delete, class: button_classes(:ghost) %>
+</div>

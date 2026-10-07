@@ -34,7 +34,7 @@ they said it. Replace DESIGN.md with:
 **Type:** display font + text font from the list below.
 **Shape:** corner radius, borders or shadows or solid color blocks, how images are framed.
 **Signature:** the one thing visitors will remember (a big serif price list, a ticket-stub booking card, a marquee of class times).
-**Layout:** which screens are customer-facing (public layout) and which are the owner's (application layout).
+**Layout:** which screens are on the customers' site and which are in /admin (CLAUDE.md, "Two halves").
 ```
 
 Be specific and committed. "Clean and modern" is not a direction. Find what is particular to this
@@ -100,7 +100,7 @@ buttons scannable; don't use emoji as icons.
 
 ## 5. Customer-facing pages
 
-Visitors' pages use `layout "public"` and are designed, not assembled from admin blocks.
+The customers' site (everything outside /admin) is designed, not assembled from admin blocks.
 
 **Start from the page blocks** in `app/views/blocks/`: hero (split, full-bleed photo), features,
 price list or menu, gallery, timetable, testimonials, stats, FAQ, find-us (address, hours, call,
@@ -115,8 +115,9 @@ this business needs, in the order a visitor wants them; a page with every block 
 design.
 
 
-- **Header and footer** (`app/views/layouts/public/_header.html.erb`, `_footer.html.erb`): redesign
-  them for the app. The footer carries what visitors look for: address, hours, phone, Zalo, map link.
+- **Header and footer** (`app/views/layouts/site/_header.html.erb`, `_account.html.erb`, `_footer.html.erb`):
+  redesign them for the app, including the customer's sign in and account link, and the customers'
+  sign in, sign up and account pages (`app/views/sessions/`, `registrations/`, `accounts/`). The footer carries what visitors look for: address, hours, phone, Zalo, map link.
 - **First screen**: say what this is and what to do, with real content from the owner's description
   (what they offer, prices, what's on today), not a generic welcome. Avoid the centered title +
   subtitle + button in a pale rounded box.
@@ -148,14 +149,14 @@ design.
 - Forms on these pages still use `form_with` and `form.field`; style the surroundings, and adjust
   the field look through the theme if needed.
 
-The owner's screens (managing bookings, members, settings) stay on the `application` layout with the
+The owner's screens in /admin (managing orders, products, settings) stay on the `admin` layout with the
 UI kit (`ui-kit` skill). They follow the theme, so they still feel like the same product. An app that
-is only a tool for the owner has no public pages; give its theme the same care.
+is only a tool for the owner keeps its site to a simple home page; give its theme the same care.
 
 ## 6. Look before you finish
 
 After building or restyling a page, run `bin/rails tailwindcss:build`, then look at it in the
-running app: `bin/look / /menu` (add `--as owner` for staff pages). It saves the first three
+running app: `bin/look / /menu` (`--as customer` for a customer's pages, `--as owner` for /admin). It saves the first three
 screens of each page; add `--screens N` when what you changed is further down. Read every screenshot it saves,
 phone first, and judge it as a visitor would:
 

@@ -1,9 +1,9 @@
 # Creates the owner account the first time the app is opened.
-class FirstRunsController < ApplicationController
+class Admin::FirstRunsController < Admin::BaseController
   allow_unauthenticated_access
   before_action :prevent_repeats
 
-  layout "authentication"
+  layout "admin_authentication"
 
   def new
     @user = User.new
@@ -14,7 +14,7 @@ class FirstRunsController < ApplicationController
 
     if @user.save
       start_new_session_for @user
-      redirect_to root_path, notice: t(".notice")
+      redirect_to admin_root_path, notice: t(".notice")
     else
       render :new, status: :unprocessable_entity
     end
@@ -22,7 +22,7 @@ class FirstRunsController < ApplicationController
 
   private
     def prevent_repeats
-      redirect_to root_path if User.exists?
+      redirect_to admin_root_path if User.exists?
     end
 
     def user_params

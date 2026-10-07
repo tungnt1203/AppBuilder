@@ -1,0 +1,9 @@
+<%# The customer's account in the site header: their name linking to /account, or sign in. %>
+<% if customer_signed_in? %>
+  <%= link_to account_path, class: "#{button_classes(:ghost)} gap-2" do %>
+    <%= avatar Current.customer.name, size: :sm %>
+    <span class="hidden max-w-40 truncate sm:inline"><%= Current.customer.name %></span>
+  <% end %>
+<% else %>
+  <%= link_to t("layouts.site.sign_in"), new_session_path, class: button_classes(:ghost) %>
+<% end %>

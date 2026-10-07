@@ -12,7 +12,7 @@ class I18nTest < ActiveSupport::TestCase
 
   test "built-in screens render in Vietnamese" do
     I18n.with_locale(:vi) do
-      assert_equal "Đăng nhập", I18n.t("sessions.new.title")
+      assert_equal "Đăng nhập", I18n.t("admin.sessions.new.title")
       assert_equal "Quản trị viên", users(:admin).role_name
       assert_match "Có 2 lỗi", I18n.t("ui.form_errors.heading", count: 2)
     end
@@ -38,15 +38,22 @@ class I18nScreensTest < ActionDispatch::IntegrationTest
   end
 
   test "built-in screens have no missing Vietnamese translations" do
-    get new_session_path
-    assert_select "h1", "Đăng nhập"
-    assert_no_missing_translations
+    [ root_path, new_session_path, new_registration_path, new_password_path, new_admin_session_path, new_admin_password_path ].each do |path|
+      get path
+      assert_response :success
+      assert_no_missing_translations
+      assert_select "h1", "Đăng nhập" if path == new_session_path
+    end
 
-    get new_password_path
-    assert_no_missing_translations
+    sign_in_as_customer customers(:casey)
+    [ account_path, edit_account_path ].each do |path|
+      get path
+      assert_response :success
+      assert_no_missing_translations
+    end
 
     sign_in_as users(:owner)
-    [ root_path, admin_users_path, new_admin_user_path, edit_admin_user_path(users(:member)), admin_user_path(users(:member)) ].each do |path|
+    [ admin_root_path, admin_users_path, new_admin_user_path, edit_admin_user_path(users(:staff)), admin_user_path(users(:staff)) ].each do |path|
       get path
       assert_response :success
       assert_no_missing_translations

@@ -3,9 +3,9 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
 
   # owner: created on first run, cannot be removed or demoted.
-  # admin: manages users in /admin.
-  # member: everyone else.
-  enum :role, %w[ member admin owner ].index_by(&:itself), default: "member"
+  # admin: also manages the staff accounts in /admin/users.
+  # staff: everyone else who works in /admin.
+  enum :role, %w[ staff admin owner ].index_by(&:itself), default: "staff"
 
   # Invitation links stop working once the invited user sets a password.
   generates_token_for :invitation, expires_in: 7.days do

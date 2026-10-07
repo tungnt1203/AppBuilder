@@ -1,17 +1,17 @@
 ---
 name: ui-kit
-description: Reference for the building blocks of the owner's and staff's screens (shells, page header, card, stat, empty state, badge, alert, tabs, dialog, menu, buttons, forms, navigation, icons) with copy-paste examples. Use when writing those screens or any form. For the app's look and customer-facing pages, use the design skill.
+description: Reference for the building blocks of the /admin screens, where the owner and staff work (shells, page header, card, stat, empty state, badge, alert, tabs, dialog, menu, buttons, forms, navigation, icons) with copy-paste examples. Use when writing those screens or any form. For the app's look and customer-facing pages, use the design skill.
 ---
 
 # UI kit
 
-Building blocks for the screens the owner and staff work in (records, schedules, reports, settings),
+Building blocks for /admin, the screens the owner and staff work in (records, orders, reports, settings),
 so those screens stay consistent as the app grows. They follow the theme, so they wear the app's
-look. Customer-facing pages are designed freely instead (`design` skill), though they can use these
+look. The customers' site is designed freely instead (`design` skill), though they can use these
 blocks where they fit, and every form uses the form builder. Helpers live in `app/helpers/ui_helper.rb`,
 partials in `app/views/ui/`, the form builder in `app/form_builders/ui_form_builder.rb`.
 
-On owner screens, compose from these blocks and use Tailwind mostly for layout: grid, flex, spacing,
+In /admin, compose from these blocks and use Tailwind mostly for layout: grid, flex, spacing,
 widths. Colors, type and corners come from the theme.
 
 ## Theme
@@ -28,34 +28,35 @@ After a theme or view change, run `bin/rails tailwindcss:build`.
 
 ## Shells
 
-- **application** (default). Sidebar for navigation, top bar for the account, content scrolls in
-  the main pane. For the owner's and staff's screens.
-- **public**. The customer-facing site: home, catalog, menu, booking. In the controller:
-  `layout "public"`. Its header and footer are partials in `app/views/layouts/public/` to redesign
-  per app; the yield is full-bleed. Pages can add header links:
+- **admin**. Every `/admin` screen (set by `Admin::BaseController`). Sidebar for navigation, top bar
+  for the account and a "View site" link, content scrolls in the main pane.
+- **application**. The customers' site, everything outside `/admin` (the default for
+  `ApplicationController`). Its header, account link and footer are partials in
+  `app/views/layouts/site/` to redesign per app; the yield is full-bleed. Pages can add header links:
 
 ```erb
-<% content_for :public_nav do %>
-  <%= bar_link_to "Menu", menu_path %>
+<% content_for :site_nav do %>
+  <%= bar_link_to "Shop", products_path %>
 <% end %>
 ```
 
-- **authentication**. Centered card. Already used by sign in, and not for product screens.
+- **admin_authentication**. Staff sign in, first run, invitations. Not for product screens.
+  Customers' sign in and account pages are on the site and get its look.
 
-Add a top-level screen in `app/views/layouts/_navigation.html.erb`:
+Add an admin screen in `app/views/layouts/admin/_navigation.html.erb`:
 
 ```erb
-<%= nav_link_to "Customers", customers_path, match: "/customers" %>
+<%= nav_link_to "Customers", admin_customers_path, match: "/admin/customers" %>
 ```
 
-`match:` keeps the link active on show and edit. Leave it off for an exact match (the home link).
+`match:` keeps the link active on show and edit. Leave it off for an exact match (the dashboard link).
 
 When the sidebar has more than a handful of links, group them:
 
 ```erb
 <%= nav_section "Shop" do %>
-  <%= nav_link_to "Orders", orders_path, match: "/orders" %>
-  <%= nav_link_to "Products", products_path, match: "/products" %>
+  <%= nav_link_to "Orders", admin_orders_path, match: "/admin/orders" %>
+  <%= nav_link_to "Products", admin_products_path, match: "/admin/products" %>
 <% end %>
 ```
 
@@ -231,9 +232,9 @@ second stylesheet.
 
 ## Layout, type, phones
 
-- On owner screens body text is `text-sm`. Secondary text is `text-muted`. Headings are `font-semibold text-ink`.
+- In /admin body text is `text-sm`. Secondary text is `text-muted`. Headings are `font-semibold text-ink`.
   Page titles come from `page_header`.
 - `space-y-4` in forms, `gap-2` between buttons, `mb-6` between page sections.
-- Everything works on a phone: the sidebar collapses behind Menu, tables sit in `overflow-x-auto`,
+- Everything works on a phone, since owners run their shop from one: the sidebar collapses behind Menu, tables sit in `overflow-x-auto`,
   actions use `flex-wrap`. Don't use a fixed pixel width for a page.
 - Live updates use Turbo Streams (`broadcasts_refreshes` on the model, `turbo_stream_from` in the view).

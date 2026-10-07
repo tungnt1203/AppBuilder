@@ -59,6 +59,20 @@ class Project < ApplicationRecord
     Rails.configuration.x.projects_root.join(slug)
   end
 
+  # Apps made since the template split the customers' site from /admin keep the owner's screens
+  # and sign in under /admin; older apps have them at the root.
+  def admin_area?
+    path.join("app/controllers/admin/sessions_controller.rb").exist?
+  end
+
+  def staff_home_path
+    admin_area? ? "/admin" : "/"
+  end
+
+  def staff_sign_in_path
+    admin_area? ? "/admin/session/new" : "/session/new"
+  end
+
   def preview_url
     "http://localhost:#{port}"
   end

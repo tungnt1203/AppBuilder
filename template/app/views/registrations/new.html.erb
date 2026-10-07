@@ -1,0 +1,18 @@
+<% content_for :title, t(".title") %>
+
+<div class="mx-auto max-w-sm px-4 py-12 sm:py-20">
+  <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
+  <p class="mt-2 mb-8 text-muted"><%= t(".description") %></p>
+
+  <%= form_with model: @customer, url: registration_path, class: "space-y-4" do |form| %>
+    <%= form.errors %>
+    <%= form.field :name, required: true, autofocus: true, autocomplete: "name" %>
+    <%= form.field :email_address, :email_field, required: true, autocomplete: "username" %>
+    <%= form.field :password, :password_field, required: true, autocomplete: "new-password", minlength: 8, maxlength: 72 %>
+    <%= form.submit t(".submit"), class: "w-full" %>
+  <% end %>
+
+  <p class="mt-6 text-center text-sm text-muted">
+    <%= t(".have_account") %> <%= link_to t(".sign_in"), new_session_path, class: link_classes %>
+  </p>
+</div>

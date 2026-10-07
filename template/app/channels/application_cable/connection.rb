@@ -1,16 +1,12 @@
 module ApplicationCable
+  # Anyone may connect, so pages on the customers' site can update live too: what a page may
+  # listen to is decided by the signed stream names turbo_stream_from puts in it.
   class Connection < ActionCable::Connection::Base
-    identified_by :current_user
+    identified_by :current_user, :current_customer
 
     def connect
-      set_current_user || reject_unauthorized_connection
+      self.current_user = Session.find_by(id: cookies.signed[:admin_session_id])&.user
+      self.current_customer = CustomerSession.find_by(id: cookies.signed[:customer_session_id])&.customer
     end
-
-    private
-      def set_current_user
-        if session = Session.find_by(id: cookies.signed[:session_id])
-          self.current_user = session.user
-        end
-      end
   end
 end

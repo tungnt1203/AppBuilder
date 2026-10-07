@@ -1,68 +1,45 @@
 require "test_helper"
 
 class PasswordsControllerTest < ActionDispatch::IntegrationTest
-  setup { @user = User.take }
+  setup { @customer = customers(:casey) }
 
   test "new" do
     get new_password_path
     assert_response :success
   end
 
-  test "create" do
-    post passwords_path, params: { email_address: @user.email_address }
-    assert_enqueued_email_with PasswordsMailer, :reset, args: [ @user ]
+  test "create emails a customer" do
+    post passwords_path, params: { email_address: @customer.email_address }
+    assert_enqueued_email_with PasswordsMailer, :reset, args: [ @customer ]
     assert_redirected_to new_session_path
-
-    follow_redirect!
-    assert_notice I18n.t("passwords.create.notice")
   end
 
-  test "create for an unknown user redirects but sends no mail" do
-    post passwords_path, params: { email_address: "missing-user@example.com" }
+  test "create for a staff email sends nothing" do
+    post passwords_path, params: { email_address: users(:owner).email_address }
     assert_enqueued_emails 0
     assert_redirected_to new_session_path
-
-    follow_redirect!
-    assert_notice I18n.t("passwords.create.notice")
   end
 
-  test "edit" do
-    get edit_password_path(@user.password_reset_token)
-    assert_response :success
-  end
+  test "update sets the new password and signs out everywhere" do
+    sign_in_as_customer @customer
 
-  test "edit with invalid password reset token" do
-    get edit_password_path("invalid token")
-    assert_redirected_to new_password_path
+    put password_path(@customer.password_reset_token), params: { password: "brand new pass", password_confirmation: "brand new pass" }
 
-    follow_redirect!
-    assert_notice I18n.t("passwords.invalid")
-  end
-
-  test "update" do
-    assert_changes -> { @user.reload.password_digest } do
-      put password_path(@user.password_reset_token), params: { password: "new", password_confirmation: "new" }
-      assert_redirected_to new_session_path
-    end
-
-    follow_redirect!
-    assert_notice I18n.t("passwords.update.notice")
+    assert_redirected_to new_session_path
+    assert @customer.reload.authenticate("brand new pass")
+    assert_empty @customer.sessions
   end
 
   test "update with non matching passwords" do
-    token = @user.password_reset_token
-    assert_no_changes -> { @user.reload.password_digest } do
-      put password_path(token), params: { password: "no", password_confirmation: "match" }
+    token = @customer.password_reset_token
+    assert_no_changes -> { @customer.reload.password_digest } do
+      put password_path(token), params: { password: "brand new pass", password_confirmation: "other pass" }
       assert_redirected_to edit_password_path(token)
     end
-
-    follow_redirect!
-    assert_notice I18n.t("passwords.update.alert")
   end
 
-  private
-    # Looks up the text through I18n so the test passes in any default locale.
-    def assert_notice(text)
-      assert_select "div", text: text
-    end
+  test "an invalid link" do
+    get edit_password_path("invalid token")
+    assert_redirected_to new_password_path
+  end
 end

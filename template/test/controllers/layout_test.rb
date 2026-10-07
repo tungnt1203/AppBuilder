@@ -1,33 +1,32 @@
 require "test_helper"
 
+# The two halves of the app look and behave apart: the customers' site and /admin.
 class LayoutTest < ActionDispatch::IntegrationTest
-  test "visitors on public pages see a sign in link instead of the account menu" do
-    with_routing do |routes|
-      routes.draw do
-        get "public" => "public_test#show"
-        resource :session
-        resources :passwords, param: :token
-        resource :first_run, only: %i[ new create ]
-        namespace(:admin) { resources :users }
-        root "home#show"
-      end
+  test "the customers' site has the site header, not the admin sidebar" do
+    User.delete_all
+    get root_path
 
-      User.delete_all
-      get "/public"
-
-      assert_response :success
-      assert_select "a[href='/session/new']"
-      assert_select "aside#app-nav"
-      assert_select "main#main"
-      assert_select "button[aria-controls=?]", "app-nav"
-    end
+    assert_response :success
+    assert_select "header a[href=?]", new_session_path
+    assert_select "aside#app-nav", count: 0
+    assert_select "a[href^='/admin']", count: 0
   end
-end
 
-class PublicTestController < ApplicationController
-  allow_unauthenticated_access
+  test "/admin has the sidebar and a way back to the site" do
+    sign_in_as users(:owner)
+    get admin_root_path
 
-  def show
-    render html: "", layout: "application"
+    assert_select "aside#app-nav"
+    assert_select "main#main"
+    assert_select "button[aria-controls=?]", "app-nav"
+    assert_select "a[href=?]", root_path
+    assert_select "a[href=?]", admin_users_path
+  end
+
+  test "staff without admin rights don't see the staff screen in the sidebar" do
+    sign_in_as users(:staff)
+    get admin_root_path
+
+    assert_select "a[href=?]", admin_users_path, count: 0
   end
 end

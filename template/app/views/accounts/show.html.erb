@@ -1,0 +1,19 @@
+<% content_for :title, t(".title") %>
+
+<div class="mx-auto max-w-2xl px-4 py-12">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div class="flex min-w-0 items-center gap-3">
+      <%= avatar @customer.name %>
+      <div class="min-w-0">
+        <h1 class="truncate font-display text-2xl font-semibold tracking-tight"><%= @customer.name %></h1>
+        <p class="truncate text-muted"><%= @customer.email_address %></p>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <%= link_to t(".edit"), edit_account_path, class: button_classes(:secondary) %>
+      <%= button_to t(".sign_out"), session_path, method: :delete, class: button_classes(:ghost) %>
+    </div>
+  </div>
+
+  <%# What the customer comes back for goes here: their orders, downloads, bookings. %>
+</div>

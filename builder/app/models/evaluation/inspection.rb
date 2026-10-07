@@ -1,7 +1,7 @@
 require "ferrum"
 
 # Opens a built app in headless Chrome like its first visitor and its owner would:
-# the pages anyone can open (the home page, a booking form…), then signed in, the
+# the pages anyone can open (the home page, a booking form…), then signed in to /admin, the
 # app's main pages (its GET routes without parameters), and then both kinds on a phone.
 # Records how each page answered and keeps a full-page screenshot of it.
 module Evaluation
@@ -11,7 +11,7 @@ module Evaluation
     MAX_PUBLIC_PAGES = 3
     MAX_PAGES = 5
     # The starter app's own screens and Rails' internals; the pages the agent made are the point.
-    SKIP = %r{\A/(rails|up|session|passwords|first_run|invitations|_preview|cable|assets|recede_historical_location|resume_historical_location|refresh_historical_location|service-worker|manifest|admin/users)(/|\z)}
+    SKIP = %r{\A/(rails|up|session|passwords|first_run|invitations|registration|account|_blocks|_preview|cable|assets|recede_historical_location|resume_historical_location|refresh_historical_location|service-worker|manifest|admin/(users|session|passwords|first_run|invitations))(/|\z)}
 
     Shot = Struct.new(:name, :path, :file, :status, :error, :signed_in, keyword_init: true)
 
@@ -29,7 +29,7 @@ module Evaluation
       public, private = candidate_pages.partition { |path| public?(path) }
       public.first(MAX_PUBLIC_PAGES).each_with_index { |path, index| visit browser, path, name: "visitor-#{index + 1}", signed_in: false }
       @signed_in = create_owner && sign_in(browser)
-      ([ "/" ] + private).uniq.first(MAX_PAGES).each_with_index { |path, index| visit browser, path, name: "page-#{index + 1}", signed_in: @signed_in }
+      ([ @project.staff_home_path ] + private).uniq.first(MAX_PAGES).each_with_index { |path, index| visit browser, path, name: "page-#{index + 1}", signed_in: @signed_in }
       browser.resize(width: 390, height: 844)
       phone_pages(public, private).each_with_index { |path, index| visit browser, path, name: "phone-#{index + 1}", signed_in: @signed_in }
       self
@@ -77,7 +77,7 @@ module Evaluation
       # What a customer most likely opens on a phone (a booking form rather than the home
       # page), and the owner's main screen.
       def phone_pages(public, private)
-        [ public.find { |path| path != "/" } || public.first, private.first || "/" ].compact.uniq
+        [ public.find { |path| path != "/" } || public.first, private.first || @project.staff_home_path ].compact.uniq
       end
 
       # Whether a visitor who isn't signed in gets the page rather than the sign-in screen.
@@ -99,7 +99,7 @@ module Evaluation
       end
 
       def sign_in(browser)
-        browser.go_to(@project.preview_url + "/session/new")
+        browser.go_to(@project.preview_url + @project.staff_sign_in_path)
         settle browser
         email, password = browser.at_css("input[name='email_address']"), browser.at_css("input[name='password']")
         return false unless email && password

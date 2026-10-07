@@ -14,7 +14,7 @@
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <%= badge user.role_name, tone: user.member? ? :gray : :brand %>
+          <%= badge user.role_name, tone: user.staff? ? :gray : :brand %>
           <%= link_to t(".edit"), edit_admin_user_path(user), class: "text-sm #{link_classes}" unless user.owner? %>
         </div>
       </li>

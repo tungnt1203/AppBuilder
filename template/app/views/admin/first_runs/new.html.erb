@@ -3,7 +3,7 @@
 <h1 class="text-2xl font-semibold tracking-tight"><%= t(".heading") %></h1>
 <p class="mt-2 mb-8 text-[0.9375rem] leading-relaxed text-muted"><%= t(".description") %></p>
 
-<%= form_with model: @user, url: first_run_path, class: "space-y-4" do |form| %>
+<%= form_with model: @user, url: admin_first_run_path, class: "space-y-4" do |form| %>
   <%= form.errors %>
   <%= form.field :name, required: true, autofocus: true, autocomplete: "name" %>
   <%= form.field :email_address, :email_field, required: true, autocomplete: "username" %>

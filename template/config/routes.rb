@@ -1,12 +1,20 @@
 Rails.application.routes.draw do
+  # The customers' site: public pages, and customers' own accounts.
   root "home#show"
 
-  resource :session
-  resources :passwords, param: :token
-  resource :first_run, only: %i[ new create ]
-  resources :invitations, only: %i[ show update ], param: :token
+  resource :registration, only: %i[ new create ]
+  resource :session, only: %i[ new create destroy ]
+  resources :passwords, only: %i[ new create edit update ], param: :token
+  resource :account, only: %i[ show edit update ]
 
+  # Where the owner and staff run the app, with their own accounts and sign in.
   namespace :admin do
+    root "dashboards#show"
+
+    resource :session, only: %i[ new create destroy ]
+    resources :passwords, only: %i[ new create edit update ], param: :token
+    resource :first_run, only: %i[ new create ]
+    resources :invitations, only: %i[ show update ], param: :token
     resources :users
   end
 

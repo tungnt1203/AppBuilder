@@ -11,6 +11,11 @@ vi:
         email_address: Email
         password: Mật khẩu
         role: Vai trò
+      customer:
+        name: Họ tên
+        email_address: Email
+        password: Mật khẩu
+        password_challenge: Mật khẩu hiện tại
     errors:
       models:
         user:
@@ -23,12 +28,14 @@ vi:
     roles:
       owner: Chủ sở hữu
       admin: Quản trị viên
-      member: Thành viên
+      staff: Nhân viên
   layouts:
-    application:
-      home: Trang chủ
-      admin: Quản trị
+    site:
       sign_in: Đăng nhập
+    admin:
+      dashboard: Tổng quan
+      people: Nhân viên
+      view_site: Xem trang
       sign_out: Đăng xuất
   ui:
     menu: Menu
@@ -41,26 +48,7 @@ vi:
         other: "Có %{count} lỗi cần sửa:"
   home:
     show:
-      welcome: Xin chào, %{name}
-      empty_title: Chưa có gì ở đây
-      empty_description: Màn hình chính của ứng dụng sẽ nằm ở đây.
-  first_runs:
-    new:
-      title: Thiết lập
-      heading: Tạo tài khoản của bạn
-      description: Bạn sẽ là chủ sở hữu ứng dụng và có thể mời người khác sau.
-      submit: Tạo tài khoản
-    create:
-      notice: Chào mừng! Tài khoản của bạn đã sẵn sàng.
-  invitations:
-    show:
-      title: Tham gia
-      heading: Xin chào, %{name}
-      description: Chọn mật khẩu để hoàn tất tài khoản %{email}.
-      submit: Tham gia
-    update:
-      notice: Chào mừng, %{name}!
-    invalid: Đường link mời không hợp lệ hoặc đã được sử dụng.
+      coming_soon: Sắp ra mắt. Hẹn gặp lại bạn sớm.
   sessions:
     new:
       title: Đăng nhập
@@ -68,9 +56,20 @@ vi:
       password: Mật khẩu
       submit: Đăng nhập
       forgot_password: Quên mật khẩu?
+      no_account: Lần đầu ghé?
+      sign_up: Tạo tài khoản
     create:
       alert: Email hoặc mật khẩu không đúng.
     rate_limited: Vui lòng thử lại sau ít phút.
+  registrations:
+    new:
+      title: Tạo tài khoản
+      description: Lần sau đăng nhập để xem đơn hàng và thông tin của bạn.
+      submit: Tạo tài khoản
+      have_account: Đã có tài khoản?
+      sign_in: Đăng nhập
+    create:
+      notice: Chào mừng, %{name}!
   passwords:
     new:
       title: Quên mật khẩu
@@ -86,36 +85,108 @@ vi:
       password_confirmation: Nhập lại mật khẩu mới
       submit: Lưu
     create:
-      notice: Nếu email này có tài khoản, hướng dẫn đặt lại mật khẩu đã được gửi.
+      notice: Nếu email này có tài khoản, chúng tôi đã gửi link đặt lại mật khẩu.
     update:
-      notice: Mật khẩu đã được đặt lại.
-      alert: Hai mật khẩu không khớp.
+      notice: Mật khẩu đã được đặt lại. Hãy đăng nhập bằng mật khẩu mới.
     invalid: Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
     rate_limited: Vui lòng thử lại sau ít phút.
+  accounts:
+    show:
+      title: Tài khoản của bạn
+      edit: Sửa thông tin
+      sign_out: Đăng xuất
+    edit:
+      title: Sửa thông tin
+      password_help: Muốn đổi mật khẩu, hãy nhập mật khẩu mới và mật khẩu hiện tại.
+      new_password: Mật khẩu mới
+      current_password: Mật khẩu hiện tại
+      submit: Lưu thay đổi
+      cancel: Huỷ
+    update:
+      notice: Đã lưu thông tin của bạn.
   passwords_mailer:
     reset:
-      subject: Đặt lại mật khẩu
+      subject: Đặt lại mật khẩu %{app}
       body: Bạn có thể đặt lại mật khẩu tại %{link}.
       link: trang đặt lại mật khẩu
       expires: Link này hết hạn sau %{time}.
-  invitations_mailer:
-    invite:
-      subject: Bạn được mời tham gia %{app}
-      greeting: Xin chào %{name},
-      body: Bạn được mời tham gia %{app}.
-      link: Chọn mật khẩu để bắt đầu
-      expires: Link này dùng được trong 7 ngày.
   admin:
     base:
       only_admins: Chỉ quản trị viên mới làm được việc này.
+    dashboards:
+      show:
+        welcome: Xin chào, %{name}
+        empty_title: Chưa có gì ở đây
+        empty_description: Đây là nơi bạn quản lý ứng dụng.
+    first_runs:
+      new:
+        title: Thiết lập
+        heading: Tạo tài khoản của bạn
+        description: Bạn sẽ là chủ sở hữu ứng dụng và có thể mời nhân viên sau.
+        submit: Tạo tài khoản
+      create:
+        notice: Chào mừng! Tài khoản của bạn đã sẵn sàng.
+    invitations:
+      show:
+        title: Tham gia
+        heading: Xin chào, %{name}
+        description: Chọn mật khẩu để hoàn tất tài khoản %{email}.
+        submit: Tham gia
+      update:
+        notice: Chào mừng, %{name}!
+      invalid: Đường link mời không hợp lệ hoặc đã được sử dụng.
+    sessions:
+      new:
+        title: Đăng nhập
+        email_address: Email
+        password: Mật khẩu
+        submit: Đăng nhập
+        forgot_password: Quên mật khẩu?
+      create:
+        alert: Email hoặc mật khẩu không đúng.
+      rate_limited: Vui lòng thử lại sau ít phút.
+    passwords:
+      new:
+        title: Quên mật khẩu
+        heading: Bạn quên mật khẩu?
+        description: Chúng tôi sẽ gửi email kèm đường link để đặt lại mật khẩu.
+        email_address: Email
+        submit: Gửi link đặt lại mật khẩu
+        back: Quay lại đăng nhập
+      edit:
+        title: Mật khẩu mới
+        heading: Chọn mật khẩu mới
+        password: Mật khẩu mới
+        password_confirmation: Nhập lại mật khẩu mới
+        submit: Lưu
+      create:
+        notice: Nếu email này có tài khoản, hướng dẫn đặt lại mật khẩu đã được gửi.
+      update:
+        notice: Mật khẩu đã được đặt lại.
+        alert: Hai mật khẩu không khớp.
+      invalid: Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
+      rate_limited: Vui lòng thử lại sau ít phút.
+    passwords_mailer:
+      reset:
+        subject: Đặt lại mật khẩu
+        body: Bạn có thể đặt lại mật khẩu tại %{link}.
+        link: trang đặt lại mật khẩu
+        expires: Link này hết hạn sau %{time}.
+    invitations_mailer:
+      invite:
+        subject: Bạn được mời tham gia %{app}
+        greeting: Xin chào %{name},
+        body: Bạn được mời cùng quản lý %{app}.
+        link: Chọn mật khẩu để bắt đầu
+        expires: Link này dùng được trong 7 ngày.
     users:
       index:
-        title: Người dùng
-        description: Những người có thể đăng nhập vào %{app}.
-        invite: Mời người dùng
+        title: Nhân viên
+        description: Những người có thể đăng nhập để quản lý %{app}.
+        invite: Mời nhân viên
         edit: Sửa
       new:
-        title: Mời người dùng
+        title: Mời nhân viên
         description: Họ sẽ nhận email kèm đường link để chọn mật khẩu.
       edit:
         title: Sửa %{name}
@@ -126,8 +197,8 @@ vi:
         invitation_link: Link mời
         invitation_help: Link này đã được gửi tới %{email}. Nếu chưa cài đặt email, hãy tự gửi link cho họ. Link dùng được trong 7 ngày, cho tới khi họ chọn mật khẩu.
       form:
-        member: Thành viên
-        admin: Quản trị viên — quản lý người dùng
+        staff: Nhân viên
+        admin: Quản trị viên — quản lý nhân viên
         invite: Gửi lời mời
         save: Lưu thay đổi
         cancel: Huỷ

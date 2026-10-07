@@ -1,0 +1,22 @@
+<% content_for :title, t(".title") %>
+
+<div class="mx-auto max-w-sm px-4 py-12">
+  <h1 class="mb-8 font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
+
+  <%= form_with model: @customer, url: account_path, method: :patch, class: "space-y-4" do |form| %>
+    <%= form.errors %>
+    <%= form.field :name, required: true, autocomplete: "name" %>
+    <%= form.field :email_address, :email_field, required: true, autocomplete: "username" %>
+
+    <fieldset class="space-y-4 border-t border-line pt-4">
+      <legend class="pt-4 text-sm text-muted"><%= t(".password_help") %></legend>
+      <%= form.field :password, :password_field, label: t(".new_password"), autocomplete: "new-password", minlength: 8, maxlength: 72, value: nil %>
+      <%= form.field :password_challenge, :password_field, label: t(".current_password"), autocomplete: "current-password", maxlength: 72, value: nil %>
+    </fieldset>
+
+    <div class="flex flex-wrap items-center gap-2 pt-2">
+      <%= form.submit t(".submit") %>
+      <%= link_to t(".cancel"), account_path, class: button_classes(:ghost) %>
+    </div>
+  <% end %>
+</div>

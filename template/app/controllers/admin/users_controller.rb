@@ -1,4 +1,5 @@
 class Admin::UsersController < Admin::BaseController
+  before_action :require_administrator
   before_action :set_user, only: %i[ show edit update destroy ]
 
   def index
@@ -6,7 +7,7 @@ class Admin::UsersController < Admin::BaseController
   end
 
   def show
-    @invitation_url = invitation_url(@user.generate_token_for(:invitation))
+    @invitation_url = admin_invitation_url(@user.generate_token_for(:invitation))
   end
 
   def new
@@ -17,7 +18,7 @@ class Admin::UsersController < Admin::BaseController
     @user = User.invite(user_params)
 
     if @user.persisted?
-      InvitationsMailer.invite(@user).deliver_later
+      Admin::InvitationsMailer.invite(@user).deliver_later
       redirect_to admin_user_path(@user), notice: t(".notice", name: @user.name)
     else
       render :new, status: :unprocessable_entity

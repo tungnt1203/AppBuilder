@@ -10,7 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_051654) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_090001) do
+  create_table "customer_sessions", force: :cascade do |t|
+    t.integer "customer_id", null: false
+    t.string "ip_address"
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_customer_sessions_on_customer_id"
+  end
+
+  create_table "customers", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "email_address", null: false
+    t.string "password_digest", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email_address"], name: "index_customers_on_email_address", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -24,11 +42,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_051654) do
     t.string "name", null: false
     t.string "email_address", null: false
     t.string "password_digest", null: false
-    t.string "role", default: "member", null: false
+    t.string "role", default: "staff", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "customer_sessions", "customers"
   add_foreign_key "sessions", "users"
 end
