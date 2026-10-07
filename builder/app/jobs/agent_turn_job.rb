@@ -111,6 +111,7 @@ class AgentTurnJob < ApplicationJob
 
     # Keep whatever the agent changed, even after a failure, so it can be undone or continued.
     def finish(project, message, status:)
+      project.adopt_app_name_from_code
       project.history.commit(message)
       mark_version(project)
       project.update!(activity: "Restarting the preview")

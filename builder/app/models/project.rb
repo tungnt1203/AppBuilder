@@ -221,6 +221,21 @@ class Project < ApplicationRecord
     application.write(application.read.sub(/config\.x\.app_name = ".*"/) { %(config.x.app_name = #{name.inspect}) })
   end
 
+  # The name in the app's config, which the agent changes when the owner asks for a new name in the chat.
+  def app_name_in_code
+    application = path.join("config/application.rb")
+    quoted = application.read[/config\.x\.app_name = ("(?:[^"\\]|\\.)*")/, 1] if application.exist?
+    quoted&.undump
+  rescue RuntimeError # not a plain Ruby string
+    nil
+  end
+
+  # Takes the name from the app's code after the agent renamed it there. Addresses stay as they are.
+  def adopt_app_name_from_code
+    code_name = app_name_in_code.to_s.squish
+    update!(name: code_name) if code_name.present? && code_name != name
+  end
+
   # A new app with this one's code, version history and preview data, but a fresh chat.
   # The copy belongs to whoever made it.
   def duplicate(owner: self.owner)

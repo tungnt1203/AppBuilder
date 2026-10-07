@@ -62,6 +62,24 @@ class ProjectTest < ActiveSupport::TestCase
     assert_not project.name_pending?
   end
 
+  test "takes the name the agent wrote in the app's code, keeping its address" do
+    project = projects(:clinic)
+    subdomain = project.subdomain
+    Dir.mktmpdir do |dir|
+      config = Pathname(dir).join("config").tap(&:mkpath).join("application.rb")
+      project.define_singleton_method(:path) { Pathname(dir) }
+
+      config.write(%(    config.x.app_name = "Nha khoa \\"Bright\\" Q3"\n))
+      project.adopt_app_name_from_code
+      assert_equal [ %(Nha khoa "Bright" Q3), subdomain ], [ project.reload.name, project.subdomain ]
+
+      config.write(%(    config.x.app_name = ENV.fetch("APP_NAME")\n))
+      assert_no_changes -> { project.reload.name } do
+        project.adopt_app_name_from_code
+      end
+    end
+  end
+
   test "keeps the provisional name when none was suggested" do
     project = Project.new(language: "vi", owner: users(:owner))
     project.name_after("Quản lý hội viên phòng gym quận 3")
