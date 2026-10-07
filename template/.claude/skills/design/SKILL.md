@@ -12,10 +12,28 @@ failure, even when every feature works.
 
 The template's neutral theme and the UI kit are the floor, not the look.
 
+## What decides the look
+
+When sources disagree, the higher one wins:
+
+1. **What the owner said**: colors, style, mood, sections, wording, content, prices, photos, apps
+   they want it to look like. Their words beat any rule of thumb in this skill.
+2. **DESIGN.md**: the direction already chosen for this app on earlier turns.
+3. **This skill's suggestions** (feel, fonts, the hardest-to-fake detail of the business): only for
+   what the owner didn't say.
+4. **The page blocks**: layouts to start from, reshaped to fit everything above.
+
+A detailed description leaves little to suggestions; a one-line one ("an app for my nail salon")
+leaves most of it. Don't blend: when the owner wants a black, minimal nail salon, it is black and
+minimal, with no pastel pink "because salons are pink". If what they ask for would hurt visitors
+(text too pale to read, a page that breaks on phones), build it as close as works and say why in
+your summary.
+
 ## 1. Choose a direction (DESIGN.md)
 
 When DESIGN.md says "Not decided yet", decide before writing views, from what the owner said
-about their business and their customers. Replace DESIGN.md with:
+about their business and their customers; everything they asked for about the look goes in as
+they said it. Replace DESIGN.md with:
 
 ```markdown
 # Design
@@ -107,7 +125,7 @@ Zalo, map), closing call to action, and a bottom action bar for phones. They use
 names, so they wear the app's look, and they already work at 390px. See them all in this app's theme
 at `/_blocks` on the preview (development only; `?only=price_list` for one). To use one, **copy its
 markup into the page's own view and make it this app's**: real content and records instead of the
-samples, the app's wording, its photos, and changes to layout and detail that the direction asks for
+samples, the app's wording, its photos, and changes to layout and detail that the owner and the direction ask for
 (a serif price list, a ticket-stub card, square corners). Don't `render "blocks/…"` from pages, and
 don't edit the blocks themselves: they are the starting point for every page. Pick the few blocks
 this business needs, in the order a visitor wants them; a page with every block is a template, not a

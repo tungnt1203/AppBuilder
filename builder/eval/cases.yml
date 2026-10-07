@@ -72,3 +72,14 @@
   request: >
     We run a monthly tech meetup. Organizers create events with a venue and a capacity, people RSVP
     on a public page, and there's a waitlist when it's full. At the door we check people in from a list.
+
+# A detailed look that goes against what a nail salon "usually" looks like: the owner's words must win.
+- id: nail-noir
+  name: Noir Nails
+  language: vi
+  request: >
+    Làm trang đặt lịch cho tiệm nail Noir Nails ở Quận 3. Giao diện nền đen, chữ trắng, điểm
+    nhấn màu vàng đồng, tối giản, chữ có chân kiểu tạp chí thời trang, tuyệt đối không dùng
+    màu hồng hay pastel. Trang chủ chỉ có 3 phần: ảnh lớn kèm nút Đặt lịch, bảng giá
+    (sơn gel 180k, đắp bột 350k, vẽ móng từ 50k/ngón), và địa chỉ + giờ mở cửa 9h–21h.
+    Khách đặt lịch không cần tài khoản. Chủ tiệm xem danh sách lịch hẹn theo ngày.

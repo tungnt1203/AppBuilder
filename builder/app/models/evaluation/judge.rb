@@ -17,7 +17,7 @@ module Evaluation
       sticky bar can show up in the middle of a capture; that isn't a problem in the app.
 
       Score each from 1 (bad) to 10 (excellent):
-      - fit: does it do what the owner asked, with the screens they'd expect?
+      - fit: does it do what the owner asked, with the screens they'd expect, and look the way they asked?
       - look: is it polished, clear and consistent, with its own look rather than a default template?
       - phone: do the phone screenshots work well on a small screen?
 
