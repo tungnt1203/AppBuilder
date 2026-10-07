@@ -67,6 +67,10 @@ class Project < ApplicationRecord
     PreviewServer.new(self)
   end
 
+  def preview_gate
+    PreviewGate.new(self)
+  end
+
   # Brings the preview up on the current code: migrations and styles first, then a
   # fresh server, then a look at the home page. What went wrong is kept for the owner
   # (and the agent) instead of failing the step that called this.

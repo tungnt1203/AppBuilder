@@ -16,6 +16,14 @@ class Projects::PreviewsControllerTest < ActionDispatch::IntegrationTest
     assert_nil project.preview_error
   end
 
+  test "opens the preview through its gate" do
+    project = projects(:clinic)
+
+    get project_preview_path(project)
+
+    assert_redirected_to project.preview_gate.entry_url
+  end
+
   test "not while the agent is working" do
     assert_no_enqueued_jobs { post project_preview_path(projects(:shop)) }
   end

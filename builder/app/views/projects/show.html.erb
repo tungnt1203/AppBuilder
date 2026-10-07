@@ -112,7 +112,7 @@
                   data-tour-text="Click this, then click any part of the preview. Your next message will be about exactly that part."
                   aria-label="Point at something in the preview" title="Point at a part of the page to ask about it"><%= icon :target, size: 15 %></button>
           <button type="button" class="btn btn-ghost btn-icon h-8 w-8" data-action="preview#reload" aria-label="Reload preview" title="Reload preview"><%= icon :reload, size: 15 %></button>
-          <%= link_to @project.preview_url, target: "_blank", class: "btn btn-ghost btn-icon h-8 w-8", "aria-label": "Open preview in a new tab", title: "Open preview in a new tab" do %><%= icon :external, size: 15 %><% end %>
+          <%= link_to project_preview_path(@project), target: "_blank", class: "btn btn-ghost btn-icon h-8 w-8", "aria-label": "Open preview in a new tab", title: "Open preview in a new tab" do %><%= icon :external, size: 15 %><% end %>
           <button type="button" class="btn btn-ghost btn-icon hidden h-8 w-8 md:inline-flex" data-action="preview#toggleFullscreen" aria-label="Full screen preview" title="Full screen (Esc to leave)"><%= icon :expand, size: 15 %></button>
         </div>
       </header>

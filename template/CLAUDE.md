@@ -64,6 +64,8 @@ Redis, or external services. Add a gem only when Rails cannot reasonably do the 
   `MAILER_FROM_ADDRESS`, `DISABLE_SSL`, `SECRET_KEY_BASE`. Never hard-code hosts, credentials or secrets.
 - `hooks/pre-backup` and `hooks/post-restore` keep backups consistent; leave them alone.
 - `config/initializers/preview_probe.rb` reports errors to the builder's preview in development; leave it as it is.
+- `config/initializers/preview_gate.rb` keeps the preview private in development; leave it as it is.
+  Use `bin/look` to see pages (it gets through); a plain request to the preview answers 403.
 
 ## Migrations must be backward compatible
 

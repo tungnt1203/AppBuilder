@@ -15,6 +15,7 @@ class PreviewServer
 
     pid_path.delete if pid_path.exist? # left by a server that's gone; in a restarted container its id may be taken
     url_path.write("http://127.0.0.1:#{@project.port}") # for the app's bin/look, inside the sandbox
+    @project.preview_gate.secret # made before the server starts, so it's never open
 
     @project.sandbox.spawn("bin/rails", "server", "-p", @project.port.to_s, "-b", @project.sandbox.bind_address, log: log_path)
     wait_until { running? }
@@ -42,7 +43,7 @@ class PreviewServer
   def check
     return "The preview server didn't start.\n\n#{log_tail}".strip unless running?
 
-    response = Net::HTTP.start("127.0.0.1", @project.port, open_timeout: 2, read_timeout: CHECK_TIMEOUT) { |http| http.get("/") }
+    response = Net::HTTP.start("127.0.0.1", @project.port, open_timeout: 2, read_timeout: CHECK_TIMEOUT) { |http| http.get("/", @project.preview_gate.headers) }
     self.class.error_from(response.body) || "The home page answered #{response.code}." if response.code.to_i >= 500
   rescue Net::ReadTimeout
     "The preview didn't answer within #{CHECK_TIMEOUT} seconds."

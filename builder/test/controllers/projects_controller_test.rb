@@ -100,7 +100,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     get project_path(projects(:clinic))
 
     assert_response :success
-    assert_select "iframe[src='http://localhost:4001']"
+    assert_select "iframe[src='#{project_preview_path(projects(:clinic))}']"
     assert_select "#messages strong", "Lịch hẹn"
     assert_select "header .segmented button[data-preview-size-param]", 3
     assert_select "header [data-action='preview#toggleFullscreen']"

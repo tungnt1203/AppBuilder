@@ -34,6 +34,8 @@ class AccessTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     get project_code_path(@other)
     assert_response :not_found
+    get project_preview_path(@other)
+    assert_response :not_found
 
     assert_no_difference -> { Message.count } do
       post project_messages_path(@other), params: { message: { body: "Xoá hết" } }

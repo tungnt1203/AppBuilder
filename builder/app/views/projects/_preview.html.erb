@@ -3,7 +3,7 @@
 <% state = project.preview_state %>
 <div class="bezel" data-preview-target="bezel">
   <div id="preview" class="stage" data-preview-target="stage" data-loading>
-    <iframe src="<%= project.preview_url %>" title="Preview of <%= project.name %>"
+    <iframe src="<%= project_preview_path(project) %>" title="Preview of <%= project.name %>"
             data-preview-target="frame" data-action="load->preview#loaded"
             onload="this.parentElement.removeAttribute('data-loading')"><%# a first load can beat the controller %></iframe>
     <div class="veil" aria-hidden="true"><span class="spinner"></span></div>

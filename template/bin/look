@@ -13,6 +13,7 @@
 # Each screenshot is one screen as a visitor sees it, top first, so the text stays readable.
 # Screenshots go to tmp/look/. The preview's address is in tmp/preview_url (set by the
 # builder); otherwise http://127.0.0.1:3000.
+require "bundler/setup" # first: net/http would load the default securerandom before the Gemfile's
 require "optparse"
 require "net/http"
 require "fileutils"
@@ -38,8 +39,8 @@ rescue SystemCallError, IOError
   abort "The app isn't running at #{base}. The builder runs the preview; wait for it to come back, never start a server yourself."
 end
 
-require "bundler/setup"
 require "ferrum"
+require "openssl"
 
 # Signing in: a session for an account of that role, put straight into the browser's cookie.
 # With no such account (a new app), a temporary one is made and removed afterwards, so the
@@ -70,6 +71,12 @@ end
 browser = Ferrum::Browser.new(window_size: [ 1280, 800 ], timeout: 20, process_timeout: 30,
   browser_options: { "no-sandbox" => nil })
 host = URI(base).host
+# The builder keeps its preview private (config/initializers/preview_gate.rb); bin/look has the pass.
+secret_path = File.join(root, "tmp/preview_secret")
+pass = OpenSSL::HMAC.hexdigest("SHA256", File.read(secret_path).strip, "preview-pass") if File.exist?(secret_path)
+if pass
+  browser.cookies.set(name: "_preview_#{pass[0, 12]}", value: pass, domain: host, path: "/", httponly: true)
+end
 browser.cookies.set(name: "session_id", value: sign_in[:cookie], domain: host, path: "/", httponly: true) if sign_in
 
 problems = 0
@@ -174,7 +181,7 @@ paths.each do |path|
       cookie = sign_in && "session_id=#{sign_in[:cookie]}"
       links.each do |link|
         response = Net::HTTP.start(URI(base).host, URI(base).port, open_timeout: 2, read_timeout: 20) do |http|
-          http.get(link, cookie ? { "Cookie" => cookie } : {})
+          http.get(link, { "Cookie" => cookie, "X-Preview-Pass" => pass }.compact)
         end
         if response.code.to_i >= 400
           problems += 1

@@ -45,6 +45,11 @@ the agent resumes its session.
   with "Ask the agent to fix it" and "Try again"; publishing waits until it's fixed. While the
   agent is building, a screen covers the preview (the app may be halfway through a change), and
   the owner can peek underneath.
+- **Private previews** (`PreviewGate`, the template's `config/initializers/preview_gate.rb`): a
+  preview answers only to people the builder lets in. The studio opens it through
+  `/projects/:id/preview`, which checks the account and redirects with a one-minute ticket signed
+  with the project's `tmp/preview_secret`; the preview turns that into a cookie. The builder's
+  own requests and the app's `bin/look` send a pass instead. Apps made before the gate stay open.
 - **Agent backends** (`AgentRunner`, settings in `config/agent.yml`):
   - `cli`: the local `claude` command and your Claude Code login. Can only be stopped.
   - `sdk`: `runner/index.mjs` with the Claude Agent SDK, interactive: the agent asks questions

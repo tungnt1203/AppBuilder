@@ -30,7 +30,7 @@ class Thumbnail
     shot = partial_path
     Dir.mktmpdir("thumbnail") do |profile|
       command = [ chrome, "--headless", "--disable-gpu", "--hide-scrollbars", "--no-first-run", "--user-data-dir=#{profile}",
-                  "--window-size=#{SIZE}", "--virtual-time-budget=3000", "--screenshot=#{shot}", @project.preview_url ]
+                  "--window-size=#{SIZE}", "--virtual-time-budget=3000", "--screenshot=#{shot}", @project.preview_gate.entry_url ]
       run(command)
     end
     return false unless shot.exist? && shot.size.positive?

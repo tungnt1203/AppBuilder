@@ -25,6 +25,7 @@ module Evaluation
     def call
       @dir.mkpath
       browser = Ferrum::Browser.new(browser_path: Rails.configuration.x.chrome_bin, window_size: [ 1280, 800 ], timeout: 30, process_timeout: 30)
+      browser.go_to(@project.preview_gate.entry_url) # past the preview's gate, which keeps a cookie
       public, private = candidate_pages.partition { |path| public?(path) }
       public.first(MAX_PUBLIC_PAGES).each_with_index { |path, index| visit browser, path, name: "visitor-#{index + 1}", signed_in: false }
       @signed_in = create_owner && sign_in(browser)
@@ -81,7 +82,7 @@ module Evaluation
 
       # Whether a visitor who isn't signed in gets the page rather than the sign-in screen.
       def public?(path)
-        response = Net::HTTP.start("127.0.0.1", @project.port, open_timeout: 2, read_timeout: 30) { |http| http.get(path) }
+        response = Net::HTTP.start("127.0.0.1", @project.port, open_timeout: 2, read_timeout: 30) { |http| http.get(path, @project.preview_gate.headers) }
         response.code.to_i.between?(200, 299)
       rescue SystemCallError, IOError, Net::ReadTimeout
         false

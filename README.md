@@ -71,13 +71,12 @@ The builder builds the app's image, pushes it to `localhost:5050` and deploys it
 
 ## Roadmap
 
-Done: the agent and each preview in a container per project (the default), turns that
-survive a job worker restart, accounts with a monthly budget for the agent.
+Done: the agent and each preview in a container per project (the default), private previews,
+turns that survive a job worker restart, accounts with a monthly budget for the agent.
 
 Before other people use it:
 
-1. Put previews behind the builder's sign-in (they're plain `localhost` ports now).
-2. Publish to a real server: a VPS, a domain, HTTPS, a private registry and real email.
+1. Publish to a real server: a VPS, a domain, HTTPS, a private registry and real email.
 
 Then: sharing (a preview link, a zip, a GitHub repository) and the first blocks.
 

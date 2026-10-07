@@ -11,7 +11,7 @@ Rails.application.routes.draw do
     resources :restorations, only: :create, module: :projects
     resource :build, only: :create, module: :projects
     resource :stop, only: :create, module: :projects
-    resource :preview, only: :create, module: :projects
+    resource :preview, only: %i[ show create ], module: :projects
     resource :thumbnail, only: :show, module: :projects
     resource :duplicate, only: :create, module: :projects
     resource :code, only: :show, module: :projects
