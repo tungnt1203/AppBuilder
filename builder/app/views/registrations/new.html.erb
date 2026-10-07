@@ -1,0 +1,39 @@
+<% content_for :title, "Create an account" %>
+
+<div>
+  <h1 class="text-xl font-semibold tracking-tight"><%= @first ? "Set up your studio" : "Create an account" %></h1>
+  <% if @first %>
+    <p class="mt-1.5 text-sm text-[var(--text-muted)]">The first account runs the studio: it can see every app and manage the other accounts.</p>
+  <% end %>
+</div>
+
+<%= form_with model: @user, url: registration_path, class: "flex flex-col gap-4" do |form| %>
+  <% if @user.errors.any? %>
+    <p class="alert" role="alert"><%= @user.errors.full_messages.to_sentence %></p>
+  <% end %>
+
+  <div class="field-group">
+    <%= form.label :name, "Your name" %>
+    <%= form.text_field :name, required: true, autofocus: true, autocomplete: "name", class: "field" %>
+  </div>
+
+  <div class="field-group">
+    <%= form.label :email_address, "Email" %>
+    <%= form.email_field :email_address, required: true, autocomplete: "username", class: "field" %>
+  </div>
+
+  <div class="field-group">
+    <%= form.label :password %>
+    <%= form.password_field :password, required: true, autocomplete: "new-password", minlength: 8, maxlength: 72, class: "field",
+          "aria-describedby": "password_hint" %>
+    <p id="password_hint" class="faint text-[0.8125rem]">At least 8 characters.</p>
+  </div>
+
+  <%= form.submit @first ? "Set up" : "Create account", class: "btn btn-primary mt-1 h-10 w-full" %>
+<% end %>
+
+<% unless @first %>
+  <% content_for :footer do %>
+    Already have an account? <%= link_to "Sign in", new_session_path, class: "font-semibold underline" %>
+  <% end %>
+<% end %>

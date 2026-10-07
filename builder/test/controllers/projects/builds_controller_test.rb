@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Projects::BuildsControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_as users(:owner) }
+
   test "approving the proposed plan builds it" do
     project = projects(:clinic)
     project.messages.create!(role: :assistant, body: "Kế hoạch…", data: { "proposal" => true })

@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Projects::MessagesControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_as users(:owner) }
+
   test "sends a request to the agent" do
     project = projects(:clinic)
 

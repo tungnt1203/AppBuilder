@@ -4,6 +4,6 @@ class ThumbnailJob < ApplicationJob
   discard_on ActiveJob::DeserializationError
 
   def perform(project)
-    project.broadcast_refresh_later_to(:projects) if project.preview_running? && project.thumbnail.capture
+    project.broadcast_listing if project.preview_running? && project.thumbnail.capture
   end
 end

@@ -1,7 +1,10 @@
 <% content_for :title, "Apps" %>
-<%= turbo_stream_from :projects %>
+<%= @everyone ? turbo_stream_from(:projects) : turbo_stream_from(Current.user, :projects) %>
 
-<%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon on-glass glass capsule fixed top-4 right-4 z-30" %>
+<div class="fixed top-4 right-4 z-30 flex items-center gap-2">
+  <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon on-glass glass capsule" %>
+  <%= render "layouts/account_menu" %>
+</div>
 
 <main class="mx-auto flex min-h-full max-w-6xl flex-col gap-14 px-4 pt-[12vh] pb-16 sm:px-6">
   <section class="mx-auto w-full max-w-3xl" data-controller="suggestion">
@@ -48,15 +51,23 @@
     </ul>
   </section>
 
-  <% if @projects.any? %>
+  <% if @projects.any? || @everyone %>
     <section aria-labelledby="apps_heading">
-      <h2 id="apps_heading" class="on-glass mb-4 flex items-baseline gap-2 px-1 text-lg font-semibold">
-        Your apps <span class="text-sm font-medium text-white/60"><%= @projects.size %></span>
-      </h2>
+      <div class="mb-4 flex items-center gap-3 px-1">
+        <h2 id="apps_heading" class="on-glass flex items-baseline gap-2 text-lg font-semibold">
+          <%= @everyone ? "All apps" : "Your apps" %> <span class="text-sm font-medium text-white/60"><%= @projects.size %></span>
+        </h2>
+        <% if Current.user.administrator? %>
+          <nav class="page-switch glass capsule ml-auto" aria-label="Whose apps">
+            <%= link_to "Mine", root_path, "aria-current": (@everyone ? nil : "page") %>
+            <%= link_to "Everyone's", root_path(apps: "all"), "aria-current": (@everyone ? "page" : nil) %>
+          </nav>
+        <% end %>
+      </div>
 
       <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <% @projects.each do |project| %>
-          <%= render "projects/card", project: project %>
+          <%= render "projects/card", project: project, everyone: @everyone %>
         <% end %>
       </ul>
     </section>

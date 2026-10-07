@@ -1,6 +1,6 @@
 class Projects::MessagesController < ApplicationController
   def create
-    @project = Project.find_by!(slug: params[:project_id])
+    @project = find_project(params[:project_id])
     request = params.dig(:message, :body).to_s.strip
     files = Array(params.dig(:message, :files)).compact_blank
 

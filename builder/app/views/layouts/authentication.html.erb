@@ -1,0 +1,21 @@
+<%# Signing in, signing up and resetting a password: a card in the middle of the backdrop. %>
+<% content_for :body do %>
+  <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon on-glass glass capsule fixed top-4 right-4 z-30" %>
+
+  <main class="flex min-h-full flex-col items-center justify-center px-4 py-12">
+    <div class="w-full max-w-sm">
+      <p class="on-glass mb-6 text-center text-lg font-semibold tracking-tight">Studio</p>
+
+      <section class="auth-card surface sheet">
+        <% if alert = flash[:alert] %><p class="alert" role="alert"><%= alert %></p><% end %>
+        <% if notice = flash[:notice] %><p class="flash" role="status"><%= notice %></p><% end %>
+        <%= yield %>
+      </section>
+
+      <% if content_for?(:footer) %>
+        <p class="on-glass mt-5 text-center text-sm"><%= yield :footer %></p>
+      <% end %>
+    </div>
+  </main>
+<% end %>
+<%= render template: "layouts/application" %>

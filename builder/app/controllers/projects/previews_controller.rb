@@ -1,7 +1,7 @@
 # "Try again" on a preview that failed to come up: restart it on the current code.
 class Projects::PreviewsController < ApplicationController
   def create
-    project = Project.find_by!(slug: params[:project_id])
+    project = find_project(params[:project_id])
 
     if project.accepts_messages? && !project.preview_starting?
       project.update!(preview_status: :starting, preview_error: nil)

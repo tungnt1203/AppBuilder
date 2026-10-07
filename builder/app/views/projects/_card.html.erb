@@ -10,7 +10,7 @@
     <div class="flex items-start gap-3 px-4 py-3.5">
       <div class="min-w-0 flex-1">
         <h3 class="truncate font-semibold"><%= project.name %></h3>
-        <p class="faint truncate text-[0.8125rem]"><%= project_subtitle(project) %></p>
+        <p class="faint truncate text-[0.8125rem]"><%= project_subtitle(project, everyone: local_assigns[:everyone]) %></p>
       </div>
       <%= status_label(project) %>
     </div>

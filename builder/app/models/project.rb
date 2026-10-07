@@ -2,6 +2,8 @@ class Project < ApplicationRecord
   RESERVED_SUBDOMAINS = %w[ www admin api app mail ]
   LANGUAGES = { "vi" => { name: "Tiếng Việt", time_zone: "Asia/Ho_Chi_Minh" }, "en" => { name: "English", time_zone: "UTC" } }
 
+  # Optional only for apps made before there were accounts (see AddOwnerToProjects).
+  belongs_to :owner, class_name: "User", optional: true
   has_many :messages, -> { order(:id) }, dependent: :destroy
   has_many :deployments, dependent: :destroy
   has_many :agent_commands, dependent: :delete_all
@@ -10,6 +12,7 @@ class Project < ApplicationRecord
   enum :preview_status, %w[ starting running broken ].index_by(&:itself), prefix: :preview
 
   validates :name, presence: true
+  validates :owner, presence: true, on: :create
   validates :language, inclusion: { in: LANGUAGES.keys }
   validates :subdomain, uniqueness: true, exclusion: { in: RESERVED_SUBDOMAINS, message: "is reserved" },
     format: { with: /\A[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\z/, message: "can only use a-z, 0-9 and dashes, not at either end" }, allow_nil: true
@@ -19,8 +22,8 @@ class Project < ApplicationRecord
   before_validation :assign_slug, :assign_port, on: :create
 
   broadcasts_refreshes
-  after_update_commit -> { broadcast_refresh_later_to(:projects) }, if: -> { saved_change_to_status? || saved_change_to_preview_status? }
-  after_destroy_commit -> { thumbnail.delete; broadcast_refresh_later_to(:projects) }
+  after_update_commit :broadcast_listing, if: -> { saved_change_to_status? || saved_change_to_preview_status? }
+  after_destroy_commit -> { thumbnail.delete; broadcast_listing }
 
   scope :ordered, -> { order(updated_at: :desc) }
   # Apps built by bin/eval stay off the home page; its report links to them.
@@ -28,6 +31,12 @@ class Project < ApplicationRecord
 
   def to_param
     slug
+  end
+
+  # Home pages showing this app: its owner's, and the administrators' list of every app.
+  def broadcast_listing
+    broadcast_refresh_later_to(owner, :projects) if owner
+    broadcast_refresh_later_to(:projects)
   end
 
   # Without a name, the app is called after the start of the owner's request until
@@ -214,7 +223,7 @@ class Project < ApplicationRecord
   # A new app with this one's code, version history and preview data, but a fresh chat.
   def duplicate
     copy_name = language == "vi" ? "#{name} (bản sao)" : "#{name} (copy)"
-    Project.create!(name: copy_name, language:, base_sha:).tap { |copy| DuplicateJob.perform_later(copy, self) }
+    Project.create!(name: copy_name, language:, base_sha:, owner:).tap { |copy| DuplicateJob.perform_later(copy, self) }
   end
 
   # Deletes the preview, code and chat. A published copy keeps running on ONCE.

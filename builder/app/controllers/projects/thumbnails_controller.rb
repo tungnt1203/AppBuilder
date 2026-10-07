@@ -1,6 +1,6 @@
 class Projects::ThumbnailsController < ApplicationController
   def show
-    thumbnail = Project.find_by!(slug: params[:project_id]).thumbnail
+    thumbnail = find_project(params[:project_id]).thumbnail
     return head :not_found unless thumbnail.exist?
 
     expires_in 1.year if params[:v] # the URL changes with each new picture

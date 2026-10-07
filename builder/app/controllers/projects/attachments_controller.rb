@@ -1,7 +1,7 @@
 # Shows a file the owner attached to a message, for the chat.
 class Projects::AttachmentsController < ApplicationController
   def show
-    project = Project.find_by!(slug: params[:project_id])
+    project = find_project(params[:project_id])
     message = project.messages.user.find(params[:message_id])
     attachment = Attachment.for(message).find { |attachment| attachment.name == params[:name] } or raise ActiveRecord::RecordNotFound
 

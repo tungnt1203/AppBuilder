@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Projects::RestorationsControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_as users(:owner) }
+
   test "restoring a version runs in the background" do
     assert_enqueued_with(job: RestoreJob, args: [ projects(:clinic), "abc1234" ]) do
       post project_restorations_path(projects(:clinic)), params: { sha: "abc1234" }

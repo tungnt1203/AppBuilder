@@ -1,6 +1,8 @@
 require "test_helper"
 
 class ProjectsControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_as users(:owner) }
+
   test "lists apps" do
     get root_path
 

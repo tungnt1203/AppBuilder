@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Projects::CodesControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_as users(:owner) }
+
   setup do
     @root = Pathname(Dir.mktmpdir)
     @original_root, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, @root

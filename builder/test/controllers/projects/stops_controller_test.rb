@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Projects::StopsControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_as users(:owner) }
+
   test "stopping a working agent" do
     project = projects(:shop)
     project.update!(working_since: 1.minute.ago)

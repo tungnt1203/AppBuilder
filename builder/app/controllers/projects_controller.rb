@@ -2,13 +2,13 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: %i[ show update destroy ]
 
   def index
-    @projects = Project.listed.ordered
+    set_listing
     @project = Project.new(language: "vi")
   end
 
   def create
     request = params.dig(:project, :request).to_s.strip
-    @project = Project.new(project_params)
+    @project = Current.user.projects.new(project_params)
     @project.name_after(request)
 
     if @project.save
@@ -16,7 +16,7 @@ class ProjectsController < ApplicationController
       ProjectSetupJob.perform_later(@project, request.presence, params.dig(:project, :plan) == "0" ? "build" : "plan")
       redirect_to @project
     else
-      @projects = Project.listed.ordered
+      set_listing
       render :index, status: :unprocessable_entity
     end
   end
@@ -36,8 +36,14 @@ class ProjectsController < ApplicationController
   end
 
   private
+    # Administrators can list every account's apps.
+    def set_listing
+      @everyone = Current.user.administrator? && params[:apps] == "all"
+      @projects = (@everyone ? Project.all : Current.user.projects).listed.ordered.includes(:owner)
+    end
+
     def set_project
-      @project = Project.find_by!(slug: params[:id])
+      @project = find_project(params[:id])
     end
 
     def project_params

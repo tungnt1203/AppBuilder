@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Projects::DeploymentsControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_as users(:owner) }
+
   test "publishing a ready project starts a deployment" do
     with_built_apps do
       assert_enqueued_with(job: PublishJob) do

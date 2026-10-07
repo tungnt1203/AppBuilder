@@ -1,0 +1,24 @@
+<% content_for :title, "Sign in" %>
+
+<h1 class="text-xl font-semibold tracking-tight">Sign in</h1>
+
+<%= form_with url: session_path, class: "flex flex-col gap-4" do |form| %>
+  <div class="field-group">
+    <%= form.label :email_address, "Email" %>
+    <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address], class: "field" %>
+  </div>
+
+  <div class="field-group">
+    <div class="flex items-baseline justify-between">
+      <%= form.label :password %>
+      <%= link_to "Forgot it?", new_password_path, class: "text-[0.8125rem] font-medium text-[var(--text-muted)] hover:underline" %>
+    </div>
+    <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72, class: "field" %>
+  </div>
+
+  <%= form.submit "Sign in", class: "btn btn-primary mt-1 h-10 w-full" %>
+<% end %>
+
+<% content_for :footer do %>
+  New here? <%= link_to "Create an account", new_registration_path, class: "font-semibold underline" %>
+<% end %>

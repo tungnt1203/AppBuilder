@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Projects::PreviewsControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_as users(:owner) }
+
   include ActiveJob::TestHelper
 
   test "trying a broken preview again restarts it" do

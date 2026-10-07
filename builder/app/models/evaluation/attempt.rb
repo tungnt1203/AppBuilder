@@ -15,7 +15,7 @@ module Evaluation
     end
 
     def create_project
-      @project = Project.create!(name: @case[:name], language: @case[:language], eval_run: @run.id)
+      @project = Project.create!(name: @case[:name], language: @case[:language], eval_run: @run.id, owner: User.owner.first!)
       @project.messages.create!(role: :user, body: @case[:request])
     end
 

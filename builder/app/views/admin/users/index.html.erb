@@ -1,0 +1,53 @@
+<% content_for :title, "Accounts" %>
+
+<div class="fixed top-4 right-4 z-30 flex items-center gap-2">
+  <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon on-glass glass capsule" %>
+  <%= render "layouts/account_menu" %>
+</div>
+
+<main class="mx-auto flex min-h-full max-w-2xl flex-col gap-6 px-4 pt-[10vh] pb-16 sm:px-6">
+  <div class="flex flex-col gap-2">
+    <%= link_to root_path, class: "on-glass inline-flex w-fit items-center gap-1 text-sm font-medium opacity-80 hover:opacity-100" do %>
+      <%= icon :back, size: 15 %> Apps
+    <% end %>
+    <h1 class="on-glass text-[2rem] leading-tight font-semibold tracking-[-0.025em]">Accounts</h1>
+    <p class="text-[0.9375rem] text-white/75">Anyone can sign up and build their own apps. Admins can also open everyone's apps and manage accounts.</p>
+  </div>
+
+  <% if notice = flash[:notice] %><p class="flash w-fit" role="status"><%= notice %></p><% end %>
+
+  <ul class="surface sheet overflow-hidden">
+    <% @users.each do |user| %>
+      <li class="account-row" id="<%= dom_id(user) %>">
+        <span class="avatar" aria-hidden="true"><%= user.name.first.upcase %></span>
+        <div class="min-w-0">
+          <p class="truncate font-semibold">
+            <%= user.name %>
+            <% if user == Current.user %><span class="faint text-[0.8125rem] font-medium">(you)</span><% end %>
+          </p>
+          <p class="faint truncate text-[0.8125rem]">
+            <%= user.email_address %> · <%= pluralize(user.projects_count, "app") %>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <% if user.role_changeable_by?(Current.user) %>
+            <%= button_to admin_user_path(user), method: :patch, params: { user: { role: user.admin? ? "member" : "admin" } },
+                  class: "btn btn-ghost h-8 px-3 text-[0.8125rem]", form: { class: "contents" },
+                  title: user.admin? ? "Can no longer open others' apps or manage accounts" : "Can open everyone's apps and manage accounts" do %>
+              <%= user.admin? ? "Remove admin" : "Make admin" %>
+            <% end %>
+          <% end %>
+          <span class="faint min-w-14 text-right text-[0.8125rem] font-medium"><%= user.role.capitalize %></span>
+          <% if user.removable_by?(Current.user) %>
+            <%= button_to admin_user_path(user), method: :delete, class: "btn btn-ghost btn-icon h-8 w-8 text-[var(--danger)]",
+                  form: { class: "contents", data: { turbo_confirm: "Remove #{user.name}'s account?" } },
+                  "aria-label": "Remove #{user.name}", title: "Remove account" do %>
+              <%= icon :trash, size: 15 %>
+            <% end %>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+</main>

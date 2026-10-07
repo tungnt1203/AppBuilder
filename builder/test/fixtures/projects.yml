@@ -6,6 +6,7 @@ clinic:
   port: 4001
   status: ready
   session_id: session-123
+  owner: owner
 
 shop:
   name: Shop
@@ -14,3 +15,4 @@ shop:
   language: en
   port: 4002
   status: working
+  owner: owner

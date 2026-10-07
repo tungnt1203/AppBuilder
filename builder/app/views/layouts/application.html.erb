@@ -25,6 +25,6 @@
   <body data-controller="glass">
     <%= render "layouts/lens" %>
     <div class="backdrop" data-turbo-permanent id="backdrop"></div>
-    <%= yield %>
+    <%= content_for?(:body) ? yield(:body) : yield %>
   </body>
 </html>

@@ -1,0 +1,17 @@
+<% content_for :title, "Choose a new password" %>
+
+<h1 class="text-xl font-semibold tracking-tight">Choose a new password</h1>
+
+<%= form_with url: password_path(params[:token]), method: :put, class: "flex flex-col gap-4" do |form| %>
+  <div class="field-group">
+    <%= form.label :password, "New password" %>
+    <%= form.password_field :password, required: true, autofocus: true, autocomplete: "new-password", minlength: 8, maxlength: 72, class: "field" %>
+  </div>
+
+  <div class="field-group">
+    <%= form.label :password_confirmation, "Repeat it" %>
+    <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", minlength: 8, maxlength: 72, class: "field" %>
+  </div>
+
+  <%= form.submit "Save password", class: "btn btn-primary mt-1 h-10 w-full" %>
+<% end %>

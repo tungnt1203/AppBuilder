@@ -1,6 +1,6 @@
 class Projects::RestorationsController < ApplicationController
   def create
-    project = Project.find_by!(slug: params[:project_id])
+    project = find_project(params[:project_id])
 
     if project.accepts_messages?
       project.update!(status: :working)

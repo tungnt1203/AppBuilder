@@ -1,6 +1,6 @@
 class Projects::AddressesController < ApplicationController
   def update
-    project = Project.find_by!(slug: params[:project_id])
+    project = find_project(params[:project_id])
 
     if !project.movable? || project.change_subdomain(params.expect(project: [ :subdomain ])[:subdomain])
       redirect_back_or_to root_path, status: :see_other

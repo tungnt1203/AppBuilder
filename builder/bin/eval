@@ -33,6 +33,7 @@ when "clean"
     project.remove
   end
 else
+  abort "Create the builder's first account in the studio before running evals: its apps belong to it." unless User.owner.exists?
   cases = Evaluation::Run.cases
   cases = cases.select { |eval_case| ARGV.include?(eval_case[:id]) } if ARGV.any?
   abort "No cases match #{ARGV.join(", ")}. Cases: #{Evaluation::Run.cases.map { |c| c[:id] }.join(", ")}" if cases.empty?

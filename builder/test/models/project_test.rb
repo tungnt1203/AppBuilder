@@ -2,7 +2,7 @@ require "test_helper"
 
 class ProjectTest < ActiveSupport::TestCase
   test "gets a fixed id of its own, not taken from its name, and the next free preview port" do
-    project = Project.create!(name: "Trung tâm Anh ngữ", language: "vi")
+    project = Project.create!(name: "Trung tâm Anh ngữ", language: "vi", owner: users(:owner))
 
     assert_match(/\A[a-z0-9]{8}\z/, project.slug)
     assert_equal 4003, project.port
@@ -12,7 +12,7 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "is published at a subdomain from its name, kept from the first publish on" do
-    project = Project.create!(name: "Trung tâm Anh ngữ", language: "vi")
+    project = Project.create!(name: "Trung tâm Anh ngữ", language: "vi", owner: users(:owner))
     assert_equal "trung-tam-anh-ngu.localhost", project.publish_host
     assert_nil project.subdomain
 
@@ -24,14 +24,14 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "subdomains stay unique" do
-    project = Project.create!(name: "Shop", language: "en")
+    project = Project.create!(name: "Shop", language: "en", owner: users(:owner))
 
     assert_match(/\Ashop-\h{4}\.localhost\z/, project.publish_host)
   end
 
   test "only known languages" do
     assert_not Project.new(name: "X", language: "fr").valid?
-    assert_equal "duong-pho.localhost", Project.create!(name: "Đường phố", language: "vi").publish_host
+    assert_equal "duong-pho.localhost", Project.create!(name: "Đường phố", language: "vi", owner: users(:owner)).publish_host
     assert_equal "Asia/Ho_Chi_Minh", projects(:clinic).time_zone
   end
 
@@ -51,7 +51,7 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "adopting a suggested name leaves the app's address alone" do
-    project = Project.new(language: "vi")
+    project = Project.new(language: "vi", owner: users(:owner))
     project.name_after("Quản lý hội viên phòng gym quận 3")
     project.save!
     slug = project.slug
@@ -63,7 +63,7 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "keeps the provisional name when none was suggested" do
-    project = Project.new(language: "vi")
+    project = Project.new(language: "vi", owner: users(:owner))
     project.name_after("Quản lý hội viên phòng gym quận 3")
     project.save!
 
