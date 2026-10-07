@@ -68,6 +68,11 @@ class AgentTranscript
     @asked
   end
 
+  # The agent reported the end of its turn.
+  def finished?
+    @finished
+  end
+
   private
     def record_session(event)
       @project.update!(session_id: event["session_id"]) if event["subtype"] == "init" && event["session_id"]
@@ -206,6 +211,7 @@ class AgentTranscript
     end
 
     def record_result(event)
+      @finished = true
       # A failed turn often repeats its last reply as the error; show it once, as the error.
       if event["is_error"] && (last = @project.messages.last)&.assistant? && last.body.strip == event["result"].to_s.strip
         last.destroy

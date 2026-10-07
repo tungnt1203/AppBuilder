@@ -11,8 +11,18 @@ Rails.application.configure do
   # "sdk" runs runner/index.mjs (the Claude Agent SDK) and is interactive: the agent can ask
   # questions mid-turn, take extra messages and be stopped. It needs `npm install` in runner/
   # and a token or API key. "cli" runs the local `claude -p` and can only be stopped.
-  sdk_ready = Rails.root.join("runner/node_modules/@anthropic-ai/claude-agent-sdk").exist? &&
-    (config.x.claude_oauth_token.present? || ENV["ANTHROPIC_API_KEY"].present?)
+  # Where each project's code and agent run: "local" (this machine) or "docker" (a container
+  # per project, see app/models/sandbox.rb and `bin/sandbox build`).
+  config.x.sandbox = ENV.fetch("SANDBOX", "local")
+  config.x.sandbox_image = ENV.fetch("SANDBOX_IMAGE", "appbuilder-sandbox")
+  config.x.sandbox_cpus = ENV.fetch("SANDBOX_CPUS", "2")
+  config.x.sandbox_memory = ENV.fetch("SANDBOX_MEMORY", "2g")
+  config.x.sandbox_gems_volume = ENV.fetch("SANDBOX_GEMS_VOLUME", "appbuilder-gems")
+  config.x.sandboxes_root = Pathname(ENV.fetch("SANDBOXES_ROOT", Rails.root.join(Rails.env.test? ? "tmp/sandboxes" : "storage/sandboxes")))
+
+  # The Docker sandbox has the Agent SDK built in.
+  sdk_installed = config.x.sandbox == "docker" || Rails.root.join("runner/node_modules/@anthropic-ai/claude-agent-sdk").exist?
+  sdk_ready = sdk_installed && (config.x.claude_oauth_token.present? || ENV["ANTHROPIC_API_KEY"].present?)
   config.x.agent_backend = ENV.fetch("AGENT_BACKEND") { sdk_ready ? "sdk" : "cli" }
   config.x.agent = config_for(:agent)
 

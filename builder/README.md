@@ -51,6 +51,30 @@ the agent resumes its session.
     with buttons, takes extra messages while it works and stops cleanly. Picked automatically
     after `npm install` in `runner/` when a token or `ANTHROPIC_API_KEY` is set.
 
+## Sandbox: where projects run
+
+By default (`SANDBOX=local`) each project's preview server, gems, tests and the coding agent run
+directly on this machine, as your user: quick to work with, but the agent can reach anything
+you can. With `SANDBOX=docker` every project gets a container of its own that only sees the
+project's folder:
+
+```sh
+bin/sandbox build            # once, and after changing sandbox/Dockerfile or runner/
+SANDBOX=docker bin/dev
+bin/sandbox list             # the projects' containers
+```
+
+- The container is made when the project first needs it and kept; deleting the app removes it.
+  The project's folder is mounted at the same path, so files, git history and the Code tab work
+  as before. Git, publishing and screenshots stay on the host.
+- The preview's port is published on `127.0.0.1` only. Gems are shared by all projects through
+  the `appbuilder-gems` volume. The agent's Claude settings and sessions live in
+  `storage/sandboxes/<slug>/`, so a container can be removed and made again.
+- The agent needs a Claude token or `ANTHROPIC_API_KEY` (a container can't use your Claude Code
+  login). It reaches the agent through the environment of `docker exec`, never its arguments.
+- Each container may use `SANDBOX_CPUS` (2) and `SANDBOX_MEMORY` (2g); keep Docker's memory in
+  mind when many previews run at once.
+
 ## Claude credentials
 
 Without any setup the agent uses your local `claude` login. To use a long-lived token instead,
@@ -88,7 +112,8 @@ bin/eval clean                # delete the apps of every run but the latest
 
 ## Settings
 
-Environment: `PROJECTS_ROOT`, `TEMPLATE_PATH`, `AGENT_BACKEND`, `FIRST_PREVIEW_PORT`,
+Environment: `SANDBOX`, `SANDBOX_IMAGE`, `SANDBOX_CPUS`, `SANDBOX_MEMORY`, `SANDBOX_GEMS_VOLUME`,
+`SANDBOXES_ROOT`, `PROJECTS_ROOT`, `TEMPLATE_PATH`, `AGENT_BACKEND`, `FIRST_PREVIEW_PORT`,
 `CLAUDE_CODE_OAUTH_TOKEN`, `ANTHROPIC_API_KEY`, `CHROME_BIN`, `THUMBNAILS_ROOT`, `REGISTRY`,
 `ONCE_BIN`, `PUBLISH_DOMAIN`, `BACKUPS_ROOT`, and `UNSPLASH_ACCESS_KEY`, `PEXELS_API_KEY`,
 `PIXABAY_API_KEY` for the agent's stock photo search (without them it uses Openverse).

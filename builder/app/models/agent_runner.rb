@@ -15,7 +15,7 @@ class AgentRunner
 
   def self.stop(project)
     project.agent_commands.create!(kind: :interrupt)
-    Process.kill("TERM", project.agent_pid) if project.agent_pid && Rails.configuration.x.agent_backend == "cli"
+    project.sandbox.stop_agent(project.agent_pid) if project.agent_pid && Rails.configuration.x.agent_backend == "cli"
   rescue Errno::ESRCH
   end
 
@@ -31,7 +31,7 @@ class AgentRunner
 
   # An agent process that outlived the job running it (the job process restarted).
   def self.end_leftover(project)
-    Process.kill("TERM", project.agent_pid) if project.agent_pid
+    project.sandbox.stop_agent(project.agent_pid) if project.agent_pid
   rescue Errno::ESRCH
   ensure
     project.update_column(:agent_pid, nil)
@@ -39,7 +39,7 @@ class AgentRunner
 
   def run(prompt)
     with_config_file do |config_path|
-      @project.shell.popen(*command(prompt, config_path), env: env) do |stdin, stdout, stderr, wait|
+      @project.sandbox.run_agent(*command(prompt, config_path), env: env) do |stdin, stdout, stderr, wait|
         @project.update_column(:agent_pid, wait.pid)
         courier = interactive? ? Thread.new { deliver_commands(stdin, wait) } : stdin.close
         errors = Thread.new { stderr.read }
@@ -84,7 +84,7 @@ class AgentRunner
     end
 
     def sdk_command(prompt, config_path)
-      [ "node", Rails.root.join("runner/index.mjs").to_s,
+      [ "node", @project.sandbox.runner_script,
         "--cwd", @project.path.to_s, "--prompt", prompt, "--config", config_path.to_s, "--permission-mode", permission_mode,
         *([ "--resume", @project.session_id ] if @project.session_id) ]
     end
@@ -100,7 +100,7 @@ class AgentRunner
     end
 
     def end_process(wait)
-      Process.kill("TERM", wait.pid) if wait.alive?
+      @project.sandbox.stop_agent(wait.pid) if wait.alive?
     rescue Errno::ESRCH
     end
 
@@ -119,15 +119,15 @@ class AgentRunner
       # The agent finished; anything not delivered is picked up by the next turn.
     end
 
+    # In the project's tmp/, where the agent can read it in the sandbox too. No secrets in it.
     def with_config_file
       return yield(nil) unless @backend == "sdk"
 
-      Tempfile.create([ "agent", ".json" ]) do |file|
-        file.write({ allowedTools: @config[:allowed_tools], disallowedTools: @config[:disallowed_tools],
-                     appendSystemPrompt: @config[:append_system_prompt], maxBudgetUsd: @config[:max_budget_usd] }.to_json)
-        file.flush
-        yield file.path
-      end
+      file = @project.path.join("tmp/agent-config.json")
+      file.dirname.mkpath
+      file.write({ allowedTools: @config[:allowed_tools], disallowedTools: @config[:disallowed_tools],
+                   appendSystemPrompt: @config[:append_system_prompt], maxBudgetUsd: @config[:max_budget_usd] }.to_json)
+      yield file.to_s
     end
 
     def parse(line)

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# The Docker sandbox projects run in when SANDBOX=docker (see sandbox/Dockerfile).
+#
+#   bin/sandbox build     build (or rebuild) the image
+#   bin/sandbox list      the projects' containers
+#   bin/sandbox prune     remove every project container (they're made again when needed)
+set -euo pipefail
+cd "$(dirname "$0")/.."
+image="${SANDBOX_IMAGE:-appbuilder-sandbox}"
+
+case "${1:-}" in
+  build) docker build --file sandbox/Dockerfile --build-arg "UID=$(id -u)" --tag "$image" . ;;
+  list)  docker ps --all --filter label=appbuilder.project --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' ;;
+  prune) docker ps --all --quiet --filter label=appbuilder.project | xargs -r docker rm --force ;;
+  *)     sed -n '2,7p' "$0"; exit 1 ;;
+esac

@@ -26,6 +26,9 @@ class AgentTurnJob < ApplicationJob
 
     AgentRunner.new(project, mode:).run(prompt) { |event| transcript.record(event) }
     transcript.finish
+    unless transcript.finished? || transcript.asked? || project.stop_requested?
+      raise ProjectShell::Error, "The agent stopped without finishing its turn."
+    end
 
     if transcript.asked?
       wait_for_answers(project)

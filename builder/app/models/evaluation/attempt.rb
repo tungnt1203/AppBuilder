@@ -68,7 +68,7 @@ module Evaluation
       end
 
       def tests
-        output, passed = project.shell.capture("bin/rails", "test")
+        output, passed = project.sandbox.capture("bin/rails", "test")
         counts = output.scan(/(\d+) runs, (\d+) assertions, (\d+) failures, (\d+) errors/).last&.map(&:to_i)
         result = { "passed" => passed }
         result.merge!(%w[ runs assertions failures errors ].zip(counts).to_h) if counts
@@ -77,7 +77,7 @@ module Evaluation
       end
 
       def rubocop
-        output, = project.shell.capture("bin/rubocop", "--format", "json")
+        output, = project.sandbox.capture("bin/rubocop", "--format", "json")
         JSON.parse(output[/\{.*\}/m].to_s).dig("summary", "offense_count")
       rescue JSON::ParserError
         nil

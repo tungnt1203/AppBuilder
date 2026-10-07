@@ -161,8 +161,14 @@ class Project < ApplicationRecord
     Thumbnail.new(self)
   end
 
+  # Commands on the host, in the project's folder: git, publishing.
   def shell
     ProjectShell.new(path)
+  end
+
+  # Where the app's own code runs (see Sandbox).
+  def sandbox
+    Sandbox.for(self)
   end
 
   def history
@@ -214,6 +220,7 @@ class Project < ApplicationRecord
   # Deletes the preview, code and chat. A published copy keeps running on ONCE.
   def remove
     preview.stop
+    sandbox.remove
     destroy!
     FileUtils.rm_rf(path)
   end
@@ -277,8 +284,8 @@ class Project < ApplicationRecord
     end
 
     def prepare_preview
-      shell.run("bin/rails", "db:prepare")
-      shell.run("bin/rails", "tailwindcss:build")
+      sandbox.run("bin/rails", "db:prepare")
+      sandbox.run("bin/rails", "tailwindcss:build")
       nil
     rescue ProjectShell::Error => error
       error.message

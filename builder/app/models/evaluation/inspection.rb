@@ -94,7 +94,7 @@ module Evaluation
             User.create!(name: "Eval Owner", email_address: #{EMAIL.inspect}, password: #{PASSWORD.inspect},
                          role: User.exists?(role: "owner") ? "admin" : "owner")
         RUBY
-        @project.shell.capture("bin/rails", "runner", script).last
+        @project.sandbox.capture("bin/rails", "runner", script).last
       end
 
       def sign_in(browser)
@@ -112,7 +112,7 @@ module Evaluation
 
       # The home page first, then lists, then forms for adding things.
       def candidate_pages
-        output, = @project.shell.capture("bin/rails", "runner", <<~RUBY)
+        output, = @project.sandbox.capture("bin/rails", "runner", <<~RUBY)
           paths = Rails.application.routes.routes.filter_map do |route|
             next unless route.verb.to_s.include?("GET")
             path = route.path.spec.to_s.sub("(.:format)", "")

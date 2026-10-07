@@ -13,13 +13,15 @@ class PreviewServer
   def start
     return if running?
 
-    @project.shell.spawn("bin/rails", "server", "-p", @project.port.to_s, "-b", "127.0.0.1", log: log_path)
+    pid_path.delete if pid_path.exist? # left by a server that's gone; in a restarted container its id may be taken
+
+    @project.sandbox.spawn("bin/rails", "server", "-p", @project.port.to_s, "-b", @project.sandbox.bind_address, log: log_path)
     wait_until { running? }
   end
 
   def stop
     pid = pid_path.read.to_i if pid_path.exist?
-    Process.kill("TERM", pid) if pid&.positive?
+    @project.sandbox.kill(pid) if pid&.positive?
     wait_until { !running? }
   rescue Errno::ESRCH
     pid_path.delete if pid_path.exist?
@@ -31,10 +33,7 @@ class PreviewServer
   end
 
   def running?
-    Socket.tcp("127.0.0.1", @project.port, connect_timeout: 0.2).close
-    true
-  rescue SystemCallError, IOError
-    false
+    @project.sandbox.listening?(@project.port)
   end
 
   # Opens the home page the way the owner would. Returns what went wrong, or nil

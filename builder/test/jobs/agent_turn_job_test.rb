@@ -4,7 +4,7 @@ class AgentTurnJobTest < ActiveSupport::TestCase
   class FakeRunner
     attr_reader :prompts
 
-    def initialize(events = []) = (@prompts, @events = [], events)
+    def initialize(events = [ { "type" => "result", "num_turns" => 1 } ]) = (@prompts, @events = [], events)
 
     def run(prompt)
       @prompts << prompt
@@ -37,6 +37,15 @@ class AgentTurnJobTest < ActiveSupport::TestCase
     assert_equal Process.pid, seen["turn_worker_pid"]
     assert_nil @project.reload.turn_heartbeat_at
     assert_nil @project.turn_worker_pid
+  end
+
+  test "an agent that ends without finishing its turn is an error, not a success" do
+    @runner = FakeRunner.new([ { "type" => "system", "subtype" => "init", "session_id" => "abc" } ])
+
+    with_runner { AgentTurnJob.perform_now(@project, "Thêm trang báo cáo", "plan") }
+
+    assert @project.reload.failed?
+    assert_equal "The agent stopped without finishing its turn.", @project.messages.error.last.body
   end
 
   test "a turn cut off by a restart resumes where it left off" do

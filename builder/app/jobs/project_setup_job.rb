@@ -6,7 +6,7 @@ class ProjectSetupJob < ApplicationJob
     name(project, first_request)
     copy_template(project)
     configure(project)
-    project.shell.run("bundle", "install", "--quiet")
+    project.sandbox.run("bundle", "install", "--quiet")
     project.restart_preview(restart: false)
     project.update!(status: :ready)
 
