@@ -19,7 +19,9 @@ class Sandbox::Docker
     case state
     when nil then create
     when RUNNING then nil
-    else host.run("docker", "start", name)
+    else
+      remove_orphans
+      host.run("docker", "start", name)
     end
   end
 
@@ -112,6 +114,9 @@ class Sandbox::Docker
 
   private
     def create
+      raise ProjectShell::Error, "#{@project.name} was deleted" unless Project.exists?(@project.id)
+
+      remove_orphans
       home.mkpath
       config = Rails.configuration.x
       path = @project.path.to_s
@@ -121,6 +126,22 @@ class Sandbox::Docker
         "--volume", "#{home}:/home/dev/.claude", "--workdir", path,
         "--cpus", config.sandbox_cpus.to_s, "--memory", config.sandbox_memory, "--pids-limit", "1024",
         config.sandbox_image)
+    rescue ProjectShell::Error
+      # A run that fails partway (its port taken, say) can leave the container behind,
+      # running without its port; remove it so the next start makes it properly.
+      host.capture("docker", "rm", "--force", name)
+      raise
+    end
+
+    # Containers of apps that no longer exist (deleted while a job was starting their preview),
+    # which would hold on to a port a new app gets.
+    def remove_orphans
+      output, listed = host.capture("docker", "ps", "--all", "--filter", "label=#{LABEL}", "--format", "{{.Label \"#{LABEL}\"}}")
+      return unless listed
+
+      slugs = output.split
+      orphans = slugs - Project.where(slug: slugs).pluck(:slug)
+      orphans.each { |slug| host.capture("docker", "rm", "--force", "appbuilder-#{slug}") }
     end
 
     def exec(command, env, interactive: false, detach: false)

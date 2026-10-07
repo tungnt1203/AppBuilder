@@ -4,9 +4,9 @@ class SandboxTest < ActiveSupport::TestCase
   # Records docker commands and answers `docker inspect` with the container's state.
   class FakeHost
     attr_reader :commands, :environments
-    attr_accessor :state
+    attr_accessor :state, :labels
 
-    def initialize(state) = (@state, @commands, @environments = state, [], [])
+    def initialize(state, labels: []) = (@state, @labels, @commands, @environments = state, labels, [], [])
 
     def run(*command, env: {})
       @commands << command
@@ -16,7 +16,11 @@ class SandboxTest < ActiveSupport::TestCase
 
     def capture(*command, env: {})
       @commands << command
-      command[1] == "inspect" ? [ "#{@state}\n", !@state.nil? ] : [ "", true ]
+      case command[1]
+      when "inspect" then [ "#{@state}\n", !@state.nil? ]
+      when "ps" then [ @labels.map { |label| "#{label}\n" }.join, true ]
+      else [ "", true ]
+      end
     end
 
     def popen(*command, env: {})
@@ -55,6 +59,34 @@ class SandboxTest < ActiveSupport::TestCase
 
     assert_equal [ "docker", "rm", "--force", "appbuilder-nha-khoa" ], host.commands.last
     assert_not home.dirname.exist?
+  end
+
+  test "containers of deleted apps are removed before a container starts, so their ports are free" do
+    host = FakeHost.new(nil, labels: [ "nha-khoa", "gone1234" ])
+    Sandbox::Docker.new(@project, host:).start
+
+    assert_includes host.commands, [ "docker", "rm", "--force", "appbuilder-gone1234" ]
+    assert_not_includes host.commands, [ "docker", "rm", "--force", "appbuilder-nha-khoa" ]
+
+    host = FakeHost.new("created", labels: [ "gone1234" ])
+    Sandbox::Docker.new(@project, host:).start
+    assert_equal [ [ "docker", "rm", "--force", "appbuilder-gone1234" ], [ "docker", "start", "appbuilder-nha-khoa" ] ], host.commands.last(2)
+  end
+
+  test "a container that failed to start is removed, to be made again next time" do
+    host = FakeHost.new(nil)
+    host.define_singleton_method(:run) { |*command, env: {}| commands << command; raise ProjectShell::Error, "port is already allocated" if command[1] == "run" }
+
+    assert_raises(ProjectShell::Error) { Sandbox::Docker.new(@project, host:).start }
+    assert_equal [ "docker", "rm", "--force", "appbuilder-nha-khoa" ], host.commands.last
+  end
+
+  test "a deleted app's container isn't made again by a job that was still running" do
+    host = FakeHost.new(nil)
+    @project.destroy!
+
+    assert_raises(ProjectShell::Error) { Sandbox::Docker.new(@project, host:).start }
+    assert_not host.commands.any? { |command| command[1] == "run" }
   end
 
   test "starts a stopped container, and leaves a running one" do
