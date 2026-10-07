@@ -5,7 +5,8 @@ class Projects::MessagesController < ApplicationController
     files = Array(params.dig(:message, :files)).compact_blank
 
     if (request.present? || files.any?) && (@project.accepts_messages? || @project.accepts_messages_while_working?)
-      @project.ask(request, mode: params.dig(:message, :plan) == "1" ? "plan" : "build", files:)
+      @project.ask(request, mode: params.dig(:message, :plan) == "1" ? "plan" : "build", files:,
+        pointed: PointedElement.from_param(params.dig(:message, :pointed)))
     end
 
     redirect_to @project

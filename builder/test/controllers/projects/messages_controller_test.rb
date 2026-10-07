@@ -70,6 +70,20 @@ class Projects::MessagesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the part of the preview the owner pointed at goes with the message" do
+    project = projects(:clinic)
+    pointed = { page: "/", selector: "header > a.logo", tag: "a", text: "Nha khoa", html: "<a class=\"logo\">Nha khoa</a>" }.to_json
+
+    post project_messages_path(project), params: { message: { body: "Làm logo này to hơn", plan: "0", pointed: } }
+
+    request = enqueued_jobs.last["arguments"][1]
+    assert request.start_with?("Làm logo này to hơn\n\nThe owner pointed at this part of the page / in the preview")
+    assert_equal "header > a.logo", project.messages.user.last.data.dig("pointed", "selector")
+
+    get project_path(project)
+    assert_select ".pointed-note", text: /Nha khoa/
+  end
+
   test "files alone are a message" do
     with_projects_root do
       post project_messages_path(projects(:clinic)), params: { message: { body: "", files: [ fixture_file_upload("logo.png", "image/png") ] } }

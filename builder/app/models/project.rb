@@ -232,12 +232,13 @@ class Project < ApplicationRecord
   end
 
   # The owner's message goes to the agent, in plan or build mode, with the files they
-  # attached. While a turn is running (interactive agent only), it joins that turn instead.
-  def ask(request, mode:, files: [])
-    message = messages.create!(role: :user, body: request)
+  # attached and the part of the preview they pointed at. While a turn is running
+  # (interactive agent only), it joins that turn instead.
+  def ask(request, mode:, files: [], pointed: nil)
+    message = messages.create!(role: :user, body: request, data: pointed ? { "pointed" => pointed.data } : {})
     attachments = Attachment.save(message, files)
-    message.update!(data: { "attachments" => attachments.map(&:to_h) }) if attachments.any?
-    request = [ request.presence, attachments_note(attachments) ].compact.join("\n\n")
+    message.update!(data: message.data.merge("attachments" => attachments.map(&:to_h))) if attachments.any?
+    request = [ request.presence, pointed&.to_prompt, attachments_note(attachments) ].compact.join("\n\n")
 
     if working?
       agent_commands.create!(kind: :message, payload: { "text" => request })

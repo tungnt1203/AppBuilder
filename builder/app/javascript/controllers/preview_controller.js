@@ -16,10 +16,12 @@ import { Controller } from "@hotwired/stimulus"
 //
 // The app reports JavaScript errors and error pages (config/initializers/preview_probe.rb
 // in the template) by postMessage; they show over the app with a button that asks
-// the agent to fix them.
+// the agent to fix them. The same probe lets the owner point at a part of a page:
+// what they pick goes with their next message.
 export default class extends Controller {
   static targets = [ "stage", "frame", "device", "bezel", "tab", "code", "codeFiles",
-                     "errorBox", "errorTitle", "errorPage", "errorMessage", "errorRequest", "errorFix" ]
+                     "errorBox", "errorTitle", "errorPage", "errorMessage", "errorRequest", "errorFix",
+                     "pickButton", "pointed", "pointedChip", "pointedLabel" ]
   static values = { version: Number, state: String, accepts: Boolean }
   static MAX_ERRORS = 5
   static LOAD_TIMEOUT = 15000
@@ -36,7 +38,7 @@ export default class extends Controller {
     this.showSize(this.savedSize())
     this.tab = "preview"
     this.errors = new Map()
-    this.onMessage = (event) => this.previewError(event)
+    this.onMessage = (event) => { this.previewError(event); this.previewPick(event) }
     window.addEventListener("message", this.onMessage)
     this.waitForLoad()
   }
@@ -58,6 +60,7 @@ export default class extends Controller {
 
   stateValueChanged(state, previous) {
     if (previous !== undefined && state !== previous) this.unpeek()
+    if (state !== "live") this.setPicking(false)
     if (this.hasErrorBoxTarget) this.showErrors()
   }
 
@@ -67,6 +70,7 @@ export default class extends Controller {
 
   reload() {
     if (!this.hasFrameTarget) return
+    this.setPicking(false)
     this.waitForLoad()
     this.frameTarget.src = this.frameTarget.src
   }
@@ -175,6 +179,40 @@ export default class extends Controller {
   dismissErrors() {
     this.errors?.clear()
     if (this.hasErrorBoxTarget) this.errorBoxTarget.hidden = true
+  }
+
+  // Pointing at a part of the page, in the app: only while it's live and on screen.
+  togglePick() {
+    this.setPicking(!this.picking && this.stateValue === "live" && this.tab === "preview")
+  }
+
+  setPicking(on) {
+    if (!this.hasPickButtonTarget || this.picking === on) return
+    this.picking = on
+    this.pickButtonTarget.setAttribute("aria-pressed", on)
+    this.frameTarget.contentWindow?.postMessage({ type: "preview:pick", on }, "*")
+    if (on) this.frameTarget.focus()
+  }
+
+  previewPick(event) {
+    const data = event.data
+    if (!this.hasFrameTarget || event.source !== this.frameTarget.contentWindow) return
+    if (data?.type === "preview:pick-ended") return this.setPicking(false)
+    if (data?.type !== "preview:picked" || !this.picking) return
+
+    const clip = (value, length) => typeof value === "string" ? value.slice(0, length) : ""
+    const pointed = { page: clip(data.page, 300), selector: clip(data.selector, 500), tag: clip(data.tag, 40), text: clip(data.text, 200), html: clip(data.html, 800) }
+    this.picking = false
+    this.pickButtonTarget.setAttribute("aria-pressed", false)
+    this.pointedTarget.value = JSON.stringify(pointed)
+    this.pointedLabelTarget.textContent = `${pointed.text ? `“${pointed.text}”` : `<${pointed.tag}>`} on ${pointed.page || "/"}`
+    this.pointedChipTarget.hidden = false
+    document.getElementById("message_body")?.focus()
+  }
+
+  clearPick() {
+    this.pointedTarget.value = ""
+    this.pointedChipTarget.hidden = true
   }
 
   // Cross-origin, so the only signal is the load event; a page that never loads

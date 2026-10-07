@@ -422,6 +422,30 @@
     cursor: pointer;
     box-shadow: 0 0 0 2px var(--surface-solid);
   }
+  /* The part of the preview the owner pointed at: above the message box, then above their message. */
+  .pointed-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0.3rem 0.35rem 0.3rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    color: var(--text);
+    &[hidden] { display: none; }
+  }
+  .pointed-note {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: 2.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    min-width: 0;
+  }
+  [data-preview-target="pickButton"][aria-pressed="true"] { background: var(--color-jade, #2f8f83); color: white; }
+
   form.dropping .capsule { outline: 2px dashed var(--link); outline-offset: 3px; }
 
   /* Going back to the version a turn left, from the chat. */

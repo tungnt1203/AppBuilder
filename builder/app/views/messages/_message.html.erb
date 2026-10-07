@@ -15,6 +15,10 @@
       <% end %>
     </ul>
   <% end %>
+  <% if message.data["pointed"] %>
+    <% pointed = PointedElement.new(message.data["pointed"]) %>
+    <p class="pointed-note" title="<%= pointed.data["selector"] %>"><%= icon :target, size: 12 %><span class="truncate">“<%= pointed.label %>”</span><span class="faint">on <%= pointed.page %></span></p>
+  <% end %>
   <% if message.body.present? %>
     <div class="bubble-user"><%= message.body %></div>
   <% end %>
