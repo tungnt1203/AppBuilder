@@ -19,6 +19,7 @@ shared:
     - Bash(bin/rubocop:*)
     - Bash(bin/icons:*)
     - Bash(bin/images:*)
+    - Bash(bin/look:*)
     - Bash(bundle exec:*)
     - Bash(git status:*)
     - Bash(git diff:*)

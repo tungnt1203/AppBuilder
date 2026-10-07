@@ -26,6 +26,9 @@ Redis, or external services. Add a gem only when Rails cannot reasonably do the 
 ## Commands
 
 - `bin/rails test` — all tests; must pass before you report a task as done
+- `bin/rails test:system` — the main flows in headless Chrome (`test/system/`); must pass too
+- `bin/look /path --as owner` — look at pages of the running app: screenshots at phone and desktop
+  width (Read them) and the problems a visitor would hit
 - `bin/rubocop` — style; must be clean
 - `bin/rails db:migrate` — after adding a migration
 - `bin/rails tailwindcss:build` — after changing views, so the preview picks up new classes
@@ -108,8 +111,10 @@ first and write it there. A plan for a new app includes a short "Look and feel" 
 
 - The feature works end to end from the browser, including empty states and validation errors.
 - Model tests for validations and business rules; integration tests for each controller action,
-  including who may and may not access it.
-- `bin/rails test` and `bin/rubocop` pass.
+  including who may and may not access it; a system test for each main flow (`new-feature` skill).
+- `bin/rails test`, `bin/rails test:system` and `bin/rubocop` pass.
+- You looked at every page you changed with `bin/look`, at phone and desktop width, and fixed what
+  it reported and what looked wrong.
 - Your summary says what changed in terms the owner understands, and flags anything that affects
   existing data.
 

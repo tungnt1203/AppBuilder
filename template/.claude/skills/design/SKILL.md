@@ -153,7 +153,16 @@ is only a tool for the owner has no public pages; give its theme the same care.
 
 ## 6. Look before you finish
 
-After building or restyling a page, read it as a visitor would: open it at phone and desktop width
-if you can take screenshots; otherwise reread the view top to bottom. Ask: does the first screen say
-what this is? Is there one obvious next step? Does anything look like a default? Would the owner show
-it to a customer with pride? Fix what fails, then run `bin/rails tailwindcss:build`.
+After building or restyling a page, run `bin/rails tailwindcss:build`, then look at it in the
+running app: `bin/look / /menu` (add `--as owner` for staff pages). It saves the first three
+screens of each page; add `--screens N` when what you changed is further down. Read every screenshot it saves,
+phone first, and judge it as a visitor would:
+
+- Does the first screen say what this is, with one obvious next step, without scrolling on a phone?
+- Does anything look like a default: gray boxes, an indigo button, everything centered, stock words?
+- Is the text readable on its background, and the spacing even? Do photos show what they should?
+- Does it look made for this business, and would the owner show it to a customer with pride?
+
+Fix the problems `bin/look` reports and what fails these questions, then look again, only at the
+pages you changed. Stop when it passes, and after three rounds at most: say in your summary what
+still isn't right instead of looking again.

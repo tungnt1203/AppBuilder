@@ -1,0 +1,193 @@
+#!/usr/bin/env ruby
+# Looks at pages of the running app (the preview) in headless Chrome, at phone and desktop
+# width: saves a full-page screenshot of each (Read the PNG to see it) and reports what a
+# visitor would run into: error pages, JavaScript errors, failed requests, broken images,
+# a page wider than the phone, and links to pages that fail.
+#
+#   bin/look                      the home page, as a visitor
+#   bin/look / /menu /booking     several pages
+#   bin/look /bookings --as owner signed in (owner, admin or member)
+#   bin/look / --phone            only at phone width (or --desktop)
+#   bin/look / --screens 6        more of a long page (default: the first 3 screens)
+#
+# Each screenshot is one screen as a visitor sees it, top first, so the text stays readable.
+# Screenshots go to tmp/look/. The preview's address is in tmp/preview_url (set by the
+# builder); otherwise http://127.0.0.1:3000.
+require "optparse"
+require "net/http"
+require "fileutils"
+
+options = { screens: 3, sizes: { "phone" => [ 390, 844 ], "desktop" => [ 1280, 800 ] } }
+OptionParser.new do |parser|
+  parser.banner = "Usage: bin/look [paths] [--as owner|admin|member] [--phone|--desktop]"
+  parser.on("--as ROLE", %w[owner admin member], "Signed in with this role") { |role| options[:as] = role }
+  parser.on("--phone", "Only at phone width (390)") { options[:sizes] = options[:sizes].slice("phone") }
+  parser.on("--desktop", "Only at desktop width (1280)") { options[:sizes] = options[:sizes].slice("desktop") }
+  parser.on("--screens N", Integer, "Screens to capture per page, from the top (default 3)") { |count| options[:screens] = count.clamp(1, 20) }
+end.parse!
+
+paths = ARGV.empty? ? [ "/" ] : ARGV.map { |path| path.start_with?("/") ? path : "/#{path}" }
+root = File.expand_path("..", __dir__)
+base = File.read(File.join(root, "tmp/preview_url")).strip rescue "http://127.0.0.1:3000"
+out = File.join(root, "tmp/look")
+FileUtils.mkdir_p(out)
+
+begin
+  Net::HTTP.get_response(URI(base + "/up"))
+rescue SystemCallError, IOError
+  abort "The app isn't running at #{base}. The builder runs the preview; wait for it to come back, never start a server yourself."
+end
+
+require "bundler/setup"
+require "ferrum"
+
+# Signing in: a session for an account of that role, put straight into the browser's cookie.
+# With no such account (a new app), a temporary one is made and removed afterwards, so the
+# owner's own first-run setup is still there.
+sign_in = nil
+if options[:as]
+  ENV["RAILS_ENV"] ||= "development"
+  require File.join(root, "config/environment")
+  require "action_dispatch/testing/test_request"
+
+  user = User.where(role: options[:as]).order(:id).first
+  temporary = user.nil?
+  user ||= User.create!(name: "Preview #{options[:as]}", email_address: "look-#{options[:as]}@example.test",
+    password: SecureRandom.base58(24), role: options[:as])
+  session = user.sessions.create!(user_agent: "bin/look")
+  jar = ActionDispatch::TestRequest.create.cookie_jar
+  jar.signed[:session_id] = session.id
+  sign_in = { cookie: jar[:session_id], user:, session:, temporary: }
+  at_exit do
+    session.delete
+    if temporary
+      user.sessions.delete_all
+      user.delete
+    end
+  end
+end
+
+browser = Ferrum::Browser.new(window_size: [ 1280, 800 ], timeout: 20, process_timeout: 30,
+  browser_options: { "no-sandbox" => nil })
+host = URI(base).host
+browser.cookies.set(name: "session_id", value: sign_in[:cookie], domain: host, path: "/", httponly: true) if sign_in
+
+problems = 0
+errors = []
+browser.page.on("Runtime.exceptionThrown") { |params| errors << params.dig("exceptionDetails", "exception", "description").to_s.lines.first.to_s.strip }
+browser.page.on("Runtime.consoleAPICalled") do |params|
+  errors << params["args"].map { |arg| arg["value"] || arg["description"] }.join(" ").strip if params["type"] == "error"
+end
+puts "Signed in as #{sign_in[:user].name} (#{options[:as]}#{", temporary account" if sign_in[:temporary]})" if sign_in
+
+paths.each do |path|
+  options[:sizes].each do |size, (width, height)|
+    errors.clear
+    browser.resize(width:, height:)
+    browser.network.clear(:traffic)
+    browser.go_to(base + path)
+    begin
+      browser.network.wait_for_idle(timeout: 5)
+    rescue Ferrum::TimeoutError
+    end
+    sleep 0.4
+
+    report = []
+    landed = URI(browser.current_url).path
+    document = browser.network.traffic.find { |exchange| exchange.request&.type == "Document" && exchange.response }
+    status = document&.response&.status
+    notes = []
+    if landed == "/session/new" && !sign_in
+      notes << "needs sign in (sent to /session/new): right for staff pages, wrong for a page visitors use. Look at staff pages with --as owner"
+    elsif landed != URI(base + path).path
+      notes << "redirected to #{landed}"
+    end
+    if status.to_i >= 400
+      heading = browser.evaluate("document.querySelector('header h1, h1')?.innerText?.trim()").to_s
+      message = browser.evaluate("document.querySelector('.exception-message .message')?.innerText?.trim()").to_s
+      report << "answered #{status}: #{[ heading, message ].reject(&:empty?).join(" — ")}"
+    end
+
+    errors.uniq.each { |error| report << "JavaScript error: #{error}" }
+    browser.network.traffic.each do |exchange|
+      next if exchange.request&.type == "Document"
+      url = exchange.request&.url.to_s
+      next if url.include?("/_preview/") || url.end_with?("/favicon.ico")
+      if exchange.error
+        report << "request failed: #{url} (#{exchange.error.error_text rescue "error"})"
+      elsif exchange.response && exchange.response.status.to_i >= 400
+        report << "request answered #{exchange.response.status}: #{url}"
+      end
+    end
+
+    broken = browser.evaluate(<<~JS)
+      [...document.images].filter((image) => image.complete && image.naturalWidth === 0 && image.src).map((image) => image.src).slice(0, 5)
+    JS
+    broken.each { |src| report << "image doesn't load: #{src}" }
+
+    if size == "phone"
+      wide = browser.evaluate(<<~JS)
+        (() => {
+          const width = document.documentElement.clientWidth
+          if (document.documentElement.scrollWidth <= width + 1) return []
+          return [...document.querySelectorAll("body *")].filter((element) => {
+            const box = element.getBoundingClientRect()
+            if (box.right <= width + 1 || box.width === 0) return false
+            for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+              const overflow = getComputedStyle(parent).overflowX
+              if (overflow === "auto" || overflow === "scroll" || overflow === "hidden" || overflow === "clip") return false
+            }
+            return true
+          }).slice(0, 3).map((element) => `<${element.localName}${element.className && typeof element.className === "string" ? ` class="${element.className.slice(0, 80)}"` : ""}> ${Math.round(element.getBoundingClientRect().right)}px`)
+        })()
+      JS
+      report << "wider than the phone (page scrolls sideways): #{wide.join(", ")}" if wide.any?
+    end
+
+    name = "#{path.delete_prefix("/").gsub(/[^\w-]+/, "_").then { |name| name.empty? ? "home" : name }}-#{size}"
+    FileUtils.rm_f(Dir[File.join(out, "#{name}{,-*}.png")])
+    page_height = browser.evaluate("document.documentElement.scrollHeight").to_i
+    total = [ (page_height.to_f / height).ceil, 1 ].max
+    files = (0...[ total, options[:screens] ].min).map do |index|
+      # Scrolled there first, so sticky headers and lazy images show as a visitor sees them.
+      top = [ index * height, page_height - height ].min.clamp(0..)
+      browser.execute("window.scrollTo(0, #{top})")
+      sleep 0.3 if index > 0
+      File.join(out, "#{name}-#{index + 1}.png").tap do |file|
+        browser.screenshot(path: file, area: { x: 0, y: top, width:, height: })
+      end
+    end
+    browser.execute("window.scrollTo(0, 0)")
+
+    problems += report.size
+    puts "#{path} (#{size} #{width}px): #{report.empty? ? "ok" : "#{report.size} problem#{"s" if report.size > 1}"}"
+    report.each { |line| puts "  - #{line}" }
+    notes.each { |line| puts "  · #{line}" }
+    puts "  screenshots: #{files.map { |file| file.delete_prefix(root + "/") }.join(", ")}"
+    puts "  · the page is #{total} screens long; only the first #{files.size} were taken (--screens #{total} for all)" if files.size < total
+
+    if size == options[:sizes].keys.last
+      links = browser.evaluate(<<~JS)
+        [...new Set([...document.querySelectorAll("a[href]")].map((link) => link.getAttribute("href"))
+          .filter((href) => href.startsWith("/") && !href.startsWith("//") && !href.startsWith("/_")).map((href) => href.split("#")[0]).filter(Boolean))].slice(0, 25)
+      JS
+      cookie = sign_in && "session_id=#{sign_in[:cookie]}"
+      links.each do |link|
+        response = Net::HTTP.start(URI(base).host, URI(base).port, open_timeout: 2, read_timeout: 20) do |http|
+          http.get(link, cookie ? { "Cookie" => cookie } : {})
+        end
+        if response.code.to_i >= 400
+          problems += 1
+          puts "  - link to #{link} answers #{response.code}"
+        end
+      rescue Net::ReadTimeout, SystemCallError, IOError => error
+        problems += 1
+        puts "  - link to #{link} didn't answer (#{error.class})"
+      end
+    end
+  end
+end
+
+browser.quit
+puts problems.zero? ? "No problems found. Look at the screenshots too." : "#{problems} problem#{"s" if problems > 1} to fix. Look at the screenshots too."
+exit(problems.zero? ? 0 : 1)

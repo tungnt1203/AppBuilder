@@ -8,10 +8,11 @@ ARG RUBY_VERSION=3.3.10
 FROM docker.io/library/ruby:$RUBY_VERSION-slim
 
 # What the template's gems need to build and run, git and ripgrep for the agent,
-# and Node for Claude Code and the Agent SDK.
+# Node for Claude Code and the Agent SDK, and Chromium for the app's bin/look and system
+# tests (with fonts for text the app's own fonts don't cover).
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential curl git libvips libyaml-dev pkg-config \
-      sqlite3 ripgrep procps nodejs npm ca-certificates && \
+      sqlite3 ripgrep procps nodejs npm ca-certificates chromium fonts-noto-core fonts-noto-color-emoji && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # The agent: the claude command (backend "cli") and the Agent SDK runner (backend "sdk").

@@ -14,6 +14,7 @@ class PreviewServer
     return if running?
 
     pid_path.delete if pid_path.exist? # left by a server that's gone; in a restarted container its id may be taken
+    url_path.write("http://127.0.0.1:#{@project.port}") # for the app's bin/look, inside the sandbox
 
     @project.sandbox.spawn("bin/rails", "server", "-p", @project.port.to_s, "-b", @project.sandbox.bind_address, log: log_path)
     wait_until { running? }
@@ -58,6 +59,10 @@ class PreviewServer
   end
 
   private
+    def url_path
+      @project.path.join("tmp/preview_url").tap { |path| path.dirname.mkpath }
+    end
+
     def pid_path
       @project.path.join("tmp/pids/server.pid")
     end

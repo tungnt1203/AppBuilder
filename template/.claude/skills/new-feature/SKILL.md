@@ -129,10 +129,25 @@ write the `label` and input separately inside `<div class="space-y-1.5">`.
 - `test/controllers/appointments_controller_test.rb`: every action, signed in via `sign_in_as users(:member)`,
   plus the access rules (signed out redirects; members can't touch others' records; admin-only stays admin-only).
 - Fixtures in `test/fixtures/appointments.yml` that reference `users(:owner)`, `users(:admin)`, `users(:member)`.
+- `test/system/<flow>_test.rb`: a system test for each main flow, walked through in the browser the way
+  people do it, from the page they start on to the result they expect. For a booking app: a visitor
+  opens the booking page on a phone (`on_phone { … }`), picks a service and a time, submits, sees the
+  confirmation; then the owner signs in (`sign_in_as users(:owner)`) and finds the booking. Also one
+  mistake (a missing field shows its error). Use `click_on`, `fill_in`, `select`, `assert_text` with the
+  words on screen. JavaScript errors fail these tests, so Stimulus code gets exercised too.
 
-Run `bin/rails test` and `bin/rubocop`, then `bin/rails tailwindcss:build`, and fix everything before reporting.
+Run `bin/rails test`, `bin/rails test:system` and `bin/rubocop`, then `bin/rails tailwindcss:build`.
 
-## 7. Summary for the owner
+## 7. Try it
+
+Look at what you built in the running app, the way its users will: `bin/look` with the pages you
+added or changed, signed in for staff pages (`bin/look /appointments /appointments/new --as owner`),
+and as a visitor for public ones. It reports error pages, JavaScript errors, broken images and links,
+and pages wider than a phone, and saves screenshots at phone and desktop width: Read them. Check the
+empty state and a page with a few records (add them in `db/seeds.rb` and run `bin/rails db:seed` when
+the app has none). Fix everything it finds and anything that looks wrong, then look again.
+
+## 8. Summary for the owner
 
 What they can do now and where to find it, in their language. Mention anything that changes existing
 data or needs their action (for example, settings to fill in).

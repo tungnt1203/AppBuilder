@@ -58,10 +58,15 @@ group :development do
   gem "web-console"
 end
 
+group :development, :test do
+  # Headless Chrome: bin/look (screenshots and checks of the running app) and system tests
+  gem "ferrum", require: false
+end
+
 group :test do
-  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
+  # System tests in headless Chrome, without a driver to install [https://github.com/rubycdp/cuprite]
   gem "capybara"
-  gem "selenium-webdriver"
+  gem "cuprite"
 end
 
 gem "rails-i18n", "~> 8.1"
