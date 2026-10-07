@@ -1,4 +1,5 @@
-# The shop's settings: currency, shipping, where it ships, payment instructions. Admins only.
+# The shop's settings: currency, shipping, where it ships, how buyers pay. Admins only.
+# Stripe is connected in Admin::StripeConnectionsController, policies in Admin::PoliciesController.
 class Admin::SettingsController < Admin::BaseController
   before_action :require_administrator
   before_action :set_store
@@ -21,6 +22,6 @@ class Admin::SettingsController < Admin::BaseController
 
     def store_params
       params.expect(store: [ :currency, :contact_email, :shipping_first_item, :shipping_additional_item,
-        :free_shipping_threshold, :ship_to_countries_text, :payment_instructions ])
+        :free_shipping_threshold, :ship_to_countries_text, :payment_instructions, :manual_payments ])
     end
 end

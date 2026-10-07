@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_120204) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_132805) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -152,10 +152,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120204) do
     t.datetime "refunded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stripe_checkout_session_id"
+    t.integer "cart_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["email"], name: "index_orders_on_email"
     t.index ["number"], name: "index_orders_on_number", unique: true
     t.index ["status", "created_at"], name: "index_orders_on_status_and_created_at"
+    t.index ["stripe_checkout_session_id"], name: "index_orders_on_stripe_checkout_session_id", unique: true
     t.index ["token"], name: "index_orders_on_token", unique: true
   end
 
@@ -196,6 +199,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120204) do
     t.text "payment_instructions"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "stripe_secret_key"
+    t.string "stripe_account_name"
+    t.string "stripe_webhook_id"
+    t.string "stripe_webhook_url"
+    t.text "stripe_webhook_secret"
+    t.boolean "manual_payments", default: true, null: false
+    t.string "contact_phone"
+    t.text "business_address"
+    t.text "refund_policy"
+    t.text "shipping_policy"
+    t.text "privacy_policy"
+    t.text "terms_of_service"
   end
 
   create_table "users", force: :cascade do |t|

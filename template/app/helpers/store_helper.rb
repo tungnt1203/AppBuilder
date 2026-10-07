@@ -32,4 +32,37 @@ module StoreHelper
         price: money(variant.price_cents), compare_at_price: (money(variant.compare_at_price_cents) if variant.on_sale?) }
     end.to_json
   end
+
+  # A policy's starting text for this shop (app/views/admin/policies/templates), for the owner to
+  # read and adjust before saving.
+  def policy_template(id, store)
+    render(partial: "admin/policies/templates/#{id}", formats: :text, locals: {
+      shop: Rails.configuration.x.app_name, currency: store.currency,
+      contact: store.contact_email.presence || "[your email]", shipping: shipping_summary(store)
+    }).strip
+  end
+
+  def shipping_summary(store)
+    first, additional, free = store.shipping_first_item_cents, store.shipping_additional_item_cents, store.free_shipping_threshold_cents
+    return t("policies.shipping_summary.free") if first.zero? && additional.zero?
+
+    [ t("policies.shipping_summary.rates", first: money(first, store.currency), additional: money(additional, store.currency)),
+      (t("policies.shipping_summary.free_from", amount: money(free, store.currency)) if free) ].compact.join(" ")
+  end
+
+  # Policy text as written in /admin: paragraphs split by blank lines, "## " starts a heading,
+  # lines starting with "- " make a list.
+  def policy_text(text)
+    blocks = text.to_s.strip.split(/\r?\n\s*\r?\n/).map do |block|
+      lines = block.lines.map(&:strip)
+      if lines.one? && lines.first.start_with?("## ")
+        tag.h2(lines.first.delete_prefix("## "), class: "mt-10 font-display text-xl font-semibold text-ink")
+      elsif lines.all? { |line| line.start_with?("- ") }
+        tag.ul(safe_join(lines.map { |line| tag.li(line.delete_prefix("- ")) }), class: "mt-4 list-disc space-y-1 pl-5")
+      else
+        tag.p(safe_join(lines, tag.br), class: "mt-4")
+      end
+    end
+    safe_join(blocks)
+  end
 end

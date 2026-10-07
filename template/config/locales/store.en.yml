@@ -52,6 +52,13 @@ en:
         free_shipping_threshold: Free shipping from
         ship_to_countries: Countries you ship to
         payment_instructions: Payment instructions
+        manual_payments: Accept manual payment
+        contact_phone: Phone
+        business_address: Business address
+        refund_policy: Refund policy
+        shipping_policy: Shipping policy
+        privacy_policy: Privacy policy
+        terms_of_service: Terms of service
     errors:
       models:
         product:
@@ -68,7 +75,7 @@ en:
         store:
           attributes:
             ship_to_countries:
-              unknown: "has codes we don't know: %{codes}"
+              unknown: 'has codes we don''t know: %{codes}'
   activemodel:
     errors:
       models:
@@ -121,6 +128,7 @@ en:
         delivered: Your order has been delivered.
         cancelled: This order was cancelled.
         refunded: This order was refunded.
+        unpaid_card: Your order isn't paid yet. It goes into production as soon as the payment is in.
       how_to_pay: How to pay
       tracking: Tracking
       track: Track your package
@@ -130,6 +138,10 @@ en:
       ship_to: Shipping to
       contact: Contact
       questions: Questions?
+      card_processing: If you just paid, it can take a moment to show here. Refresh the page in a minute.
+      pay_now: Pay %{total}
+    stripe_not_connected: Card payments aren't available right now. Please contact the shop.
+    payment_not_started: We couldn't open the payment page. Please try again in a moment.
   home:
     show:
       tagline: Original designs, printed on demand and shipped to your door.
@@ -175,7 +187,13 @@ en:
       free: Free
       total: Total
       place_order: Place order
-      payment_note: After placing the order you'll see how to pay.
+      payment: Payment
+      methods:
+        stripe: Card
+        stripe_hint: Pay securely with your card, Apple Pay or Google Pay on the next page.
+        manual: Bank transfer or other
+        manual_hint: After placing the order you'll see how to pay.
+      agreement_html: By placing your order you agree to our %{policies}.
   order_mailer:
     summary:
       subtotal: Subtotal
@@ -202,6 +220,7 @@ en:
         zero: Cart
         one: Cart, 1 item
         other: Cart, %{count} items
+      footer_navigation: Shop information
     admin:
       orders: Orders
       products: Products
@@ -216,8 +235,8 @@ en:
   admin:
     order_mailer:
       placed:
-        subject: "New order %{number} (%{total})"
-        intro: "New order %{number} from %{name} (%{email})."
+        subject: New order %{number} (%{total})
+        intro: New order %{number} from %{name} (%{email}).
         open: Open the order
     dashboards:
       show:
@@ -239,6 +258,8 @@ en:
           title: Get your shop ready
           product: Add your first product
           settings: Set your currency and shipping rates
+          stripe: Connect Stripe to take card payments
+          policies: Publish your refund, shipping and privacy policies
           staff: Invite your staff
           view: Look at your shop
     orders:
@@ -298,6 +319,14 @@ en:
         staff_note_hint: Only staff see this.
         edit_contact: Edit contact and address
         save: Save
+        refund_card: Refund
+        confirm_refund_card: Refund %{total} to the buyer's card for order %{number}? Stripe sends the money back right away.
+        payment: Payment
+        payment_methods:
+          manual: Manual payment
+          stripe: Card (Stripe)
+        view_in_stripe: View in Stripe
+        unpaid_card: The buyer hasn't paid yet. Unpaid card orders are cancelled after a day.
       update:
         notice: The order was saved.
       payments:
@@ -318,6 +347,7 @@ en:
       refunds:
         create:
           notice: Order %{number} is marked as refunded.
+          failed: 'Stripe couldn''t refund it: %{error}'
     products:
       index:
         title: Products
@@ -346,14 +376,14 @@ en:
         options_hint: Like Color and Size. Separate the values with commas; a variant is made for each combination.
         option_name: Option %{number}
         option_name_examples:
-          "1": Color
-          "2": Size
-          "3": Material
+          '1': Color
+          '2': Size
+          '3': Material
         option_values: Values
         option_values_examples:
-          "1": Black, White, Navy
-          "2": S, M, L, XL
-          "3": Cotton, Blend
+          '1': Black, White, Navy
+          '2': S, M, L, XL
+          '3': Cotton, Blend
         variants: Variants
         pricing: Pricing
         variant: Variant
@@ -413,8 +443,71 @@ en:
         shipping: Shipping
         free_shipping_hint: Leave empty for no free shipping.
         countries_hint: Two-letter codes, separated by commas. Leave empty to ship everywhere.
-        payment: Payment
         payment_hint: Shown to buyers after they place an order, until it's paid.
         save: Save
+        general: General
+        stripe:
+          title: Card payments (Stripe)
+          intro: Connect your Stripe account so buyers can pay by card, Apple Pay and Google Pay. Money goes straight to your Stripe account.
+          secret_key: Stripe secret key
+          secret_key_hint_html: In your Stripe dashboard, open %{link} and copy the secret key (or create a restricted key). Use a test key (sk_test_…) to try it out first.
+          connect: Connect Stripe
+          connected_html: Connected to <strong>%{account}</strong>. Buyers pay by card at checkout.
+          test_mode: Test mode
+          live: Live
+          test_mode_hint: This is a test key, so no real money moves. Pay with card 4242 4242 4242 4242, any future date and any CVC. Connect your live key when you're ready to sell.
+          webhook_on: Stripe sends payment updates to this shop.
+          webhook_later: Payments are confirmed when buyers come back from Stripe. Once the shop runs on its own https address, connect again so Stripe can also send updates (late payments, refunds made in Stripe).
+          webhook_moved: The shop's address changed, so Stripe can't send payment updates here yet.
+          webhook_register: Send updates to this address
+          disconnect: Disconnect Stripe
+          confirm_disconnect: Disconnect Stripe? Buyers won't be able to pay by card until you connect again.
+        manual:
+          title: Manual payment
+          accept: Also accept manual payment
+          accept_hint: Buyers can choose to pay by bank transfer or another way you describe below; you mark those orders as paid.
       update:
         notice: Settings saved.
+    stripe_connections:
+      wrong_key: That doesn't look like a Stripe secret key. It starts with sk_live_, sk_test_, rk_live_ or rk_test_.
+      create:
+        notice: Stripe is connected.
+        failed: 'Stripe didn''t accept that key: %{error}'
+      update:
+        notice: Stripe now sends payment updates to this address.
+        failed: 'Stripe refused: %{error}'
+      destroy:
+        notice: Stripe is disconnected.
+    policies:
+      edit:
+        title: Policies
+        description: The pages buyers, payment providers and ad networks look for. They're linked in the site's footer.
+        contact: Contact details
+        contact_hint_html: Shown on the %{link} page.
+        business_address_hint: Your business or return address. Leave empty to keep it off the site.
+        view: View page
+        draft: Not published
+        template_hint: A starting text for a print-on-demand shop. Read it, change what doesn't fit how you work, then save to publish it.
+        format_hint: Separate paragraphs with a blank line. Start a line with "## " for a heading and with "- " for a list item. Empty a policy to take its page down.
+        save: Save and publish
+      update:
+        notice: Policies saved.
+  policies:
+    titles:
+      refund: Refund policy
+      shipping: Shipping policy
+      privacy: Privacy policy
+      terms: Terms of service
+    updated: Last updated %{date}
+    shipping_summary:
+      free: Shipping is free on every order.
+      rates: Shipping is %{first} for the first item and %{additional} for each additional item.
+      free_from: Orders of %{amount} or more ship free.
+  contacts:
+    show:
+      title: Contact
+      intro: Questions about an order, sizing or anything else? We're happy to help.
+      email: Email
+      phone: Phone
+      address: Address
+      order_hint: About an order? Include your order number so we can help faster.

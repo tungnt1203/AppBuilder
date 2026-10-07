@@ -3,7 +3,8 @@
 <div class="mx-auto max-w-5xl px-4 py-12">
   <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
 
-  <%= form_with model: @checkout, url: checkout_path, scope: :checkout, class: "mt-8 grid gap-10 md:grid-cols-[1fr_22rem]" do |form| %>
+  <%= form_with model: @checkout, url: checkout_path, scope: :checkout, class: "mt-8 grid gap-10 md:grid-cols-[1fr_22rem]",
+        data: { turbo: false, controller: "leave-frame" } do |form| %>
     <div class="space-y-8">
       <%= form.errors %>
 
@@ -29,6 +30,29 @@
         </div>
         <%= form.field :note, :text_area, rows: 2 %>
       </fieldset>
+
+      <fieldset>
+        <legend class="mb-4 text-lg font-semibold"><%= t(".payment") %></legend>
+        <% if @checkout.payment_methods.many? %>
+          <div class="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+            <% @checkout.payment_methods.each do |method| %>
+              <label class="flex cursor-pointer items-start gap-3 p-4 has-checked:bg-brand-50">
+                <%= form.radio_button :payment_method, method, class: "mt-1 size-4 accent-brand-600" %>
+                <span>
+                  <span class="flex items-center gap-2 font-medium"><%= icon(method == "stripe" ? "credit-card" : "banknote", size: 18) %> <%= t(".methods.#{method}") %></span>
+                  <span class="mt-0.5 block text-sm text-muted"><%= t(".methods.#{method}_hint") %></span>
+                </span>
+              </label>
+            <% end %>
+          </div>
+        <% else %>
+          <%= form.hidden_field :payment_method %>
+          <p class="flex items-start gap-3 rounded-xl border border-line bg-surface p-4 text-sm">
+            <%= icon(@checkout.payment_method == "stripe" ? "lock" : "banknote", size: 18, class: "mt-0.5 shrink-0 text-muted") %>
+            <span><%= t(".methods.#{@checkout.payment_method}_hint") %></span>
+          </p>
+        <% end %>
+      </fieldset>
     </div>
 
     <aside class="h-fit space-y-4 rounded-xl border border-line bg-surface p-6 md:sticky md:top-20">
@@ -50,7 +74,11 @@
         <div class="flex justify-between border-t border-line pt-2 text-base font-semibold"><dt><%= t(".total") %></dt><dd><%= money(@checkout.total_cents) %></dd></div>
       </dl>
       <%= form.submit t(".place_order"), class: "w-full py-2.5" %>
-      <p class="text-xs text-muted"><%= t(".payment_note") %></p>
+      <% if (policies = Store.current.published_policies & %w[ terms refund ]).any? %>
+        <p class="text-xs text-muted">
+          <%= t(".agreement_html", policies: to_sentence(policies.map { |id| link_to(t("policies.titles.#{id}"), policy_path(id), target: "_blank", class: "underline hover:text-ink") })) %>
+        </p>
+      <% end %>
     </aside>
   <% end %>
 </div>

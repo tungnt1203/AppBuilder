@@ -16,7 +16,8 @@
         <%= menu_button_to t(".cancel"), admin_order_cancellation_path(@order), form: { data: { turbo_confirm: t(".confirm_cancel", number: @order.name) } } %>
       <% end %>
       <% if @order.can_refund? %>
-        <%= menu_button_to t(".refund"), admin_order_refund_path(@order), form: { data: { turbo_confirm: t(".confirm_refund", number: @order.name) } } %>
+        <%= menu_button_to t(@order.card? ? ".refund_card" : ".refund"), admin_order_refund_path(@order),
+              form: { data: { turbo_confirm: t(@order.card? ? ".confirm_refund_card" : ".confirm_refund", number: @order.name, total: money(@order.total_cents, @order.currency)) } } %>
       <% end %>
     <% end %>
   <% end %>
@@ -109,6 +110,15 @@
           <% if @order.tracking_url.present? %><br><%= link_to t(".track"), @order.tracking_url, class: link_classes, target: "_blank", rel: "noopener" %><% end %>
         </p>
       <% end %>
+      <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".payment") %></h2>
+      <p class="mt-2 text-sm text-muted">
+        <%= t(".payment_methods.#{@order.payment_method}") %>
+        <% if (url = @order.stripe_dashboard_url(test_mode: Store.current.stripe_test_mode?)) %>
+          <br><%= link_to t(".view_in_stripe"), url, class: link_classes, target: "_blank", rel: "noopener" %>
+        <% elsif @order.card? && @order.pending? %>
+          <br><%= t(".unpaid_card") %>
+        <% end %>
+      </p>
       <p class="mt-6 text-sm"><%= link_to t(".buyer_page"), order_path(@order), class: link_classes, target: "_blank" %></p>
     <% end %>
 

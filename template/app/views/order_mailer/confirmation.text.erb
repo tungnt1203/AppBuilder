@@ -7,7 +7,7 @@
 <% end -%>
 <%= t("order_mailer.summary.shipping") %>: <%= money(@order.shipping_cents, @order.currency) %>
 <%= t("order_mailer.summary.total") %>: <%= money(@order.total_cents, @order.currency) %>
-<% if @order.pending? && @store.payment_instructions.present? %>
+<% if @order.pending? && !@order.card? && @store.payment_instructions.present? %>
 
 <%= t(".payment") %>:
 <%= @store.payment_instructions %>

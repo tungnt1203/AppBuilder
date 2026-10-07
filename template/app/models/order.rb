@@ -5,10 +5,17 @@
 # Status moves forward with the methods below, each recorded as an event in the order's timeline:
 #   pending (placed, waiting for payment) → paid → in_production → shipped → delivered
 #   cancelled from pending or paid, refunded from any paid status.
+#
+# Payment is "manual" (the buyer follows the shop's payment instructions and staff mark the order
+# paid) or "stripe" (the buyer pays by card on Stripe Checkout; see #confirm_card_payment!). A card
+# order stays pending until Stripe says it's paid; until then it's a checkout the buyer hasn't
+# finished, kept out of the orders that need action and cancelled after a day.
 class Order < ApplicationRecord
   include MoneyAttributes
 
   STATUSES = %w[ pending paid in_production shipped delivered cancelled refunded ].freeze
+  PAYMENT_METHODS = %w[ manual stripe ].freeze
+  UNPAID_CARD_EXPIRY = 1.day
   FIRST_NUMBER = 1001
 
   belongs_to :customer, optional: true
@@ -27,6 +34,7 @@ class Order < ApplicationRecord
   validates :note, :staff_note, length: { maximum: 2000 }
   validates :shipping_country, inclusion: { in: ->(_) { Country.codes } }
   validates :currency, inclusion: { in: Store::CURRENCIES.keys }
+  validates :payment_method, inclusion: { in: PAYMENT_METHODS }
   validates :tracking_url, format: { with: %r{\Ahttps?://[^\s]+\z}i }, allow_blank: true
 
   normalizes :email, with: ->(email) { email.strip.downcase }
@@ -37,7 +45,10 @@ class Order < ApplicationRecord
   scope :newest_first, -> { order(created_at: :desc, id: :desc) }
   scope :placed_since, ->(time) { where(created_at: time..) }
   scope :counted_in_sales, -> { where(status: %w[ paid in_production shipped delivered ]) }
-  scope :needs_action, -> { where(status: %w[ pending paid in_production ]) }
+  scope :needs_action, -> { where(status: %w[ paid in_production ]).or(awaiting_payment) }
+  # Pending orders someone has to act on: manual payments the shop is waiting for.
+  scope :awaiting_payment, -> { where(status: "pending", payment_method: "manual") }
+  scope :unpaid_card, -> { where(status: "pending", payment_method: "stripe") }
   scope :search, ->(query) {
     query = query.to_s.strip.delete_prefix("#")
     if query.match?(/\A\d+\z/)
@@ -70,7 +81,10 @@ class Order < ApplicationRecord
     paid? || in_production? || shipped? || delivered?
   end
 
-  def can_mark_paid? = pending?
+  def card? = payment_method == "stripe"
+
+  # Staff mark manual payments; card payments are confirmed by Stripe.
+  def can_mark_paid? = pending? && !card?
   def can_start_production? = paid?
   def can_ship? = paid? || in_production?
   def can_mark_delivered? = shipped?
@@ -101,8 +115,35 @@ class Order < ApplicationRecord
     transition! :cancelled, from: :can_cancel?, by:, cancelled_at: Time.current, message: reason
   end
 
-  def refund!(by: nil, reason: nil)
+  # A card order's money goes back through Stripe first (pass stripe: false when Stripe already
+  # refunded it). Raises StripeGateway::Error when Stripe refuses.
+  def refund!(by: nil, reason: nil, stripe: card?)
+    raise InvalidTransition, "#{name} can't be refunded while #{status}" unless can_refund?
+    if stripe
+      gateway = Store.current.stripe or raise StripeGateway::Error, I18n.t("orders.stripe_not_connected")
+      gateway.refund(payment_reference)
+    end
     transition! :refunded, from: :can_refund?, by:, refunded_at: Time.current, message: reason
+  end
+
+  # Called when Stripe says the order's Checkout Session is paid (the buyer coming back to the
+  # order page, or the webhook; whichever is first). Marks it paid, empties the cart it came from
+  # and sends the emails that a manual order sends when it's placed. Safe to call again.
+  def confirm_card_payment!(payment_intent:)
+    return false unless card? && pending?
+
+    transition! :paid, from: :pending?, by: nil, paid_at: Time.current, payment_reference: payment_intent, message: "Stripe"
+    CartItem.where(cart_id:).delete_all if cart_id
+    OrderMailer.confirmation(self).deliver_later
+    Admin::OrderMailer.placed(self).deliver_later
+    true
+  rescue InvalidTransition
+    false # the other confirmation got there first
+  end
+
+  # Where staff see the payment in Stripe.
+  def stripe_dashboard_url(test_mode: false)
+    "https://dashboard.stripe.com/#{"test/" if test_mode}payments/#{payment_reference}" if card? && payment_reference.present?
   end
 
   def record(action, by: nil, message: nil)

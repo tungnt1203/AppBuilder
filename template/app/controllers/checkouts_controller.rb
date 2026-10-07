@@ -1,5 +1,8 @@
-# Checkout as a guest: contact, shipping address, review, place the order.
+# Checkout as a guest: contact, shipping address, how to pay, place the order. Card orders go
+# on to Stripe Checkout.
 class CheckoutsController < ApplicationController
+  include StripeCheckout
+
   rate_limit to: 10, within: 1.minute, only: :create, with: -> { redirect_to new_checkout_path, alert: t("checkouts.rate_limited") }
 
   before_action :require_items
@@ -12,7 +15,9 @@ class CheckoutsController < ApplicationController
     @checkout = Checkout.new(cart: current_cart, **checkout_params)
     @checkout.customer = Current.customer if customer_signed_in?
 
-    if order = @checkout.place
+    if (order = @checkout.place) && order.card?
+      pay_with_stripe order, cancel_url: cart_url
+    elsif order
       redirect_to order_path(order, placed: 1)
     else
       render :new, status: :unprocessable_entity

@@ -1,10 +1,11 @@
 class Admin::OrdersController < Admin::BaseController
+  # Card checkouts the buyer hasn't paid yet show only under All.
   FILTERS = {
-    "open" => %w[ pending paid in_production ],
-    "pending" => %w[ pending ],
-    "to_ship" => %w[ paid in_production ],
-    "shipped" => %w[ shipped delivered ],
-    "closed" => %w[ cancelled refunded ]
+    "open" => -> { Order.needs_action },
+    "pending" => -> { Order.awaiting_payment },
+    "to_ship" => -> { Order.where(status: %w[ paid in_production ]) },
+    "shipped" => -> { Order.where(status: %w[ shipped delivered ]) },
+    "closed" => -> { Order.where(status: %w[ cancelled refunded ]) }
   }.freeze
 
   before_action :set_order, only: %i[ show update ]
@@ -12,9 +13,9 @@ class Admin::OrdersController < Admin::BaseController
   def index
     @filter = FILTERS.key?(params[:filter]) ? params[:filter] : nil
     scope = Order.search(params[:q]).newest_first.includes(:line_items)
-    scope = scope.where(status: FILTERS[@filter]) if @filter
+    scope = scope.merge(FILTERS[@filter].call) if @filter
     @page = paginate(scope, per: 50)
-    @counts = FILTERS.transform_values { |statuses| Order.where(status: statuses).count }
+    @counts = FILTERS.transform_values { |filter| filter.call.count }
   end
 
   def show

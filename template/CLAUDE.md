@@ -120,11 +120,22 @@ Every app starts as a working shop. Build on it; don't write a second cart, chec
   (`price` / `price=`), and shown with `money(cents)` and `price_range(product)` (`MoneyHelper`) in
   the shop's currency. Never use floats for money, and never total prices in a view.
 - **Settings**: `Store.current` (currency, flat-rate shipping, free-shipping threshold, countries
-  shipped to, payment instructions), edited by admins at `/admin/settings`.
-- **Payment and fulfillment** are manual for now: an order waits as `pending` with the store's
-  payment instructions until staff mark it paid, and staff add tracking when they ship. Payment
-  providers (Stripe) and print-on-demand providers plug in later as gems; don't write payment or
-  provider API code in the app.
+  shipped to, how buyers pay), edited by admins at `/admin/settings`.
+- **Payment** is built in and finished; don't change it for a feature. Buyers pay by card on
+  Stripe Checkout once the owner pastes their Stripe secret key in `/admin/settings` (stored
+  encrypted; the app registers its own webhook when it runs on a public https address), and/or
+  manually with the store's payment instructions (staff mark those orders paid). A card order stays
+  `pending` until Stripe confirms it (`Order#confirm_card_payment!`, from the order page or
+  `StripeWebhooksController`); refunds of card orders go through Stripe. Every call to Stripe is in
+  `StripeGateway`; tests use `connect_fake_stripe`. Never write other payment code, never ask the
+  owner for keys in chat, and when they ask for card payments point them to Settings. For trying it
+  out: a test key (`sk_test_…`) and card 4242 4242 4242 4242.
+- **Policies**: refund, shipping, privacy and terms pages at `/policies/:id` and a `/contact` page,
+  written by the owner at `/admin/settings/policies` (it starts them from print-on-demand
+  templates). Keep the footer links to them when you redesign the footer: Stripe and ad networks
+  check for them.
+- **Fulfillment** is manual for now: staff move orders to production and add tracking when they
+  ship. Print-on-demand providers plug in later; don't write provider API code in the app.
 - **Development data**: `db/seeds.rb` adds a sample catalog for the preview. When the owner gives
   their real products, replace the samples there.
 

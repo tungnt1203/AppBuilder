@@ -7,6 +7,8 @@
       <li><%= link_to t(".setup.product"), new_admin_product_path, class: link_classes %></li>
       <% if Current.user.administrator? %>
         <li><%= link_to t(".setup.settings"), edit_admin_settings_path, class: link_classes %></li>
+        <li><%= link_to t(".setup.stripe"), edit_admin_settings_path(anchor: "payments"), class: link_classes %></li>
+        <li><%= link_to t(".setup.policies"), edit_admin_policies_path, class: link_classes %></li>
         <li><%= link_to t(".setup.staff"), admin_users_path, class: link_classes %></li>
       <% end %>
       <li><%= link_to t(".setup.view"), root_path, class: link_classes, target: "_blank" %></li>

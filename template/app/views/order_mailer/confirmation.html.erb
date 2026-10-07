@@ -3,7 +3,7 @@
 
 <%= render "order_mailer/summary", order: @order %>
 
-<% if @order.pending? && @store.payment_instructions.present? %>
+<% if @order.pending? && !@order.card? && @store.payment_instructions.present? %>
   <h2><%= t(".payment") %></h2>
   <%= simple_format @store.payment_instructions %>
 <% end %>

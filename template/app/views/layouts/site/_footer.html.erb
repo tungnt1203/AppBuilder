@@ -1,10 +1,16 @@
 <%# The site's footer: what shoppers look for (contact, shipping and returns, social links).
-    Redesign it for the app. %>
+    Redesign it for the app, but keep the links to the policies and contact page: payment
+    providers and ad networks check that they're there. %>
 <footer class="mt-24 border-t border-line">
-  <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-10 text-sm text-muted">
+  <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 text-sm text-muted md:flex-row md:items-center md:justify-between">
     <p>© <%= Date.current.year %> <%= Rails.configuration.x.app_name %></p>
-    <% if Store.current.contact_email.present? %>
-      <%= mail_to Store.current.contact_email, class: "hover:text-ink" %>
-    <% end %>
+    <nav aria-label="<%= t("layouts.site.footer_navigation") %>">
+      <ul class="flex flex-wrap gap-x-6 gap-y-2">
+        <% Store.current.published_policies.each do |id| %>
+          <li><%= link_to t("policies.titles.#{id}"), policy_path(id), class: "hover:text-ink" %></li>
+        <% end %>
+        <li><%= link_to t("contacts.show.title"), contact_path, class: "hover:text-ink" %></li>
+      </ul>
+    </nav>
   </div>
 </footer>

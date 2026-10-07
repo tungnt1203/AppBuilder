@@ -1,0 +1,29 @@
+<% content_for :title, t(".title") %>
+
+<div class="mx-auto max-w-3xl px-4 py-12">
+  <h1 class="font-display text-3xl font-semibold tracking-tight md:text-4xl"><%= t(".title") %></h1>
+  <p class="mt-3 text-lg leading-relaxed text-muted"><%= t(".intro") %></p>
+
+  <dl class="mt-8 space-y-6">
+    <% if @store.contact_email.present? %>
+      <div class="flex gap-4">
+        <%= icon "mail", size: 22, class: "mt-0.5 shrink-0 text-brand-600" %>
+        <div><dt class="font-semibold"><%= t(".email") %></dt><dd class="mt-1"><%= mail_to @store.contact_email, class: link_classes %></dd></div>
+      </div>
+    <% end %>
+    <% if @store.contact_phone.present? %>
+      <div class="flex gap-4">
+        <%= icon "phone", size: 22, class: "mt-0.5 shrink-0 text-brand-600" %>
+        <div><dt class="font-semibold"><%= t(".phone") %></dt><dd class="mt-1"><%= link_to @store.contact_phone, "tel:#{@store.contact_phone.delete("^0-9+")}", class: link_classes %></dd></div>
+      </div>
+    <% end %>
+    <% if @store.business_address.present? %>
+      <div class="flex gap-4">
+        <%= icon "map-pin", size: 22, class: "mt-0.5 shrink-0 text-brand-600" %>
+        <div><dt class="font-semibold"><%= t(".address") %></dt><dd class="mt-1 text-muted"><%= simple_format @store.business_address, {}, wrapper_tag: "span" %></dd></div>
+      </div>
+    <% end %>
+  </dl>
+
+  <p class="mt-10 text-sm text-muted"><%= t(".order_hint") %></p>
+</div>

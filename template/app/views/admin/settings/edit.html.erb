@@ -1,32 +1,85 @@
 <%= page_header t(".title"), t(".description") %>
 
-<%= form_with model: @store, url: admin_settings_path, method: :patch, class: "max-w-2xl space-y-6" do |form| %>
-  <%= form.errors %>
-
-  <%= card class: "space-y-4" do %>
-    <h2 class="text-sm font-semibold text-ink"><%= t(".store") %></h2>
-    <div class="space-y-1.5">
-      <%= form.label :currency %>
-      <%= form.select :currency, Store::CURRENCIES.keys %>
-      <p class="text-xs text-muted"><%= t(".currency_hint") %></p>
-    </div>
-    <%= form.field :contact_email, :email_field, hint: t(".contact_email_hint") %>
-  <% end %>
-
-  <%= card class: "space-y-4" do %>
-    <h2 class="text-sm font-semibold text-ink"><%= t(".shipping") %></h2>
-    <div class="grid gap-4 sm:grid-cols-2">
-      <%= form.field :shipping_first_item, :number_field, step: 0.01, min: 0 %>
-      <%= form.field :shipping_additional_item, :number_field, step: 0.01, min: 0 %>
-    </div>
-    <%= form.field :free_shipping_threshold, :number_field, step: 0.01, min: 0, hint: t(".free_shipping_hint") %>
-    <%= form.field :ship_to_countries_text, label: Store.human_attribute_name(:ship_to_countries), placeholder: "US, CA, GB, AU", hint: t(".countries_hint") %>
-  <% end %>
-
-  <%= card class: "space-y-4" do %>
-    <h2 class="text-sm font-semibold text-ink"><%= t(".payment") %></h2>
-    <%= form.field :payment_instructions, :text_area, rows: 4, hint: t(".payment_hint") %>
-  <% end %>
-
-  <%= form.submit t(".save") %>
+<%= tabs do %>
+  <%= tab_to t(".general"), edit_admin_settings_path %>
+  <%= tab_to t("admin.policies.edit.title"), edit_admin_policies_path %>
 <% end %>
+
+<div class="max-w-2xl space-y-6">
+  <%= card class: "space-y-4", id: "payments" do %>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <h2 class="text-sm font-semibold text-ink"><%= t(".stripe.title") %></h2>
+      <% if @store.stripe_connected? %>
+        <%= @store.stripe_test_mode? ? badge(t(".stripe.test_mode"), tone: :yellow) : badge(t(".stripe.live"), tone: :green) %>
+      <% end %>
+    </div>
+
+    <% if @store.stripe_connected? %>
+      <p class="text-sm text-muted"><%= t(".stripe.connected_html", account: @store.stripe_account_name) %></p>
+      <% if @store.stripe_test_mode? %>
+        <%= alert t(".stripe.test_mode_hint"), tone: :warning %>
+      <% end %>
+
+      <% if @store.stripe_webhook_url.present? && @store.stripe_webhook_url == stripe_webhook_url %>
+        <p class="flex items-center gap-2 text-sm text-muted"><%= icon "circle-check", size: 16, class: "text-green-600" %> <%= t(".stripe.webhook_on") %></p>
+      <% elsif Store.public_url?(stripe_webhook_url) %>
+        <%= alert tone: :warning do %>
+          <p><%= t(".stripe.webhook_moved") %></p>
+          <%= button_to t(".stripe.webhook_register"), admin_stripe_connection_path, method: :patch, class: "mt-2 #{button_classes(:secondary, size: :sm)}" %>
+        <% end %>
+      <% else %>
+        <p class="text-sm text-muted"><%= t(".stripe.webhook_later") %></p>
+      <% end %>
+
+      <%= button_to t(".stripe.disconnect"), admin_stripe_connection_path, method: :delete, class: button_classes(:secondary, size: :sm),
+            form: { data: { turbo_confirm: t(".stripe.confirm_disconnect") } } %>
+    <% else %>
+      <p class="text-sm text-muted"><%= t(".stripe.intro") %></p>
+      <%= form_with url: admin_stripe_connection_path, class: "space-y-3" do |form| %>
+        <div class="space-y-1.5">
+          <%= form.label :secret_key, t(".stripe.secret_key"), class: "block text-sm font-medium text-ink" %>
+          <%= form.password_field :secret_key, required: true, autocomplete: "off", spellcheck: false, placeholder: "sk_live_… or rk_live_…", class: field_classes %>
+          <p class="text-xs text-muted"><%= t(".stripe.secret_key_hint_html", link: link_to("dashboard.stripe.com/apikeys", "https://dashboard.stripe.com/apikeys", target: "_blank", rel: "noopener", class: link_classes)) %></p>
+        </div>
+        <%= form.button t(".stripe.connect"), class: button_classes %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= form_with model: @store, url: admin_settings_path, method: :patch, class: "space-y-6" do |form| %>
+    <%= form.errors %>
+
+    <%= card class: "space-y-4" do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".manual.title") %></h2>
+      <% if @store.stripe_connected? %>
+        <label class="flex items-start gap-3 text-sm">
+          <%= form.check_box :manual_payments, class: "mt-0.5" %>
+          <span><span class="font-medium text-ink"><%= t(".manual.accept") %></span><span class="block text-muted"><%= t(".manual.accept_hint") %></span></span>
+        </label>
+      <% end %>
+      <%= form.field :payment_instructions, :text_area, rows: 4, hint: t(".payment_hint") %>
+    <% end %>
+
+    <%= card class: "space-y-4" do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".store") %></h2>
+      <div class="space-y-1.5">
+        <%= form.label :currency %>
+        <%= form.select :currency, Store::CURRENCIES.keys %>
+        <p class="text-xs text-muted"><%= t(".currency_hint") %></p>
+      </div>
+      <%= form.field :contact_email, :email_field, hint: t(".contact_email_hint") %>
+    <% end %>
+
+    <%= card class: "space-y-4" do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".shipping") %></h2>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <%= form.field :shipping_first_item, :number_field, step: 0.01, min: 0 %>
+        <%= form.field :shipping_additional_item, :number_field, step: 0.01, min: 0 %>
+      </div>
+      <%= form.field :free_shipping_threshold, :number_field, step: 0.01, min: 0, hint: t(".free_shipping_hint") %>
+      <%= form.field :ship_to_countries_text, label: Store.human_attribute_name(:ship_to_countries), placeholder: "US, CA, GB, AU", hint: t(".countries_hint") %>
+    <% end %>
+
+    <%= form.submit t(".save") %>
+  <% end %>
+</div>

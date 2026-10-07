@@ -1,5 +1,5 @@
-# The shop's settings, one row: currency, shipping rates, where it ships, how to pay.
-# Store.current everywhere; the owner changes it at /admin/settings.
+# The shop's settings, one row: currency, shipping rates, where it ships, how buyers pay, the
+# shop's policies. Store.current everywhere; the owner changes it at /admin/settings.
 class Store < ApplicationRecord
   include MoneyAttributes
 
@@ -13,12 +13,20 @@ class Store < ApplicationRecord
     "VND" => { unit: "₫", precision: 0, format: "%n %u" }
   }.freeze
 
+  # The pages every shop needs (Stripe, ad networks and buyers look for them), at /policies/:id.
+  POLICIES = { "refund" => :refund_policy, "shipping" => :shipping_policy, "privacy" => :privacy_policy, "terms" => :terms_of_service }.freeze
+
   money_attribute :shipping_first_item, :shipping_additional_item, :free_shipping_threshold
+
+  encrypts :stripe_secret_key, :stripe_webhook_secret
 
   validates :currency, inclusion: { in: CURRENCIES.keys }
   validates :shipping_first_item_cents, :shipping_additional_item_cents, numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validates :free_shipping_threshold_cents, numericality: { greater_than: 0, only_integer: true }, allow_nil: true
   validates :contact_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :contact_phone, length: { maximum: 50 }
+  validates :business_address, length: { maximum: 500 }
+  validates :refund_policy, :shipping_policy, :privacy_policy, :terms_of_service, length: { maximum: 50_000 }
   validate :countries_are_known
 
   normalizes :ship_to_countries, with: ->(codes) { Array(codes).map { |code| code.to_s.strip.upcase }.compact_blank.uniq.sort }
@@ -58,7 +66,88 @@ class Store < ApplicationRecord
     CURRENCIES.fetch(currency)
   end
 
+  # How buyers can pay at checkout, the first one picked by default: "stripe" (card, on Stripe
+  # Checkout) once the owner connected Stripe, "manual" (the payment instructions, the owner
+  # marks the order paid) unless they turned it off. Never empty.
+  def payment_methods
+    methods = []
+    methods << "stripe" if stripe_connected?
+    methods << "manual" if manual_payments? || methods.empty?
+    methods
+  end
+
+  def stripe_connected?
+    stripe_key.present?
+  end
+
+  def stripe
+    StripeGateway.build(stripe_key) if stripe_connected?
+  end
+
+  # Checks the key with Stripe, saves it, and registers the webhook when the shop has a public
+  # https address (webhook_url nil otherwise: payments are still confirmed when buyers come back
+  # from Stripe). Raises StripeGateway::Error when Stripe refuses the key.
+  def connect_stripe!(secret_key, webhook_url: nil)
+    secret_key = secret_key.to_s.strip
+    raise StripeGateway::Error, I18n.t("admin.stripe_connections.wrong_key") unless secret_key.match?(/\A(sk|rk)_(test|live)_\w+\z/)
+
+    gateway = StripeGateway.build(secret_key)
+    name = gateway.account_name
+    disconnect_stripe!
+    update!(stripe_secret_key: secret_key, stripe_account_name: name)
+    register_stripe_webhook!(webhook_url)
+  end
+
+  # (Re)registers the webhook at url, e.g. after the shop moved to a new address.
+  def register_stripe_webhook!(url)
+    return unless stripe_connected? && self.class.public_url?(url)
+
+    stripe.delete_webhook(stripe_webhook_id) if stripe_webhook_id
+    id, secret = stripe.create_webhook(url)
+    update!(stripe_webhook_id: id, stripe_webhook_url: url, stripe_webhook_secret: secret)
+  end
+
+  def disconnect_stripe!
+    stripe.delete_webhook(stripe_webhook_id) if stripe_connected? && stripe_webhook_id
+    update!(stripe_secret_key: nil, stripe_account_name: nil, stripe_webhook_id: nil, stripe_webhook_url: nil, stripe_webhook_secret: nil)
+  end
+
+  def stripe_test_mode?
+    stripe_connected? && stripe.test_mode?
+  end
+
+  # The webhook secret, nil when unreadable (see stripe_key).
+  def stripe_signing_secret
+    stripe_webhook_secret
+  rescue ActiveRecord::Encryption::Errors::Decryption
+    nil
+  end
+
+  # Stripe can only call addresses on the internet, over https.
+  def self.public_url?(url)
+    uri = URI.parse(url.to_s)
+    uri.scheme == "https" && uri.host.present? && !uri.host.match?(/(\Alocalhost|\.localhost|\.local|\.test)\z|\A(127\.|10\.|192\.168\.)/)
+  rescue URI::InvalidURIError
+    false
+  end
+
+  def policy(id)
+    public_send(POLICIES.fetch(id)).presence
+  end
+
+  def published_policies
+    POLICIES.keys.select { |id| policy(id) }
+  end
+
   private
+    # The key, nil when it can't be decrypted (the app's SECRET_KEY_BASE changed): the owner
+    # connects Stripe again.
+    def stripe_key
+      stripe_secret_key
+    rescue ActiveRecord::Encryption::Errors::Decryption
+      nil
+    end
+
     def countries_are_known
       unknown = ship_to_countries - Country.codes
       errors.add(:ship_to_countries, :unknown, codes: unknown.join(", ")) if unknown.any?

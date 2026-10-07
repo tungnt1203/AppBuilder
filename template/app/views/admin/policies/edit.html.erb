@@ -1,0 +1,41 @@
+<%= page_header t("admin.settings.edit.title"), t(".description") %>
+
+<%= tabs do %>
+  <%= tab_to t("admin.settings.edit.general"), edit_admin_settings_path %>
+  <%= tab_to t(".title"), edit_admin_policies_path %>
+<% end %>
+
+<%= form_with model: @store, url: admin_policies_path, method: :patch, class: "max-w-3xl space-y-6" do |form| %>
+  <%= form.errors %>
+
+  <%= card class: "space-y-4" do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".contact") %></h2>
+    <p class="text-sm text-muted"><%= t(".contact_hint_html", link: link_to("/contact", contact_path, target: "_blank", class: link_classes)) %></p>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <%= form.field :contact_email, :email_field %>
+      <%= form.field :contact_phone, :telephone_field %>
+    </div>
+    <%= form.field :business_address, :text_area, rows: 3, hint: t(".business_address_hint") %>
+  <% end %>
+
+  <% Store::POLICIES.each do |id, attribute| %>
+    <%= card class: "space-y-3" do %>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-sm font-semibold text-ink"><%= t("policies.titles.#{id}") %></h2>
+        <% if @store.policy(id) %>
+          <%= link_to t(".view"), policy_path(id), target: "_blank", class: "text-sm #{link_classes}" %>
+        <% else %>
+          <%= badge t(".draft"), tone: :yellow %>
+        <% end %>
+      </div>
+      <% unless @store.policy(id) %>
+        <p class="text-sm text-muted"><%= t(".template_hint") %></p>
+      <% end %>
+      <%= form.text_area attribute, rows: 14, value: @store.public_send(attribute).presence || policy_template(id, @store),
+            "aria-label": t("policies.titles.#{id}"), class: "#{field_classes} font-mono text-xs leading-relaxed" %>
+    <% end %>
+  <% end %>
+
+  <p class="text-xs text-muted"><%= t(".format_hint") %></p>
+  <%= form.submit t(".save") %>
+<% end %>

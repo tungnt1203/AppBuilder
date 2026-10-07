@@ -7,7 +7,12 @@ Rails.application.routes.draw do
   resource :cart, only: :show
   resources :cart_items, only: %i[ create update destroy ]
   resource :checkout, only: %i[ new create ]
-  resources :orders, only: :show
+  resources :orders, only: :show do
+    resource :payment, only: :create, module: :orders
+  end
+  resources :policies, only: :show
+  resource :contact, only: :show
+  post "stripe/webhook" => "stripe_webhooks#create", as: :stripe_webhook
 
   resource :registration, only: %i[ new create ]
   resource :session, only: %i[ new create destroy ]
@@ -37,6 +42,8 @@ Rails.application.routes.draw do
       end
     end
     resource :settings, only: %i[ edit update ]
+    resource :stripe_connection, only: %i[ create update destroy ]
+    resource :policies, only: %i[ edit update ], path: "settings/policies"
     resources :users
   end
 
