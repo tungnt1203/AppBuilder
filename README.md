@@ -1,39 +1,87 @@
-# appbuilder workspace
+# AppBuilder
 
-An AI app builder for Rails: describe an app in a chat, watch it being built in a live
-preview, and publish it to your own server with [ONCE](https://github.com/basecamp/once).
-Working name only.
+An AI app builder for Rails. Describe an app in a chat, watch a coding agent build it in a live
+preview next to the chat, and publish it to your own server with
+[ONCE](https://github.com/basecamp/once). Made first for small businesses (nail salons, clinics,
+cafés, boarding houses…), in Vietnamese and English. Working name only.
 
-One repository with three parts:
+> **Status: early, runs on one machine.** The agent and the previews run directly on the
+> machine that runs the builder, with access to its files. Don't open it to other people
+> until each project runs in its own container (see [Roadmap](#roadmap)).
 
-| Repo        | What it is                                                        |
-|-------------|-------------------------------------------------------------------|
-| `template/` | The Rails 8 app every generated app starts from: ONCE-ready, with conventions and skills for Claude |
-| `blocks/`   | Integration gems (VietQR + SePay, Zalo, Google login, ...)         |
-| `builder/`  | The builder web app and the agent runner                           |
+## What it does
 
-New apps start from the last commit of `template/` (see `ProjectSetupJob`); each generated
-app gets a git repository of its own under `projects/`, which isn't part of this one.
+- **Chat to build**: plan first or build right away; the agent asks when something important is
+  unclear, shows its plan as a checklist, and suggests what to ask for next.
+- **Live preview** of the real Rails app, at desktop, tablet and phone sizes, with a Code tab.
+  Errors in the preview come with a "Fix this error" button.
+- **Point and attach**: point at a part of the preview to talk about it; attach a logo, photos,
+  a menu as PDF or screenshots.
+- **Versions**: every turn is a git commit; go back to any version from the chat or History.
+- **Publish** to ONCE at `<name>.<your domain>`, with a backup before every update.
+- **Eval**: `bin/eval` builds ten fixed sample requests and scores them, to tell whether a
+  change to the prompts made generated apps better or worse.
 
-## Plan
+## What's in this repository
 
-1. ✅ `template` runs on ONCE: deploy, update, failed update keeps the old version, backup and restore (verified locally with ONCE v0.3.3 on 2026-10-05).
-2. ✅ Tune generation quality by running Claude Code inside `template` with sample prompts (two rounds, see `playground/`).
-3. ✅ Preview per project (local `bin/rails server` on its own port; containers later).
-4. ✅ Builder UI: chat + preview.
-5. Versions and undo (one git commit per turn — commits done, undo not yet).
-6. ✅ Publish: build image, push, `once deploy`, or backup + `once update --image`.
-7. First block: VietQR + SePay.
-8. Beta with real users.
+| Folder      | What it is                                                         | License |
+|-------------|--------------------------------------------------------------------|---------|
+| `builder/`  | The builder: studio web app, agent runner, publishing, eval         | AGPL-3.0 |
+| `template/` | The Rails 8 app every generated app starts from: ONCE-ready, with auth, a UI kit, and `CLAUDE.md` + skills for the agent | MIT |
+| `blocks/`   | Integrations for generated apps, as gems (not started yet)           | MIT |
 
-## Local ONCE setup
+New apps start from the last commit of `template/` (see `ProjectSetupJob`). Each generated app
+gets its own git repository under `projects/`, which isn't part of this one. The template and the
+blocks are MIT so that the apps made with them belong to their owners; the template's
+`LICENSE` isn't copied into those apps.
 
-- `once` binary in `~/.local/bin` (no background service, so no auto-update/auto-backup).
-- Local registry: `docker run -d --restart=always --name local-registry -p 5050:5000 registry:2`
-- Build and deploy:
-  ```sh
-  docker build -t localhost:5050/starter:v1 template && docker push localhost:5050/starter:v1
-  once deploy localhost:5050/starter:v1 --host myapp.localhost --auto-update=false
-  once update myapp.localhost --image localhost:5050/starter:v2
-  ```
-- ONCE disables TLS automatically for `*.localhost`.
+## Run it locally
+
+You need macOS or Linux with:
+
+- Ruby 3.3.10 (see `builder/.ruby-version`) and SQLite
+- [Claude Code](https://claude.com/claude-code), signed in (`claude` on your `PATH`): the agent
+  uses your Claude account. Or a token from `claude setup-token`, see `builder/README.md`.
+- Google Chrome, for app thumbnails and `bin/eval` (`CHROME_BIN` if it's not in the default place)
+- To publish: Docker, a local registry and the `once` command (see below)
+- Optional: Node.js, for the interactive agent (`npm install` in `builder/runner`)
+
+```sh
+git clone https://github.com/tungnt1203/AppBuilder.git
+cd AppBuilder/builder
+bin/setup --skip-server
+bin/dev
+```
+
+Open http://localhost:3000 and describe an app. Generated apps go to `../projects/`, each with
+its preview server on its own port from 4001.
+
+`builder/README.md` explains how the builder works, its settings and the eval.
+
+### Publishing locally with ONCE
+
+```sh
+docker run -d --restart=always --name local-registry -p 5050:5000 registry:2
+# install the once command: https://github.com/basecamp/once
+```
+
+The builder builds the app's image, pushes it to `localhost:5050` and deploys it with
+`once deploy` at `http://<name>.localhost` (ONCE turns TLS off for `*.localhost`). Settings:
+`REGISTRY`, `ONCE_BIN`, `PUBLISH_DOMAIN`, `BACKUPS_ROOT`.
+
+## Roadmap
+
+Before other people use it:
+
+1. Run the agent and each preview in a container per project.
+2. Publish to a real server: a VPS, a domain, HTTPS and a private registry.
+3. Keep turns alive when the job worker loses its heartbeat.
+
+Then: sharing (a preview link, a zip, a GitHub repository), the cost of each app with a budget,
+and the first blocks.
+
+## License
+
+`builder/` is licensed under the [GNU AGPL v3](builder/LICENSE): if you run a modified builder
+as a service for others, you share your changes under the same license. `template/` and
+`blocks/` are [MIT](template/LICENSE).

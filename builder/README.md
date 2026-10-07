@@ -1,7 +1,8 @@
 # builder
 
 The web app: describe an app, chat with the coding agent on the left, watch the live
-preview on the right. Every project is a copy of `../template` in `../projects/<slug>`.
+preview on the right. Every project starts from the last commit of `../template`, in
+`../projects/<slug>` with a git repository of its own.
 
 ## Run locally
 
@@ -25,11 +26,13 @@ Open http://localhost:3000.
 
 ## How it works
 
-- **Setup** (`ProjectSetupJob`): clone the template, set the app's name, language and time zone,
+- **Setup** (`ProjectSetupJob`): copy the template's last commit, set the app's name, language and time zone,
   install gems, prepare the database, start the preview server on the project's own port.
-- **Turns** (`AgentTurnJob`): run the coding agent in the project. Each event becomes a chat
-  message (`AgentEvent`). Afterwards the builder rebuilds CSS, commits the change in the
-  project's git repository and restarts the preview.
+- **Turns** (`AgentTurnJob`): run the coding agent in the project. Its events become chat
+  messages, a live activity line and a plan checklist (`AgentTranscript`). Afterwards the builder
+  commits the change in the project's git repository (the agent names it) and restarts the
+  preview. Messages can carry attached files (`Attachment`) and the part of the preview the
+  owner pointed at (`PointedElement`).
 - **Preview** (`PreviewServer`, `Project#restart_preview`): after setup, each turn and each
   restore, the builder runs `db:prepare` (new migrations) and the CSS build, restarts the app's
   server and opens its home page. A failure is kept as `preview_error` and shown over the preview
@@ -37,9 +40,10 @@ Open http://localhost:3000.
   agent is building, a screen covers the preview (the app may be halfway through a change), and
   the owner can peek underneath.
 - **Agent backends** (`AgentRunner`, settings in `config/agent.yml`):
-  - `cli` (default without an API key): the local `claude` command and your Claude Code login.
-  - `sdk`: `runner/index.mjs` with the Claude Agent SDK. Needs `ANTHROPIC_API_KEY`
-    and `npm install` in `runner/`.
+  - `cli`: the local `claude` command and your Claude Code login. Can only be stopped.
+  - `sdk`: `runner/index.mjs` with the Claude Agent SDK, interactive: the agent asks questions
+    with buttons, takes extra messages while it works and stops cleanly. Picked automatically
+    after `npm install` in `runner/` when a token or `ANTHROPIC_API_KEY` is set.
 
 ## Claude credentials
 
@@ -59,5 +63,27 @@ claude:
 the token: preview servers, tests and image builds of the apps run without it. A token belongs
 to one Claude account; everyone running the builder uses their own.
 
+## Eval
+
+`bin/eval` builds the sample requests in `eval/cases.yml` as real projects, the way the studio
+builds them, then measures each: whether the build finished, cost and time, the app's tests and
+rubocop, which pages open for a visitor and for the signed-in owner, and a model's 1–10 scores
+for fit, look and phone from full-page screenshots. Results and `report.html` go to
+`storage/evals/<run>/`, compared with the run before. A full run costs roughly $2–4 of agent
+usage per case.
+
+```sh
+bin/eval                      # every case, three at a time
+bin/eval nail cafe -j 2       # some cases
+bin/eval -m "shorter prompt"  # note what changed in this run
+bin/eval report               # print the latest run again
+bin/eval clean                # delete the apps of every run but the latest
+```
+
+## Settings
+
 Environment: `PROJECTS_ROOT`, `TEMPLATE_PATH`, `AGENT_BACKEND`, `FIRST_PREVIEW_PORT`,
-`CLAUDE_CODE_OAUTH_TOKEN`.
+`CLAUDE_CODE_OAUTH_TOKEN`, `ANTHROPIC_API_KEY`, `CHROME_BIN`, `THUMBNAILS_ROOT`, `REGISTRY`,
+`ONCE_BIN`, `PUBLISH_DOMAIN`, `BACKUPS_ROOT`, and `UNSPLASH_ACCESS_KEY`, `PEXELS_API_KEY`,
+`PIXABAY_API_KEY` for the agent's stock photo search (without them it uses Openverse).
+The agent's tools, budget and instructions are in `config/agent.yml`.
