@@ -20,9 +20,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     User.delete_all
 
     get root_path
-    assert_redirected_to new_registration_path
-    follow_redirect!
-    assert_select "h1", "Set up your studio"
+    assert_redirected_to new_session_path
 
     post registration_path, params: { user: { name: "Tùng", email_address: "tung@example.com", password: "long enough" } }
 

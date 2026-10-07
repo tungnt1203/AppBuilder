@@ -1,8 +1,7 @@
-# Anyone can create an account. The very first one runs the studio (see User).
+# Anyone can create an account. The very first one also runs the studio (see User).
 class RegistrationsController < ApplicationController
   allow_unauthenticated_access
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_registration_path, alert: "Try again later." }
-  before_action :set_first
 
   layout "authentication"
 
@@ -20,9 +19,4 @@ class RegistrationsController < ApplicationController
       render :new, status: :unprocessable_entity
     end
   end
-
-  private
-    def set_first
-      @first = !User.exists?
-    end
 end
