@@ -15,6 +15,6 @@ module Admin::OrderTransition
       yield
       redirect_to admin_order_path(@order), notice: t(".notice", number: @order.name), status: :see_other
     rescue Order::InvalidTransition
-      redirect_to admin_order_path(@order), alert: t("admin.orders.invalid_transition", number: @order.name, status: @order.reload.status), status: :see_other
+      redirect_to admin_order_path(@order), alert: t("admin.orders.invalid_transition", number: @order.name, status: t(@order.reload.status, scope: "orders.statuses")), status: :see_other
     end
 end

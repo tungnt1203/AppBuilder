@@ -44,10 +44,18 @@ class ProjectSetupJob < ApplicationJob
 
       project.write_app_name
       application = project.path.join("config/application.rb")
-      application.write(application.read
-        .sub(/config\.i18n\.default_locale = :\w+/, "config.i18n.default_locale = :#{project.language}")
-        .sub(/config\.time_zone = ".*"/) { %(config.time_zone = "#{project.time_zone}") })
+      application.write(localize(application.read, project))
       project.shell.run("git", "commit", "--quiet", "-am", "Set up #{project.name}")
       project.update!(base_sha: project.history.current_sha)
+    end
+
+    # /admin speaks the owner's language. The customers' site stays in the template's (English,
+    # for buyers abroad) until the agent learns who the buyers are. Templates from before the
+    # split have one language for the whole app: the owner's.
+    def localize(source, project)
+      language = source.match?(/config\.x\.admin_locale = /) ? "config.x.admin_locale" : "config.i18n.default_locale"
+      source
+        .sub(/^(\s*)#{Regexp.escape(language)} = :\w+/) { "#{$1}#{language} = :#{project.language}" }
+        .sub(/^(\s*)config\.time_zone = ".*"$/) { %(#{$1}config.time_zone = "#{project.time_zone}") }
     end
 end
