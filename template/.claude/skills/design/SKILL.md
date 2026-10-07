@@ -108,9 +108,27 @@ picker), a collection, the cart, checkout and the buyer's order page, plus the o
 (`order_mailer/`). Restyle them for the brand and rearrange them freely; keep their forms' fields,
 the Stimulus targets (`variant-picker`, `gallery`) and the links between them working.
 
+**A look is the whole site.** Choosing or changing the direction (a new app, "make it look like
+this site", a screenshot, "more premium") isn't done until every page a buyer passes through wears
+it: home, all products, a product, a collection, the cart, checkout, the order page, the policies
+and contact pages, header and footer. A buyer who taps a product and lands on the starting look
+sees a template. Check them all (section 6).
+
+**A reference is a layout, not a palette.** When the owner shows a site or a screenshot, take what
+makes it recognizable: the order of sections, the header (centered logo, mega menu, announcement
+bar), how product cards look (photo ratio, hover image, badges, price position), the product page
+(gallery beside or above, sticky buy box, accordions), the type scale and spacing, as well as the
+colors. Rebuild those in the views; don't only change the theme.
+
+**Rearranging is moving markup.** "Put the reviews above the description", "a bigger photo", "menu in
+the middle": change the view's structure (order, grid columns, widths), not only classes. When the
+owner pointed at an element in the preview, that element is the one they mean. If their layout
+would break the shop (the add-to-cart form below the fold on phones, prices hidden), build it as
+close as works and say why.
+
 **Start from the page blocks** in `app/views/blocks/`: hero (split, full-bleed photo), features,
 price list or menu, gallery, timetable, testimonials, stats, FAQ, find-us (address, hours, call,
-Zalo, map), closing call to action, and a bottom action bar for phones. They use only the theme's
+map), closing call to action, and a bottom action bar for phones. They use only the theme's
 names, so they wear the app's look, and they already work at 390px. See them all in this app's theme
 at `/_blocks` on the preview (development only; `?only=price_list` for one). To use one, **copy its
 markup into the page's own view and make it this app's**: real content and records instead of the
@@ -123,13 +141,17 @@ design.
 
 - **Header and footer** (`app/views/layouts/site/_header.html.erb`, `_account.html.erb`, `_footer.html.erb`):
   redesign them for the app; with customer accounts on, also the sign-in link and the customers'
-  sign in, sign up and account pages (`app/views/sessions/`, `registrations/`, `accounts/`). The footer carries what visitors look for: address, hours, phone, Zalo, map link.
+  sign in, sign up and account pages (`app/views/sessions/`, `registrations/`, `accounts/`). The footer carries what visitors look for: the policies and contact links (keep them), social links, and for a local business its address and hours.
 - **First screen**: say what this is and what to do, with real content from the owner's description
   (what they offer, prices, what's on today), not a generic welcome. Avoid the centered title +
   subtitle + button in a pale rounded box.
 - **Composition**: vary the sections: split layouts, full-bleed bands of brand color, a big number,
   an asymmetric grid, a horizontal scroller of cards. Generous space (`py-16 md:py-24` between
   sections), one clear max width, text `text-base`/`text-lg`.
+- **Product photos**: every product has at least one. The sample products come with mockups
+  (`db/seeds/images`); when you add products, attach the owner's photos (print-on-demand sellers
+  have mockups from Printify or Printful: ask for them in the chat), else a sample mockup that fits,
+  else one from `bin/images`. A grid of gray placeholders makes the shop look empty.
 - **Images**: use what the owner gives first (Active Storage uploads, attach in seeds when they
   provide files). When a page needs photos they haven't given (a hero, the services, the classes),
   get free stock photos with `bin/images`:
@@ -162,7 +184,10 @@ is only a tool for the owner keeps its site to a simple home page; give its them
 ## 6. Look before you finish
 
 After building or restyling a page, run `bin/rails tailwindcss:build`, then look at it in the
-running app: `bin/look / /menu` (`--as customer` for a customer's pages, `--as owner` for /admin). It saves the first three
+running app: `bin/look / /products` (`--as customer` for a customer's pages, `--as owner` for /admin).
+After a change of look, look at the whole buyer's path: `bin/look / /products /products/<a slug>
+/collections/<a slug> /cart /contact` (the cart and checkout need items: check their views by
+reading them too). It saves the first three
 screens of each page; add `--screens N` when what you changed is further down. Read every screenshot it saves,
 phone first, and judge it as a visitor would:
 
