@@ -25,6 +25,12 @@
             <%= render "projects/versions", project: @project %>
           </div>
         </details>
+        <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="share">
+          <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Share" aria-label="Share"><%= icon :share %></summary>
+          <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-[22px] p-4 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[24rem] lg:right-auto lg:left-0">
+            <%= render "projects/share", project: @project %>
+          </div>
+        </details>
         <% if deployment = @project.latest_deployment %>
           <%= render "projects/deployment_status", project: @project, deployment: deployment %>
         <% end %>

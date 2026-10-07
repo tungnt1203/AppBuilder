@@ -1,0 +1,30 @@
+<%# Showing the app to other people: a link to try the preview, the published address, the code. %>
+<p class="text-sm font-semibold">Preview link</p>
+<% if project.share_token %>
+  <p class="muted mt-1 text-xs">Anyone with this link can try the app as it is now, without an account, even while it's being built.</p>
+  <div class="mt-2 flex items-center gap-2" data-controller="clipboard">
+    <input type="text" readonly value="<%= shared_preview_url(project.share_token) %>" class="field h-9 min-w-0 flex-1 font-mono text-xs"
+           data-clipboard-target="source" aria-label="Preview link" data-action="focus->clipboard#select">
+    <button type="button" class="btn btn-primary h-9 px-3.5" data-clipboard-target="button" data-action="clipboard#copy">Copy</button>
+  </div>
+  <%= button_to "Stop sharing", project_share_path(project), method: :delete, class: "btn btn-ghost mt-2 h-7 px-2.5 text-xs text-[var(--danger)]",
+        title: "The link stops working, and people who opened it lose the preview",
+        form: { data: { turbo_confirm: "Stop sharing? The link stops working, and people who opened it lose the preview." } } %>
+<% else %>
+  <p class="muted mt-1 text-xs">Let someone try the app before it's published: they get a link, no account needed.</p>
+  <%= button_to project_share_path(project), class: "btn btn-ghost well mt-2 h-8 px-3 text-sm" do %><%= icon :link, size: 14 %>Create a link<% end %>
+<% end %>
+
+<% if project.live_deployment %>
+  <hr class="my-3 border-[var(--line)]">
+  <p class="text-sm font-semibold">Published app</p>
+  <div class="mt-2 flex items-center gap-2" data-controller="clipboard">
+    <input type="text" readonly value="<%= project.publish_url %>" class="field h-9 min-w-0 flex-1 font-mono text-xs"
+           data-clipboard-target="source" aria-label="Published address">
+    <button type="button" class="btn btn-ghost well h-9 px-3.5" data-clipboard-target="button" data-action="clipboard#copy">Copy</button>
+  </div>
+<% end %>
+
+<hr class="my-3 border-[var(--line)]">
+<%= link_to project_download_path(project), class: "btn btn-ghost h-8 w-full justify-start px-2 text-sm", data: { turbo: false },
+      title: "The code of the latest version, as a .zip" do %><%= icon :download, size: 15 %>Download the code<% end %>

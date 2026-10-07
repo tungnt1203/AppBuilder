@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resource :tour, only: :create
   resources :passwords, param: :token
   root "projects#index"
+  get "s/:token", to: "shares#show", as: :shared_preview
 
   resources :projects, only: %i[ index create show update destroy ] do
     resources :messages, only: :create, module: :projects
@@ -16,6 +17,8 @@ Rails.application.routes.draw do
     resource :duplicate, only: :create, module: :projects
     resource :code, only: :show, module: :projects
     resource :address, only: :update, module: :projects
+    resource :share, only: %i[ create destroy ], module: :projects
+    resource :download, only: :show, module: :projects
     get "messages/:message_id/attachments/:name", to: "projects/attachments#show", as: :attachment, constraints: { name: %r{[^/]+} }
   end
 

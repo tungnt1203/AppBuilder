@@ -24,6 +24,12 @@ class PreviewGate
     SecureRandom.hex(32).tap { |value| secret_path.write(value); secret_path.chmod(0o600) }
   end
 
+  # A new secret: tickets, cookies and passes made with the old one stop working at once.
+  def reset
+    secret_path.delete if secret_path.exist?
+    secret
+  end
+
   def pass
     OpenSSL::HMAC.hexdigest("SHA256", secret, "preview-pass")
   end

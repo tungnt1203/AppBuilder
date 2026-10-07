@@ -50,6 +50,10 @@ the agent resumes its session.
   `/projects/:id/preview`, which checks the account and redirects with a one-minute ticket signed
   with the project's `tmp/preview_secret`; the preview turns that into a cookie. The builder's
   own requests and the app's `bin/look` send a pass instead. Apps made before the gate stay open.
+- **Sharing** (the Share menu): a preview link (`/s/:token`, no account needed) that goes through
+  the same gate; stopping it gives the preview a new secret, so whoever opened it is out at once.
+  The menu also copies the published address and downloads the code of the latest version as a
+  zip (`git archive`, so no databases, logs or secrets).
 - **Agent backends** (`AgentRunner`, settings in `config/agent.yml`):
   - `cli`: the local `claude` command and your Claude Code login. Can only be stopped.
   - `sdk`: `runner/index.mjs` with the Claude Agent SDK, interactive: the agent asks questions

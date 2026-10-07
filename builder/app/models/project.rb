@@ -176,6 +176,28 @@ class Project < ApplicationRecord
     Thumbnail.new(self)
   end
 
+  # Anyone with the link can try the preview (see SharesController).
+  def share_preview
+    update!(share_token: SecureRandom.base58(24)) unless share_token
+  end
+
+  # Ends the link and lets out whoever came in through it: a new preview secret outdates
+  # every cookie, so the studio reloads its preview to get a fresh one.
+  def stop_sharing
+    preview_gate.reset
+    update!(share_token: nil, preview_version: preview_version + 1)
+  end
+
+  # The code of the latest version, zipped in a folder named after the app. Files the
+  # agent is still changing aren't in it.
+  def archive_to(file)
+    shell.run("git", "archive", "--format=zip", "--prefix=#{archive_name}/", "--output=#{file}", "HEAD")
+  end
+
+  def archive_name
+    subdomain || subdomain_for(name)
+  end
+
   # Commands on the host, in the project's folder: git, publishing.
   def shell
     ProjectShell.new(path)
