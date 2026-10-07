@@ -9,9 +9,10 @@
     <aside class="studio-panel studio-chat" aria-label="Chat">
       <header class="studio-bar">
         <%= link_to root_path, class: "btn btn-ghost btn-icon h-8 w-8", "aria-label": "All apps", title: "All apps" do %><%= icon :back %><% end %>
-        <div class="flex min-w-0 flex-1 items-center gap-2">
-          <h1 class="truncate text-[0.9375rem] font-semibold"><%= @project.name %></h1>
-          <span class="chip hidden shrink-0 rounded-full px-2 py-0.5 text-xs sm:inline-flex"><%= status_label(@project) %></span>
+        <%# The app shows its own name in the preview; the bar only says what's going on. %>
+        <h1 class="sr-only"><%= @project.name %></h1>
+        <div class="flex min-w-0 flex-1 items-center">
+          <span class="chip inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs"><%= status_label(@project) %></span>
         </div>
         <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon h-8 w-8" %>
         <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="history">
