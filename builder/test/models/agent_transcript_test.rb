@@ -138,6 +138,13 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_equal [ "error", "Budget exceeded" ], [ @project.messages.last.role, @project.messages.last.body ]
   end
 
+  test "charges each turn to the app's owner" do
+    assert_difference -> { @project.owner.usages.count } do
+      record "type" => "result", "is_error" => false, "total_cost_usd" => 1.23, "num_turns" => 4, "duration_ms" => 1000
+    end
+    assert_equal [ @project.id, 1.23 ], [ Usage.last.project_id, Usage.last.cost_usd.to_f ]
+  end
+
   test "a stopped turn is summed up, not shown as an empty error" do
     @project.agent_commands.create!(kind: :interrupt)
     @project.update!(working_since: 1.minute.ago)

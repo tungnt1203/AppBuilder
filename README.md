@@ -71,14 +71,16 @@ The builder builds the app's image, pushes it to `localhost:5050` and deploys it
 
 ## Roadmap
 
+Done: the agent and each preview in a container per project (`SANDBOX=docker`), turns that
+survive a job worker restart, accounts with a monthly budget for the agent.
+
 Before other people use it:
 
-1. Run the agent and each preview in a container per project.
-2. Publish to a real server: a VPS, a domain, HTTPS and a private registry.
-3. Keep turns alive when the job worker loses its heartbeat.
+1. Make the container sandbox the default, and put previews behind the builder's sign-in
+   (they're plain `localhost` ports now).
+2. Publish to a real server: a VPS, a domain, HTTPS, a private registry and real email.
 
-Then: sharing (a preview link, a zip, a GitHub repository), the cost of each app with a budget,
-and the first blocks.
+Then: sharing (a preview link, a zip, a GitHub repository) and the first blocks.
 
 ## License
 

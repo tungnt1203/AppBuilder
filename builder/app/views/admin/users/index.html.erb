@@ -26,7 +26,8 @@
             <% if user == Current.user %><span class="faint text-[0.8125rem] font-medium">(you)</span><% end %>
           </p>
           <p class="faint truncate text-[0.8125rem]">
-            <%= user.email_address %> · <%= pluralize(user.projects_count, "app") %>
+            <%= user.email_address %> · <%= pluralize(user.projects_count, "app") %> ·
+            <%= number_to_currency(user.spent_this_month) %><%= " of #{number_to_currency(user.monthly_budget, precision: 0)}" if user.monthly_budget %> this month
           </p>
         </div>
 

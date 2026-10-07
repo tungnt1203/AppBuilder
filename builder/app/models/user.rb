@@ -2,6 +2,10 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :projects, foreign_key: :owner_id, inverse_of: :owner, dependent: :restrict_with_error
+  has_many :usages, dependent: :delete_all
+
+  # Less than this left and a turn can't do much, so none starts.
+  MIN_TURN_USD = 0.25
 
   # owner: the first account; cannot be removed or demoted.
   # admin: manages accounts and can open every app.
@@ -42,6 +46,28 @@ class User < ApplicationRecord
 
   def app_limit_reached?
     app_limit.present? && projects.count >= app_limit
+  end
+
+  # Members' apps may spend up to config.x.monthly_budget_usd on the agent each month.
+  def monthly_budget
+    Rails.configuration.x.monthly_budget_usd unless administrator?
+  end
+
+  def spent_this_month
+    usages.this_month.sum(:cost_usd).to_f
+  end
+
+  def budget_left
+    [ monthly_budget - spent_this_month, 0 ].max if monthly_budget
+  end
+
+  def over_budget?
+    monthly_budget.present? && budget_left < MIN_TURN_USD
+  end
+
+  def budget_message
+    "This month's budget for the agent is used up ($%.2f of $%.2f). It starts again on %s." %
+      [ spent_this_month, monthly_budget, Time.current.next_month.beginning_of_month.to_date.to_fs(:long) ]
   end
 
   # The apps this account may open: its own, or every app for administrators.

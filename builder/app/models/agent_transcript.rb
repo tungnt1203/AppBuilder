@@ -220,9 +220,14 @@ class AgentTranscript
         last.destroy
       end
 
+      charge event["total_cost_usd"]
       data = event.slice("total_cost_usd", "num_turns", "duration_ms", "subtype")
       data["stopped"] = true if event["is_error"] && !error
       @project.messages.create!(role: error ? :error : :result, body: error ? event["result"].to_s : "", data:)
+    end
+
+    def charge(cost)
+      @project.owner.usages.create!(project: @project, cost_usd: cost) if @project.owner && cost.to_f.positive?
     end
 
     # The plan for this turn is one message whose tasks get ticked off.

@@ -7,6 +7,7 @@ class Project < ApplicationRecord
   has_many :messages, -> { order(:id) }, dependent: :destroy
   has_many :deployments, dependent: :destroy
   has_many :agent_commands, dependent: :delete_all
+  has_many :usages, dependent: :nullify
 
   enum :status, %w[ setting_up ready working failed ].index_by(&:itself), default: "setting_up"
   enum :preview_status, %w[ starting running broken ].index_by(&:itself), prefix: :preview
@@ -268,6 +269,8 @@ class Project < ApplicationRecord
   # attached and the part of the preview they pointed at. While a turn is running
   # (interactive agent only), it joins that turn instead.
   def ask(request, mode:, files: [], pointed: nil)
+    return tell_budget_spent if owner&.over_budget?
+
     message = messages.create!(role: :user, body: request, data: pointed ? { "pointed" => pointed.data } : {})
     attachments = Attachment.save(message, files)
     message.update!(data: message.data.merge("attachments" => attachments.map(&:to_h))) if attachments.any?
@@ -336,5 +339,10 @@ class Project < ApplicationRecord
 
     def owner_has_room
       errors.add(:base, "You can have #{owner.app_limit} apps. Delete one to make room for another.") if owner&.app_limit_reached?
+      errors.add(:base, owner.budget_message) if owner&.over_budget?
+    end
+
+    def tell_budget_spent
+      messages.create!(role: :notice, body: owner.budget_message)
     end
 end

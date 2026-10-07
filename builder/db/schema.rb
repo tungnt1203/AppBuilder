@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_025208) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_063146) do
   create_table "agent_commands", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "kind", null: false
@@ -85,6 +85,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_025208) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "usages", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "project_id"
+    t.decimal "cost_usd", precision: 10, scale: 4, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_usages_on_project_id"
+    t.index ["user_id", "created_at"], name: "index_usages_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_usages_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "password_digest", null: false
@@ -100,4 +111,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_025208) do
   add_foreign_key "messages", "projects"
   add_foreign_key "projects", "users", column: "owner_id"
   add_foreign_key "sessions", "users"
+  add_foreign_key "usages", "projects", on_delete: :nullify
+  add_foreign_key "usages", "users"
 end

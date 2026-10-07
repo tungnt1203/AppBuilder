@@ -69,6 +69,17 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "build", enqueued_jobs.last["arguments"].last
   end
 
+  test "a member over the monthly budget can't start a new app" do
+    users(:member).usages.create!(cost_usd: 25)
+    sign_in_as users(:member)
+
+    assert_no_difference -> { Project.count } do
+      post projects_path, params: { project: { name: "Tiệm bánh", language: "vi", request: "Trang đặt bánh" } }
+    end
+    assert_response :unprocessable_entity
+    assert_match "budget for the agent is used up", response.body
+  end
+
   test "an app needs a name or a description" do
     post projects_path, params: { project: { name: "", language: "vi", request: "" } }
 

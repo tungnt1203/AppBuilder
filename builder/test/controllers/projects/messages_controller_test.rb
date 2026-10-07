@@ -14,6 +14,19 @@ class Projects::MessagesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Thêm trang báo cáo", project.messages.last.body
   end
 
+  test "a member whose monthly budget is used up gets told so instead of a turn" do
+    project = projects(:clinic)
+    project.update!(owner: users(:member))
+    users(:member).usages.create!(cost_usd: 20)
+    sign_in_as users(:member)
+
+    assert_no_enqueued_jobs only: AgentTurnJob do
+      post project_messages_path(project), params: { message: { body: "Thêm trang báo cáo", plan: "0" } }
+    end
+    assert_equal "notice", project.messages.last.role
+    assert_match "budget for the agent is used up", project.messages.last.body
+  end
+
   test "asks for a plan first when Plan first is on" do
     assert_enqueued_with(job: AgentTurnJob, args: [ projects(:clinic), "Làm trang báo cáo", "plan" ]) do
       post project_messages_path(projects(:clinic)), params: { message: { body: "Làm trang báo cáo", plan: "1" } }

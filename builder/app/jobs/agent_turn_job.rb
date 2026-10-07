@@ -24,7 +24,7 @@ class AgentTurnJob < ApplicationJob
     project.agent_commands.pending.where.not(kind: :message).update_all(delivered_at: Time.current) # left from an earlier turn
     transcript = AgentTranscript.new(project)
 
-    AgentRunner.new(project, mode:).run(prompt) { |event| transcript.record(event) }
+    AgentRunner.new(project, mode:, config: agent_config(project)).run(prompt) { |event| transcript.record(event) }
     transcript.finish
     unless transcript.finished? || transcript.asked? || project.stop_requested?
       raise ProjectShell::Error, "The agent stopped without finishing its turn."
@@ -110,6 +110,13 @@ class AgentTurnJob < ApplicationJob
     end
 
     # Keep whatever the agent changed, even after a failure, so it can be undone or continued.
+    # A turn may spend what's left of the owner's monthly budget, up to the per-turn limit.
+    def agent_config(project)
+      config = Rails.configuration.x.agent
+      left = project.owner&.budget_left
+      left ? config.merge(max_budget_usd: [ config[:max_budget_usd].to_f, left ].min.round(2)) : config
+    end
+
     def finish(project, message, status:)
       project.adopt_app_name_from_code
       project.history.commit(message)

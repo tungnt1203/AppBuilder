@@ -112,4 +112,13 @@ class AgentTurnJobTest < ActiveSupport::TestCase
       AgentRunner.singleton_class.alias_method :new, :original_new
       AgentRunner.singleton_class.remove_method :original_new
     end
+
+  test "a turn may spend only what's left of a member's monthly budget" do
+    project = projects(:clinic)
+    project.update!(owner: users(:member))
+    users(:member).usages.create!(cost_usd: 17)
+
+    assert_equal 3.0, AgentTurnJob.new.send(:agent_config, project)[:max_budget_usd]
+    assert_equal Rails.configuration.x.agent[:max_budget_usd], AgentTurnJob.new.send(:agent_config, projects(:shop))[:max_budget_usd]
+  end
 end

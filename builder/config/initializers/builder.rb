@@ -39,6 +39,10 @@ Rails.application.configure do
   # How many apps a member's account may have; administrators have no limit.
   config.x.apps_per_account = Integer(ENV.fetch("APPS_PER_ACCOUNT", 2))
 
+  # What a member's apps may spend on the agent each calendar month, in US dollars
+  # (MONTHLY_BUDGET_USD=none for no limit); administrators have no limit.
+  config.x.monthly_budget_usd = ENV.fetch("MONTHLY_BUDGET_USD", "20").then { |value| Float(value) unless value == "none" }
+
   # Each project's preview server gets its own port, counting up from here.
   config.x.first_preview_port = Integer(ENV.fetch("FIRST_PREVIEW_PORT", 4001))
 

@@ -126,4 +126,11 @@ Environment: `SANDBOX`, `SANDBOX_IMAGE`, `SANDBOX_CPUS`, `SANDBOX_MEMORY`, `SAND
 `CLAUDE_CODE_OAUTH_TOKEN`, `ANTHROPIC_API_KEY`, `CHROME_BIN`, `THUMBNAILS_ROOT`, `REGISTRY`,
 `ONCE_BIN`, `PUBLISH_DOMAIN`, `BACKUPS_ROOT`, and `UNSPLASH_ACCESS_KEY`, `PEXELS_API_KEY`,
 `PIXABAY_API_KEY` for the agent's stock photo search (without them it uses Openverse).
-The agent's tools, budget and instructions are in `config/agent.yml`.
+The agent's tools, budget per turn and instructions are in `config/agent.yml`.
+
+Limits for members (administrators have none): `APPS_PER_ACCOUNT` (default 2) and
+`MONTHLY_BUDGET_USD` (default 20, or `none`), what the agent may cost for an account's apps
+in a calendar month. Every turn's cost is kept in `usages`, also after its app is deleted. A
+turn may spend what's left of the month's budget, up to the per-turn limit; with less than
+$0.25 left, no turn starts. Members see their spending on the home page, admins everyone's in
+Accounts.
