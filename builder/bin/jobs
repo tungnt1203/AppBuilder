@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+ENV["BUILDER_LONG_JOBS"] = "1" # loads the code once, see config/environments/development.rb
 require_relative "../config/environment"
 require "solid_queue/cli"
 

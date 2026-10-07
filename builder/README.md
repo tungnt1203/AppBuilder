@@ -24,6 +24,12 @@ bin/jobs
 
 Open http://localhost:3000.
 
+The web server picks up code changes; the worker (`bin/jobs`) doesn't, so restart it after
+changing the builder. It loads the code once because reloading would wait for the agent turns
+it runs, which last many minutes, and Solid Queue would give up on the worker meanwhile. If a
+worker dies mid-turn anyway, `RescueStrandedTurnsJob` (every minute) runs the turn again and
+the agent resumes its session.
+
 ## How it works
 
 - **Setup** (`ProjectSetupJob`): copy the template's last commit, set the app's name, language and time zone,

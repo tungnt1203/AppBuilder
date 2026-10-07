@@ -4,10 +4,16 @@ Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Make code changes take effect immediately without server restart.
-  config.enable_reloading = true
+  #
+  # Except in the job worker (bin/jobs) and bin/eval, which run agent turns for many
+  # minutes: reloading waits for every running job to finish, and meanwhile the worker
+  # neither picks up jobs nor sends heartbeats, so Solid Queue gives up on it and marks
+  # the turn failed. They load the code once; restart them after changing it.
+  long_jobs = ENV["BUILDER_LONG_JOBS"].present?
+  config.enable_reloading = !long_jobs
 
   # Do not eager load code on boot.
-  config.eager_load = false
+  config.eager_load = long_jobs
 
   # Show full error reports.
   config.consider_all_requests_local = true

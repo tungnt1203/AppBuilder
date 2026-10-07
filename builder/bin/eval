@@ -17,6 +17,7 @@ OptionParser.new do |parser|
   parser.on("-m NOTE", "What changed in this run") { |value| options[:note] = value }
 end.parse!
 
+ENV["BUILDER_LONG_JOBS"] = "1" # loads the code once, see config/environments/development.rb
 require_relative "../config/environment"
 
 case ARGV.first

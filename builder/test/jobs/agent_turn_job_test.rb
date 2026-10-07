@@ -26,6 +26,19 @@ class AgentTurnJobTest < ActiveSupport::TestCase
     assert @project.ready?
   end
 
+  test "a turn checks in on the project while it runs, and stops when it ends" do
+    seen = nil
+    project = @project
+    @runner.define_singleton_method(:run) { |prompt, &block| seen = project.reload.slice(:turn_heartbeat_at, :turn_worker_pid) }
+
+    with_runner { AgentTurnJob.perform_now(@project, "Thêm trang báo cáo", "plan") }
+
+    assert seen["turn_heartbeat_at"].present?
+    assert_equal Process.pid, seen["turn_worker_pid"]
+    assert_nil @project.reload.turn_heartbeat_at
+    assert_nil @project.turn_worker_pid
+  end
+
   test "a turn cut off by a restart resumes where it left off" do
     job = AgentTurnJob.new(@project, "Thêm trang báo cáo", "plan")
     @project.update!(status: :working, agent_job_id: job.job_id, working_since: 1.minute.ago, activity: "Thinking")

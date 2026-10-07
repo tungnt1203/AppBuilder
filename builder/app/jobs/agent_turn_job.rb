@@ -3,10 +3,15 @@
 # committed and the preview restarted. Every step shows up in the chat.
 #
 # If the job process restarts mid-turn, Solid Queue runs the job again; the agent
-# then resumes its session and continues instead of starting over.
+# then resumes its session and continues instead of starting over. If the worker dies
+# or is given up on, RescueStrandedTurnsJob runs it again the same way; the turn checks
+# in on the project (turn_heartbeat_at, turn_worker_pid) so it can tell.
 class AgentTurnJob < ApplicationJob
   RESUME_NOTE = "The builder restarted while you were working on this and your turn was cut off. " \
                 "Check what is already done before you continue."
+  HEARTBEAT = 15 # seconds
+
+  around_perform :check_in
 
   def perform(project, request, mode = "build")
     if project.agent_job_id == job_id
@@ -39,6 +44,24 @@ class AgentTurnJob < ApplicationJob
   end
 
   private
+    def check_in
+      project = arguments.first
+      checks_in = Project.where(id: project.id)
+      checks_in.update_all(turn_heartbeat_at: Time.current, turn_worker_pid: ::Process.pid)
+      heartbeat = Thread.new do
+        loop do
+          sleep HEARTBEAT
+          Rails.application.executor.wrap { checks_in.update_all(turn_heartbeat_at: Time.current) }
+        end
+      end
+
+      yield
+      StrandedJob.settle(job_id) # given up on by Solid Queue while it was still working
+    ensure
+      heartbeat&.kill
+      checks_in&.where(turn_worker_pid: ::Process.pid)&.update_all(turn_heartbeat_at: nil, turn_worker_pid: nil)
+    end
+
     # Clears what the cut-off run left behind. Returns false when the owner had
     # already pressed Stop, so the turn ends here with its work kept.
     def resume_interrupted(project, request, mode)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_090001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_021726) do
   create_table "agent_commands", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "kind", null: false
@@ -66,6 +66,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_090001) do
     t.boolean "name_pending", default: false, null: false
     t.string "subdomain"
     t.string "eval_run"
+    t.datetime "turn_heartbeat_at"
+    t.integer "turn_worker_pid"
     t.index ["eval_run"], name: "index_projects_on_eval_run"
     t.index ["port"], name: "index_projects_on_port", unique: true
     t.index ["slug"], name: "index_projects_on_slug", unique: true
