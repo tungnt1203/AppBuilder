@@ -1,0 +1,6 @@
+# Generated apps, eval and playground runs, backups: local data, not source.
+/projects/
+/playground/
+/backups/
+/.ruby-lsp/
+.DS_Store

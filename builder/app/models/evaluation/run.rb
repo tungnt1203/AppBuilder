@@ -67,9 +67,10 @@ module Evaluation
     end
 
     private
+      # The last commit that changed this folder of the repository, and whether it has unsaved edits.
       def version_of(path)
-        sha = ProjectShell.new(path).capture("git", "rev-parse", "--short", "HEAD").first.strip
-        dirty = ProjectShell.new(path).capture("git", "status", "--porcelain").first.present?
+        sha = ProjectShell.new(path).capture("git", "log", "-1", "--format=%h", "--", ".").first.strip
+        dirty = ProjectShell.new(path).capture("git", "status", "--porcelain", "--", ".").first.present?
         dirty ? "#{sha}+changes" : sha
       end
   end

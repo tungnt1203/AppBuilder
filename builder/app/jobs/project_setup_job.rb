@@ -21,12 +21,22 @@ class ProjectSetupJob < ApplicationJob
       project.adopt_name(AppNamer.new(request, language: project.language).name) if project.name_pending?
     end
 
+    # The template's last commit (not unsaved edits) becomes the app's first version. The
+    # template is a folder of a bigger repository (the monorepo) or a repository of its own.
     def copy_template(project)
       return if project.path.join(".git").exist?
 
-      project.path.dirname.mkpath
-      ProjectShell.new(project.path.dirname).run("git", "clone", "--quiet", Rails.configuration.x.template_path.to_s, project.path.to_s)
-      project.shell.run("git", "remote", "remove", "origin")
+      template = ProjectShell.new(Rails.configuration.x.template_path)
+      repository = ProjectShell.new(template.run("git", "rev-parse", "--show-toplevel").strip) # archive only sees the root's view
+      folder = template.run("git", "rev-parse", "--show-prefix").strip
+      project.path.mkpath
+      Tempfile.create([ "template", ".tar" ]) do |archive|
+        repository.run("git", "archive", "--format=tar", "--output", archive.path, "HEAD:#{folder}")
+        project.shell.run("tar", "-xf", archive.path)
+      end
+      project.shell.run("git", "init", "--quiet", "--initial-branch=main")
+      project.shell.run("git", "add", "--all")
+      project.shell.run("git", "commit", "--quiet", "-m", "Start from the template")
     end
 
     def configure(project)
