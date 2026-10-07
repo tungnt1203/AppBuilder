@@ -1,5 +1,6 @@
 # Customers create their own account on the customers' site.
 class RegistrationsController < ApplicationController
+  before_action :require_customer_accounts
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_registration_path, alert: t("sessions.rate_limited") }
 
   def new

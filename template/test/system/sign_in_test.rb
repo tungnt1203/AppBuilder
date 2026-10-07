@@ -14,6 +14,8 @@ class SignInTest < ApplicationSystemTestCase
   end
 
   test "a visitor creates a customer account on a phone and signs out" do
+    enable_customer_accounts
+
     on_phone do
       visit root_path
       click_on I18n.t("layouts.site.sign_in")

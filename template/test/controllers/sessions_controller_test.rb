@@ -1,6 +1,8 @@
 require "test_helper"
 
 class SessionsControllerTest < ActionDispatch::IntegrationTest
+  setup { enable_customer_accounts }
+
   test "new" do
     get new_session_path
     assert_response :success

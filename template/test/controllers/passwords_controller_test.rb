@@ -1,6 +1,8 @@
 require "test_helper"
 
 class PasswordsControllerTest < ActionDispatch::IntegrationTest
+  setup { enable_customer_accounts }
+
   setup { @customer = customers(:casey) }
 
   test "new" do

@@ -27,6 +27,11 @@ module Starter
     # Shown in the page title, navigation and emails.
     config.x.app_name = "Starter"
 
+    # Customers buy and book without an account by default (a guest checkout). Turn this on when
+    # customers should sign up and come back to an account: sign up, sign in, password reset and
+    # /account then open, and the site header shows a sign-in link. Off, those pages answer 404.
+    config.x.customer_accounts = false
+
     # Language and time zone of the people using the app. Built-in screens are
     # translated in config/locales (en, vi); rails-i18n covers Rails' own messages.
     config.i18n.available_locales = %i[ en vi ]

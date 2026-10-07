@@ -41,7 +41,7 @@ After a theme or view change, run `bin/rails tailwindcss:build`.
 ```
 
 - **admin_authentication**. Staff sign in, first run, invitations. Not for product screens.
-  Customers' sign in and account pages are on the site and get its look.
+  Customers' sign in and account pages (when the app has customer accounts) are on the site and get its look.
 
 Add an admin screen in `app/views/layouts/admin/_navigation.html.erb`:
 

@@ -116,7 +116,7 @@ design.
 
 
 - **Header and footer** (`app/views/layouts/site/_header.html.erb`, `_account.html.erb`, `_footer.html.erb`):
-  redesign them for the app, including the customer's sign in and account link, and the customers'
+  redesign them for the app; with customer accounts on, also the sign-in link and the customers'
   sign in, sign up and account pages (`app/views/sessions/`, `registrations/`, `accounts/`). The footer carries what visitors look for: address, hours, phone, Zalo, map link.
 - **First screen**: say what this is and what to do, with real content from the owner's description
   (what they offer, prices, what's on today), not a generic welcome. Avoid the centered title +

@@ -1,6 +1,8 @@
 require "test_helper"
 
 class AccountsControllerTest < ActionDispatch::IntegrationTest
+  setup { enable_customer_accounts }
+
   test "needs a signed-in customer" do
     get account_path
     assert_redirected_to new_session_path

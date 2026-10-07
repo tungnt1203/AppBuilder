@@ -29,6 +29,7 @@ end
 
 class I18nScreensTest < ActionDispatch::IntegrationTest
   setup do
+    enable_customer_accounts
     @default_locale, @locale = I18n.default_locale, I18n.locale
     I18n.default_locale = I18n.locale = :vi
   end

@@ -84,7 +84,7 @@ Every app has two halves that share the database and nothing else: their own acc
 layout and look. Decide for every screen which half it belongs to.
 
 - **The customers' site**: everything outside `/admin`. Home, catalog, product pages, cart,
-  checkout, booking, order status, and customers' own accounts. Controllers inherit from
+  checkout, booking, order status, and customer accounts when the app has them. Controllers inherit from
   `ApplicationController`; pages are **public** by default. Designed freely (`design` skill).
 - **/admin**: where the owner and staff run the app. Managing products, orders, customers,
   schedules, reports, settings. Controllers live in `app/controllers/admin/`, inherit from
@@ -101,14 +101,21 @@ It never sends visitors to `/admin`, and has no link to it; the owner goes to `/
 
 Two kinds, never mixed: a customer can't sign in to `/admin`, and a staff account isn't a customer.
 
-- **Customers** (`Customer`, `CustomerSession`): sign up at `/registration/new`, sign in at
-  `/session/new`, reset a password at `/passwords/new`, see and edit their details at `/account`.
-  `Current.customer` is the signed-in customer (nil for visitors); views check `customer_signed_in?`.
-  A site page only for signed-in customers adds `before_action :require_customer`, which sends
-  visitors to sign in and back. Records a customer owns use `belongs_to :customer`, and site
-  controllers look them up through it: `Current.customer.orders.find(params[:id])`. Put what
-  customers come back for (orders, downloads, bookings) on `/account`. When the owner wants no
-  customer accounts (a guest checkout, a landing page), take the sign-in link out of the site header.
+- **Buyers need no account.** Anyone can buy, book or order as a guest: checkout asks for what the
+  order needs (email, name, shipping address) and never for sign in. Each order gets a page the
+  buyer reaches from the confirmation and the email, by an unguessable link
+  (`has_secure_token` or `generates_token_for`), not by id. Never put sign in in the way of buying.
+- **Customer accounts** are optional and off by default (`config.x.customer_accounts` in
+  `config/application.rb`). Turn them on only when the owner asks for them or the app can't work
+  without them (a member area, saved addresses, a wishlist, order history across visits). Then
+  `Customer` / `CustomerSession` give sign up at `/registration/new`, sign in at `/session/new`,
+  password reset at `/passwords/new` and `/account`; the site header shows sign in. Off, those
+  pages answer 404. `Current.customer` is the signed-in customer (nil for guests); views check
+  `customer_signed_in?`. A page only for signed-in customers adds `before_action :require_customer`.
+  Records a customer owns use `belongs_to :customer, optional: true` (guests have none) and are
+  looked up through it: `Current.customer.orders.find(params[:id])`. Show what customers come back
+  for (orders, downloads) on `/account`, and still let them buy as guests unless the owner says
+  otherwise. Tests of these pages call `enable_customer_accounts` in `setup`.
 - **Owner and staff** (`User`, `Session`): `Current.user`, in `/admin` only. Roles: `owner` (created
   on first run, permanent), `admin`, `staff`; `user.administrator?` is true for owner and admin.
   Admins invite and manage staff at `/admin/users`. A controller only admins may use adds

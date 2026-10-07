@@ -7,6 +7,7 @@ class Admin::DashboardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a signed-in customer is not let in" do
+    enable_customer_accounts
     sign_in_as_customer customers(:casey)
 
     get admin_root_path

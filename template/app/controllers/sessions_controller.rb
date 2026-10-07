@@ -1,5 +1,6 @@
 # Customers sign in and out of the customers' site.
 class SessionsController < ApplicationController
+  before_action :require_customer_accounts
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_path, alert: t("sessions.rate_limited") }
 
   def new

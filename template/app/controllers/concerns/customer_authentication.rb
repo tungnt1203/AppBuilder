@@ -1,20 +1,31 @@
-# Sign in for customers on the customers' site. Pages are public unless a controller asks for a
-# customer with `before_action :require_customer`. Separate from the owner's and staff's sign in
+# Sign in for customers on the customers' site, when the app has customer accounts
+# (config.x.customer_accounts). Pages are public unless a controller asks for a customer with
+# `before_action :require_customer`. Separate from the owner's and staff's sign in
 # to /admin (Admin::Authentication): its own cookie, its own screens.
 module CustomerAuthentication
   extend ActiveSupport::Concern
 
   included do
-    helper_method :customer_signed_in?
+    helper_method :customer_accounts?, :customer_signed_in?
   end
 
   private
+    def customer_accounts?
+      Rails.configuration.x.customer_accounts
+    end
+
+    # For the account screens themselves: they don't exist while the app has no customer accounts.
+    def require_customer_accounts
+      head :not_found unless customer_accounts?
+    end
+
     def customer_signed_in?
-      resume_customer_session.present?
+      customer_accounts? && resume_customer_session.present?
     end
 
     def require_customer
-      resume_customer_session || request_customer_sign_in
+      require_customer_accounts
+      resume_customer_session || request_customer_sign_in unless performed?
     end
 
     def resume_customer_session

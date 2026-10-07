@@ -7,7 +7,7 @@ class LayoutTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :success
-    assert_select "header a[href=?]", new_session_path
+    assert_select "header"
     assert_select "aside#app-nav", count: 0
     assert_select "a[href^='/admin']", count: 0
   end

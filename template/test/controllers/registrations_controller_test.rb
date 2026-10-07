@@ -1,6 +1,8 @@
 require "test_helper"
 
 class RegistrationsControllerTest < ActionDispatch::IntegrationTest
+  setup { enable_customer_accounts }
+
   test "new" do
     get new_registration_path
     assert_response :success

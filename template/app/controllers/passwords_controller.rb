@@ -1,5 +1,6 @@
 # Customers reset a forgotten password by email.
 class PasswordsController < ApplicationController
+  before_action :require_customer_accounts
   before_action :set_customer_by_token, only: %i[ edit update ]
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_password_path, alert: t("passwords.rate_limited") }
 

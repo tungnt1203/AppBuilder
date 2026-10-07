@@ -1,5 +1,5 @@
 <%# The site's header. Redesign it for the app: logo or wordmark, the few links visitors need,
-    the main call to action, and the customer's account (sign in, or their name and account).
+    the main call to action, the cart, and with customer accounts on, the customer's account.
     Pages can add links with content_for :site_nav. There's no link to /admin here: the owner
     and staff go there directly. %>
 <header class="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
@@ -12,6 +12,6 @@
     <% else %>
       <div class="flex-1"></div>
     <% end %>
-    <%= render "layouts/site/account" %>
+    <%= render "layouts/site/account" if customer_accounts? %>
   </div>
 </header>

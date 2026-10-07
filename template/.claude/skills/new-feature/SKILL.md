@@ -15,10 +15,10 @@ feature ends up half-done.
   browse and order on the site (`ProductsController`, `OrdersController`), the owner manages them in
   /admin (`Admin::ProductsController`, `Admin::OrdersController`). Same models, separate controllers,
   views and tests.
-- Who may see and change what: on the site, any visitor, or only the signed-in customer and only
-  their own records (`before_action :require_customer`, `Current.customer.orders`); in /admin, all
-  staff or only admins (`before_action :require_administrator`). Site pages must work with no
-  accounts in the app.
+- Who may see and change what: on the site, any visitor (buying never needs an account; a buyer
+  reaches their order by its unguessable link), or, when the app has customer accounts, only the
+  signed-in customer and only their own records; in /admin, all staff or only admins
+  (`before_action :require_administrator`). Site pages must work with no accounts in the app.
 - What a person does on each screen. Prefer fewer screens: index with inline actions over many pages.
 
 Where the request leaves something open, choose what suits the owner best, build it, and list it
@@ -78,8 +78,8 @@ class Admin::ProductsController < Admin::BaseController
 end
 ```
 
-The customers' side, in `app/controllers/`. Public pages show only what visitors may see; a
-customer's own records are looked up through `Current.customer`:
+The customers' side, in `app/controllers/`. Public pages show only what visitors may see. A guest's
+order is found by its token (`has_secure_token :token` on `Order`), never by id:
 
 ```ruby
 class ProductsController < ApplicationController
@@ -93,10 +93,8 @@ class ProductsController < ApplicationController
 end
 
 class OrdersController < ApplicationController
-  before_action :require_customer
-
   def show
-    @order = Current.customer.orders.find(params[:id])
+    @order = Order.find_by!(token: params[:id]) # order_path(order.token)
   end
 end
 ```
@@ -161,8 +159,9 @@ write the `label` and input separately inside `<div class="space-y-1.5">`.
   `sign_in_as users(:staff)`, plus the access rules (signed out goes to sign in; a signed-in customer
   is not let in; admin-only stays admin-only).
 - `test/controllers/products_controller_test.rb` (and the other site controllers): as a visitor with
-  no accounts, and as a customer via `sign_in_as_customer customers(:casey)`; a customer never sees
-  another customer's records (`customers(:jordan)`'s order answers 404).
+  no accounts at all; an order's page opens by its token and not by its id. With customer accounts
+  on (`setup { enable_customer_accounts }`), also as a customer via
+  `sign_in_as_customer customers(:casey)`, who never sees `customers(:jordan)`'s records (404).
 - Fixtures in `test/fixtures/products.yml` that reference `users(:owner)`, `users(:staff)`,
   `customers(:casey)`, `customers(:jordan)`.
 - `test/system/<flow>_test.rb`: a system test for each main flow, walked through in the browser the way
@@ -177,8 +176,8 @@ Run `bin/rails test`, `bin/rails test:system` and `bin/rubocop`, then `bin/rails
 ## 7. Try it
 
 Look at what you built in the running app, the way its users will: `bin/look` with the pages you
-added or changed, as a visitor for site pages (`bin/look /products`), as a customer for theirs
-(`bin/look /account --as customer`), and signed in to /admin for staff pages
+added or changed, as a visitor for site pages (`bin/look /products`), as a customer for their pages when the app has
+customer accounts (`bin/look /account --as customer`), and signed in to /admin for staff pages
 (`bin/look /admin/products /admin/products/new --as owner`). It reports error pages, JavaScript errors, broken images and links,
 and pages wider than a phone, and saves screenshots at phone and desktop width: Read them. Check the
 empty state and a page with a few records (add them in `db/seeds.rb` and run `bin/rails db:seed` when
