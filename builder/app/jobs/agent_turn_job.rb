@@ -9,6 +9,8 @@
 class AgentTurnJob < ApplicationJob
   RESUME_NOTE = "The builder restarted while you were working on this and your turn was cut off. " \
                 "Check what is already done before you continue."
+  LOST_SESSION_NOTE = "Your earlier conversation about this app isn't available any more. " \
+                      "Read SPEC.md and look at the code to catch up before you continue."
   HEARTBEAT = 15 # seconds
 
   around_perform :check_in
@@ -24,7 +26,15 @@ class AgentTurnJob < ApplicationJob
     project.agent_commands.pending.where.not(kind: :message).update_all(delivered_at: Time.current) # left from an earlier turn
     transcript = AgentTranscript.new(project)
 
-    AgentRunner.new(project, mode:, config: agent_config(project)).run(prompt) { |event| transcript.record(event) }
+    begin
+      AgentRunner.new(project, mode:, config: agent_config(project)).run(prompt) { |event| transcript.record(event) }
+    rescue ProjectShell::Error
+      raise unless transcript.lost_session? && project.session_id
+      start_new_session(project)
+      prompt = [ LOST_SESSION_NOTE, prompt ].join("\n\n")
+      transcript = AgentTranscript.new(project)
+      retry
+    end
     transcript.finish
     unless transcript.finished? || transcript.asked? || project.stop_requested?
       raise ProjectShell::Error, "The agent stopped without finishing its turn."
@@ -63,6 +73,13 @@ class AgentTurnJob < ApplicationJob
     ensure
       heartbeat&.kill
       checks_in&.where(turn_worker_pid: ::Process.pid)&.update_all(turn_heartbeat_at: nil, turn_worker_pid: nil)
+    end
+
+    # The session to resume is gone, for example after the app moved into a container: the
+    # turn starts over in a new one, on the app as it is.
+    def start_new_session(project)
+      project.update!(session_id: nil)
+      project.messages.create!(role: :notice, body: "The agent couldn't find its earlier conversation about this app, so it starts a new one. The app and its versions are unchanged.")
     end
 
     # Clears what the cut-off run left behind. Returns false when the owner had

@@ -48,6 +48,30 @@ class AgentTurnJobTest < ActiveSupport::TestCase
     assert_equal "The agent stopped without finishing its turn.", @project.messages.error.last.body
   end
 
+  test "a session that's gone starts over in a new one" do
+    @project.update!(session_id: "from-this-machine")
+    lost = [ { "type" => "result", "is_error" => true, "result" => "", "errors" => [ "No conversation found with session ID: from-this-machine" ] } ]
+    runner = FakeRunner.new
+    runner.define_singleton_method(:run) do |prompt, &block|
+      @prompts << prompt
+      if @prompts.one?
+        lost.each(&block)
+        raise ProjectShell::Error, "Agent exited with 1"
+      end
+      block.({ "type" => "result", "num_turns" => 1 })
+    end
+    @runner = runner
+
+    with_runner { AgentTurnJob.perform_now(@project, "Thêm ảnh", "plan") }
+
+    assert_equal 2, runner.prompts.size
+    assert_equal [ AgentTurnJob::LOST_SESSION_NOTE, "Thêm ảnh" ].join("\n\n"), runner.prompts.last
+    assert_nil @project.reload.session_id
+    assert @project.ready?
+    assert_empty @project.messages.error
+    assert_match "starts a new one", @project.messages.notice.last.body
+  end
+
   test "a turn cut off by a restart resumes where it left off" do
     job = AgentTurnJob.new(@project, "Thêm trang báo cáo", "plan")
     @project.update!(status: :working, agent_job_id: job.job_id, working_since: 1.minute.ago, activity: "Thinking")

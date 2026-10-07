@@ -73,6 +73,12 @@ class AgentTranscript
     @finished
   end
 
+  # The session to resume wasn't found where the agent runs (it ran somewhere else before,
+  # or its settings were removed): the turn didn't start.
+  def lost_session?
+    @lost_session
+  end
+
   private
     def record_session(event)
       @project.update!(session_id: event["session_id"]) if event["subtype"] == "init" && event["session_id"]
@@ -212,18 +218,22 @@ class AgentTranscript
 
     def record_result(event)
       @finished = true
+      errors = Array(event["errors"]).map(&:to_s)
+      return @lost_session = true if event["is_error"] && errors.any? { |error| error.start_with?("No conversation found") }
+
       # A turn the owner stopped ends "with an error" that says nothing: it's just stopped.
-      error = event["is_error"] && event["result"].to_s.strip.presence && !@project.stop_requested?
+      problem = event["result"].to_s.strip.presence || errors.join("\n").presence
+      error = event["is_error"] && problem && !@project.stop_requested?
 
       # A failed turn often repeats its last reply as the error; show it once, as the error.
-      if error && (last = @project.messages.last)&.assistant? && last.body.strip == event["result"].to_s.strip
+      if error && (last = @project.messages.last)&.assistant? && last.body.strip == problem
         last.destroy
       end
 
       charge event["total_cost_usd"]
       data = event.slice("total_cost_usd", "num_turns", "duration_ms", "subtype")
       data["stopped"] = true if event["is_error"] && !error
-      @project.messages.create!(role: error ? :error : :result, body: error ? event["result"].to_s : "", data:)
+      @project.messages.create!(role: error ? :error : :result, body: error ? problem : "", data:)
     end
 
     def charge(cost)

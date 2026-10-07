@@ -45,7 +45,7 @@ class AgentRunner
         errors = Thread.new { stderr.read }
         stdout.each_line { |line| yield parse(line) if line.strip.present? }
         status = wait.value
-        raise ProjectShell::Error, "Agent exited with #{status.exitstatus}: #{errors.value.last(2000)}" unless status.success? || @project.stop_requested?
+        raise ProjectShell::Error, "Agent exited with #{status.exitstatus}: #{readable(errors.value)}" unless status.success? || @project.stop_requested?
       ensure
         courier.kill if courier.is_a?(Thread)
         end_process(wait) # the job is being cut off, for example by a restart
@@ -87,6 +87,12 @@ class AgentRunner
       [ "node", @project.sandbox.runner_script,
         "--cwd", @project.path.to_s, "--prompt", prompt, "--config", config_path.to_s, "--permission-mode", permission_mode,
         *([ "--resume", @project.session_id ] if @project.session_id) ]
+    end
+
+    # The end of what the agent printed, without the minified source Node quotes for an
+    # exception, which would push the message itself out of view.
+    def readable(stderr)
+      stderr.to_s.lines.reject { |line| line.size > 500 }.join.strip.last(2000)
     end
 
     def permission_mode

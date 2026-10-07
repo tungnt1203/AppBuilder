@@ -159,6 +159,19 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_equal "result", @project.messages.last.role
   end
 
+  test "an error the agent reports in its list of errors is shown" do
+    record "type" => "result", "is_error" => true, "subtype" => "error_during_execution", "result" => "", "errors" => [ "Credit balance is too low" ]
+    assert_equal [ "error", "Credit balance is too low" ], [ @project.messages.last.role, @project.messages.last.body ]
+  end
+
+  test "a session that can't be resumed is noted, not shown" do
+    assert_no_difference -> { @project.messages.count } do
+      record "type" => "result", "is_error" => true, "subtype" => "error_during_execution", "result" => "",
+             "errors" => [ "No conversation found with session ID: 5f412df2" ]
+    end
+    assert @transcript.lost_session?
+  end
+
   test "an error that repeats the last reply shows once" do
     record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => "You've hit your session limit" } ] }
     record "type" => "result", "is_error" => true, "result" => "You've hit your session limit"
