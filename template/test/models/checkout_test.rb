@@ -75,4 +75,14 @@ class CheckoutTest < ActiveSupport::TestCase
     def checkout(**overrides)
       Checkout.new(cart: @cart, **details.merge(overrides))
     end
+
+  test "an email needs a full domain, as Stripe and mail servers require" do
+    checkout = Checkout.new(cart: Cart.create!, email: "tung@gmail")
+    checkout.validate
+    assert checkout.errors.of_kind?(:email, :invalid)
+
+    checkout.email = "tung@gmail.com"
+    checkout.validate
+    assert_not checkout.errors.include?(:email)
+  end
 end

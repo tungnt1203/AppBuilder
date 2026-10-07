@@ -27,7 +27,7 @@ class Order < ApplicationRecord
 
   money_attribute :subtotal, :shipping, :total
 
-  validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }, length: { maximum: 254 }
+  validates :email, presence: true, format: { with: EMAIL_FORMAT }, length: { maximum: 254 }
   validates :shipping_name, :shipping_address1, :shipping_city, :shipping_country, presence: true
   validates :shipping_name, :shipping_address1, :shipping_address2, :shipping_city, :shipping_region,
     :shipping_postal_code, :phone, length: { maximum: 200 }

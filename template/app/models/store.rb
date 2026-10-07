@@ -23,7 +23,7 @@ class Store < ApplicationRecord
   validates :currency, inclusion: { in: CURRENCIES.keys }
   validates :shipping_first_item_cents, :shipping_additional_item_cents, numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validates :free_shipping_threshold_cents, numericality: { greater_than: 0, only_integer: true }, allow_nil: true
-  validates :contact_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :contact_email, format: { with: EMAIL_FORMAT }, allow_blank: true
   validates :contact_phone, length: { maximum: 50 }
   validates :business_address, length: { maximum: 500 }
   validates :refund_policy, :shipping_policy, :privacy_policy, :terms_of_service, length: { maximum: 50_000 }

@@ -22,7 +22,7 @@ class Checkout
   attr_reader :cart, :order
   attr_accessor :customer
 
-  validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email, presence: true, format: { with: ApplicationRecord::EMAIL_FORMAT }
   validates :shipping_name, :shipping_address1, :shipping_city, :shipping_country, presence: true
   validate :cart_has_items
   validate :ships_to_country
