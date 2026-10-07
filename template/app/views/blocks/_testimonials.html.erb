@@ -3,15 +3,15 @@
     cards swipe sideways. Structure after HyperUI testimonials (MIT). %>
 <section class="bg-brand-50 py-16 md:py-24">
   <div class="mx-auto max-w-6xl px-4">
-    <h2 class="max-w-2xl text-3xl font-bold text-balance text-ink md:text-4xl">Khách quen nói gì</h2>
+    <h2 class="max-w-2xl text-3xl font-bold text-balance text-ink md:text-4xl">What regulars say</h2>
   </div>
 
   <ul class="mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-auto md:grid md:max-w-6xl md:grid-cols-3 md:overflow-visible">
-    <% [ [ "Làm xong đi đám cưới luôn, 3 tuần chưa bong chút nào.", "Ngọc Anh", "Sơn gel + vẽ" ],
-         [ "Đặt 7h tối, đến là làm ngay. Không phải ngồi chờ như chỗ cũ.", "Thu Trang", "Đắp bột" ],
-         [ "Chị chủ tư vấn màu rất có gu, lần nào cũng được khen.", "Hoài Thương", "Sơn gel trơn" ] ].each do |quote, name, service| %>
+    <% [ [ "Did them the day before a wedding. Three weeks later, not a single chip.", "Emma R.", "Gel + art" ],
+         [ "Booked for 7 pm and was in the chair at 7. No sitting around like my old place.", "Priya S.", "Acrylic full set" ],
+         [ "The owner has a great eye for color. I get compliments every time.", "Jordan K.", "Gel manicure" ] ].each do |quote, name, service| %>
       <li class="flex w-[85%] shrink-0 snap-start flex-col rounded-xl bg-surface p-6 shadow-sm md:w-auto">
-        <div class="flex gap-0.5 text-accent" aria-label="5 sao"><% 5.times do %><%= icon "star", size: 16, class: "fill-current" %><% end %></div>
+        <div class="flex gap-0.5 text-accent" aria-label="5 stars"><% 5.times do %><%= icon "star", size: 16, class: "fill-current" %><% end %></div>
         <blockquote class="mt-4 flex-1 text-lg leading-relaxed text-ink">“<%= quote %>”</blockquote>
         <p class="mt-6 text-sm"><strong class="font-semibold text-ink"><%= name %></strong> <span class="text-muted">· <%= service %></span></p>
       </li>

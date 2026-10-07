@@ -1,19 +1,19 @@
 <%# Timetable: classes, shows or sessions by day. Day chips jump to each day; on phones they
     scroll sideways. Each row shows time, what, who and how many places are left, and the action.
     For gyms, yoga, dance, language centers, cinemas. Build the days from the owner's records. %>
-<section id="lich" class="bg-canvas py-16 md:py-24">
+<section id="schedule" class="bg-canvas py-16 md:py-24">
   <div class="mx-auto max-w-3xl px-4">
-    <h2 class="text-3xl font-bold text-ink md:text-4xl">Lịch tập tuần này</h2>
+    <h2 class="text-3xl font-bold text-ink md:text-4xl">Classes this week</h2>
 
-    <nav class="sticky top-14 z-10 -mx-4 mt-6 flex gap-2 overflow-x-auto bg-canvas/95 px-4 py-3 backdrop-blur [scrollbar-width:none]" aria-label="Ngày">
-      <% %w[T2 T3 T4 T5 T6 T7 CN].each_with_index do |day, i| %>
-        <a href="#ngay-<%= i %>" class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition <%= i.zero? ? "bg-brand-600 text-white" : "bg-surface text-ink ring-1 ring-line ring-inset hover:bg-surface-muted" %>"><%= day %></a>
+    <nav class="sticky top-14 z-10 -mx-4 mt-6 flex gap-2 overflow-x-auto bg-canvas/95 px-4 py-3 backdrop-blur [scrollbar-width:none]" aria-label="Days">
+      <% %w[Mon Tue Wed Thu Fri Sat Sun].each_with_index do |day, i| %>
+        <a href="#day-<%= i %>" class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition <%= i.zero? ? "bg-brand-600 text-white" : "bg-surface text-ink ring-1 ring-line ring-inset hover:bg-surface-muted" %>"><%= day %></a>
       <% end %>
     </nav>
 
-    <% [ [ "Thứ Hai", [ [ "06:00", "Yoga buổi sáng", "Cô Lan", 4 ], [ "18:30", "HIIT 45 phút", "Anh Minh", 0 ] ] ],
-         [ "Thứ Ba", [ [ "17:30", "Pilates cơ bản", "Cô Hà", 7 ] ] ] ].each_with_index do |(day, sessions), i| %>
-      <div id="ngay-<%= i %>" class="scroll-mt-32">
+    <% [ [ "Monday", [ [ "6:00", "Morning yoga", "Lana", 4 ], [ "18:30", "HIIT 45", "Marcus", 0 ] ] ],
+         [ "Tuesday", [ [ "17:30", "Pilates basics", "Hannah", 7 ] ] ] ].each_with_index do |(day, sessions), i| %>
+      <div id="day-<%= i %>" class="scroll-mt-32">
         <h3 class="mt-8 text-sm font-semibold tracking-wide text-muted uppercase"><%= day %></h3>
         <ul class="mt-3 divide-y divide-line overflow-hidden rounded-xl bg-surface ring-1 ring-line">
           <% sessions.each do |time, name, coach, left| %>
@@ -21,12 +21,12 @@
               <span class="w-14 font-display text-lg font-semibold text-ink tabular-nums"><%= time %></span>
               <div class="min-w-0 flex-1">
                 <p class="font-semibold text-ink"><%= name %></p>
-                <p class="text-sm text-muted"><%= coach %><%= " · còn #{left} chỗ" unless left.zero? %></p>
+                <p class="text-sm text-muted"><%= coach %><%= " · #{left} spots left" unless left.zero? %></p>
               </div>
               <% if left.zero? %>
-                <span class="text-sm font-medium text-muted">Hết chỗ</span>
+                <span class="text-sm font-medium text-muted">Full</span>
               <% else %>
-                <a href="#" class="rounded-lg bg-brand-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-brand-500">Giữ chỗ</a>
+                <a href="#" class="rounded-lg bg-brand-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-brand-500">Reserve</a>
               <% end %>
             </li>
           <% end %>

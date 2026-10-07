@@ -66,7 +66,7 @@ end of application.css as named classes. Don't scatter one-off hex values in vie
 
 ## 3. Fonts
 
-Self-hosted in `app/assets/fonts`, declared in `app/assets/tailwind/fonts.css`, all with Vietnamese.
+Self-hosted in `app/assets/fonts`, declared in `app/assets/tailwind/fonts.css`.
 Set `--font-display` (headings, h1–h3 use it) and `--font-sans` (text). One or two families.
 
 | Family | Character |
@@ -86,11 +86,11 @@ Set `--font-display` (headings, h1–h3 use it) and `--font-sans` (text). One or
 | Plus Jakarta Sans | crisp modern text |
 | Manrope | neutral modern text |
 | Inter | neutral UI text, italic |
-| Be Vietnam Pro | made for Vietnamese, neutral |
+| Be Vietnam Pro | neutral, slightly geometric |
 | JetBrains Mono | monospace |
 
-Vietnamese diacritics stack above and below letters: keep body `leading-relaxed` (1.6+), headings at
-least `leading-tight`, and give uppercase labels some tracking. Avoid weights below 300 for text.
+Keep body `leading-relaxed` (1.6+), headings at least `leading-tight`, and give uppercase labels
+some tracking. Avoid weights below 300 for text.
 
 ## 4. Icons
 

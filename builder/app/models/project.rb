@@ -280,7 +280,7 @@ class Project < ApplicationRecord
   # A new app with this one's code, version history and preview data, but a fresh chat.
   # The copy belongs to whoever made it.
   def duplicate(owner: self.owner)
-    copy_name = language == "vi" ? "#{name} (bản sao)" : "#{name} (copy)"
+    copy_name = "#{name} (copy)"
     Project.create!(name: copy_name, language:, base_sha:, owner:).tap { |copy| DuplicateJob.perform_later(copy, self) }
   end
 

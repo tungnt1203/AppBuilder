@@ -52,7 +52,7 @@ class ProjectManagementTest < ActiveSupport::TestCase
   test "duplicating copies code, history and data but not the running server" do
     copy = nil
     assert_enqueued_with(job: DuplicateJob) { copy = @project.duplicate }
-    assert_equal [ "Nha khoa (bản sao)", "vi", nil ], [ copy.name, copy.language, copy.subdomain ]
+    assert_equal [ "Nha khoa (copy)", "vi", nil ], [ copy.name, copy.language, copy.subdomain ]
     assert_not_equal @project.slug, copy.slug
     assert copy.setting_up?
     assert_not_equal @project.port, copy.port
@@ -61,8 +61,8 @@ class ProjectManagementTest < ActiveSupport::TestCase
 
     assert_equal "data", copy.path.join("storage/development.sqlite3").read
     assert_not copy.path.join("tmp/pids/server.pid").exist?
-    assert_match 'config.x.app_name = "Nha khoa (bản sao)"', copy.path.join("config/application.rb").read
-    assert_equal [ "Copy “Nha khoa” as Nha khoa (bản sao)", "Set up Nha khoa" ], copy.history.versions.map(&:subject).first(2)
+    assert_match 'config.x.app_name = "Nha khoa (copy)"', copy.path.join("config/application.rb").read
+    assert_equal [ "Copy “Nha khoa” as Nha khoa (copy)", "Set up Nha khoa" ], copy.history.versions.map(&:subject).first(2)
     assert copy.reload.ready?
     assert_equal "Copied from “Nha khoa”: its code, versions and preview data.", copy.messages.last.body
     assert_match 'app_name = "Nha khoa"', @project.path.join("config/application.rb").read

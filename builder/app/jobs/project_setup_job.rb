@@ -1,4 +1,4 @@
-# Copies the template into a new project, configures its name, language and
+# Copies the template into a new project, configures its name, time zone and
 # time zone, starts the preview, then hands the owner's first request (already in
 # the chat) to the agent. Safe to run again if the job process restarted halfway.
 class ProjectSetupJob < ApplicationJob
@@ -18,7 +18,7 @@ class ProjectSetupJob < ApplicationJob
 
   private
     def name(project, request)
-      project.adopt_name(AppNamer.new(request, language: project.language).name) if project.name_pending?
+      project.adopt_name(AppNamer.new(request).name) if project.name_pending?
     end
 
     # The template's last commit (not unsaved edits) becomes the app's first version. The
@@ -49,13 +49,9 @@ class ProjectSetupJob < ApplicationJob
       project.update!(base_sha: project.history.current_sha)
     end
 
-    # /admin speaks the owner's language. The customers' site stays in the template's (English,
-    # for buyers abroad) until the agent learns who the buyers are. Templates from before the
-    # split have one language for the whole app: the owner's.
+    # Apps are in English whatever the owner's language (which is only the one they chat in);
+    # they get the owner's time zone, for order times in /admin.
     def localize(source, project)
-      language = source.match?(/config\.x\.admin_locale = /) ? "config.x.admin_locale" : "config.i18n.default_locale"
-      source
-        .sub(/^(\s*)#{Regexp.escape(language)} = :\w+/) { "#{$1}#{language} = :#{project.language}" }
-        .sub(/^(\s*)config\.time_zone = ".*"$/) { %(#{$1}config.time_zone = "#{project.time_zone}") }
+      source.sub(/^(\s*)config\.time_zone = ".*"$/) { %(#{$1}config.time_zone = "#{project.time_zone}") }
     end
 end

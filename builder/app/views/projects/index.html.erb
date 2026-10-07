@@ -31,7 +31,7 @@
         <%= form.text_field :name, placeholder: "Name (optional)", "aria-label": "App name, or leave it empty to have one suggested",
               data: { suggestion_target: "name" }, class: "field h-9 w-auto min-w-0 flex-1 py-0 text-sm sm:max-w-56" %>
         <%= form.select :language, Project::LANGUAGES.map { |code, info| [ info[:name], code ] }, {},
-              "aria-label": "Language of the app", class: "field h-9 w-auto py-0 text-sm" %>
+              "aria-label": "The language you chat in (apps are in English)", class: "field h-9 w-auto py-0 text-sm" %>
         <label class="plan-toggle" title="Show me a plan first, and ask me if anything is unclear">
           <%= hidden_field_tag "project[plan]", "0", id: nil %>
           <%= check_box_tag "project[plan]", "1", params.dig(:project, :plan) == "1", id: "project_plan" %>

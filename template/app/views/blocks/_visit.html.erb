@@ -1,32 +1,32 @@
 <%# Find us: address with a Google Maps link, opening hours with today marked, phone that dials,
-    Zalo that opens a chat. What visitors of a local business look for most; it can also live in
-    the footer. Zalo chat links are https://zalo.me/<phone number>. Keep the hours in one place
+    a text link that opens a message. What visitors of a local business look for most; it can also live in
+    the footer. Keep the hours in one place
     (a constant or the owner's settings) and reuse them. %>
-<% address = "123 Võ Văn Tần, Phường 6, Quận 3, TP.HCM"
-   phone = "0901234567"
-   hours = [ "Chủ nhật 9:00 – 20:00", "Thứ Hai 9:00 – 21:00", "Thứ Ba 9:00 – 21:00", "Thứ Tư 9:00 – 21:00",
-             "Thứ Năm 9:00 – 21:00", "Thứ Sáu 9:00 – 22:00", "Thứ Bảy 9:00 – 22:00" ] # by Date#wday %>
-<section id="lien-he" class="bg-canvas py-16 md:py-24">
+<% address = "123 Bedford Ave, Brooklyn, NY 11211"
+   phone = "+12125550142"
+   hours = [ [ "Sunday", "9 am – 8 pm" ], [ "Monday", "9 am – 9 pm" ], [ "Tuesday", "9 am – 9 pm" ], [ "Wednesday", "9 am – 9 pm" ],
+             [ "Thursday", "9 am – 9 pm" ], [ "Friday", "9 am – 10 pm" ], [ "Saturday", "9 am – 10 pm" ] ] # by Date#wday %>
+<section id="visit" class="bg-canvas py-16 md:py-24">
   <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-2">
     <div>
-      <h2 class="text-3xl font-bold text-ink md:text-4xl">Ghé tiệm</h2>
+      <h2 class="text-3xl font-bold text-ink md:text-4xl">Visit us</h2>
       <p class="mt-4 flex items-start gap-3 text-lg text-ink"><%= icon "map-pin", size: 22, class: "mt-1 text-brand-600" %> <%= address %></p>
       <div class="mt-6 flex flex-wrap gap-3">
         <a href="https://www.google.com/maps/search/?api=1&query=<%= ERB::Util.url_encode(address) %>" target="_blank" rel="noopener"
-           class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 font-semibold text-white transition hover:bg-brand-500"><%= icon "navigation", size: 18 %> Chỉ đường</a>
-        <a href="tel:<%= phone %>" class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-ink ring-1 ring-line transition ring-inset hover:bg-surface-muted"><%= icon "phone", size: 18 %> Gọi</a>
-        <a href="https://zalo.me/<%= phone %>" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-ink ring-1 ring-line transition ring-inset hover:bg-surface-muted"><%= icon "message-circle", size: 18 %> Zalo</a>
+           class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 font-semibold text-white transition hover:bg-brand-500"><%= icon "navigation", size: 18 %> Directions</a>
+        <a href="tel:<%= phone %>" class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-ink ring-1 ring-line transition ring-inset hover:bg-surface-muted"><%= icon "phone", size: 18 %> Call</a>
+        <a href="sms:<%= phone %>" class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 font-semibold text-ink ring-1 ring-line transition ring-inset hover:bg-surface-muted"><%= icon "message-circle", size: 18 %> Text us</a>
       </div>
     </div>
 
     <div class="rounded-xl bg-surface p-6 ring-1 ring-line">
-      <h3 class="flex items-center gap-2 font-semibold text-ink"><%= icon "clock", size: 18, class: "text-muted" %> Giờ mở cửa</h3>
+      <h3 class="flex items-center gap-2 font-semibold text-ink"><%= icon "clock", size: 18, class: "text-muted" %> Opening hours</h3>
       <ul class="mt-4 space-y-2">
         <% today = Time.zone.today.wday %>
         <% (1..7).map { |n| n % 7 }.each do |wday| %>
-          <% day, time = hours[wday].split(" ", 3).then { |words| [ words.first(2).join(" "), words.last ] } %>
+          <% day, time = hours[wday] %>
           <li class="flex justify-between gap-4 rounded-md px-3 py-1.5 whitespace-nowrap <%= "bg-brand-50 font-semibold text-brand-800" if wday == today %>">
-            <span><%= day %><%= tag.span(" (hôm nay)", class: "sr-only") if wday == today %></span><span class="tabular-nums"><%= time %></span>
+            <span><%= day %><%= tag.span(" (today)", class: "sr-only") if wday == today %></span><span class="tabular-nums"><%= time %></span>
           </li>
         <% end %>
       </ul>

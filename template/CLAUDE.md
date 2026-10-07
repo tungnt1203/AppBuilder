@@ -3,8 +3,8 @@
 This is a Rails 8 app, an online shop to start with (see "The shop"), that its owner self-hosts
 with ONCE (https://github.com/basecamp/once).
 The people describing features are usually not programmers: build what they ask for as a
-complete, working feature, and explain the result in plain language. Reply entirely in the
-language the owner writes in.
+complete, working feature, and explain the result in plain language. Reply to the owner in the
+language they write in, but build the app itself in English (see "Language and time zone").
 
 ## SPEC.md: what was asked and what was chosen
 
@@ -13,10 +13,10 @@ changes something:
 
 - Under **Asked**, add each thing the owner asked for in this message, one line each, close to
   their words and with their specifics (names, prices, colors, sections, rules, who may do what):
-  `- [ ] Trang chủ nền đen, điểm nhấn vàng đồng, không dùng màu hồng`. When they change their
+  `- [ ] Black home page, brass accents, no pink`. When they change their
   mind, change or remove the old line; never keep two lines that disagree.
 - Under **Chosen**, list what you decided where they said nothing that matters to them: who can
-  sign up, what's public, the look, sample content: `- Khách đặt lịch không cần tài khoản`.
+  sign up, what's public, the look, sample content: `- Buyers check out without an account`.
 
 Before you finish, check every unchecked line under Asked against the app itself (the running
 app with `bin/look`, the tests, the code), and tick it (`- [x]`) only when it's true there. A line
@@ -30,23 +30,16 @@ phones), build it as close as works and say why.
 
 ## Language and time zone
 
-Set these once, at the start of a new app (`config/application.rb`). The two halves can speak
-different languages: a Vietnamese owner selling to buyers in the US has the site in English and
-/admin in Vietnamese.
+The app is in English, everywhere: the site, /admin, emails, sample content, product names and
+the app's name, even when the owner writes to you in another language. Translate what they ask
+for into natural English copy; keep names they give (a brand, a person) as they wrote them. Write
+in another language only when the owner explicitly asks for the app itself to be in it.
 
-- `config.i18n.default_locale`: the buyers' language, for the site and the emails to buyers. `:en`
-  unless the owner sells to Vietnamese buyers (`:vi`).
-- `config.x.admin_locale`: the owner's language, for /admin and the emails to staff (`:vi` for a
-  Vietnamese owner).
 - `config.time_zone`: the owner's, e.g. `"Asia/Ho_Chi_Minh"`; order times in /admin use it.
 
-The built-in screens (the shop, sign in, accounts, /admin, emails) are already translated in
-`config/locales/*.yml` (en and vi), and rails-i18n translates validation errors, dates and numbers,
-so don't write those again. Write new copy for the site in the buyers' language and for /admin in
-the owner's; when both are the same language, write it directly in the view. Format with `l(date)`,
+The built-in screens use `config/locales/*.yml` through `t(...)`, and Rails covers its own
+messages, dates and numbers. Write new copy directly in the view. Format with `l(date)`,
 `l(time, format: :short)` and `money(cents)`.
-
-Reply to the owner in the language they write in, whatever the app's languages are.
 
 ## Stack (fixed)
 
@@ -171,8 +164,7 @@ touching views; on a new app it says "Not decided yet": choose the direction wit
 first and write it there. A plan for a new app includes a short "Look and feel" section.
 
 - Theme (colors, fonts, corners): `app/assets/tailwind/application.css`. The template's theme is a
-  neutral placeholder; replace it with the app's direction. Fonts are self-hosted (`fonts.css`, all with
-  Vietnamese); icons are Lucide via `icon "name"` (find names with `bin/icons <word>`); free stock
+  neutral placeholder; replace it with the app's direction. Fonts are self-hosted (`fonts.css`); icons are Lucide via `icon "name"` (find names with `bin/icons <word>`); free stock
   photos come from `bin/images <english words>` (see the `design` skill).
 - **The customers' site** (everything outside `/admin`) uses the `application` layout, the default
   for `ApplicationController`, and is designed freely: header, footer, sections, imagery, motion. Start from the page blocks in

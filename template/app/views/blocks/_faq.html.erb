@@ -3,12 +3,12 @@
     HyperUI FAQs (MIT). %>
 <section class="bg-surface py-16 md:py-24">
   <div class="mx-auto max-w-3xl px-4">
-    <h2 class="text-3xl font-bold text-ink md:text-4xl">Câu hỏi thường gặp</h2>
+    <h2 class="text-3xl font-bold text-ink md:text-4xl">Questions, answered</h2>
 
     <div class="mt-8 divide-y divide-line border-y border-line">
-      <% [ [ "Có cần đặt trước không?", "Nên đặt trước để không phải chờ, nhất là tối thứ Sáu đến Chủ nhật. Khách vãng lai vẫn nhận khi còn thợ trống." ],
-           [ "Thanh toán bằng gì?", "Tiền mặt, chuyển khoản hoặc quét mã VietQR tại quầy." ],
-           [ "Muốn đổi giờ thì sao?", "Nhắn Zalo cho tiệm trước 2 tiếng là đổi được, không mất phí." ] ].each do |question, answer| %>
+      <% [ [ "Do I need to book ahead?", "Booking means no wait, especially Friday to Sunday evenings. Walk-ins are welcome whenever a chair is free." ],
+           [ "How can I pay?", "Cards, Apple Pay, Google Pay or cash at the desk." ],
+           [ "Can I move my appointment?", "Text us at least 2 hours before and we'll move it, free of charge." ] ].each do |question, answer| %>
         <details class="group py-5 [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex cursor-pointer items-center justify-between gap-4 text-lg font-semibold text-ink">
             <%= question %>

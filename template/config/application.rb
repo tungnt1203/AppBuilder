@@ -32,12 +32,9 @@ module Starter
     # /account then open, and the site header shows a sign-in link. Off, those pages answer 404.
     config.x.customer_accounts = false
 
-    # Languages: the customers' site and the emails to buyers use default_locale (the buyers'
-    # language); /admin and the emails to staff use admin_locale (the owner's). Built-in screens
-    # are translated in config/locales (en, vi); rails-i18n covers Rails' own messages.
-    config.i18n.available_locales = %i[ en vi ]
+    # The whole app is in English: the site, /admin and every email.
+    config.i18n.available_locales = %i[ en ]
     config.i18n.default_locale = :en
-    config.x.admin_locale = :en
     # The owner's time zone: order times in /admin and emails.
     config.time_zone = "UTC"
 

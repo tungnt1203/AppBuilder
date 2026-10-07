@@ -35,18 +35,12 @@ class ProjectSetupJobTest < ActiveSupport::TestCase
     assert_equal [ "Start from the template" ], project.shell.run("git", "log", "--format=%s").lines.map(&:chomp)
   end
 
-  test "/admin gets the owner's language and time zone; the site keeps the buyers'" do
-    source = %(    # config.time_zone = "Central Time (US & Canada)"\n    config.i18n.default_locale = :en\n    config.x.admin_locale = :en\n    config.time_zone = "UTC"\n)
+  test "the app stays in English and gets the owner's time zone" do
+    source = %(    # config.time_zone = "Central Time (US & Canada)"\n    config.i18n.default_locale = :en\n    config.time_zone = "UTC"\n)
     result = ProjectSetupJob.new.send(:localize, source, projects(:clinic))
 
     assert_match "config.i18n.default_locale = :en", result
-    assert_match "config.x.admin_locale = :#{projects(:clinic).language}", result
     assert_match %(\n    config.time_zone = "#{projects(:clinic).time_zone}"), result
     assert_match %(# config.time_zone = "Central Time (US & Canada)"), result
-  end
-
-  test "an older template without admin_locale gets the owner's language everywhere" do
-    result = ProjectSetupJob.new.send(:localize, %(config.i18n.default_locale = :en\n), projects(:clinic))
-    assert_match "config.i18n.default_locale = :#{projects(:clinic).language}", result
   end
 end
