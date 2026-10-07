@@ -1,0 +1,8 @@
+<p><%= t(".greeting", name: @user.name) %></p>
+
+<p>
+  <%= t(".body", app: Rails.configuration.x.app_name) %>
+  <%= link_to t(".link"), @invitation_url %>.
+</p>
+
+<p><%= t(".expires") %></p>

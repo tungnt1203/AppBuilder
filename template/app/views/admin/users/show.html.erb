@@ -1,0 +1,11 @@
+<%= page_header @user.name, @user.email_address do %>
+  <%= link_to t(".back"), admin_users_path, class: button_classes(:secondary) %>
+<% end %>
+
+<div class="max-w-2xl">
+  <%= card do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".invitation_link") %></h2>
+    <p class="mt-1 text-sm text-muted"><%= t(".invitation_help", email: @user.email_address) %></p>
+    <input type="text" readonly value="<%= @invitation_url %>" class="mt-4 font-mono <%= field_classes %>">>
+  <% end %>
+</div>

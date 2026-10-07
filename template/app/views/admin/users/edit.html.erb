@@ -1,0 +1,8 @@
+<%= page_header t(".title", name: @user.name) do %>
+  <%= button_to t(".remove"), admin_user_path(@user), method: :delete, class: button_classes(:danger),
+        form: { data: { turbo_confirm: t(".confirm_remove", name: @user.name) } } %>
+<% end %>
+
+<div class="max-w-lg">
+  <%= card { render "form", user: @user } %>
+</div>

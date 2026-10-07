@@ -1,0 +1,17 @@
+<% content_for :title, t(".title") %>
+
+<h1 class="text-2xl font-semibold tracking-tight"><%= t(".heading") %></h1>
+<p class="mt-2 mb-8 text-[0.9375rem] leading-relaxed text-muted"><%= t(".description") %></p>
+
+<%= form_with url: passwords_path, class: "space-y-4" do |form| %>
+  <div class="space-y-1.5">
+    <%= form.label :email_address, t(".email_address") %>
+    <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address] %>
+  </div>
+
+  <%= form.submit t(".submit"), class: "w-full" %>
+<% end %>
+
+<p class="mt-6 text-center text-sm">
+  <%= link_to t(".back"), new_session_path, class: link_classes %>
+</p>

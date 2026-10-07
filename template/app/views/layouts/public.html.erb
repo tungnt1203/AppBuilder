@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html class="h-full">
+  <head>
+    <%= render "layouts/head" %>
+  </head>
+
+  <%# The customer-facing site: home, catalog, menu, booking, anything visitors use.
+      It's an open canvas. Design the header, the footer and every section for this
+      app (see DESIGN.md and the design skill); none of it has to look like the owner's screens. %>
+  <body class="min-h-full bg-canvas font-sans text-ink antialiased">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2"><%= t("ui.skip") %></a>
+
+    <%= render "layouts/public/header" %>
+
+    <main id="main">
+      <% if flash[:notice] || flash[:alert] %>
+        <div class="mx-auto max-w-6xl px-4 pt-8">
+          <%= render "ui/flash" %>
+        </div>
+      <% end %>
+      <%= yield %>
+    </main>
+
+    <%= render "layouts/public/footer" %>
+  </body>
+</html>

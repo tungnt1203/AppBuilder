@@ -1,0 +1,140 @@
+# Bản tiếng Việt cho các màn hình có sẵn trong template. Thông báo của Rails
+# (lỗi nhập liệu, ngày tháng, số) lấy từ gem rails-i18n.
+vi:
+  date:
+    formats:
+      default: "%d/%m/%Y"
+  activerecord:
+    attributes:
+      user:
+        name: Họ tên
+        email_address: Email
+        password: Mật khẩu
+        role: Vai trò
+    errors:
+      models:
+        user:
+          attributes:
+            role:
+              owner_permanent: của chủ sở hữu không thể thay đổi
+            base:
+              owner_permanent: Không thể xoá chủ sở hữu
+  users:
+    roles:
+      owner: Chủ sở hữu
+      admin: Quản trị viên
+      member: Thành viên
+  layouts:
+    application:
+      home: Trang chủ
+      admin: Quản trị
+      sign_in: Đăng nhập
+      sign_out: Đăng xuất
+  ui:
+    menu: Menu
+    close: Đóng
+    skip: Tới nội dung
+    navigation: Điều hướng
+    breadcrumbs: Đường dẫn
+    form_errors:
+      heading:
+        other: "Có %{count} lỗi cần sửa:"
+  home:
+    show:
+      welcome: Xin chào, %{name}
+      empty_title: Chưa có gì ở đây
+      empty_description: Màn hình chính của ứng dụng sẽ nằm ở đây.
+  first_runs:
+    new:
+      title: Thiết lập
+      heading: Tạo tài khoản của bạn
+      description: Bạn sẽ là chủ sở hữu ứng dụng và có thể mời người khác sau.
+      submit: Tạo tài khoản
+    create:
+      notice: Chào mừng! Tài khoản của bạn đã sẵn sàng.
+  invitations:
+    show:
+      title: Tham gia
+      heading: Xin chào, %{name}
+      description: Chọn mật khẩu để hoàn tất tài khoản %{email}.
+      submit: Tham gia
+    update:
+      notice: Chào mừng, %{name}!
+    invalid: Đường link mời không hợp lệ hoặc đã được sử dụng.
+  sessions:
+    new:
+      title: Đăng nhập
+      email_address: Email
+      password: Mật khẩu
+      submit: Đăng nhập
+      forgot_password: Quên mật khẩu?
+    create:
+      alert: Email hoặc mật khẩu không đúng.
+    rate_limited: Vui lòng thử lại sau ít phút.
+  passwords:
+    new:
+      title: Quên mật khẩu
+      heading: Bạn quên mật khẩu?
+      description: Chúng tôi sẽ gửi email kèm đường link để đặt lại mật khẩu.
+      email_address: Email
+      submit: Gửi link đặt lại mật khẩu
+      back: Quay lại đăng nhập
+    edit:
+      title: Mật khẩu mới
+      heading: Chọn mật khẩu mới
+      password: Mật khẩu mới
+      password_confirmation: Nhập lại mật khẩu mới
+      submit: Lưu
+    create:
+      notice: Nếu email này có tài khoản, hướng dẫn đặt lại mật khẩu đã được gửi.
+    update:
+      notice: Mật khẩu đã được đặt lại.
+      alert: Hai mật khẩu không khớp.
+    invalid: Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
+    rate_limited: Vui lòng thử lại sau ít phút.
+  passwords_mailer:
+    reset:
+      subject: Đặt lại mật khẩu
+      body: Bạn có thể đặt lại mật khẩu tại %{link}.
+      link: trang đặt lại mật khẩu
+      expires: Link này hết hạn sau %{time}.
+  invitations_mailer:
+    invite:
+      subject: Bạn được mời tham gia %{app}
+      greeting: Xin chào %{name},
+      body: Bạn được mời tham gia %{app}.
+      link: Chọn mật khẩu để bắt đầu
+      expires: Link này dùng được trong 7 ngày.
+  admin:
+    base:
+      only_admins: Chỉ quản trị viên mới làm được việc này.
+    users:
+      index:
+        title: Người dùng
+        description: Những người có thể đăng nhập vào %{app}.
+        invite: Mời người dùng
+        edit: Sửa
+      new:
+        title: Mời người dùng
+        description: Họ sẽ nhận email kèm đường link để chọn mật khẩu.
+      edit:
+        title: Sửa %{name}
+        remove: Xoá
+        confirm_remove: Xoá %{name}? Người này sẽ không đăng nhập được nữa.
+      show:
+        back: Quay lại danh sách
+        invitation_link: Link mời
+        invitation_help: Link này đã được gửi tới %{email}. Nếu chưa cài đặt email, hãy tự gửi link cho họ. Link dùng được trong 7 ngày, cho tới khi họ chọn mật khẩu.
+      form:
+        member: Thành viên
+        admin: Quản trị viên — quản lý người dùng
+        invite: Gửi lời mời
+        save: Lưu thay đổi
+        cancel: Huỷ
+      create:
+        notice: Đã mời %{name}.
+      update:
+        notice: Đã cập nhật %{name}.
+      destroy:
+        notice: Đã xoá %{name}.
+        cannot_remove_self: Bạn không thể tự xoá chính mình.

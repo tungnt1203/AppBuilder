@@ -1,0 +1,16 @@
+#!/bin/bash -e
+
+# Called by ONCE after restoring the storage volume, before the app boots.
+# Replaces the live database files, which were copied while in use, with
+# the consistent snapshots taken by pre-backup.
+cd /rails/storage
+[ -d backup ] || exit 0
+
+for snapshot in backup/*.sqlite3; do
+  [ -e "$snapshot" ] || continue
+  db=$(basename "$snapshot")
+  rm -f "$db-wal" "$db-shm"
+  mv "$snapshot" "$db"
+done
+
+rmdir backup 2>/dev/null || true

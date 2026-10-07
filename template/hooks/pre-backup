@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+# Called by ONCE before it copies the storage volume into a backup.
+# Takes a consistent snapshot of each SQLite database so the app keeps
+# serving requests instead of being paused for the copy.
+cd /rails/storage
+mkdir -p backup
+
+for db in *.sqlite3; do
+  [ -e "$db" ] || continue
+  sqlite3 "$db" ".backup 'backup/$db.tmp'"
+  mv "backup/$db.tmp" "backup/$db"
+done

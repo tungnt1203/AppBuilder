@@ -1,0 +1,138 @@
+# Text for the screens that come with the template. Rails' own messages
+# (validation errors, dates, numbers) come from the rails-i18n gem.
+en:
+  activerecord:
+    attributes:
+      user:
+        name: Name
+        email_address: Email address
+        password: Password
+        role: Role
+    errors:
+      models:
+        user:
+          attributes:
+            role:
+              owner_permanent: of the owner cannot be changed
+            base:
+              owner_permanent: The owner cannot be removed
+  users:
+    roles:
+      owner: Owner
+      admin: Admin
+      member: Member
+  layouts:
+    application:
+      home: Home
+      admin: Admin
+      sign_in: Sign in
+      sign_out: Sign out
+  ui:
+    menu: Menu
+    close: Close
+    skip: Skip to content
+    navigation: Navigation
+    breadcrumbs: Breadcrumb
+    form_errors:
+      heading:
+        one: "1 problem to fix:"
+        other: "%{count} problems to fix:"
+  home:
+    show:
+      welcome: Welcome, %{name}
+      empty_title: Nothing here yet
+      empty_description: This is where the app's main screen goes.
+  first_runs:
+    new:
+      title: Set up
+      heading: Create your account
+      description: You'll be the owner of this app and can invite others later.
+      submit: Create account
+    create:
+      notice: Welcome! Your account is ready.
+  invitations:
+    show:
+      title: Join
+      heading: Welcome, %{name}
+      description: Choose a password to finish setting up %{email}.
+      submit: Join
+    update:
+      notice: Welcome, %{name}!
+    invalid: This invitation link is invalid or has already been used.
+  sessions:
+    new:
+      title: Sign in
+      email_address: Email address
+      password: Password
+      submit: Sign in
+      forgot_password: Forgot password?
+    create:
+      alert: Try another email address or password.
+    rate_limited: Try again later.
+  passwords:
+    new:
+      title: Forgot password
+      heading: Forgot your password?
+      description: We'll email you a link to reset it.
+      email_address: Email address
+      submit: Email reset link
+      back: Back to sign in
+    edit:
+      title: New password
+      heading: Choose a new password
+      password: New password
+      password_confirmation: Repeat new password
+      submit: Save
+    create:
+      notice: Password reset instructions sent (if user with that email address exists).
+    update:
+      notice: Password has been reset.
+      alert: Passwords did not match.
+    invalid: Password reset link is invalid or has expired.
+    rate_limited: Try again later.
+  passwords_mailer:
+    reset:
+      subject: Reset your password
+      body: You can reset your password on %{link}.
+      link: this password reset page
+      expires: This link will expire in %{time}.
+  invitations_mailer:
+    invite:
+      subject: You're invited to %{app}
+      greeting: Hi %{name},
+      body: You've been invited to %{app}.
+      link: Choose a password to get started
+      expires: This link works for 7 days.
+  admin:
+    base:
+      only_admins: Only admins can do that.
+    users:
+      index:
+        title: People
+        description: Who can sign in to %{app}.
+        invite: Invite someone
+        edit: Edit
+      new:
+        title: Invite someone
+        description: They'll get an email with a link to choose a password.
+      edit:
+        title: Edit %{name}
+        remove: Remove
+        confirm_remove: Remove %{name}? They won't be able to sign in.
+      show:
+        back: Back to people
+        invitation_link: Invitation link
+        invitation_help: We emailed this link to %{email}. If email isn't set up yet, send it to them yourself. It works for 7 days, until they choose a password.
+      form:
+        member: Member
+        admin: Admin — can manage people
+        invite: Send invitation
+        save: Save changes
+        cancel: Cancel
+      create:
+        notice: "%{name} was invited."
+      update:
+        notice: "%{name} was updated."
+      destroy:
+        notice: "%{name} was removed."
+        cannot_remove_self: You cannot remove yourself.

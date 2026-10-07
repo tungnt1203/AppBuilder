@@ -1,0 +1,6 @@
+<% if flash[:notice] || flash[:alert] %>
+  <div class="mb-6 space-y-2">
+    <%= alert flash[:notice], tone: :success, id: "notice" if flash[:notice] %>
+    <%= alert flash[:alert], tone: :danger, id: "alert" if flash[:alert] %>
+  </div>
+<% end %>

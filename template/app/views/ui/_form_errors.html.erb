@@ -1,0 +1,8 @@
+<div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+  <p class="font-medium"><%= t("ui.form_errors.heading", count: model.errors.count) %></p>
+  <ul class="mt-2 list-disc pl-5">
+    <% model.errors.full_messages.each do |message| %>
+      <li><%= message %></li>
+    <% end %>
+  </ul>
+</div>

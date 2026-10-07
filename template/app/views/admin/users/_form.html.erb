@@ -1,0 +1,13 @@
+<%= form_with model: [ :admin, user ], class: "space-y-4" do |form| %>
+  <%= form.errors %>
+  <%= form.field :name, required: true, autofocus: true %>
+  <%= form.field :email_address, :email_field, required: true %>
+  <div class="space-y-1.5">
+    <%= form.label :role %>
+    <%= form.select :role, [ [ t(".member"), "member" ], [ t(".admin"), "admin" ] ] %>
+  </div>
+  <div class="flex items-center gap-2 pt-2">
+    <%= form.submit user.new_record? ? t(".invite") : t(".save") %>
+    <%= link_to t(".cancel"), admin_users_path, class: button_classes(:ghost) %>
+  </div>
+<% end %>
