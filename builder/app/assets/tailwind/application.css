@@ -506,14 +506,19 @@
   }
   .turn-done .restore-link::before { content: "· "; color: var(--text-faint); }
 
+  /* A short line from the builder, centered; a longer one wraps evenly and stays a soft box. */
   .notice {
     align-self: center;
     margin: 0 auto;
     width: fit-content;
+    max-width: 88%;
     padding: 0.35rem 0.85rem;
-    border-radius: 999px;
+    border-radius: 14px;
     background: var(--well);
     font-size: 0.8125rem;
+    line-height: 1.45;
+    text-align: center;
+    text-wrap: balance;
     color: var(--text-muted);
   }
 

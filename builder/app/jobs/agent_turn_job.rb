@@ -79,7 +79,7 @@ class AgentTurnJob < ApplicationJob
     # turn starts over in a new one, on the app as it is.
     def start_new_session(project)
       project.update!(session_id: nil)
-      project.messages.create!(role: :notice, body: "The agent couldn't find its earlier conversation about this app, so it starts a new one. The app and its versions are unchanged.")
+      project.messages.create!(role: :notice, body: "Started a new conversation with the agent; your app is unchanged.")
     end
 
     # Clears what the cut-off run left behind. Returns false when the owner had

@@ -69,7 +69,7 @@ class AgentTurnJobTest < ActiveSupport::TestCase
     assert_nil @project.reload.session_id
     assert @project.ready?
     assert_empty @project.messages.error
-    assert_match "starts a new one", @project.messages.notice.last.body
+    assert_match "new conversation", @project.messages.notice.last.body
   end
 
   test "a turn cut off by a restart resumes where it left off" do
