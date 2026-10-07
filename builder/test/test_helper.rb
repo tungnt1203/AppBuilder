@@ -39,5 +39,12 @@ module ActiveSupport
     ensure
       Rails.configuration.x.agent_backend = original
     end
+
+    def with_sandbox(kind)
+      original, Rails.configuration.x.sandbox = Rails.configuration.x.sandbox, kind
+      yield
+    ensure
+      Rails.configuration.x.sandbox = original
+    end
   end
 end

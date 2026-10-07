@@ -136,12 +136,4 @@ class SandboxTest < ActiveSupport::TestCase
     assert_not Sandbox::Docker.listening_in?(tables, 8080) # connected, not listening
     assert_not Sandbox::Docker.listening_in?(tables, 4002)
   end
-
-  private
-    def with_sandbox(kind)
-      original, Rails.configuration.x.sandbox = Rails.configuration.x.sandbox, kind
-      yield
-    ensure
-      Rails.configuration.x.sandbox = original
-    end
 end

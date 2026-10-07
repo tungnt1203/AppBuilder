@@ -6,6 +6,9 @@ class Sandbox::Local
     @project = project
   end
 
+  # Runs on this machine, so the agent only gets the commands config/agent.yml allows.
+  def isolated? = false
+
   def start
   end
 

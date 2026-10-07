@@ -70,13 +70,21 @@ class AgentRunner
     end
   end
 
+  # In its own container the agent may run any shell command: it can only reach the app's
+  # folder. On this machine (the local sandbox) only the commands listed in config/agent.yml.
+  def allowed_tools
+    return @config[:allowed_tools] unless @project.sandbox.isolated?
+
+    @config[:allowed_tools].grep_v(/\ABash\(/) + [ "Bash" ]
+  end
+
   private
     def cli_command(prompt)
       [ "claude", "-p", prompt,
         "--output-format", "stream-json", "--verbose", "--include-partial-messages",
         "--setting-sources", "project",
         "--permission-mode", permission_mode,
-        "--allowedTools", *@config[:allowed_tools],
+        "--allowedTools", *allowed_tools,
         "--disallowedTools", *@config[:disallowed_tools],
         "--append-system-prompt", @config[:append_system_prompt],
         "--max-budget-usd", @config[:max_budget_usd].to_s,
@@ -131,7 +139,7 @@ class AgentRunner
 
       file = @project.path.join("tmp/agent-config.json")
       file.dirname.mkpath
-      file.write({ allowedTools: @config[:allowed_tools], disallowedTools: @config[:disallowed_tools],
+      file.write({ allowedTools: allowed_tools, disallowedTools: @config[:disallowed_tools],
                    appendSystemPrompt: @config[:append_system_prompt], maxBudgetUsd: @config[:max_budget_usd] }.to_json)
       yield file.to_s
     end

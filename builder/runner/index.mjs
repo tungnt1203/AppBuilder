@@ -70,7 +70,13 @@ async function canUseTool(toolName, input, { toolUseID }) {
     return { behavior: "deny", message: "The owner reviews the plan in the studio and approves it with a button. Stop here." }
   }
 
-  return { behavior: "deny", message: `${toolName} isn't available in the builder.` }
+  // Not a broken tool: say what to do instead, or the agent ends its turn thinking its tools failed.
+  if (toolName === "Bash") {
+    return { behavior: "deny", message: "That command isn't allowed here; your tools still work. Run each command " +
+      "on its own, without cd (you're already in the app's folder), pipes, ; or $(...): for example " +
+      "`bin/rails tailwindcss:build`, then `bin/look / /products`. Use Read, Grep and Glob to look at files." }
+  }
+  return { behavior: "deny", message: `${toolName} isn't available in the builder; your other tools still work.` }
 }
 
 inbox.push(args.prompt)

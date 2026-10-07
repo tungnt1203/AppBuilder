@@ -14,6 +14,9 @@ class Sandbox::Docker
     "appbuilder-#{@project.slug}"
   end
 
+  # The agent can only reach the project's folder, so it may run any shell command.
+  def isolated? = true
+
   # Makes the container, or starts it again after it stopped (Docker restarted, say).
   def start
     case state

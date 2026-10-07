@@ -10,6 +10,19 @@ class AgentRunnerTest < ActiveSupport::TestCase
     assert_includes command, "Bash(bin/rails:*)"
   end
 
+  test "in its own container the agent may run any shell command; on this machine only the listed ones" do
+    local = AgentRunner.new(projects(:clinic), backend: "cli").command("Hi")
+    assert_includes local, "Bash(bin/rails:*)"
+    assert_not_includes local, "Bash"
+
+    with_sandbox("docker") do
+      tools = AgentRunner.new(projects(:clinic), backend: "cli").allowed_tools
+      assert_includes tools, "Bash"
+      assert_not tools.any? { |tool| tool.start_with?("Bash(") }
+      assert_includes tools, "Read"
+    end
+  end
+
   test "plan mode proposes without changing anything" do
     assert_includes AgentRunner.new(projects(:clinic), mode: "plan", backend: "cli").command("Hi"), "plan"
     assert_includes AgentRunner.new(projects(:clinic), mode: "build", backend: "cli").command("Hi"), "acceptEdits"
