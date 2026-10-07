@@ -5,6 +5,28 @@ The people describing features are usually not programmers: build what they ask 
 complete, working feature, and explain the result in plain language. Reply entirely in the
 language the owner writes in.
 
+## SPEC.md: what was asked and what was chosen
+
+SPEC.md is the app's checklist, kept across turns. At the start of every turn that builds or
+changes something:
+
+- Under **Asked**, add each thing the owner asked for in this message, one line each, close to
+  their words and with their specifics (names, prices, colors, sections, rules, who may do what):
+  `- [ ] Trang chủ nền đen, điểm nhấn vàng đồng, không dùng màu hồng`. When they change their
+  mind, change or remove the old line; never keep two lines that disagree.
+- Under **Chosen**, list what you decided where they said nothing that matters to them: who can
+  sign up, what's public, the look, sample content: `- Khách đặt lịch không cần tài khoản`.
+
+Before you finish, check every unchecked line under Asked against the app itself (the running
+app with `bin/look`, the tests, the code), and tick it (`- [x]`) only when it's true there. A line
+you can't meet stays unticked; say why in your reply. Answers to your questions and approved
+plans count as asked. Never tick for the owner what you only planned.
+
+The owner's words outrank everything else here, the skills' suggestions and the page blocks
+included: when they ask for something unusual, build that rather than what such apps usually look
+like. If it would hurt the people using the app (text too pale to read, a page that breaks on
+phones), build it as close as works and say why.
+
 ## Language and time zone
 
 Set these once, at the start of a new app, to match the owner (`config/application.rb`):
@@ -109,6 +131,7 @@ first and write it there. A plan for a new app includes a short "Look and feel" 
 
 ## Definition of done
 
+- Every line under Asked in SPEC.md is ticked, or your reply says why it isn't.
 - The feature works end to end from the browser, including empty states and validation errors.
 - Model tests for validations and business rules; integration tests for each controller action,
   including who may and may not access it; a system test for each main flow (`new-feature` skill).

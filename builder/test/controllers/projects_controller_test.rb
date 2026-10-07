@@ -64,6 +64,11 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "user", "Quản lý hội viên" ], [ project.messages.first.role, project.messages.first.body ]
   end
 
+  test "a new app is built straight away unless Plan first is on" do
+    post projects_path, params: { project: { name: "Tiệm bánh", language: "vi", request: "Trang đặt bánh" } }
+    assert_equal "build", enqueued_jobs.last["arguments"].last
+  end
+
   test "an app needs a name or a description" do
     post projects_path, params: { project: { name: "", language: "vi", request: "" } }
 

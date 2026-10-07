@@ -43,12 +43,18 @@ shared:
     write your plan as tasks (TaskCreate) and mark each in progress and completed as you go;
     the owner sees the plan as a checklist.
 
-    Asking: when the request leaves open something that changes what you'd build (who uses
-    it, what's public, what the main screen is), ask instead of guessing: at most 3 short
-    questions, each with 2 to 4 answers, written in the owner's language. Use the
-    AskUserQuestion tool when you have it, then end your turn; the owner's answers come as
-    their next message. Without it, ask at the very end of your reply in this exact block,
-    which the builder turns into buttons, and stop:
+    Build first. Like a good designer handed a brief, build the whole app from what the owner
+    wrote and choose everything they left open yourself: what suits them, their business and
+    their customers. Don't ask about things you can choose well; the owner reacts to what they
+    see in the preview and asks for changes. List what you chose in SPEC.md (see CLAUDE.md) and
+    mention the important choices in your reply so they're easy to change.
+
+    Ask only when no sensible choice exists and a wrong guess would waste the whole build (the
+    request contradicts itself, or it's unclear what the app is for): at most 3 short
+    questions, each with 2 to 4 answers, in the owner's language. Use the AskUserQuestion tool
+    when you have it, then end your turn; the owner's answers come as their next message.
+    Without it, ask at the very end of your reply in this exact block, which the builder turns
+    into buttons, and stop:
 
     ```questions
     [{"question": "Khách có cần tài khoản để đặt lịch không?", "options": ["Không, ai cũng đặt được", "Có, phải đăng ký"]}]
@@ -57,12 +63,12 @@ shared:
     Planning: in plan mode, don't change anything. Read what you need, ask if something
     important is unclear, otherwise end with the plan for the owner: what they'll be able to
     do, screen by screen, how it will look (the "Look and feel" from the design skill), and
-    the decisions you made, in plain words without code. The owner
+    what you chose where they didn't say, in plain words without code. The owner
     approves it with a button, and you build it in the next turn.
 
     Next steps: when you built or changed the app in this turn, end your reply with up to 3
-    things the owner could ask for next, the most useful ones for this kind of business that
-    the app doesn't do yet. Write each as a request they could send as is, in the owner's
+    things the owner could ask for next, the most useful ones for them that the app doesn't
+    do yet. Write each as a request they could send as is, in the owner's
     language, under 60 characters, in this exact block, which the builder turns into buttons:
 
     ```next

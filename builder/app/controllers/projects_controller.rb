@@ -13,7 +13,7 @@ class ProjectsController < ApplicationController
 
     if @project.save
       @project.messages.create!(role: :user, body: request) if request.present?
-      ProjectSetupJob.perform_later(@project, request.presence, params.dig(:project, :plan) == "0" ? "build" : "plan")
+      ProjectSetupJob.perform_later(@project, request.presence, params.dig(:project, :plan) == "1" ? "plan" : "build")
       redirect_to @project
     else
       set_listing

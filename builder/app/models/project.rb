@@ -266,9 +266,9 @@ class Project < ApplicationRecord
     end
   end
 
-  # Plan first for a new app, or while a plan is being discussed.
+  # Builds straight away by default; plans first only while a plan is being discussed.
   def plans_by_default?
-    planning? || history.versions.size <= 1
+    planning?
   end
 
   # The agent's latest reply, while the owner hasn't answered it yet.

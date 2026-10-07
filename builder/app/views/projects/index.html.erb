@@ -32,7 +32,7 @@
               "aria-label": "Language of the app", class: "field h-9 w-auto py-0 text-sm" %>
         <label class="plan-toggle" title="Show me a plan first, and ask me if anything is unclear">
           <%= hidden_field_tag "project[plan]", "0", id: nil %>
-          <%= check_box_tag "project[plan]", "1", params.dig(:project, :plan) != "0", id: "project_plan" %>
+          <%= check_box_tag "project[plan]", "1", params.dig(:project, :plan) == "1", id: "project_plan" %>
           Plan first
         </label>
         <%= form.button class: "btn btn-primary ml-auto h-9 px-4", title: "Build app (⌘↵)", disabled: Current.user.app_limit_reached? do %>

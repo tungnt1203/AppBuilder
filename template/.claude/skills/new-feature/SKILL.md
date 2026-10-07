@@ -16,7 +16,8 @@ feature ends up half-done.
   with no accounts in the app (see "Public pages and sign in" in CLAUDE.md).
 - What a person does on each screen. Prefer fewer screens: index with inline actions over many pages.
 
-If the request is ambiguous, pick the simplest reasonable interpretation and say so in your summary.
+Where the request leaves something open, choose what suits the owner best, build it, and list it
+under Chosen in SPEC.md; don't stop to ask about what you can reasonably choose.
 
 ## 2. Model and migration
 
@@ -149,5 +150,6 @@ the app has none). Fix everything it finds and anything that looks wrong, then l
 
 ## 8. Summary for the owner
 
-What they can do now and where to find it, in their language. Mention anything that changes existing
+Tick what's done under Asked in SPEC.md first (CLAUDE.md). Then tell them what they can do now and
+where to find it, in their language, and the choices they may want to change. Mention anything that changes existing
 data or needs their action (for example, settings to fill in).
