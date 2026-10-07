@@ -1,26 +1,36 @@
 #!/usr/bin/env ruby
-# Builds the sample requests in eval/cases.yml as real projects and measures them:
-# build outcome, cost, time, the app's tests, which pages open, and a model's scores
-# for fit, look and phone. Results go to storage/evals/<run>/ (report.html).
+# Builds a random sample of the requests in eval/prompts.yml as real projects and measures
+# them: build outcome, cost, time, the app's tests, which pages open, how much of what was
+# asked the app visibly does, and scores for look and phone. Results go to
+# storage/evals/<run>/ (report.html).
 #
-#   bin/eval                     every case (costs roughly $2-4 of agent usage per case)
-#   bin/eval nail cafe -j 2      some cases, two at a time (default 3)
+#   bin/eval                     8 requests, the same 8 every time (costs roughly $2-4 each)
+#   bin/eval -n 20 -s 2          20 requests, a different sample (seed 2)
+#   bin/eval p004 p017 -j 2      these requests, two at a time (default 3)
 #   bin/eval -m "shorter prompt" note what changed in this run
+#   bin/eval generate [count]    write eval/prompts.yml (default 60 requests); --force replaces it
 #   bin/eval report [run]        print a run's summary again (default: the latest)
 #   bin/eval clean               delete the apps of every run but the latest
 require "optparse"
 
-options = { concurrency: 3 }
+options = { concurrency: 3, sample: 8, seed: 1 }
 OptionParser.new do |parser|
-  parser.banner = "Usage: bin/eval [case ids] [-j N] [-m note] | report [run] | clean"
-  parser.on("-j N", Integer, "Cases built at the same time") { |value| options[:concurrency] = value }
+  parser.banner = "Usage: bin/eval [ids] [-n N] [-s SEED] [-j N] [-m note] | generate [count] [--force] | report [run] | clean"
+  parser.on("-n N", Integer, "Requests to build, sampled from eval/prompts.yml") { |value| options[:sample] = value }
+  parser.on("-s SEED", Integer, "Which sample (the same seed picks the same requests)") { |value| options[:seed] = value }
+  parser.on("-j N", Integer, "Requests built at the same time") { |value| options[:concurrency] = value }
   parser.on("-m NOTE", "What changed in this run") { |value| options[:note] = value }
+  parser.on("--force", "generate: replace the existing prompts") { options[:force] = true }
 end.parse!
 
 ENV["BUILDER_LONG_JOBS"] = "1" # loads the code once, see config/environments/development.rb
 require_relative "../config/environment"
 
 case ARGV.first
+when "generate"
+  abort "eval/prompts.yml exists; runs are compared on it. Use --force to replace it and start a new baseline." if Evaluation::Prompts::FILE.exist? && !options[:force]
+  count, cost = Evaluation::Prompts.generate((ARGV[1] || 60).to_i)
+  puts "Wrote #{count} requests to eval/prompts.yml ($#{cost&.round(2)})."
 when "report"
   id = ARGV[1] || Evaluation::Run.ids.last or abort("No eval runs yet.")
   report = Evaluation::Report.for(id)
@@ -34,15 +44,19 @@ when "clean"
   end
 else
   abort "Create the builder's first account in the studio before running evals: its apps belong to it." unless User.owner.exists?
-  cases = Evaluation::Run.cases
-  cases = cases.select { |eval_case| ARGV.include?(eval_case[:id]) } if ARGV.any?
-  abort "No cases match #{ARGV.join(", ")}. Cases: #{Evaluation::Run.cases.map { |c| c[:id] }.join(", ")}" if cases.empty?
+  abort "No requests yet: run bin/eval generate first." if Evaluation::Prompts.all.empty?
+  if ARGV.any?
+    cases = Evaluation::Prompts.all.select { |prompt| ARGV.include?(prompt[:id]) }
+    abort "No requests match #{ARGV.join(", ")}." if cases.empty?
+  else
+    cases = Evaluation::Prompts.sample(options[:sample], seed: options[:seed])
+  end
 
-  run = Evaluation::Run.new(cases:, concurrency: options[:concurrency], note: options[:note])
-  puts "Eval #{run.id}: #{cases.size} cases, #{options[:concurrency]} at a time"
+  run = Evaluation::Run.new(cases:, concurrency: options[:concurrency], note: options[:note], seed: (options[:seed] unless ARGV.any?))
+  puts "Eval #{run.id}: #{cases.size} requests (#{cases.map { |c| c[:id] }.join(" ")}), #{options[:concurrency]} at a time"
   run.call do |result|
     judge = result["judge"] || {}
-    puts "  #{result["id"]}: #{result["outcome"]}, $#{result["cost_usd"]}, fit #{judge["fit"]} look #{judge["look"]} phone #{judge["phone"]}"
+    puts "  #{result["id"]}: #{result["outcome"]}, $#{result["cost_usd"]}, asked #{Evaluation::Judge.asked_rate(judge) || "–"}% look #{judge["look"]} phone #{judge["phone"]}"
   end
 
   report = Evaluation::Report.for(run.id)

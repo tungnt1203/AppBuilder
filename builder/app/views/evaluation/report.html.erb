@@ -22,6 +22,8 @@
     .badge.built { color: var(--good); border-color: currentColor; } .badge.bad { color: var(--bad); border-color: currentColor; }
     dl { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 12px 0; } dt { color: var(--faint); font-size: 0.8rem; } dd { margin: 0; font-variant-numeric: tabular-nums; }
     .notes { margin: 8px 0 16px; }
+    .asked { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 4px; }
+    .asked .met b { color: var(--good); } .asked .missed b { color: var(--bad); } .asked .unclear b { color: var(--faint); }
     .shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
     figure { margin: 0; } figure img { width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block; }
     figcaption { font-size: 0.8rem; color: var(--faint); margin-top: 4px; overflow-wrap: anywhere; } figcaption.error { color: var(--bad); }
@@ -34,6 +36,7 @@
   <h1>Eval <%= @data["id"] %></h1>
   <p class="faint">
     builder <%= @data["builder"] %> · template <%= @data["template"] %> · prompt <%= @data["prompt"] %> · <%= @data["agent_backend"] %>
+    <% if @report.sample_text.present? %> · <%= @report.sample_text %><% end %>
     <% if @data["note"].present? %> · <%= @data["note"] %><% end %>
     <% if @previous %> · compared with <%= @previous["id"] %><% end %>
   </p>
@@ -64,7 +67,8 @@
         <div><dt>tests</dt><dd><%= @report.tests_text(result).presence || "–" %></dd></div>
         <div><dt>pages ok</dt><dd><%= @report.ok_pages(result) %>/<%= result.dig("pages", "visited")&.size.to_i %></dd></div>
         <div><dt>signed in</dt><dd><%= result.dig("pages", "signed_in") ? "yes" : "no" %></dd></div>
-        <div><dt>fit · look · phone</dt><dd><%= [ judge["fit"], judge["look"], judge["phone"] ].map { |score| score || "–" }.join(" · ") %></dd></div>
+        <div><dt>asked met</dt><dd><%= @report.asked_text(judge).presence || "–" %></dd></div>
+        <div><dt>look · phone</dt><dd><%= [ judge["look"], judge["phone"] ].map { |score| score || "–" }.join(" · ") %></dd></div>
         <div><dt>cost</dt><dd>$<%= result["cost_usd"] || "–" %></dd></div>
         <div><dt>time</dt><dd><%= result["build_seconds"] ? "#{(result["build_seconds"] / 60.0).round(1)} min" : "–" %></dd></div>
         <div><dt>agent steps</dt><dd><%= result["agent_turns"] || "–" %></dd></div>
@@ -72,6 +76,13 @@
         <div><dt>rubocop</dt><dd><%= result["rubocop"] || "–" %></dd></div>
       </dl>
       <% if judge["notes"].present? %><p class="notes"><%= judge["notes"] %></p><% end %>
+      <% if judge["asked"].present? %>
+        <ul class="asked">
+          <% judge["asked"].each do |item| %>
+            <li class="<%= item["verdict"] %>"><b><%= { "met" => "✓", "missed" => "✗", "unclear" => "?" }[item["verdict"]] %></b> <%= item["item"] %> <span class="faint"><%= item["why"] %></span></li>
+          <% end %>
+        </ul>
+      <% end %>
       <% [ result["error"], result["preview_error"], judge["error"], result.dig("tests", "output") ].compact_blank.each do |problem| %>
         <pre><%= problem %></pre>
       <% end %>

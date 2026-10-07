@@ -19,8 +19,8 @@ cafés, boarding houses…), in Vietnamese and English. Working name only.
   a menu as PDF or screenshots.
 - **Versions**: every turn is a git commit; go back to any version from the chat or History.
 - **Publish** to ONCE at `<name>.<your domain>`, with a backup before every update.
-- **Eval**: `bin/eval` builds ten fixed sample requests and scores them, to tell whether a
-  change to the prompts made generated apps better or worse.
+- **Eval**: `bin/eval` builds a random sample of 60 varied owner requests and checks how much of
+  what each asked for the app does, to tell whether a change made generated apps better or worse.
 
 ## What's in this repository
 

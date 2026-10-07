@@ -1,0 +1,470 @@
+# Requests bin/eval builds, written by `bin/eval generate` (Evaluation::Prompts).
+# Keep this file fixed: runs are only comparable on the same prompts. To change the
+# set, generate a new one and start a new baseline.
+- id: p001
+  name: Rêu Xanh
+  language: vi
+  request: Mình bán cây thủy sinh với rêu, muốn có web cho khách xem cây nào còn hàng
+    và nhắn đặt.
+- id: p002
+  name: Sách Gác Mái
+  language: vi
+  request: Mình mở tiệm sách cũ nhỏ ở Đà Nẵng, tên Sách Gác Mái. Muốn có trang cho
+    khách xem sách mới về, và có chỗ để khách đăng ký tên cuốn đang tìm, khi nào có
+    mình gửi mail báo. Mình chỉ có 1 mình nên làm đơn giản thôi.
+- id: p003
+  name: Groove Cellar
+  language: en
+  request: 'I run a used vinyl shop called Groove Cellar, open Wed to Sun, 12pm to
+    8pm, in a basement under a laundromat. I want a public catalogue where every record
+    has artist, title, year, pressing country, condition (M, NM, VG+, VG, G) and price
+    in USD, filterable by genre and condition. Customers can sign in and keep a wishlist,
+    and get an email when something on it arrives. I and my part-timer Dev can add
+    records, mark them as sold or on hold for a customer for 48 hours, and see which
+    wishlist items are most wanted. I want the look to feel like a worn 1970s record
+    sleeve: cream cardboard texture, big slab serif titles, a ring-wear circle on
+    the cover, a stamped ''SOLD'' on sold items. Definitely not a clean modern shop
+    look.'
+- id: p004
+  name: Len Của Mẹ
+  language: vi
+  request: 'Mình làm đồ len handmade (mũ, khăn, thú bông móc) bán online, tên shop
+    là Len Của Mẹ. Mình muốn một web có: trang giới thiệu sản phẩm theo từng nhóm
+    (mũ, khăn, thú bông, đồ sơ sinh), mỗi món có ảnh, giá, kích thước, màu có thể
+    chọn. Khách không thanh toán trên web, chỉ bấm ''đặt món này'' rồi điền tên, sđt,
+    địa chỉ, ghi chú màu; mình nhận mail và vào trang quản lý xem đơn, đổi trạng thái
+    (đã nhận, đang đan, đã gửi). Có mục ''đặt làm theo yêu cầu'' cho khách gửi ảnh
+    mẫu. Mình đan nên mỗi tuần chỉ nhận tối đa 8 đơn, hết thì web hiện ''tuần này
+    đã đủ đơn''. Giao diện ấm, mềm, như cuộn len.'
+- id: p005
+  name: Ký gửi Bé Xinh
+  language: vi
+  request: Tiệm ký gửi quần áo trẻ em, cần web để người ký gửi xem món của mình đã
+    bán chưa.
+- id: p006
+  name: Mía Lau Bà Sáu
+  language: vi
+  request: quán nước mía muốn có web cho khách xem menu va gio mo cua thoi
+- id: p007
+  name: Cinder & Salt
+  language: en
+  request: I make small-batch hot sauce in my kitchen and sell it in batches of about
+    60 bottles. I need a site where people can see the current batch, join a waitlist
+    for the next one, and pre-order bottles for local pickup. When a batch sells out,
+    it should say so and offer to email them when the next is ready.
+- id: p008
+  name: Hạt Đen
+  language: vi
+  request: 'Mình có quán cà phê rang xay tại Buôn Ma Thuột tên Hạt Đen, bán cả hạt
+    rang lẻ theo túi 250g và 500g. Cần web có: giới thiệu quán, giờ mở cửa 6h30 đến
+    21h mỗi ngày, menu đồ uống chia theo mục (cà phê phin, espresso, trà, đá xay),
+    danh sách hạt đang rang (tên, vùng trồng, độ rang, mô tả vị, giá túi). Khách có
+    thể đăng nhập để đặt trước túi hạt lấy tại quán, mình và 2 nhân viên thấy danh
+    sách đơn theo ngày, bấm ''đã rang xong'' thì khách nhận mail. Chỉ mình mới sửa
+    được giá và menu. Mình muốn giao diện như tờ báo in thập niên 80: nền giấy ngả
+    vàng, chữ đen, nhiều cột, tiêu đề lớn kiểu báo, menu như mục rao vặt, chứ đừng
+    kiểu quán cà phê hiện đại trắng gỗ.'
+- id: p009
+  name: Cơm Nhà Chị Hai
+  language: vi
+  request: Chị bán cơm trưa cho mấy công ty quanh khu Tân Bình, khoảng 60 phần mỗi
+    ngày. Muốn web có thực đơn từng ngày trong tuần, khách đăng nhập chọn phần ăn
+    cho cả tuần trước 17h chiều thứ Sáu, chị xem tổng số phần mỗi ngày, mỗi công ty
+    bao nhiêu phần để nấu và chia hộp. Có cái nhắc qua mail cho khách chưa chọn.
+- id: p010
+  name: Trà Ô Long Bảo Lộc
+  language: vi
+  request: Mình trồng trà ô long ở Bảo Lộc, muốn làm web cho khách đặt mẫu thử 20g
+    và xem câu chuyện vườn trà.
+- id: p011
+  name: Hơi Thở Yoga
+  language: vi
+  request: Mình mở phòng yoga nhỏ tên Hơi Thở, có 3 giáo viên là cô Lan (hatha), anh
+    Minh (vinyasa) và Trang (yoga cho bà bầu). Mỗi lớp tối đa 12 người, mở đặt chỗ
+    trước 7 ngày, huỷ được trước giờ học 4 tiếng, huỷ muộn thì bị trừ 1 buổi. Học
+    viên mua gói 10 buổi hoặc 20 buổi, và mình tự ghi số buổi còn lại trên web (không
+    thanh toán online). Học viên đăng nhập xem lịch tuần, đặt chỗ, xem số buổi còn
+    lại; hết chỗ thì vào danh sách chờ, có người huỷ thì tự gửi mail. Giáo viên xem
+    danh sách lớp mình dạy và điểm danh. Chỉ mình được chỉnh gói và số buổi. Giao
+    diện nhẹ nhàng, màu đất, nhiều khoảng trắng.
+- id: p012
+  name: Cún Thơm
+  language: vi
+  request: Mình cắt tỉa lông chó mèo tại nhà, cần trang cho khách đặt lịch theo khung
+    giờ và ghi tên bé, giống, cân nặng.
+- id: p013
+  name: Mi Xinh
+  language: vi
+  request: Em nối mi tại nhà ở Thủ Đức, tên tiệm Mi Xinh. Muốn có web để đăng các
+    kiểu mi (tự nhiên, volume, mi thỏ...) kèm ảnh và giá, khách chọn kiểu rồi đặt
+    lịch trong khung giờ 9h-19h, mỗi ca khoảng 2 tiếng. Em cần xem lịch từng ngày
+    và ghi chú khách bị dị ứng keo. Khách cũ được nhắc qua mail sau 3 tuần để dặm
+    mi.
+- id: p014
+  name: Bài Tập Về Nhà
+  language: vi
+  request: Phòng vật lý trị liệu nhỏ của mình cần trang để bệnh nhân đăng nhập xem
+    bài tập mình giao ở nhà, kèm ảnh hướng dẫn.
+- id: p015
+  name: Quiet Hands
+  language: en
+  request: 'I''m a mobile massage therapist, I travel to clients'' homes within 15
+    km of Hobart. I want a booking site called Quiet Hands. Services: 30, 60 and 90
+    minute sessions (Swedish, deep tissue, sports), prices shown but paid in person.
+    Clients sign in, pick a service and a time within my working hours (Tue to Sat,
+    9 to 6, with a 45 minute travel gap between bookings), enter their address and
+    any injuries or areas to avoid. I get an email and see a day view with addresses
+    in order. Clients can see past sessions and my notes for them, which only I can
+    write. I''d like the look to be strictly black and white, big type, heavy borders,
+    almost brutalist, because everything in my industry looks like a beige spa and
+    I hate it.'
+- id: p016
+  name: Lạnh Nhanh
+  language: vi
+  request: Thợ sửa máy lạnh, cần web nhận yêu cầu bảo trì và vệ sinh máy, khách điền
+    địa chỉ, số máy, chọn ngày.
+- id: p017
+  name: Xe Đạp Chú Bảy
+  language: vi
+  request: Tiệm sửa xe đạp của chú mình, tên Xe Đạp Chú Bảy, ở Cần Thơ. Chú muốn web
+    để khách để lại xe thì được 1 mã, lên web nhập mã hoặc số điện thoại là xem xe
+    đã sửa tới đâu (đã nhận, chờ phụ tùng, đang sửa, xong rồi, mời lấy xe). Chú và
+    thằng cháu cập nhật trạng thái, ghi tiền công và phụ tùng. Khi xe xong thì gửi
+    mail hoặc hiện ngay trên web.
+- id: p018
+  name: Mái Tôn Ba Miền
+  language: vi
+  request: Mình nhận làm mái tôn, chống dột. Muốn web cho khách gửi ảnh mái nhà, diện
+    tích ước chừng, địa chỉ để mình báo giá. Mình xem các yêu cầu, trả lời báo giá
+    ngay trên web, khách nhận mail.
+- id: p019
+  name: Chỉnh Piano Hà Nội
+  language: vi
+  request: Mình chỉnh đàn piano tận nhà ở Hà Nội, cần trang để khách đặt lịch và để
+    lại thông tin cây đàn.
+- id: p020
+  name: Sơn Đẹp 24h
+  language: vi
+  request: 'Mình có đội thợ sơn nhà khoảng 12 người chia 3 tổ, tên Sơn Đẹp 24h. Cần
+    công cụ nội bộ: mình (chủ) tạo công trình gồm địa chỉ khách, ngày bắt đầu, ngày
+    hẹn xong, diện tích, tổ nào phụ trách. Tổ trưởng đăng nhập chỉ thấy công trình
+    của tổ mình, cập nhật tiến độ mỗi ngày (phần trăm xong, ảnh chụp, vật tư cần thêm).
+    Vật tư cần thêm thì mình nhận mail ngay. Thợ thường không đăng nhập, chỉ tổ trưởng.
+    Khách cũng nhận được một đường link riêng (không cần đăng nhập) để xem ảnh và
+    tiến độ công trình của nhà họ. Mình cần màn hình tổng hợp: công trình nào trễ
+    hạn.'
+- id: p021
+  name: Hiệp Sĩ Nhỏ
+  language: vi
+  request: 'Mình dạy cờ vua cho trẻ em ở một trung tâm nhỏ tên Hiệp Sĩ Nhỏ, có 4 lớp
+    theo trình độ (mầm, cơ bản, nâng cao, thi đấu), mỗi lớp 8-10 bé. Cần web để: phụ
+    huynh đăng nhập xem lịch lớp của con, nhận thông báo, xem nhận xét của thầy sau
+    mỗi buổi và điểm Elo/cấp độ hiện tại của bé; thầy cô ghi nhận xét, điểm danh,
+    và đăng các giải đấu sắp tới cho phụ huynh đăng ký cho con. Phụ huynh chỉ xem
+    con mình, không xem con người khác. Giao diện vui, nhiều màu, có hình quân cờ.'
+- id: p022
+  name: Cello Notes
+  language: en
+  request: I teach cello privately to about 25 students, kids and adults. I want a
+    simple site where each student signs in and sees the notes from their last lesson,
+    what to practise this week, and a practice log where they tick off days and write
+    a line about how it went. I can see everyone's logs on one page and email a student
+    who hasn't logged anything in 10 days. Students can't see each other.
+- id: p023
+  name: Lớp Vẽ Cô Mai
+  language: vi
+  request: Cô dạy vẽ cho các bé, muốn có web đăng tranh của từng bé và phụ huynh xem
+    được tranh con mình.
+- id: p024
+  name: IELTS Nhóm Nhỏ
+  language: vi
+  request: Mình dạy IELTS nhóm 6 bạn, mỗi tuần giao bài writing, các bạn đăng nhập
+    nộp bài (dán text hoặc up file), mình chấm và ghi nhận xét, điểm band từng tiêu
+    chí. Các bạn xem biểu đồ điểm của mình theo tuần. Quá hạn nộp bài thì gửi mail
+    nhắc.
+- id: p025
+  name: Thread & Needle
+  language: en
+  request: 'We''re a volunteer-run community sewing class that meets Thursday evenings
+    at the old library annex in Leeds, six-week terms, 14 seats per term, with beginner
+    and improver streams. I want a site where people can see the current term and
+    what we''ll make each week (tote bag, elastic-waist skirt, zip pouch, simple shirt),
+    sign up for a seat or join the waitlist, and tick that they''ve borrowed one of
+    our four sewing machines for the term. Tutors (three of us) see the class list,
+    mark attendance and post a short ''what to bring'' note that emails the class
+    the day before. An admin (me, Hazel) can open and close terms and change the number
+    of seats. The look should feel like a dressmaker''s pattern sheet or blueprint:
+    pale blue paper, white dotted stitch lines, hand-lettered headings, little scissors
+    icons, measurement ticks along the page edges.'
+- id: p026
+  name: CLB Chạy Bộ Sky Garden
+  language: vi
+  request: CLB chạy bộ chung cư mình cần web để mỗi người ghi km hằng ngày và xem
+    bảng xếp hạng trong tháng.
+- id: p027
+  name: Board Game Burrow
+  language: en
+  request: Our neighbourhood board game group meets every other Saturday at someone's
+    flat. I'd like a site where members RSVP, say which games they can bring, and
+    see the list of what's coming so we don't end up with four copies of Catan. The
+    host for the night can be set per event.
+- id: p028
+  name: Hội Cựu SV K12
+  language: vi
+  request: 'Mình là trưởng ban liên lạc lớp Điện tử K12 trường Bách Khoa, khoảng 85
+    bạn. Muốn web riêng cho lớp gồm: bảng tin (ban liên lạc đăng thông báo), sự kiện
+    (họp lớp, đá bóng, đám cưới bạn) có xác nhận tham gia, album ảnh các bạn tự up,
+    và danh bạ để các bạn tự cập nhật nghề nghiệp, thành phố đang ở, số điện thoại
+    (có tuỳ chọn ẩn). Chỉ bạn nào được ban liên lạc duyệt mới đăng nhập được, người
+    ngoài không xem được gì. Ban liên lạc gồm 4 người được đăng thông báo và duyệt
+    thành viên; thành viên thường chỉ đăng ảnh và bình luận. Có mục ghi tên những
+    bạn đã đóng quỹ lớp năm nay để minh bạch, chỉ thủ quỹ sửa.'
+- id: p029
+  name: Bánh Xe Xoay
+  language: vi
+  request: Nhóm đạp xe cuối tuần của tụi mình khoảng 40 người. Cần web đăng chuyến
+    đi (ngày, điểm hẹn, cung đường, độ khó, số km), ai đi thì bấm tham gia, ai chở
+    xe thì ghi riêng. Sau chuyến có chỗ đăng ảnh. Admin là 3 người trong nhóm.
+- id: p030
+  name: Hội Nuôi Ong
+  language: vi
+  request: Hội nuôi ong ở Đắk Lắk cần bảng đăng ký lịch kiểm tra tổ ong chung để các
+    thành viên khỏi trùng nhau.
+- id: p031
+  name: Cơm Yêu Thương
+  language: vi
+  request: 'Nhóm mình nấu 150 suất cơm miễn phí mỗi thứ Bảy cho bệnh nhân nghèo ở
+    bệnh viện Chợ Rẫy, tên nhóm là Cơm Yêu Thương. Cần web có: lịch các thứ Bảy sắp
+    tới, tình nguyện viên đăng nhập đăng ký ca (sơ chế 5h, nấu 7h, đóng hộp 10h, giao
+    11h, mỗi ca cần số người nhất định, hiện còn thiếu bao nhiêu), nhận mail nhắc
+    tối thứ Sáu. Ban điều hành 5 người thấy ai đã đăng ký, có thể thêm người thay
+    thế, và ghi lại sau mỗi buổi: số suất đã phát, nguyên liệu nhận được từ ai. Có
+    một trang công khai ghi các khoản ủng hộ nguyên liệu và tiền mặt nhận được cùng
+    chi tiêu, để minh bạch, chỉ thủ quỹ nhập. Trang công khai cho mọi người xem, kèm
+    ảnh các buổi nấu.'
+- id: p032
+  name: Foster Net
+  language: en
+  request: 'We''re a small animal rescue that relies on about 30 foster homes. I need
+    a site where fosters sign in, mark whether they have space right now (and for
+    which animals: cats, dogs, kittens, small animals), and see the animals currently
+    placed with them with vet appointments and notes. Coordinators can add animals,
+    assign them to a foster, and when a foster says they have space it should show
+    up on a dashboard. The public page lists animals ready for adoption with photos
+    and an enquiry form.'
+- id: p033
+  name: Mèo Hoang Sài Gòn
+  language: vi
+  request: nhóm cứu mèo hoang cần trang đăng các bé mèo cần nhận nuôi, kèm ảnh, tuổi,
+    tình trạng tiêm triệt sản, và form để người muốn nhận nuôi liên hệ
+- id: p034
+  name: Tủ Sách Xóm
+  language: vi
+  request: Xóm mình có cái tủ sách chung khoảng 300 cuốn do bác tổ trưởng quản lý.
+    Muốn có web ghi sách trong tủ, ai mượn cuốn nào, hẹn trả ngày nào, quá hạn thì
+    nhắc qua mail. Hàng xóm ai cũng xem được danh sách sách, nhưng muốn mượn thì phải
+    đăng ký tài khoản.
+- id: p035
+  name: Plot 14 Community Garden
+  language: en
+  request: 'We run a community garden with 22 raised plots, a waitlist of about 30
+    people, and one rule that matters: you lose your plot if you miss three work days
+    in a season. I want a site with a map of the plots (a simple grid is fine) showing
+    who holds each one, a waitlist people can join in order, a calendar of work days
+    where members check in, and a rule counter that flags anyone at two missed days
+    and emails them a warning. Garden leads (four of us) can assign plots, mark attendance,
+    and post notices; members can see their own record and the notice board. There
+    should be a public page with the garden''s story, opening hours (dawn to dusk,
+    tools shed open Saturdays 9 to 12) and the sign-up form for the waitlist. For
+    the look, I''d love it to look like an old seed packet: illustrated vegetables,
+    a warm paper colour, stamped lettering, a little ''sow by'' banner at the top,
+    not a typical neighbourhood-association site.'
+- id: p036
+  name: Đám Cưới Hương & Nam
+  language: vi
+  request: Đám cưới tụi mình, cần web cho khách xác nhận có đến không và ghi lời chúc.
+- id: p037
+  name: Hội Sách Cuối Năm
+  language: vi
+  request: 'Bên mình tổ chức hội chợ sách cuối năm ở Hội An, 2 ngày 20-21/12, có khoảng
+    40 gian hàng của các nhà sách và nhà xuất bản nhỏ. Cần web có: thông tin sự kiện
+    và sơ đồ khu vực, trang đăng ký gian hàng cho đơn vị (tên, loại sách, diện tích
+    cần, điện hay không), ban tổ chức duyệt rồi gửi mail xác nhận kèm số gian. Lịch
+    các buổi giao lưu tác giả theo giờ cho khách xem, khách đăng ký giữ chỗ buổi nào
+    cũng được (mỗi buổi tối đa 50 chỗ). Ban tổ chức 6 người xem tổng hợp: bao nhiêu
+    gian đã duyệt, còn trống mấy chỗ.'
+- id: p038
+  name: Short Nights Film Fest
+  language: en
+  request: We're running a three-day short film festival in a converted church. I
+    need a schedule page for the public (screenings by block, with runtime and age
+    rating), and a volunteer area where people sign up for shifts (door, projection,
+    bar, Q&A runner) and see where they're needed. Organisers can see gaps and email
+    everyone on a given shift.
+- id: p039
+  name: Tất Niên Công Ty Hoa Việt
+  language: vi
+  request: Công ty mình 40 người sắp tổ chức tất niên. Cần web để mọi người đăng nhập
+    bằng mail công ty, xác nhận tham dự, chọn món chay hay mặn, đăng ký tiết mục văn
+    nghệ, và bốc thăm trúng thưởng (quay số ngẫu nhiên giữa những người có mặt). HR
+    là người duy nhất tạo giải thưởng và bấm quay.
+- id: p040
+  name: Thôi Nôi Bé Bơ
+  language: vi
+  request: Sinh nhật 1 tuổi bé Bơ, cần trang mời khách xác nhận đi dự, ghi lời chúc
+    va xem ảnh của bé.
+- id: p041
+  name: Áo Dài Thuê Cô Lan
+  language: vi
+  request: Cô cho thuê áo dài cưới và áo dài lễ ở Huế, khoảng 120 bộ. Muốn web cho
+    khách xem bộ nào (ảnh, màu, size, giá thuê 1 ngày, 3 ngày), chọn ngày thuê thì
+    biết bộ đó còn trống không, và gửi yêu cầu giữ. Cô xem lịch từng bộ, duyệt hay
+    từ chối, ghi lại ngày trả. Mỗi bộ sau khi trả cần 2 ngày giặt ủi nên không cho
+    thuê liền.
+- id: p042
+  name: Basecamp Lend
+  language: en
+  request: 'I rent out camping and hiking gear from my garage in Boulder: tents (2
+    and 4 person), sleeping bags rated to -10C, stoves, bear canisters, trekking poles,
+    about 60 items in all. I want people to browse by category, see what is free on
+    their dates, and request a booking with pickup and return days (pickup Friday
+    evenings or Saturday mornings only, return Sunday or Monday). I need to approve
+    each request, see a calendar of what''s out, and mark gear as damaged or in repair
+    so it can''t be booked. Each item has a daily price and a deposit amount shown,
+    both handled in cash at pickup. It should have a rugged, topographic-map look:
+    contour lines in the background, muted greens and rust, stencil-style headings,
+    maybe a ''trail log'' feel on the booking page. Customers need to sign in so I
+    can see their past rentals and flag anyone who returned something late.'
+- id: p043
+  name: Homestay Mây Đà Lạt
+  language: vi
+  request: homestay 4 phòng ở Đà Lạt cần web cho khách xem phòng còn trống theo ngày,
+    ảnh phòng, giá, và gửi yêu cầu đặt
+- id: p044
+  name: Nhà Trọ Cô Tư
+  language: vi
+  request: 'Mình có dãy trọ 12 phòng ở Bình Thạnh, cần công cụ quản lý. Chủ trọ nhập
+    mỗi tháng chỉ số điện nước từng phòng, web tự tính tiền điện (3.800đ/kwh), nước
+    (18.000đ/khối), cộng tiền phòng, rác, wifi rồi ra hoá đơn từng phòng. Người thuê
+    đăng nhập xem hoá đơn của mình, lịch sử, đã đóng chưa (chủ trọ tự đánh dấu khi
+    nhận tiền mặt hoặc chuyển khoản, web không thanh toán). Có chỗ cho chủ đăng thông
+    báo (cúp nước, họp trọ), và người thuê gửi yêu cầu sửa chữa như hư vòi nước, bóng
+    đèn kèm ảnh. Hợp đồng: ghi ngày bắt đầu và kết thúc, còn 30 ngày là nhắc chủ qua
+    mail. Người thuê chỉ thấy phòng của mình.'
+- id: p045
+  name: Kho Đồ Nghề Xóm
+  language: vi
+  request: Mình muốn cho hàng xóm mượn đồ nghề như máy khoan, thang, máy cắt cỏ. Cần
+    web ghi ai đang mượn gì, bao giờ trả.
+- id: p046
+  name: Linh Dịch Thuật
+  language: vi
+  request: Mình là dịch giả tự do Anh-Việt, chuyên dịch hợp đồng, tài liệu y tế va
+    sách thiếu nhi. Cần web giới thiệu bản thân, lĩnh vực, vài mẫu dịch, và form để
+    khách gửi file (docx hoặc pdf), chọn ngôn ngữ, hạn chót, mình báo giá theo số
+    từ. Khách có tài khoản xem được các đơn cũ và tải bản dịch mình giao.
+- id: p047
+  name: Logo Cho Bạn
+  language: vi
+  request: mình freelance thiết kế logo, cần web portfolio với form nhận brief của
+    khách
+- id: p048
+  name: Ảnh Sản Phẩm Hoàng
+  language: vi
+  request: Mình chụp ảnh sản phẩm cho các shop online ở Hà Nội. Muốn web có bảng giá
+    3 gói (10, 30, 60 ảnh), ảnh mẫu trước-sau, form đặt lịch chụp. Sau khi chụp, mình
+    up ảnh lên trang riêng của khách để chọn ảnh ưng, khách tick chọn những tấm cần
+    chỉnh sửa và bấm gửi, mình nhận mail.
+- id: p049
+  name: Kế Toán Nhà Thu
+  language: vi
+  request: 'Mình làm kế toán tự do tại nhà cho khoảng 30 tiệm nhỏ và hộ kinh doanh.
+    Cần web để mỗi khách đăng nhập nộp chứng từ mỗi tháng (up ảnh hoá đơn, sao kê,
+    ghi chú), xem còn thiếu gì trong danh sách mình yêu cầu (ví dụ: hoá đơn đầu vào,
+    bảng lương, sao kê ngân hàng). Đến ngày 5 hàng tháng mà khách chưa nộp đủ thì
+    tự gửi mail nhắc, đến ngày 10 nhắc lần hai. Mình xem bảng tổng hợp ai đã nộp đủ,
+    ai còn thiếu, và tải tất cả chứng từ của một khách trong tháng. Khách này không
+    được thấy khách kia.'
+- id: p050
+  name: Voice by Mara
+  language: en
+  request: I'm a freelance voice actor. I need a portfolio site with demos grouped
+    by type (commercial, audiobook, e-learning, animation), a short bio, my rates
+    as ranges, and a quote request form where clients paste a script, say how it will
+    be used, and the deadline. I want to reply to requests from a simple inbox.
+- id: p051
+  name: Nghỉ Phép Xây Dựng Phúc An
+  language: vi
+  request: Công ty xây dựng nhỏ của mình 15 người, gồm 3 kỹ sư, 2 kế toán, 1 thủ kho,
+    còn lại là giám sát và hành chính. Cần web để nhân viên xin nghỉ phép (loại phép
+    năm, ốm, không lương, ngày bắt đầu và kết thúc, lý do), trưởng bộ phận duyệt,
+    giám đốc duyệt phép trên 3 ngày. Mỗi người có 12 ngày phép năm, web tự trừ và
+    hiện còn bao nhiêu, đầu năm đặt lại. Có lịch chung xem ai nghỉ ngày nào để tránh
+    trùng nhau, và mail báo khi đơn được duyệt hoặc bị từ chối.
+- id: p052
+  name: Nha Khoa Bright
+  language: vi
+  request: Phòng khám nha khoa của mình có 3 ghế, cần web nội bộ ghi vật tư (găng
+    tay, chất trám, kim tê, gel trắng răng...), số lượng tồn, mức tối thiểu; khi nào
+    xuống dưới mức tối thiểu thì gửi mail cho chị quản lý đặt hàng. Nhân viên ghi
+    'đã lấy 2 hộp' mỗi lần dùng.
+- id: p053
+  name: Hồ Sơ Luật Thành Đạt
+  language: vi
+  request: văn phòng luật 5 người cần tool nội bộ theo dõi hồ sơ vụ việc, ngày tòa,
+    hạn nộp tài liệu, và luật sư phụ trách
+- id: p054
+  name: Phòng Họp 2 Tầng
+  language: vi
+  request: Văn phòng bọn mình có 2 phòng họp, hay đụng giờ nhau. Cần web đặt phòng
+    theo giờ, nhân viên đăng nhập, xem lịch ngày, đặt, huỷ. Không cho đặt chồng giờ,
+    tối đa 3 tiếng một lần.
+- id: p055
+  name: Studio Tempo
+  language: en
+  request: 'We''re a ten-person design agency and need an internal tool for timesheets
+    and projects. Admins (two partners) create clients and projects with a budget
+    in hours. Staff log hours per project per day with a short note, and see their
+    weekly total. Project managers see burn against budget for their own projects,
+    and the partners see everything. When a project hits 80% of its hours, email the
+    project manager. Friday afternoon, email anyone with fewer than 30 hours logged
+    that week. Nothing public, sign-in only. It should look like our own brand: off-white
+    background, one acid green accent, tight monospaced type, no icons, lots of tables.'
+- id: p056
+  name: Công Thức Nhà Bà
+  language: vi
+  request: Gia đình mình muốn có web chung để lưu công thức nấu ăn của bà, ai trong
+    nhà cũng thêm được món và ảnh.
+- id: p057
+  name: Chore Quest
+  language: en
+  request: I want a chore chart for my three kids (ages 7, 10 and 13). Each chore
+    has points and a day it's due, kids sign in with their own login and tick what
+    they've done, I approve it, and points add up toward rewards that I set (like
+    movie night at 100 points). Different chores per kid, a weekly leaderboard that's
+    friendly, and a reminder email to me if anything's still unapproved by Sunday
+    night.
+- id: p058
+  name: Cá Koi Thanh Thủy
+  language: vi
+  request: 'Mình và mấy anh em trong hội chơi cá Koi ở Biên Hòa muốn làm web chung
+    tên Cá Koi Thanh Thủy. Mỗi người có hồ riêng, đăng nhập vào ghi nhật ký hồ: ngày
+    thay nước, độ pH, nhiệt độ, thức ăn, bệnh, kèm ảnh. Mỗi con cá có hồ sơ riêng
+    gồm tên, dòng (Kohaku, Sanke, Showa...), ngày mua, nơi mua, kích thước theo thời
+    gian, ảnh qua các lần. Hội viên xem được cá của nhau nhưng chỉ sửa cá của mình.
+    Có mục ''sàn giao lưu'' để đăng cá muốn nhượng hoặc đổi, và lịch các buổi đi thăm
+    trại cá. Giao diện mình muốn phong cách Nhật xưa: nền giấy gạo, nét mực tàu, con
+    dấu đỏ, chữ dọc ở tiêu đề, chứ đừng kiểu web bán cá cảnh nhiều màu.'
+- id: p059
+  name: Lịch Chăm Ba Mẹ
+  language: vi
+  request: Nhà mình 3 anh em ở 3 nơi, ba mẹ lớn tuổi. Cần web chung để chia lịch ai
+    đưa ba mẹ đi khám, ai ở nhà tuần nào, ghi lại lịch uống thuốc, ngày tái khám,
+    kết quả khám. Ai đăng ký ngày nào thì 2 người kia nhận mail. Chỉ 3 anh em và vợ
+    chồng mình được vào.
+- id: p060
+  name: Switch & Stem
+  language: en
+  request: 'I collect mechanical keyboards and want a catalogue page for my collection:
+    each board with photos, switches, keycaps, case material and sound clip, plus
+    a ''for sale or trade'' flag.'

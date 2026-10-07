@@ -95,19 +95,28 @@ to one Claude account; everyone running the builder uses their own.
 
 ## Eval
 
-`bin/eval` builds the sample requests in `eval/cases.yml` as real projects, the way the studio
-builds them, then measures each: whether the build finished, cost and time, the app's tests and
-rubocop, which pages open for a visitor and for the signed-in owner, and a model's 1–10 scores
-for fit, look and phone from full-page screenshots. Results and `report.html` go to
-`storage/evals/<run>/`, compared with the run before. A full run costs roughly $2–4 of agent
-usage per case.
+`eval/prompts.yml` holds 60 first messages from imagined owners, written once by a model
+(`bin/eval generate`): many kinds of business and group, from one line to a detailed brief,
+mostly Vietnamese, some asking for an unusual look. Each run builds a random sample of them as
+real projects, the way the studio builds them, then measures each: whether the build finished,
+cost and time, the app's tests and rubocop, which pages open for a visitor and for the
+signed-in owner, and a model's review of the screenshots. The review lists everything the
+request explicitly asked for and marks each met, missed or unclear; **asked %** is the share
+met of those it could see. It also scores look and phone from 1 to 10. Results and
+`report.html` go to `storage/evals/<run>/`, compared with the run before. Each request costs
+roughly $2–4 of agent usage.
+
+The same seed picks the same sample, so compare runs on the same seed; use other seeds now and
+then so the prompts aren't tuned to a few requests.
 
 ```sh
-bin/eval                      # every case, three at a time
-bin/eval nail cafe -j 2       # some cases
+bin/eval                      # 8 requests (seed 1), three at a time
+bin/eval -n 20 -s 2           # 20 requests, another sample
+bin/eval p004 p017 -j 2       # these requests
 bin/eval -m "shorter prompt"  # note what changed in this run
 bin/eval report               # print the latest run again
 bin/eval clean                # delete the apps of every run but the latest
+bin/eval generate --force     # write a new prompt set (start a new baseline)
 ```
 
 ## Settings

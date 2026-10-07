@@ -1,18 +1,13 @@
 require "digest"
 
-# One run of bin/eval: every sample request in eval/cases.yml is built as a real
-# project, the way the studio builds it, then checked (Evaluation::Attempt). What
-# came out is kept in storage/evals/<id>/ and compared with the run before it.
+# One run of bin/eval: a sample of the requests in eval/prompts.yml (Evaluation::Prompts)
+# is built as real projects, the way the studio builds them, then checked
+# (Evaluation::Attempt). What came out is kept in storage/evals/<id>/ and compared with
+# the run before it.
 module Evaluation
   class Run
     ROOT = Rails.root.join("storage/evals")
-    CASES = Rails.root.join("eval/cases.yml")
-
     attr_reader :id, :cases, :results, :meta
-
-    def self.cases
-      YAML.load_file(CASES).map(&:with_indifferent_access)
-    end
 
     def self.ids
       ROOT.exist? ? ROOT.children.select { |dir| dir.join("results.json").exist? }.map { |dir| dir.basename.to_s }.sort : []
@@ -22,13 +17,14 @@ module Evaluation
       JSON.parse(ROOT.join(id, "results.json").read)
     end
 
-    def initialize(cases:, concurrency: 3, note: nil)
+    def initialize(cases:, concurrency: 3, note: nil, seed: nil)
       @cases, @concurrency = cases, concurrency
       @id = Time.current.strftime("%Y%m%d-%H%M")
       @results = []
       @meta = { "id" => id, "note" => note, "started_at" => Time.current.iso8601, "agent_backend" => Rails.configuration.x.agent_backend,
                 "builder" => version_of(Rails.root), "template" => version_of(Rails.configuration.x.template_path),
-                "prompt" => Digest::SHA256.hexdigest(Rails.configuration.x.agent[:append_system_prompt].to_s).first(8) }
+                "prompt" => Digest::SHA256.hexdigest(Rails.configuration.x.agent[:append_system_prompt].to_s).first(8),
+                "prompts" => Prompts.digest, "seed" => seed }
     end
 
     def dir

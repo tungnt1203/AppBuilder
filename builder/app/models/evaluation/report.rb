@@ -19,7 +19,7 @@ module Evaluation
         "built" => cases.count { |result| result["outcome"] == "built" },
         "tests passed" => cases.count { |result| result.dig("tests", "passed") },
         "pages ok" => cases.sum { |result| ok_pages(result) },
-        "fit" => average(judged.map { |judge| judge["fit"] }),
+        "asked %" => average(judged.map { |judge| Judge.asked_rate(judge) }),
         "look" => average(judged.map { |judge| judge["look"] }),
         "phone" => average(judged.map { |judge| judge["phone"] }),
         "cost $" => cases.sum { |result| result["cost_usd"].to_f + result.dig("judge", "cost_usd").to_f }.round(2),
@@ -28,11 +28,11 @@ module Evaluation
     end
 
     def to_text
-      header = [ "case", "outcome", "tests", "pages", "fit", "look", "phone", "$", "min" ]
+      header = [ "request", "outcome", "tests", "pages", "asked", "look", "phone", "$", "min" ]
       rows = @data["cases"].map do |result|
         judge = result["judge"] || {}
         [ result["id"], result["outcome"], tests_text(result), "#{ok_pages(result)}/#{result.dig("pages", "visited")&.size.to_i}",
-          judge["fit"], judge["look"], judge["phone"], result["cost_usd"], result["build_seconds"] && (result["build_seconds"] / 60.0).round(1) ].map(&:to_s)
+          asked_text(judge), judge["look"], judge["phone"], result["cost_usd"], result["build_seconds"] && (result["build_seconds"] / 60.0).round(1) ].map(&:to_s)
       end
       widths = header.each_index.map { |index| ([ header ] + rows).map { |row| row[index].size }.max }
       line = ->(row) { row.each_with_index.map { |cell, index| cell.ljust(widths[index]) }.join("  ") }
@@ -43,7 +43,7 @@ module Evaluation
         "#{name}: #{value}#{change}"
       end
 
-      [ "Run #{@data["id"]}  builder #{@data["builder"]}  template #{@data["template"]}  prompt #{@data["prompt"]}  #{@data["note"]}".strip,
+      [ [ "Run #{@data["id"]}", "builder #{@data["builder"]}", "template #{@data["template"]}", "prompt #{@data["prompt"]}", sample_text, @data["note"] ].compact_blank.join("  "),
         "", line.(header), *rows.map(&line), "", *summary ].join("\n")
     end
 
@@ -60,10 +60,21 @@ module Evaluation
       Array(result.dig("pages", "visited")).count { |page| page["status"].to_i.between?(200, 399) && page["error"].blank? }
     end
 
+    # "5/6 met": what the app visibly does of what was asked, leaving out what can't be seen.
+    def asked_text(judge)
+      verdicts = Array(judge["asked"]).map { |item| item["verdict"] }
+      judged = verdicts.count { |verdict| verdict.in?(%w[ met missed ]) }
+      judged.positive? ? "#{verdicts.count("met")}/#{judged}" : ""
+    end
+
     def tests_text(result)
       tests = result["tests"] or return ""
       return "error" unless tests["runs"]
       "#{tests["runs"] - tests["failures"] - tests["errors"]}/#{tests["runs"]}"
+    end
+
+    def sample_text
+      [ ("prompts #{@data["prompts"]}" if @data["prompts"]), ("seed #{@data["seed"]}" if @data["seed"]) ].compact.join("  ")
     end
 
     private
