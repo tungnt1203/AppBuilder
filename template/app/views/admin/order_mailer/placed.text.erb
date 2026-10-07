@@ -1,0 +1,8 @@
+<%= t(".intro", number: @order.name, name: @order.shipping_name, email: @order.email) %>
+
+<% @order.line_items.each do |item| -%>
+<%= item.quantity %> × <%= item.product_title %><%= " (#{item.variant_title})" if item.variant_title %>: <%= money(item.total_cents, @order.currency) %>
+<% end -%>
+<%= t("order_mailer.summary.total") %>: <%= money(@order.total_cents, @order.currency) %>
+
+<%= t(".open") %>: <%= admin_order_url(@order) %>

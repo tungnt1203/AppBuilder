@@ -1,0 +1,10 @@
+<%= t(".heading", number: @order.name) %>
+
+<%= t(".intro") %>
+<% if @order.tracking_number.present? %>
+
+<%= t(".tracking") %>: <%= [ @order.carrier, @order.tracking_number ].compact_blank.join(" ") %>
+<% if @order.tracking_url.present? %><%= t(".track") %>: <%= @order.tracking_url %><% end %>
+<% end %>
+
+<%= t(".view") %>: <%= order_url(@order) %>

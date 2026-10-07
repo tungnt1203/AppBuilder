@@ -1,0 +1,8 @@
+main:
+  currency: USD
+  contact_email: hello@example.com
+  shipping_first_item_cents: 500
+  shipping_additional_item_cents: 200
+  free_shipping_threshold_cents: 10000
+  ship_to_countries: <%= %w[ CA GB US ].to_json %>
+  payment_instructions: Pay by bank transfer to account 123, with your order number as the reference.

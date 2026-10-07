@@ -1,0 +1,67 @@
+<% content_for :title, t(".title", number: @order.name) %>
+<% content_for :head do %>
+  <meta name="robots" content="noindex">
+<% end %>
+
+<div class="mx-auto max-w-3xl px-4 py-12">
+  <% if params[:placed] %>
+    <div class="mb-8 rounded-xl border border-green-200 bg-green-50 p-6 text-green-900">
+      <p class="flex items-center gap-2 text-lg font-semibold"><%= icon "circle-check" %> <%= t(".thanks", name: @order.shipping_name) %></p>
+      <p class="mt-1 text-sm"><%= t(".confirmation_sent", email: @order.email) %></p>
+    </div>
+  <% end %>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title", number: @order.name) %></h1>
+    <%= order_status_badge @order %>
+  </div>
+  <p class="mt-1 text-sm text-muted"><%= t(".placed_on", date: l(@order.created_at, format: :long)) %></p>
+
+  <p class="mt-6 text-ink"><%= t(".status_text.#{@order.status}") %></p>
+
+  <% if @order.pending? && @store.payment_instructions.present? %>
+    <div class="mt-6 rounded-xl border border-line bg-surface p-6">
+      <h2 class="font-semibold"><%= t(".how_to_pay") %></h2>
+      <div class="mt-2 text-sm leading-relaxed"><%= simple_format @store.payment_instructions %></div>
+    </div>
+  <% end %>
+
+  <% if @order.tracking_number.present? %>
+    <div class="mt-6 rounded-xl border border-line bg-surface p-6">
+      <h2 class="flex items-center gap-2 font-semibold"><%= icon "truck", size: 18 %> <%= t(".tracking") %></h2>
+      <p class="mt-2 text-sm"><%= [ @order.carrier, @order.tracking_number ].compact_blank.join(" · ") %></p>
+      <%= link_to t(".track"), @order.tracking_url, class: "mt-3 inline-block text-sm #{link_classes}", target: "_blank", rel: "noopener" if @order.tracking_url.present? %>
+    </div>
+  <% end %>
+
+  <ul class="mt-8 divide-y divide-line border-y border-line">
+    <% @order.line_items.each do |item| %>
+      <li class="flex justify-between gap-4 py-4 text-sm">
+        <span class="min-w-0">
+          <%= item.quantity %> × <%= item.product_title %>
+          <% if item.variant_title %><span class="block text-muted"><%= item.variant_title %></span><% end %>
+        </span>
+        <span class="whitespace-nowrap"><%= money(item.total_cents, @order.currency) %></span>
+      </li>
+    <% end %>
+  </ul>
+  <dl class="mt-4 ml-auto max-w-xs space-y-2 text-sm">
+    <div class="flex justify-between"><dt class="text-muted"><%= t(".subtotal") %></dt><dd><%= money(@order.subtotal_cents, @order.currency) %></dd></div>
+    <div class="flex justify-between"><dt class="text-muted"><%= t(".shipping") %></dt><dd><%= money(@order.shipping_cents, @order.currency) %></dd></div>
+    <div class="flex justify-between border-t border-line pt-2 text-base font-semibold"><dt><%= t(".total") %></dt><dd><%= money(@order.total_cents, @order.currency) %></dd></div>
+  </dl>
+
+  <div class="mt-10 grid gap-6 text-sm sm:grid-cols-2">
+    <div>
+      <h2 class="font-semibold"><%= t(".ship_to") %></h2>
+      <p class="mt-2 text-muted"><%= safe_join(@order.shipping_address_lines, tag.br) %></p>
+    </div>
+    <div>
+      <h2 class="font-semibold"><%= t(".contact") %></h2>
+      <p class="mt-2 text-muted"><%= @order.email %><% if @order.phone.present? %><br><%= @order.phone %><% end %></p>
+      <% if @store.contact_email.present? %>
+        <p class="mt-4"><%= t(".questions") %> <%= mail_to @store.contact_email, class: link_classes %></p>
+      <% end %>
+    </div>
+  </div>
+</div>

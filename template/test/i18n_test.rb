@@ -2,12 +2,12 @@ require "test_helper"
 
 class I18nTest < ActiveSupport::TestCase
   test "every built-in English text has a Vietnamese translation" do
-    english = flatten_keys(YAML.load_file(Rails.root.join("config/locales/en.yml"))["en"])
-    vietnamese = flatten_keys(YAML.load_file(Rails.root.join("config/locales/vi.yml"))["vi"])
+    english = Rails.root.glob("config/locales/{en,*.en}.yml").flat_map { |file| flatten_keys(YAML.load_file(file)["en"]) }
+    vietnamese = Rails.root.glob("config/locales/{vi,*.vi}.yml").flat_map { |file| flatten_keys(YAML.load_file(file)["vi"]) }
 
     # Vietnamese has no singular form, so the plural "one" keys are not needed.
     missing = english - vietnamese - english.grep(/\.one\z/)
-    assert_empty missing, "Missing in config/locales/vi.yml"
+    assert_empty missing, "Missing in the Vietnamese locale files (config/locales/*vi.yml)"
   end
 
   test "built-in screens render in Vietnamese" do

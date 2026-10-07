@@ -1,0 +1,56 @@
+<% content_for :title, t(".title") %>
+
+<div class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
+
+  <%= form_with model: @checkout, url: checkout_path, scope: :checkout, class: "mt-8 grid gap-10 md:grid-cols-[1fr_22rem]" do |form| %>
+    <div class="space-y-8">
+      <%= form.errors %>
+
+      <fieldset class="space-y-4">
+        <legend class="mb-4 text-lg font-semibold"><%= t(".contact") %></legend>
+        <%= form.field :email, :email_field, required: true, autocomplete: "email", hint: t(".email_hint") %>
+        <%= form.field :phone, :telephone_field, autocomplete: "tel", hint: t(".phone_hint") %>
+      </fieldset>
+
+      <fieldset class="space-y-4">
+        <legend class="mb-4 text-lg font-semibold"><%= t(".shipping") %></legend>
+        <div class="space-y-1.5">
+          <%= form.label :shipping_country %>
+          <%= form.select :shipping_country, Store.current.countries_for_checkout, {}, autocomplete: "country" %>
+        </div>
+        <%= form.field :shipping_name, required: true, autocomplete: "name" %>
+        <%= form.field :shipping_address1, required: true, autocomplete: "address-line1" %>
+        <%= form.field :shipping_address2, autocomplete: "address-line2" %>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <%= form.field :shipping_city, required: true, autocomplete: "address-level2" %>
+          <%= form.field :shipping_region, autocomplete: "address-level1" %>
+          <%= form.field :shipping_postal_code, autocomplete: "postal-code" %>
+        </div>
+        <%= form.field :note, :text_area, rows: 2 %>
+      </fieldset>
+    </div>
+
+    <aside class="h-fit space-y-4 rounded-xl border border-line bg-surface p-6 md:sticky md:top-20">
+      <h2 class="text-lg font-semibold"><%= t(".summary") %></h2>
+      <ul class="space-y-3 text-sm">
+        <% @checkout.items.each do |item| %>
+          <li class="flex justify-between gap-4">
+            <span class="min-w-0">
+              <%= item.quantity %> × <%= item.product.title %>
+              <% if item.variant.title %><span class="block text-muted"><%= item.variant.title %></span><% end %>
+            </span>
+            <span class="whitespace-nowrap"><%= money(item.total_cents) %></span>
+          </li>
+        <% end %>
+      </ul>
+      <dl class="space-y-2 border-t border-line pt-4 text-sm">
+        <div class="flex justify-between"><dt class="text-muted"><%= t(".subtotal") %></dt><dd><%= money(@checkout.subtotal_cents) %></dd></div>
+        <div class="flex justify-between"><dt class="text-muted"><%= t(".shipping_cost") %></dt><dd><%= @checkout.shipping_cents.zero? ? t(".free") : money(@checkout.shipping_cents) %></dd></div>
+        <div class="flex justify-between border-t border-line pt-2 text-base font-semibold"><dt><%= t(".total") %></dt><dd><%= money(@checkout.total_cents) %></dd></div>
+      </dl>
+      <%= form.submit t(".place_order"), class: "w-full py-2.5" %>
+      <p class="text-xs text-muted"><%= t(".payment_note") %></p>
+    </aside>
+  <% end %>
+</div>

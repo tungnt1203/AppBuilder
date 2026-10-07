@@ -1,0 +1,35 @@
+<%= form_with model: [ :admin, collection ], class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <%= form.field :title, required: true, autofocus: collection.new_record? %>
+    <%= form.field :description, :text_area, rows: 3 %>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <%= form.field :slug, hint: (t(".slug_hint") if collection.new_record?) %>
+      <%= form.field :position, :number_field, hint: t(".position_hint") %>
+    </div>
+  <% end %>
+
+  <%= card do %>
+    <fieldset>
+      <legend class="text-sm font-semibold text-ink"><%= t(".products") %></legend>
+      <%= hidden_field_tag "collection[product_ids][]", "" %>
+      <% products = Product.where.not(status: "archived").order(:title) %>
+      <% if products.any? %>
+        <div class="mt-3 max-h-96 space-y-2 overflow-y-auto">
+          <% selected = params.dig(:collection, :product_ids)&.map(&:to_i) || collection.product_ids %>
+          <% products.each do |product| %>
+            <label class="flex items-center gap-2 text-sm">
+              <%= check_box_tag "collection[product_ids][]", product.id, selected.include?(product.id), id: dom_id(product, :collection), class: "size-4 rounded border-line accent-brand-600" %>
+              <%= product.title %>
+              <% unless product.active? %><%= product_status_badge product %><% end %>
+            </label>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="mt-2 text-sm text-muted"><%= t(".no_products") %></p>
+      <% end %>
+    </fieldset>
+  <% end %>
+
+  <%= form.submit collection.new_record? ? t(".create") : t(".save") %>
+<% end %>

@@ -44,9 +44,6 @@ en:
       heading:
         one: "1 problem to fix:"
         other: "%{count} problems to fix:"
-  home:
-    show:
-      coming_soon: Something new is on its way. Check back soon.
   sessions:
     new:
       title: Sign in
@@ -111,11 +108,6 @@ en:
   admin:
     base:
       only_admins: Only admins can do that.
-    dashboards:
-      show:
-        welcome: Welcome, %{name}
-        empty_title: Nothing here yet
-        empty_description: This is where you'll run the app.
     first_runs:
       new:
         title: Set up

@@ -1,2 +1,10 @@
-<%# The site's footer: address, opening hours, contact, social links, whatever this business's
-    visitors look for. Empty until the app has something to say. %>
+<%# The site's footer: what shoppers look for (contact, shipping and returns, social links).
+    Redesign it for the app. %>
+<footer class="mt-24 border-t border-line">
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-10 text-sm text-muted">
+    <p>© <%= Date.current.year %> <%= Rails.configuration.x.app_name %></p>
+    <% if Store.current.contact_email.present? %>
+      <%= mail_to Store.current.contact_email, class: "hover:text-ink" %>
+    <% end %>
+  </div>
+</footer>

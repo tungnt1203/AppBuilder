@@ -1,0 +1,41 @@
+tee_black_s:
+  product: tee
+  option1: Black
+  option2: S
+  sku: TEE-BLK-S
+  price_cents: 2400
+  position: 0
+
+tee_black_m:
+  product: tee
+  option1: Black
+  option2: M
+  sku: TEE-BLK-M
+  price_cents: 2400
+  compare_at_price_cents: 3000
+  position: 1
+
+tee_white_s:
+  product: tee
+  option1: White
+  option2: S
+  price_cents: 2400
+  available: false
+  position: 2
+
+tee_white_m:
+  product: tee
+  option1: White
+  option2: M
+  price_cents: 2600
+  position: 3
+
+mug:
+  product: mug
+  price_cents: 1500
+  position: 0
+
+hoodie:
+  product: hoodie
+  price_cents: 4500
+  position: 0

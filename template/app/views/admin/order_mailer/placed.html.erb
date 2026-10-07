@@ -1,0 +1,5 @@
+<p><%= t(".intro", number: @order.name, name: @order.shipping_name, email: @order.email) %></p>
+
+<%= render "order_mailer/summary", order: @order %>
+
+<p><%= link_to t(".open"), admin_order_url(@order) %></p>

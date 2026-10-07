@@ -102,6 +102,12 @@ buttons scannable; don't use emoji as icons.
 
 The customers' site (everything outside /admin) is designed, not assembled from admin blocks.
 
+The shop's pages are already there, working, in a plain starting look: home (`home/show`), all
+products (`products/index`), a product (`products/show`, with its photo gallery and option
+picker), a collection, the cart, checkout and the buyer's order page, plus the order emails
+(`order_mailer/`). Restyle them for the brand and rearrange them freely; keep their forms' fields,
+the Stimulus targets (`variant-picker`, `gallery`) and the links between them working.
+
 **Start from the page blocks** in `app/views/blocks/`: hero (split, full-bleed photo), features,
 price list or menu, gallery, timetable, testimonials, stats, FAQ, find-us (address, hours, call,
 Zalo, map), closing call to action, and a bottom action bar for phones. They use only the theme's

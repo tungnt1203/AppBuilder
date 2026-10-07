@@ -1,0 +1,42 @@
+<% address = { shipping_address1: "1 Main St", shipping_city: "Portland", shipping_region: "OR", shipping_postal_code: "97201", shipping_country: "US", currency: "USD" } %>
+
+pending:
+  number: 1001
+  token: pendingtoken000000000000000000001
+  status: pending
+  email: pat@example.com
+  shipping_name: Pat Buyer
+  subtotal_cents: 2400
+  shipping_cents: 500
+  total_cents: 2900
+  <% address.each do |key, value| %><%= key %>: <%= value %>
+  <% end %>
+
+paid:
+  number: 1002
+  token: paidtoken0000000000000000000000002
+  status: paid
+  email: lee@example.com
+  shipping_name: Lee Buyer
+  subtotal_cents: 1500
+  shipping_cents: 500
+  total_cents: 2000
+  paid_at: <%= 1.hour.ago.to_fs(:db) %>
+  <% address.each do |key, value| %><%= key %>: <%= value %>
+  <% end %>
+
+shipped:
+  number: 1003
+  token: shippedtoken00000000000000000003
+  status: shipped
+  email: sam@example.com
+  shipping_name: Sam Buyer
+  subtotal_cents: 4800
+  shipping_cents: 0
+  total_cents: 4800
+  carrier: USPS
+  tracking_number: 9400100000000000000000
+  paid_at: <%= 3.days.ago.to_fs(:db) %>
+  shipped_at: <%= 1.day.ago.to_fs(:db) %>
+  <% address.each do |key, value| %><%= key %>: <%= value %>
+  <% end %>

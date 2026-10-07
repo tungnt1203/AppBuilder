@@ -1,0 +1,45 @@
+<%= page_header t(".title") do %>
+  <%= link_to t(".new"), new_admin_product_path, class: button_classes %>
+<% end %>
+
+<%= tabs do %>
+  <%= tab_to t(".all"), admin_products_path(q: params[:q].presence) %>
+  <% Product.statuses.each_key do |status| %>
+    <%= tab_to t(status, scope: "products.statuses"), admin_products_path(status:, q: params[:q].presence) %>
+  <% end %>
+<% end %>
+
+<%= toolbar do %>
+  <%= form_with url: admin_products_path, method: :get, class: "flex w-full max-w-sm gap-2" do |form| %>
+    <%= form.hidden_field :status, value: @status if @status %>
+    <%= form.search_field :q, value: params[:q], placeholder: t(".search"), aria: { label: t(".search") } %>
+    <%= form.button t(".search_button"), type: "submit", name: nil, class: button_classes(:secondary) %>
+  <% end %>
+<% end %>
+
+<% if @page.records.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @page.records.each do |product| %>
+        <li>
+          <%= link_to edit_admin_product_path(product), class: "flex items-center gap-4 px-6 py-3 hover:bg-surface-muted" do %>
+            <%= product_image product, size: :thumb, class: "size-12 shrink-0 rounded-lg" %>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-medium text-ink"><%= product.title %></span>
+              <span class="block truncate text-xs text-muted"><%= t(".variants", count: product.variants.size) %></span>
+            </span>
+            <span class="hidden text-sm text-ink sm:block"><%= price_range(product) %></span>
+            <span class="w-20 text-right"><%= product_status_badge product %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+  <%= render "ui/pagination", page: @page %>
+<% elsif params[:q].present? || @status %>
+  <%= empty_state t(".no_results") %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") do %>
+    <%= link_to t(".new"), new_admin_product_path, class: button_classes %>
+  <% end %>
+<% end %>

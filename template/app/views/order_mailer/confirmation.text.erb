@@ -1,0 +1,16 @@
+<%= t(".heading", name: @order.shipping_name) %>
+
+<%= t(".intro", number: @order.name) %>
+
+<% @order.line_items.each do |item| -%>
+<%= item.quantity %> × <%= item.product_title %><%= " (#{item.variant_title})" if item.variant_title %>: <%= money(item.total_cents, @order.currency) %>
+<% end -%>
+<%= t("order_mailer.summary.shipping") %>: <%= money(@order.shipping_cents, @order.currency) %>
+<%= t("order_mailer.summary.total") %>: <%= money(@order.total_cents, @order.currency) %>
+<% if @order.pending? && @store.payment_instructions.present? %>
+
+<%= t(".payment") %>:
+<%= @store.payment_instructions %>
+<% end %>
+
+<%= t(".view") %>: <%= order_url(@order) %>

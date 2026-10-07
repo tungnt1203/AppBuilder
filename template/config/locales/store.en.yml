@@ -1,0 +1,420 @@
+# Text for the shop: the customers' site, /admin's shop screens and the order emails.
+en:
+  activerecord:
+    models:
+      product: Product
+      variant: Variant
+      collection: Collection
+      order: Order
+      store: Store
+    attributes:
+      product:
+        title: Title
+        description: Description
+        status: Status
+        slug: Web address
+        base_price: Price
+        images: Photos
+        option1_name: Option 1
+        option2_name: Option 2
+        option3_name: Option 3
+        option1_values: Values of option 1
+        option2_values: Values of option 2
+        option3_values: Values of option 3
+      variant:
+        price: Price
+        compare_at_price: Compare-at price
+        sku: SKU
+        available: For sale
+      collection:
+        title: Title
+        description: Description
+        slug: Web address
+        position: Position
+      order:
+        email: Email
+        phone: Phone
+        shipping_name: Full name
+        shipping_address1: Address
+        shipping_address2: Apartment, suite, etc.
+        shipping_city: City
+        shipping_region: State / province
+        shipping_postal_code: ZIP / postal code
+        shipping_country: Country
+        note: Note for the order
+        staff_note: Staff note
+        tracking_url: Tracking link
+      store:
+        currency: Currency
+        contact_email: Contact email
+        shipping_first_item: Shipping, first item
+        shipping_additional_item: Shipping, each additional item
+        free_shipping_threshold: Free shipping from
+        ship_to_countries: Countries you ship to
+        payment_instructions: Payment instructions
+    errors:
+      models:
+        product:
+          attributes:
+            base:
+              options_in_order: Fill in the options in order, starting with option 1
+              too_many_variants: These options make more than 100 variants; use fewer values
+            images:
+              not_an_image: "%{name} isn't an image"
+        variant:
+          attributes:
+            base:
+              taken: This combination of options already exists
+        store:
+          attributes:
+            ship_to_countries:
+              unknown: "has codes we don't know: %{codes}"
+  activemodel:
+    errors:
+      models:
+        checkout:
+          attributes:
+            base:
+              empty_cart: Your cart is empty
+            shipping_country:
+              not_shipped_to: isn't a country we ship to
+  products:
+    statuses:
+      draft: Draft
+      active: Active
+      archived: Archived
+    product:
+      sold_out: Sold out
+    index:
+      title: Shop
+      search: Search products
+      sort: Sort by
+      sorts:
+        newest: Newest
+        title: Name
+      empty: Products are coming soon.
+      no_results: Nothing matches "%{query}".
+    show:
+      photo: Photo %{number}
+      quantity: Quantity
+      add_to_cart: Add to cart
+      unavailable: This option is sold out.
+  orders:
+    statuses:
+      pending: Awaiting payment
+      paid: Paid
+      in_production: In production
+      shipped: Shipped
+      delivered: Delivered
+      cancelled: Cancelled
+      refunded: Refunded
+    show:
+      title: Order %{number}
+      thanks: Thank you, %{name}!
+      confirmation_sent: We've sent a confirmation to %{email}. Keep this page's link to check on your order.
+      placed_on: Placed %{date}
+      status_text:
+        pending: We've got your order. It goes into production once the payment is in.
+        paid: Payment received. Your order goes into production shortly.
+        in_production: Your order is being made.
+        shipped: Your order is on its way.
+        delivered: Your order has been delivered.
+        cancelled: This order was cancelled.
+        refunded: This order was refunded.
+      how_to_pay: How to pay
+      tracking: Tracking
+      track: Track your package
+      subtotal: Subtotal
+      shipping: Shipping
+      total: Total
+      ship_to: Shipping to
+      contact: Contact
+      questions: Questions?
+  home:
+    show:
+      tagline: Original designs, printed on demand and shipped to your door.
+      shop_all: Shop all
+      collections: Collections
+      new_arrivals: New arrivals
+      view_all: View all
+      opening_soon: Our first products are on their way. Check back soon.
+  collections:
+    show:
+      empty: Nothing in this collection yet.
+  carts:
+    show:
+      title: Your cart
+      quantity: Quantity
+      update: Update
+      remove: Remove
+      subtotal: Subtotal
+      shipping_at_checkout: Shipping is added at checkout.
+      checkout: Check out
+      continue: Continue shopping
+      empty: Your cart is empty.
+      start_shopping: Start shopping
+      unavailable:
+        one: An item in your cart is no longer available and was left out.
+        other: "%{count} items in your cart are no longer available and were left out."
+  cart_items:
+    create:
+      added: "%{product} was added to your cart."
+      unavailable: That option isn't available any more.
+  checkouts:
+    empty: Your cart is empty.
+    rate_limited: Too many tries. Wait a minute and try again.
+    new:
+      title: Checkout
+      contact: Contact
+      email_hint: For your order confirmation and shipping updates.
+      phone_hint: Optional, for the delivery driver.
+      shipping: Shipping address
+      summary: Order summary
+      subtotal: Subtotal
+      shipping_cost: Shipping
+      free: Free
+      total: Total
+      place_order: Place order
+      payment_note: After placing the order you'll see how to pay.
+  order_mailer:
+    summary:
+      subtotal: Subtotal
+      shipping: Shipping
+      total: Total
+      ship_to: Shipping to
+    confirmation:
+      subject: "%{app}: order %{number} confirmed"
+      heading: Thank you, %{name}!
+      intro: We've received your order %{number}.
+      payment: How to pay
+      view: View your order
+    shipped:
+      subject: "%{app}: order %{number} is on its way"
+      heading: Order %{number} has shipped
+      intro: Your order is on its way.
+      tracking: Tracking
+      track: Track your package
+      view: View your order
+  layouts:
+    site:
+      shop: Shop
+      cart_with_count:
+        zero: Cart
+        one: Cart, 1 item
+        other: Cart, %{count} items
+    admin:
+      orders: Orders
+      products: Products
+      collections: Collections
+      settings: Settings
+  ui:
+    pagination:
+      label: Pages
+      previous: Previous
+      next: Next
+      page: Page %{number} of %{pages}
+  admin:
+    order_mailer:
+      placed:
+        subject: "New order %{number} (%{total})"
+        intro: "New order %{number} from %{name} (%{email})."
+        open: Open the order
+    dashboards:
+      show:
+        title: Dashboard
+        welcome: Welcome back, %{name}.
+        sales: Sales
+        last_30_days: Last 30 days, paid orders
+        orders: Orders
+        today:
+          zero: None today
+          one: 1 today
+          other: "%{count} today"
+        awaiting_payment: Awaiting payment
+        to_ship: To ship
+        recent_orders: Recent orders
+        all_orders: All orders
+        no_orders: No orders yet. They show up here as soon as someone checks out.
+        setup:
+          title: Get your shop ready
+          product: Add your first product
+          settings: Set your currency and shipping rates
+          staff: Invite your staff
+          view: Look at your shop
+    orders:
+      invalid_transition: Order %{number} is %{status} now, so that can't be done.
+      index:
+        title: Orders
+        all: All
+        filters:
+          open: Open
+          pending: Awaiting payment
+          to_ship: To ship
+          shipped: Shipped
+          closed: Closed
+        search: Number, email or name
+        search_button: Search
+        empty_title: No orders yet
+        empty_description: Orders show up here as soon as someone checks out.
+        no_results: Nothing matches "%{query}".
+      show:
+        title: Order %{number}
+        mark_paid: Mark as paid
+        start_production: Start production
+        mark_delivered: Mark as delivered
+        more: More
+        cancel: Cancel order
+        confirm_cancel: Cancel order %{number}?
+        refund: Mark as refunded
+        confirm_refund: Mark order %{number} as refunded? Refund the money with your payment provider too.
+        sku: SKU %{sku}
+        subtotal: Subtotal
+        shipping: Shipping
+        total: Total
+        ship:
+          title: Ship this order
+          description: Add the tracking details; the buyer gets an email with them.
+          carrier: Carrier
+          tracking_number: Tracking number
+          tracking_url: Tracking link
+          submit: Mark as shipped
+        timeline: Timeline
+        by_buyer: Buyer
+        events:
+          placed: Order placed
+          paid: Marked as paid
+          in_production: Production started
+          shipped: Shipped
+          delivered: Delivered
+          cancelled: Cancelled
+          refunded: Refunded
+          edited: Order details edited
+        customer: Customer
+        ship_to: Shipping to
+        buyer_note: Note from the buyer
+        tracking: Tracking
+        track: Track the package
+        buyer_page: The buyer's order page
+        staff_note_hint: Only staff see this.
+        edit_contact: Edit contact and address
+        save: Save
+      update:
+        notice: The order was saved.
+      payments:
+        create:
+          notice: Order %{number} is marked as paid.
+      productions:
+        create:
+          notice: Order %{number} is in production.
+      shipments:
+        create:
+          notice: Order %{number} is marked as shipped. The buyer was emailed.
+      deliveries:
+        create:
+          notice: Order %{number} is marked as delivered.
+      cancellations:
+        create:
+          notice: Order %{number} was cancelled.
+      refunds:
+        create:
+          notice: Order %{number} is marked as refunded.
+    products:
+      index:
+        title: Products
+        new: Add product
+        all: All
+        search: Search products
+        search_button: Search
+        variants:
+          one: 1 variant
+          other: "%{count} variants"
+        empty_title: No products yet
+        empty_description: Add what you sell, with its photos, options and prices.
+        no_results: No products match.
+      new:
+        title: Add product
+      edit:
+        view: View on site
+        delete: Delete
+        confirm_delete: Delete %{title}? Orders that have it keep their copy.
+      form:
+        photos: Photos
+        add_photos: Add photos
+        photos_hint: The first photo is the one shown in lists. Images up to 20 MB.
+        remove_photo: Remove photo
+        options: Options
+        options_hint: Like Color and Size. Separate the values with commas; a variant is made for each combination.
+        option_name: Option %{number}
+        option_name_examples:
+          "1": Color
+          "2": Size
+          "3": Material
+        option_values: Values
+        option_values_examples:
+          "1": Black, White, Navy
+          "2": S, M, L, XL
+          "3": Cotton, Blend
+        variants: Variants
+        pricing: Pricing
+        variant: Variant
+        variants_hint: Compare-at price shows the old price crossed out. Untick "For sale" to hide a variant from buyers.
+        status_hint: Only active products are on the site.
+        base_price_hint: Every variant starts at this price; change them one by one after saving.
+        slug_hint: "%{url}"
+        collections: Collections
+        create: Add product
+        save: Save
+      create:
+        notice: "%{title} was added."
+      update:
+        notice: "%{title} was saved."
+      destroy:
+        notice: "%{title} was deleted."
+      images:
+        destroy:
+          notice: The photo was removed.
+    collections:
+      index:
+        title: Collections
+        description: Groups of products on the site.
+        new: Add collection
+        products:
+          zero: No products
+          one: 1 product
+          other: "%{count} products"
+        empty_title: No collections yet
+        empty_description: Group products, like "New in" or "Gifts", to help buyers find them.
+      new:
+        title: Add collection
+      edit:
+        view: View on site
+        delete: Delete
+        confirm_delete: Delete %{title}? Its products stay.
+      form:
+        slug_hint: Leave empty to make it from the title.
+        position_hint: Lower numbers come first.
+        products: Products
+        no_products: Add products first.
+        create: Add collection
+        save: Save
+      create:
+        notice: "%{title} was added."
+      update:
+        notice: "%{title} was saved."
+      destroy:
+        notice: "%{title} was deleted."
+    settings:
+      edit:
+        title: Settings
+        description: How the shop sells and ships.
+        store: Store
+        currency_hint: Prices are in this currency. Orders keep the currency they were placed in.
+        contact_email_hint: Shown on the site and used as the reply-to address of order emails.
+        shipping: Shipping
+        free_shipping_hint: Leave empty for no free shipping.
+        countries_hint: Two-letter codes, separated by commas. Leave empty to ship everywhere.
+        payment: Payment
+        payment_hint: Shown to buyers after they place an order, until it's paid.
+        save: Save
+      update:
+        notice: Settings saved.

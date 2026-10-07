@@ -1,0 +1,7 @@
+<%= page_header @collection.title, breadcrumbs: [ [ t("admin.collections.index.title"), admin_collections_path ], [ @collection.title, nil ] ] do %>
+  <%= link_to t(".view"), collection_path(@collection), class: button_classes(:secondary), target: "_blank" %>
+  <%= button_to t(".delete"), admin_collection_path(@collection), method: :delete, class: button_classes(:danger),
+        form: { data: { turbo_confirm: t(".confirm_delete", title: @collection.title) } } %>
+<% end %>
+
+<%= render "form", collection: @collection %>

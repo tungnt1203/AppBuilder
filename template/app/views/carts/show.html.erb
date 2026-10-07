@@ -1,0 +1,53 @@
+<% content_for :title, t(".title") %>
+
+<div class="mx-auto max-w-3xl px-4 py-12">
+  <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
+
+  <% if @unavailable.positive? %>
+    <%= alert t(".unavailable", count: @unavailable), tone: :warning, class: "mt-6" %>
+  <% end %>
+
+  <% if @items.any? %>
+    <ul class="mt-6 divide-y divide-line border-y border-line">
+      <% @items.each do |item| %>
+        <li class="flex gap-4 py-5" id="<%= dom_id(item) %>">
+          <%= link_to product_path(item.product), class: "w-20 shrink-0" do %>
+            <%= product_image item.product, size: :thumb, class: "aspect-square w-20 rounded-lg" %>
+          <% end %>
+          <div class="flex min-w-0 flex-1 flex-col gap-2">
+            <div class="flex justify-between gap-4">
+              <div class="min-w-0">
+                <%= link_to item.product.title, product_path(item.product), class: "font-medium text-ink" %>
+                <% if item.variant.title %>
+                  <p class="text-sm text-muted"><%= item.variant.title %></p>
+                <% end %>
+              </div>
+              <p class="font-medium whitespace-nowrap"><%= money(item.total_cents) %></p>
+            </div>
+            <div class="flex items-center gap-3">
+              <%= form_with url: cart_item_path(item), method: :patch, data: { controller: "autosubmit" } do |form| %>
+                <%= form.label :quantity, t(".quantity"), class: "sr-only", for: "quantity_#{item.id}" %>
+                <%= form.number_field :quantity, value: item.quantity, min: 0, max: Cart::MAX_QUANTITY, inputmode: "numeric",
+                      id: "quantity_#{item.id}", class: "w-20 #{field_classes}", data: { action: "change->autosubmit#submit" } %>
+                <noscript><%= form.button t(".update"), type: "submit", class: button_classes(:secondary, size: :sm) %></noscript>
+              <% end %>
+              <%= button_to t(".remove"), cart_item_path(item), method: :delete, class: "text-sm text-muted underline hover:text-ink" %>
+            </div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+
+    <div class="mt-6 flex flex-col items-end gap-1">
+      <p class="text-lg font-medium"><%= t(".subtotal") %>: <%= money(@items.sum(&:total_cents)) %></p>
+      <p class="text-sm text-muted"><%= t(".shipping_at_checkout") %></p>
+      <%= link_to t(".checkout"), new_checkout_path, class: "#{button_classes} mt-4 w-full py-2.5 sm:w-auto sm:px-8" %>
+      <%= link_to t(".continue"), products_path, class: "mt-2 text-sm #{link_classes}" %>
+    </div>
+  <% else %>
+    <div class="rounded-xl border border-dashed border-line px-6 py-16 text-center">
+      <p class="text-muted"><%= t(".empty") %></p>
+      <%= link_to t(".start_shopping"), products_path, class: "#{button_classes} mt-6" %>
+    </div>
+  <% end %>
+</div>

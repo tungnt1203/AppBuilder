@@ -1,17 +1,19 @@
 <%# The site's header. Redesign it for the app: logo or wordmark, the few links visitors need,
-    the main call to action, the cart, and with customer accounts on, the customer's account.
-    Pages can add links with content_for :site_nav. There's no link to /admin here: the owner
-    and staff go there directly. %>
+    the cart, and with customer accounts on, the customer's account. Pages can add links with
+    content_for :site_nav. There's no link to /admin here: the owner and staff go there directly. %>
 <header class="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
-  <div class="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-    <%= link_to Rails.configuration.x.app_name, root_path, class: "font-display font-semibold text-ink" %>
-    <% if content_for?(:site_nav) %>
-      <nav class="flex flex-1 items-center gap-1 overflow-x-auto" aria-label="<%= t("ui.navigation") %>">
-        <%= yield :site_nav %>
-      </nav>
-    <% else %>
-      <div class="flex-1"></div>
-    <% end %>
+  <div class="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4">
+    <%= link_to Rails.configuration.x.app_name, root_path, class: "mr-2 truncate font-display font-semibold text-ink" %>
+    <nav class="flex flex-1 items-center gap-1 overflow-x-auto" aria-label="<%= t("ui.navigation") %>">
+      <%= bar_link_to t("layouts.site.shop"), products_path %>
+      <%= yield :site_nav %>
+    </nav>
     <%= render "layouts/site/account" if customer_accounts? %>
+    <%= link_to cart_path, class: "#{button_classes(:ghost)} relative", id: "cart-link", aria: { label: t("layouts.site.cart_with_count", count: cart_item_count) } do %>
+      <%= icon "shopping-bag", size: 20 %>
+      <% if cart_item_count.positive? %>
+        <span class="absolute -top-0.5 -right-0.5 grid min-w-5 place-items-center rounded-full bg-brand-600 px-1 text-[0.6875rem] leading-5 font-semibold text-white"><%= cart_item_count %></span>
+      <% end %>
+    <% end %>
   </div>
 </header>

@@ -46,9 +46,6 @@ vi:
     form_errors:
       heading:
         other: "Có %{count} lỗi cần sửa:"
-  home:
-    show:
-      coming_soon: Sắp ra mắt. Hẹn gặp lại bạn sớm.
   sessions:
     new:
       title: Đăng nhập
@@ -113,11 +110,6 @@ vi:
   admin:
     base:
       only_admins: Chỉ quản trị viên mới làm được việc này.
-    dashboards:
-      show:
-        welcome: Xin chào, %{name}
-        empty_title: Chưa có gì ở đây
-        empty_description: Đây là nơi bạn quản lý ứng dụng.
     first_runs:
       new:
         title: Thiết lập

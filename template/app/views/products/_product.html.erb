@@ -1,0 +1,13 @@
+<%# A product in a grid: photo, title, price. %>
+<%= link_to product_path(product), class: "group block" do %>
+  <div class="aspect-4/5 overflow-hidden rounded-xl">
+    <%= product_image product, size: :card, class: "size-full transition duration-300 group-hover:scale-[1.03]" %>
+  </div>
+  <h3 class="mt-3 text-sm font-medium text-ink"><%= product.title %></h3>
+  <p class="mt-1 text-sm text-muted">
+    <%= price_range(product) %>
+    <% unless product.available? %>
+      · <%= t("products.product.sold_out") %>
+    <% end %>
+  </p>
+<% end %>

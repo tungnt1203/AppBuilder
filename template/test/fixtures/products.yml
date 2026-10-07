@@ -1,0 +1,21 @@
+tee:
+  title: Cat Mom Tee
+  slug: cat-mom-tee
+  description: Soft cotton tee with a hand-drawn cat.
+  status: active
+  option1_name: Color
+  option1_values: <%= %w[ Black White ].to_json %>
+  option2_name: Size
+  option2_values: <%= %w[ S M ].to_json %>
+  published_at: <%= 2.days.ago.to_fs(:db) %>
+
+mug:
+  title: Morning Mug
+  slug: morning-mug
+  status: active
+  published_at: <%= 1.day.ago.to_fs(:db) %>
+
+hoodie:
+  title: Draft Hoodie
+  slug: draft-hoodie
+  status: draft

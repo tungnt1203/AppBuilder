@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-This is a Rails 8 app that its owner self-hosts with ONCE (https://github.com/basecamp/once).
+This is a Rails 8 app, an online shop to start with (see "The shop"), that its owner self-hosts
+with ONCE (https://github.com/basecamp/once).
 The people describing features are usually not programmers: build what they ask for as a
 complete, working feature, and explain the result in plain language. Reply entirely in the
 language the owner writes in.
@@ -29,15 +30,23 @@ phones), build it as close as works and say why.
 
 ## Language and time zone
 
-Set these once, at the start of a new app, to match the owner (`config/application.rb`):
+Set these once, at the start of a new app (`config/application.rb`). The two halves can speak
+different languages: a Vietnamese owner selling to buyers in the US has the site in English and
+/admin in Vietnamese.
 
-- `config.i18n.default_locale`: `:vi` for Vietnamese owners, otherwise `:en`.
-- `config.time_zone`: where the app's users are, e.g. `"Asia/Ho_Chi_Minh"` for Vietnam.
+- `config.i18n.default_locale`: the buyers' language, for the site and the emails to buyers. `:en`
+  unless the owner sells to Vietnamese buyers (`:vi`).
+- `config.x.admin_locale`: the owner's language, for /admin and the emails to staff (`:vi` for a
+  Vietnamese owner).
+- `config.time_zone`: the owner's, e.g. `"Asia/Ho_Chi_Minh"`; order times in /admin use it.
 
-The built-in screens (sign in, accounts, /admin, emails) are already translated in `config/locales/en.yml` and
-`vi.yml`, and rails-i18n translates validation errors, dates and numbers, so don't write those again.
-Write new UI copy directly in the owner's language. Format with `l(date)`, `l(time, format: :short)`
-and `number_to_currency`, which follow the locale (for example `150.000 VNĐ` and `05/10/2026` in Vietnamese).
+The built-in screens (the shop, sign in, accounts, /admin, emails) are already translated in
+`config/locales/*.yml` (en and vi), and rails-i18n translates validation errors, dates and numbers,
+so don't write those again. Write new copy for the site in the buyers' language and for /admin in
+the owner's; when both are the same language, write it directly in the view. Format with `l(date)`,
+`l(time, format: :short)` and `money(cents)`.
+
+Reply to the owner in the language they write in, whatever the app's languages are.
 
 ## Stack (fixed)
 
@@ -97,6 +106,39 @@ It never sends visitors to `/admin`, and has no link to it; the owner goes to `/
 (a new install starts the owner's first-run setup there). Test site pages with no users
 (`User.delete_all`).
 
+## The shop (built in)
+
+Every app starts as a working shop. Build on it; don't write a second cart, checkout or order model.
+
+- **Catalog**: `Product` (title, description, photos as `images`, status draft/active/archived, up to
+  three options like Color × Size) and its `Variant`s, one per combination of option values, each
+  with its own price, compare-at price, SKU and "for sale" switch. Saving a product makes and
+  removes variants to match its options (`Product#sync_variants`). `Collection` groups products.
+  Products and collections are found by `slug` (`product_path(product)` uses it).
+- **Cart and checkout**: `Cart` (signed cookie, `current_cart` / `current_cart!` in site controllers),
+  `CartItem`, and `Checkout`, which turns a cart into an `Order` in one transaction. Prices, titles
+  and totals always come from the database and are copied into the order's `LineItem`s.
+- **Orders**: `Order` moves through `pending → paid → in_production → shipped → delivered` (or
+  `cancelled`, `refunded`) only with its methods (`mark_paid!`, `start_production!`, `ship!`,
+  `mark_delivered!`, `cancel!`, `refund!`), which check the step is allowed, record an `OrderEvent`
+  in the timeline and send the buyer's emails (`OrderMailer`). Never set `status` directly. Buyers
+  reach an order by its token (`order_path(order)`); staff at `/admin/orders`.
+- **Money** is integer cents in `*_cents` columns, edited as decimals through `money_attribute`
+  (`price` / `price=`), and shown with `money(cents)` and `price_range(product)` (`MoneyHelper`) in
+  the shop's currency. Never use floats for money, and never total prices in a view.
+- **Settings**: `Store.current` (currency, flat-rate shipping, free-shipping threshold, countries
+  shipped to, payment instructions), edited by admins at `/admin/settings`.
+- **Payment and fulfillment** are manual for now: an order waits as `pending` with the store's
+  payment instructions until staff mark it paid, and staff add tracking when they ship. Payment
+  providers (Stripe) and print-on-demand providers plug in later as gems; don't write payment or
+  provider API code in the app.
+- **Development data**: `db/seeds.rb` adds a sample catalog for the preview. When the owner gives
+  their real products, replace the samples there.
+
+Change the shop's screens freely to fit the owner (design skill), keep its rules (prices from the
+database, statuses through the methods, guest checkout), and add features around it: reviews,
+discount codes, a size guide, gift notes, product pages that look like the owner's brand.
+
 ## Accounts
 
 Two kinds, never mixed: a customer can't sign in to `/admin`, and a staff account isn't a customer.
@@ -143,8 +185,8 @@ first and write it there. A plan for a new app includes a short "Look and feel" 
 - Interactivity comes from Turbo (Frames, Streams, morphing) and Stimulus (`shell`, `dialog`, `menu`,
   plus small controllers of your own).
 - Set the app's name in `config.x.app_name` (`config/application.rb`).
-- `root` is the site's home page (`HomeController`, a "coming soon" placeholder) and `/admin`'s is
-  `Admin::DashboardsController`. Replace both with the app's real ones.
+- `root` is the shop's home page (`HomeController`: collections and newest products) and `/admin`'s is
+  `Admin::DashboardsController` (sales and orders at a glance). Redesign the home page for the owner.
 
 ## Definition of done
 

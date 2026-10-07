@@ -1,0 +1,140 @@
+<%= page_header t(".title", number: @order.name), l(@order.created_at, format: :long),
+      breadcrumbs: [ [ t("admin.orders.index.title"), admin_orders_path ], [ @order.name, nil ] ] do %>
+  <%= order_status_badge @order %>
+  <% if @order.can_mark_paid? %>
+    <%= button_to t(".mark_paid"), admin_order_payment_path(@order), class: button_classes %>
+  <% end %>
+  <% if @order.can_start_production? %>
+    <%= button_to t(".start_production"), admin_order_production_path(@order), class: button_classes(:secondary) %>
+  <% end %>
+  <% if @order.can_mark_delivered? %>
+    <%= button_to t(".mark_delivered"), admin_order_delivery_path(@order), class: button_classes(:secondary) %>
+  <% end %>
+  <% if @order.can_cancel? || @order.can_refund? %>
+    <%= menu t(".more") do %>
+      <% if @order.can_cancel? %>
+        <%= menu_button_to t(".cancel"), admin_order_cancellation_path(@order), form: { data: { turbo_confirm: t(".confirm_cancel", number: @order.name) } } %>
+      <% end %>
+      <% if @order.can_refund? %>
+        <%= menu_button_to t(".refund"), admin_order_refund_path(@order), form: { data: { turbo_confirm: t(".confirm_refund", number: @order.name) } } %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<div class="grid gap-6 lg:grid-cols-[1fr_20rem]">
+  <div class="space-y-6">
+    <%= card padded: false do %>
+      <ul class="divide-y divide-line">
+        <% @order.line_items.each do |item| %>
+          <li class="flex items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6">
+            <% if item.product %>
+              <%= link_to edit_admin_product_path(item.product), class: "shrink-0" do %>
+                <%= product_image item.product, size: :thumb, class: "size-12 rounded-lg" %>
+              <% end %>
+            <% else %>
+              <div class="grid size-12 shrink-0 place-items-center rounded-lg bg-surface-muted text-muted"><%= icon "package", size: 18 %></div>
+            <% end %>
+            <div class="min-w-0 flex-1 text-sm">
+              <p class="font-medium text-ink"><%= item.product_title %></p>
+              <p class="text-muted"><%= [ item.variant_title, (t(".sku", sku: item.sku) if item.sku) ].compact.join(" · ") %></p>
+              <p class="text-muted sm:hidden"><%= money(item.unit_price_cents, @order.currency) %> × <%= item.quantity %></p>
+            </div>
+            <p class="hidden text-sm text-muted whitespace-nowrap sm:block"><%= money(item.unit_price_cents, @order.currency) %> × <%= item.quantity %></p>
+            <p class="text-right text-sm font-medium whitespace-nowrap sm:w-20"><%= money(item.total_cents, @order.currency) %></p>
+          </li>
+        <% end %>
+      </ul>
+      <dl class="space-y-2 border-t border-line px-6 py-4 text-sm">
+        <div class="flex justify-between"><dt class="text-muted"><%= t(".subtotal") %></dt><dd><%= money(@order.subtotal_cents, @order.currency) %></dd></div>
+        <div class="flex justify-between"><dt class="text-muted"><%= t(".shipping") %></dt><dd><%= money(@order.shipping_cents, @order.currency) %></dd></div>
+        <div class="flex justify-between font-semibold"><dt><%= t(".total") %></dt><dd><%= money(@order.total_cents, @order.currency) %></dd></div>
+      </dl>
+    <% end %>
+
+    <% if @order.can_ship? %>
+      <%= card do %>
+        <h2 class="flex items-center gap-2 text-sm font-semibold text-ink"><%= icon "truck", size: 18 %> <%= t(".ship.title") %></h2>
+        <p class="mt-1 text-sm text-muted"><%= t(".ship.description") %></p>
+        <%= form_with url: admin_order_shipment_path(@order), class: "mt-4 grid gap-4 sm:grid-cols-2" do |form| %>
+          <div class="space-y-1.5">
+            <%= form.label :carrier, t(".ship.carrier") %>
+            <%= form.text_field :carrier, placeholder: "USPS", list: "carriers" %>
+            <datalist id="carriers"><% %w[ USPS UPS FedEx DHL YunExpress ].each do |carrier| %><option value="<%= carrier %>"><% end %></datalist>
+          </div>
+          <div class="space-y-1.5">
+            <%= form.label :tracking_number, t(".ship.tracking_number") %>
+            <%= form.text_field :tracking_number %>
+          </div>
+          <div class="space-y-1.5 sm:col-span-2">
+            <%= form.label :tracking_url, t(".ship.tracking_url") %>
+            <%= form.url_field :tracking_url, placeholder: "https://" %>
+          </div>
+          <div class="sm:col-span-2"><%= form.submit t(".ship.submit") %></div>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= card do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".timeline") %></h2>
+      <ol class="mt-4 space-y-4">
+        <% @order.events.reverse_each do |event| %>
+          <li class="flex gap-3 text-sm">
+            <span class="mt-1.5 size-2 shrink-0 rounded-full bg-brand-500"></span>
+            <div>
+              <p class="text-ink"><%= t(".events.#{event.action}", default: event.action.humanize) %><%= ": #{event.message}" if event.message %></p>
+              <p class="text-xs text-muted"><%= l(event.created_at, format: :short) %> · <%= event.user&.name || t(".by_buyer") %></p>
+            </div>
+          </li>
+        <% end %>
+      </ol>
+    <% end %>
+  </div>
+
+  <div class="space-y-6">
+    <%= card do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".customer") %></h2>
+      <p class="mt-2 text-sm"><%= mail_to @order.email, class: link_classes %></p>
+      <% if @order.phone.present? %><p class="text-sm text-muted"><%= @order.phone %></p><% end %>
+      <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".ship_to") %></h2>
+      <p class="mt-2 text-sm text-muted"><%= safe_join(@order.shipping_address_lines, tag.br) %></p>
+      <% if @order.note.present? %>
+        <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".buyer_note") %></h2>
+        <p class="mt-2 text-sm text-muted"><%= @order.note %></p>
+      <% end %>
+      <% if @order.tracking_number.present? %>
+        <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".tracking") %></h2>
+        <p class="mt-2 text-sm text-muted">
+          <%= [ @order.carrier, @order.tracking_number ].compact_blank.join(" · ") %>
+          <% if @order.tracking_url.present? %><br><%= link_to t(".track"), @order.tracking_url, class: link_classes, target: "_blank", rel: "noopener" %><% end %>
+        </p>
+      <% end %>
+      <p class="mt-6 text-sm"><%= link_to t(".buyer_page"), order_path(@order), class: link_classes, target: "_blank" %></p>
+    <% end %>
+
+    <%= card do %>
+      <%= form_with model: @order, url: admin_order_path(@order), class: "space-y-4" do |form| %>
+        <%= form.errors %>
+        <%= form.field :staff_note, :text_area, rows: 3, hint: t(".staff_note_hint") %>
+        <details class="group" <%= "open" if @order.errors.any? %>>
+          <summary class="cursor-pointer text-sm font-medium text-ink"><%= t(".edit_contact") %></summary>
+          <div class="mt-4 space-y-4">
+            <%= form.field :email, :email_field, required: true %>
+            <%= form.field :phone, :telephone_field %>
+            <%= form.field :shipping_name, required: true %>
+            <%= form.field :shipping_address1, required: true %>
+            <%= form.field :shipping_address2 %>
+            <%= form.field :shipping_city, required: true %>
+            <%= form.field :shipping_region %>
+            <%= form.field :shipping_postal_code %>
+            <div class="space-y-1.5">
+              <%= form.label :shipping_country %>
+              <%= form.select :shipping_country, Country.options %>
+            </div>
+          </div>
+        </details>
+        <%= form.submit t(".save") %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

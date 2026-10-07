@@ -1,0 +1,9 @@
+<%= page_header @product.title, breadcrumbs: [ [ t("admin.products.index.title"), admin_products_path ], [ @product.title, nil ] ] do %>
+  <% if @product.active? %>
+    <%= link_to t(".view"), product_path(@product), class: button_classes(:secondary), target: "_blank" %>
+  <% end %>
+  <%= button_to t(".delete"), admin_product_path(@product), method: :delete, class: button_classes(:danger),
+        form: { data: { turbo_confirm: t(".confirm_delete", title: @product.title) } } %>
+<% end %>
+
+<%= render "form", product: @product %>

@@ -1,4 +1,4 @@
-class Admin::InvitationsMailer < ApplicationMailer
+class Admin::InvitationsMailer < Admin::BaseMailer
   def invite(user)
     @user = user
     @invitation_url = admin_invitation_url(user.generate_token_for(:invitation))

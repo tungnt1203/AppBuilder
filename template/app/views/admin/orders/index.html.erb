@@ -1,0 +1,27 @@
+<%= page_header t(".title") %>
+
+<%= tabs do %>
+  <%= tab_to t(".all"), admin_orders_path(q: params[:q].presence) %>
+  <% Admin::OrdersController::FILTERS.each_key do |filter| %>
+    <%= tab_to "#{t(".filters.#{filter}")} (#{@counts[filter]})", admin_orders_path(filter:, q: params[:q].presence) %>
+  <% end %>
+<% end %>
+
+<%= toolbar do %>
+  <%= form_with url: admin_orders_path, method: :get, class: "flex w-full max-w-sm gap-2" do |form| %>
+    <%= form.hidden_field :filter, value: @filter if @filter %>
+    <%= form.search_field :q, value: params[:q], placeholder: t(".search"), aria: { label: t(".search") } %>
+    <%= form.button t(".search_button"), type: "submit", name: nil, class: button_classes(:secondary) %>
+  <% end %>
+<% end %>
+
+<% if @page.records.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <%= render partial: "admin/orders/order", collection: @page.records %>
+    </ul>
+  <% end %>
+  <%= render "ui/pagination", page: @page %>
+<% else %>
+  <%= empty_state t(".empty_title"), params[:q].present? ? t(".no_results", query: params[:q]) : t(".empty_description") %>
+<% end %>

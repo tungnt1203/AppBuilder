@@ -19,6 +19,7 @@ class Admin::DashboardsControllerTest < ActionDispatch::IntegrationTest
 
     get admin_root_path
     assert_response :success
-    assert_select "h1", /Sam Staff/
+    assert_select "h1", I18n.t("admin.dashboards.show.title")
+    assert_select "p", /Sam Staff/
   end
 end

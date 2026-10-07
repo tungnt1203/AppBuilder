@@ -1,0 +1,11 @@
+<h1><%= t(".heading", name: @order.shipping_name) %></h1>
+<p><%= t(".intro", number: @order.name) %></p>
+
+<%= render "order_mailer/summary", order: @order %>
+
+<% if @order.pending? && @store.payment_instructions.present? %>
+  <h2><%= t(".payment") %></h2>
+  <%= simple_format @store.payment_instructions %>
+<% end %>
+
+<p><%= link_to t(".view"), order_url(@order) %></p>

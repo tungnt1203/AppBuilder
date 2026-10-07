@@ -1,3 +1,40 @@
-<%= page_header t(".welcome", name: Current.user.name) %>
+<%= page_header t(".title"), t(".welcome", name: Current.user.name) %>
 
-<%= empty_state t(".empty_title"), t(".empty_description") %>
+<% if @product_count.zero? %>
+  <%= card class: "mb-6" do %>
+    <h2 class="font-semibold text-ink"><%= t(".setup.title") %></h2>
+    <ol class="mt-3 list-decimal space-y-2 pl-5 text-sm text-muted">
+      <li><%= link_to t(".setup.product"), new_admin_product_path, class: link_classes %></li>
+      <% if Current.user.administrator? %>
+        <li><%= link_to t(".setup.settings"), edit_admin_settings_path, class: link_classes %></li>
+        <li><%= link_to t(".setup.staff"), admin_users_path, class: link_classes %></li>
+      <% end %>
+      <li><%= link_to t(".setup.view"), root_path, class: link_classes, target: "_blank" %></li>
+    </ol>
+  <% end %>
+<% end %>
+
+<div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <%= stat money(@sales_30_days, @store.currency), t(".sales"), hint: t(".last_30_days") %>
+  <%= stat @orders_30_days, t(".orders"), hint: t(".today", count: @orders_today) %>
+  <%= link_to admin_orders_path(filter: "pending"), class: "block" do %>
+    <%= stat @pending_count, t(".awaiting_payment") %>
+  <% end %>
+  <%= link_to admin_orders_path(filter: "to_ship"), class: "block" do %>
+    <%= stat @to_ship_count, t(".to_ship") %>
+  <% end %>
+</div>
+
+<%= card padded: false do %>
+  <div class="flex items-center justify-between border-b border-line px-6 py-4">
+    <h2 class="text-sm font-semibold text-ink"><%= t(".recent_orders") %></h2>
+    <%= link_to t(".all_orders"), admin_orders_path, class: "text-sm #{link_classes}" if @recent_orders.any? %>
+  </div>
+  <% if @recent_orders.any? %>
+    <ul class="divide-y divide-line">
+      <%= render partial: "admin/orders/order", collection: @recent_orders %>
+    </ul>
+  <% else %>
+    <p class="px-6 py-10 text-center text-sm text-muted"><%= t(".no_orders") %></p>
+  <% end %>
+<% end %>

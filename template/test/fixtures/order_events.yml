@@ -1,0 +1,12 @@
+pending_placed:
+  order: pending
+  action: placed
+
+paid_placed:
+  order: paid
+  action: placed
+
+paid_paid:
+  order: paid
+  action: paid
+  user: owner

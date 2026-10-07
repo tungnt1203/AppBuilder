@@ -1,0 +1,25 @@
+<%= page_header t(".title"), t(".description") do %>
+  <%= link_to t(".new"), new_admin_collection_path, class: button_classes %>
+<% end %>
+
+<% if @collections.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @collections.each do |collection| %>
+        <li>
+          <%= link_to edit_admin_collection_path(collection), class: "flex items-center justify-between gap-4 px-6 py-4 hover:bg-surface-muted" do %>
+            <span class="min-w-0">
+              <span class="block truncate text-sm font-medium text-ink"><%= collection.title %></span>
+              <span class="block truncate text-xs text-muted">/collections/<%= collection.slug %></span>
+            </span>
+            <span class="text-sm text-muted"><%= t(".products", count: collection.products_count) %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") do %>
+    <%= link_to t(".new"), new_admin_collection_path, class: button_classes %>
+  <% end %>
+<% end %>

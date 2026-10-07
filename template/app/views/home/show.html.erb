@@ -1,5 +1,33 @@
-<%# Placeholder home page of the customers' site. Replace it with the app's real one. %>
-<section class="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-4 py-24 text-center">
-  <h1 class="font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl"><%= Rails.configuration.x.app_name %></h1>
-  <p class="mt-4 text-lg text-muted"><%= t(".coming_soon") %></p>
+<%# The site's home page. A plain starting point: redesign it for the shop (design skill). %>
+<section class="border-b border-line bg-surface">
+  <div class="mx-auto max-w-6xl px-4 py-16 sm:py-24">
+    <h1 class="max-w-2xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-6xl"><%= Rails.configuration.x.app_name %></h1>
+    <p class="mt-4 max-w-xl text-lg text-muted"><%= t(".tagline") %></p>
+    <%= link_to t(".shop_all"), products_path, class: "#{button_classes} mt-8" %>
+  </div>
+</section>
+
+<% if @collections.any? %>
+  <section class="mx-auto max-w-6xl px-4 pt-16">
+    <h2 class="font-display text-2xl font-semibold tracking-tight"><%= t(".collections") %></h2>
+    <div class="mt-6 flex gap-3 overflow-x-auto pb-2">
+      <% @collections.each do |collection| %>
+        <%= link_to collection.title, collection_path(collection), class: "shrink-0 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium hover:border-ink" %>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+
+<section class="mx-auto max-w-6xl px-4 pt-16">
+  <div class="flex items-end justify-between gap-4">
+    <h2 class="font-display text-2xl font-semibold tracking-tight"><%= t(".new_arrivals") %></h2>
+    <%= link_to t(".view_all"), products_path, class: "text-sm #{link_classes}" if @products.any? %>
+  </div>
+  <div class="mt-6">
+    <% if @products.any? %>
+      <%= render "products/grid", products: @products %>
+    <% else %>
+      <p class="rounded-xl border border-dashed border-line px-6 py-16 text-center text-muted"><%= t(".opening_soon") %></p>
+    <% end %>
+  </div>
 </section>

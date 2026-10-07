@@ -1,9 +1,13 @@
-<%# The signed-in staff member, a way to the customers' site, and sign out. %>
+<%# The signed-in staff member, a way to the customers' site, and sign out. Icons only on phones. %>
 <div class="flex items-center gap-1">
-  <%= link_to t("layouts.admin.view_site"), root_path, class: button_classes(:ghost), target: "_blank" %>
+  <%= link_to root_path, class: button_classes(:ghost), target: "_blank", title: t("layouts.admin.view_site") do %>
+    <%= icon "store", size: 18 %><span class="max-sm:sr-only"><%= t("layouts.admin.view_site") %></span>
+  <% end %>
   <span class="inline-flex items-center gap-2 px-2 text-sm text-muted">
     <%= avatar Current.user.name, size: :sm %>
-    <span class="hidden max-w-40 truncate sm:inline"><%= Current.user.name %></span>
+    <span class="hidden max-w-40 truncate md:inline"><%= Current.user.name %></span>
   </span>
-  <%= button_to t("layouts.admin.sign_out"), admin_session_path, method: :delete, class: button_classes(:ghost) %>
+  <%= button_to admin_session_path, method: :delete, class: button_classes(:ghost), title: t("layouts.admin.sign_out") do %>
+    <%= icon "log-out", size: 18 %><span class="max-sm:sr-only"><%= t("layouts.admin.sign_out") %></span>
+  <% end %>
 </div>

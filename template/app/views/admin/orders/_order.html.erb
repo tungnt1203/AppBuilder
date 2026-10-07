@@ -1,0 +1,15 @@
+<li>
+  <%= link_to admin_order_path(order), class: "flex items-start gap-4 px-4 py-4 hover:bg-surface-muted sm:items-center sm:px-6" do %>
+    <span class="min-w-0 flex-1 sm:flex sm:items-center sm:gap-4">
+      <span class="block font-medium text-ink sm:w-16"><%= order.name %></span>
+      <span class="block min-w-0 sm:flex-1">
+        <span class="block truncate text-sm text-ink"><%= order.shipping_name %></span>
+        <span class="block truncate text-xs text-muted"><%= order.email %> · <%= l(order.created_at, format: :short) %></span>
+      </span>
+    </span>
+    <span class="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-4">
+      <span class="text-sm font-medium text-ink"><%= money(order.total_cents, order.currency) %></span>
+      <span class="whitespace-nowrap sm:w-32 sm:text-right"><%= order_status_badge order %></span>
+    </span>
+  <% end %>
+</li>

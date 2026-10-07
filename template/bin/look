@@ -167,18 +167,26 @@ paths.each do |path|
 
     name = "#{path.delete_prefix("/").gsub(/[^\w-]+/, "_").then { |name| name.empty? ? "home" : name }}-#{size}"
     FileUtils.rm_f(Dir[File.join(out, "#{name}{,-*}.png")])
-    page_height = browser.evaluate("document.documentElement.scrollHeight").to_i
-    total = [ (page_height.to_f / height).ceil, 1 ].max
+    # /admin's layout scrolls inside #main rather than the page; follow whichever scrolls.
+    pane = browser.evaluate(<<~JS)
+      (() => {
+        const main = document.querySelector("#main")
+        if (!main || !/auto|scroll/.test(getComputedStyle(main).overflowY) || main.scrollHeight <= main.clientHeight + 1) return null
+        return { height: main.scrollHeight, view: main.clientHeight }
+      })()
+    JS
+    page_height, step = pane ? [ pane["height"].to_i, pane["view"].to_i ] : [ browser.evaluate("document.documentElement.scrollHeight").to_i, height ]
+    total = [ (page_height.to_f / step).ceil, 1 ].max
     files = (0...[ total, options[:screens] ].min).map do |index|
       # Scrolled there first, so sticky headers and lazy images show as a visitor sees them.
-      top = [ index * height, page_height - height ].min.clamp(0..)
-      browser.execute("window.scrollTo(0, #{top})")
+      top = [ index * step, page_height - step ].min.clamp(0..)
+      browser.execute(pane ? "document.querySelector('#main').scrollTop = #{top}" : "window.scrollTo(0, #{top})")
       sleep 0.3 if index > 0
       File.join(out, "#{name}-#{index + 1}.png").tap do |file|
-        browser.screenshot(path: file, area: { x: 0, y: top, width:, height: })
+        browser.screenshot(path: file, area: { x: 0, y: pane ? 0 : top, width:, height: })
       end
     end
-    browser.execute("window.scrollTo(0, 0)")
+    browser.execute(pane ? "document.querySelector('#main').scrollTop = 0" : "window.scrollTo(0, 0)")
 
     problems += report.size
     puts "#{path} (#{size} #{width}px): #{report.empty? ? "ok" : "#{report.size} problem#{"s" if report.size > 1}"}"

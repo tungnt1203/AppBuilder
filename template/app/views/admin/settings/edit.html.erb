@@ -1,0 +1,32 @@
+<%= page_header t(".title"), t(".description") %>
+
+<%= form_with model: @store, url: admin_settings_path, method: :patch, class: "max-w-2xl space-y-6" do |form| %>
+  <%= form.errors %>
+
+  <%= card class: "space-y-4" do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".store") %></h2>
+    <div class="space-y-1.5">
+      <%= form.label :currency %>
+      <%= form.select :currency, Store::CURRENCIES.keys %>
+      <p class="text-xs text-muted"><%= t(".currency_hint") %></p>
+    </div>
+    <%= form.field :contact_email, :email_field, hint: t(".contact_email_hint") %>
+  <% end %>
+
+  <%= card class: "space-y-4" do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".shipping") %></h2>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <%= form.field :shipping_first_item, :number_field, step: 0.01, min: 0 %>
+      <%= form.field :shipping_additional_item, :number_field, step: 0.01, min: 0 %>
+    </div>
+    <%= form.field :free_shipping_threshold, :number_field, step: 0.01, min: 0, hint: t(".free_shipping_hint") %>
+    <%= form.field :ship_to_countries_text, label: Store.human_attribute_name(:ship_to_countries), placeholder: "US, CA, GB, AU", hint: t(".countries_hint") %>
+  <% end %>
+
+  <%= card class: "space-y-4" do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".payment") %></h2>
+    <%= form.field :payment_instructions, :text_area, rows: 4, hint: t(".payment_hint") %>
+  <% end %>
+
+  <%= form.submit t(".save") %>
+<% end %>
