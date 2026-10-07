@@ -1,7 +1,7 @@
 <%# Questions from the agent. The answers start the next turn. %>
 <% project = message.project %>
 
-<%= form_with url: project_messages_path(project), class: "questions", data: { controller: "answers", action: "answers#submit" } do |form| %>
+<%= form_with url: project_messages_path(project), class: "questions", data: { controller: "answers", action: "answers#submit", answers_accepts_value: project.accepts_messages? } do |form| %>
   <%= hidden_field_tag "message[body]", "", data: { answers_target: "body" }, id: nil %>
   <%= hidden_field_tag "message[plan]", project.planning? ? "1" : "0", id: nil %>
 
@@ -18,7 +18,7 @@
   <% end %>
 
   <div class="flex items-center gap-3">
-    <%= form.button "Send answers", class: "btn btn-primary", disabled: !project.accepts_messages?, data: { answers_target: "send" } %>
+    <%= form.button "Send answers", class: "btn btn-primary shrink-0 whitespace-nowrap", disabled: !project.accepts_messages?, data: { answers_target: "send" } %>
     <span class="faint text-xs">or type your own answer below</span>
   </div>
 <% end %>

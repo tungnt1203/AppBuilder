@@ -446,7 +446,55 @@
   }
   [data-preview-target="pickButton"][aria-pressed="true"] { background: var(--color-jade, #2f8f83); color: white; }
 
-  form.dropping .capsule { outline: 2px dashed var(--link); outline-offset: 3px; }
+  form.dropping .composer { outline: 2px dashed var(--link); outline-offset: 3px; }
+
+  /* The studio's message box: text on top across the whole width, actions in a row under it.
+     It sits in the flow under the chat, so a long message pushes the chat up, never over it. */
+  .composer-dock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    padding: 0 0.75rem 0.75rem;
+  }
+  .composer {
+    display: flex;
+    flex-direction: column;
+    border-radius: 22px;
+    transition: border-color 150ms;
+  }
+  .composer:focus-within { border-color: color-mix(in srgb, var(--color-jade) 55%, var(--glass-edge)); }
+  .composer-input {
+    display: block;
+    width: 100%;
+    min-height: 2.75rem;
+    max-height: min(40vh, 16rem);
+    resize: none;
+    overflow-y: hidden;
+    padding: 0.75rem 1rem 0.25rem;
+    background: transparent;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--text);
+    overflow-wrap: anywhere;
+
+    &::placeholder { color: var(--text-faint); }
+    &:focus { outline: none; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+  .composer-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.4rem 0.4rem;
+  }
+  .composer-hint {
+    margin-left: auto;
+    margin-right: 0.35rem;
+    font-size: 0.6875rem;
+    color: var(--text-faint);
+  }
+  @media (hover: none) { .composer-hint { visibility: hidden; } }
 
   /* Going back to the version a turn left, from the chat. */
   .restore-link {
@@ -1108,7 +1156,6 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    align-self: center;
     padding: 0.3rem 0.6rem;
     border-radius: 999px;
     font-size: 0.75rem;

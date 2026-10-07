@@ -46,7 +46,7 @@
 
   <div class="grid min-h-0 flex-1 gap-3 sm:gap-4 lg:grid-cols-[minmax(340px,420px)_1fr]">
     <aside class="surface sheet relative flex min-h-[60vh] flex-col overflow-hidden lg:min-h-0" aria-label="Chat">
-      <div id="messages" class="flex-1 space-y-4 overflow-y-auto px-5 pt-5 <%= @project.working? || @project.setting_up? ? "pb-36" : "pb-24" %>" data-controller="autoscroll">
+      <div id="messages" class="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 pt-5 pb-4" data-controller="autoscroll">
         <% items = chat_items(@project.messages) %>
         <% items.each_with_index do |item, index| %>
           <% if item.is_a?(Array) %>
@@ -59,45 +59,51 @@
         <div id="draft" class="reply draft" data-turbo-permanent></div>
       </div>
 
-      <% if @project.setting_up? || @project.working? %>
-        <div class="activity glass capsule absolute inset-x-3 bottom-[4.25rem] flex items-center gap-2.5 px-4 py-2"
-             data-controller="elapsed" data-elapsed-since-value="<%= (@project.working_since || @project.updated_at).to_i %>" aria-live="polite">
-          <span class="activity-dot"></span>
-          <span id="activity-text" class="live-activity min-w-0 flex-1 truncate"><%= @project.setting_up? ? "Setting up the project" : (@project.activity || "Working") %></span>
-          <span class="faint tabular-nums" data-elapsed-target="clock"></span>
-          <% if @project.working? %>
-            <%= button_to "Stop", project_stop_path(@project), class: "btn btn-ghost h-7 px-3 text-xs", title: "Stop the agent; what's done so far is kept",
-                  disabled: @project.stop_requested? %>
-          <% end %>
-        </div>
-      <% end %>
+      <%# In the flow under the chat: as the message grows, the chat above gets shorter instead of hidden. %>
+      <div class="composer-dock">
+        <% if @project.setting_up? || @project.working? %>
+          <div class="activity glass capsule flex items-center gap-2.5 px-4 py-2"
+               data-controller="elapsed" data-elapsed-since-value="<%= (@project.working_since || @project.updated_at).to_i %>" aria-live="polite">
+            <span class="activity-dot"></span>
+            <span id="activity-text" class="live-activity min-w-0 flex-1 truncate"><%= @project.setting_up? ? "Setting up the project" : (@project.activity || "Working") %></span>
+            <span class="faint tabular-nums" data-elapsed-target="clock"></span>
+            <% if @project.working? %>
+              <%= button_to "Stop", project_stop_path(@project), class: "btn btn-ghost h-7 px-3 text-xs", title: "Stop the agent; what's done so far is kept",
+                    disabled: @project.stop_requested? %>
+            <% end %>
+          </div>
+        <% end %>
 
-      <%= form_with model: [ @project, Message.new ], class: "absolute inset-x-3 bottom-3", data: { controller: "composer attachments", action: "dragover->attachments#dragOver dragleave->attachments#dragLeave drop->attachments#drop" } do |form| %>
-        <ul class="attachment-list" data-attachments-target="list" hidden></ul>
-        <div class="pointed-chip glass" data-preview-target="pointedChip" hidden>
-          <%= icon :target, size: 14 %>
-          <span class="min-w-0 flex-1 truncate" data-preview-target="pointedLabel"></span>
-          <button type="button" class="btn btn-ghost btn-icon h-6 w-6" data-action="preview#clearPick" aria-label="Forget the part you pointed at">&times;</button>
-        </div>
-        <%= hidden_field_tag "message[pointed]", "", id: nil, data: { preview_target: "pointed" } %>
-        <div class="glass capsule flex items-end gap-2 py-1.5 pr-1.5 pl-1.5">
-          <%= hidden_field_tag "message[plan]", "0", id: nil %>
+        <%= form_with model: [ @project, Message.new ], data: { controller: "composer attachments", action: "dragover->attachments#dragOver dragleave->attachments#dragLeave drop->attachments#drop" } do |form| %>
+          <ul class="attachment-list" data-attachments-target="list" hidden></ul>
+          <div class="pointed-chip glass" data-preview-target="pointedChip" hidden>
+            <%= icon :target, size: 14 %>
+            <span class="min-w-0 flex-1 truncate" data-preview-target="pointedLabel"></span>
+            <button type="button" class="btn btn-ghost btn-icon h-6 w-6" data-action="preview#clearPick" aria-label="Forget the part you pointed at">&times;</button>
+          </div>
+          <%= hidden_field_tag "message[pointed]", "", id: nil, data: { preview_target: "pointed" } %>
           <% can_send = @project.accepts_messages? || @project.accepts_messages_while_working? %>
-          <%= form.file_field :files, multiple: true, accept: "image/png,image/jpeg,image/gif,image/webp,image/svg+xml,application/pdf,text/plain,text/csv",
-                hidden: true, disabled: !can_send, data: { attachments_target: "input", action: "change->attachments#add" } %>
-          <button type="button" class="btn btn-ghost btn-icon h-9 w-9" data-action="attachments#pick" <%= "disabled" unless can_send %>
-                  aria-label="Attach files" title="Attach a logo, photos, a menu (PDF)… or paste a screenshot"><%= icon :paperclip, size: 18 %></button>
-          <%= form.text_area :body, rows: 1, disabled: !can_send, required: true, "aria-label": "Ask for a change",
-                placeholder: @project.accepts_messages? ? "Ask for a change" : (can_send ? "Add to the request while it works" : "Wait for the current step to finish"),
-                data: { action: "keydown->composer#submitOnShortcut input->composer#resize paste->attachments#paste", composer_target: "input", attachments_target: "body" },
-                class: "max-h-40 min-h-9 flex-1 resize-none bg-transparent py-2 text-[0.9375rem] leading-snug outline-none placeholder:text-[var(--text-faint)] disabled:opacity-60" %>
-          <label class="plan-toggle" title="The agent proposes a plan first and builds it when you approve">
-            <%= check_box_tag "message[plan]", "1", @project.plans_by_default?, id: "message_plan", disabled: !@project.accepts_messages? %>
-            <span>Plan first</span>
-          </label>
-          <%= form.button disabled: !can_send, class: "btn btn-primary btn-icon", "aria-label": "Send", title: "Send (⌘↵)" do %><%= icon :send %><% end %>
-        </div>
-      <% end %>
+          <div class="composer glass">
+            <%= form.text_area :body, rows: 1, disabled: !can_send, required: true, "aria-label": "Ask for a change",
+                  placeholder: @project.accepts_messages? ? "Ask for a change" : (can_send ? "Add to the request while it works" : "Wait for the current step to finish"),
+                  data: { action: "keydown->composer#submitOnShortcut input->composer#resize paste->attachments#paste", composer_target: "input", attachments_target: "body" },
+                  class: "composer-input" %>
+            <div class="composer-actions">
+              <%= hidden_field_tag "message[plan]", "0", id: nil %>
+              <%= form.file_field :files, multiple: true, accept: "image/png,image/jpeg,image/gif,image/webp,image/svg+xml,application/pdf,text/plain,text/csv",
+                    hidden: true, disabled: !can_send, data: { attachments_target: "input", action: "change->attachments#add" } %>
+              <button type="button" class="btn btn-ghost btn-icon h-8 w-8" data-action="attachments#pick" <%= "disabled" unless can_send %>
+                      aria-label="Attach files" title="Attach a logo, photos, a menu (PDF)… or paste a screenshot"><%= icon :paperclip, size: 18 %></button>
+              <label class="plan-toggle" title="The agent proposes a plan first and builds it when you approve">
+                <%= check_box_tag "message[plan]", "1", @project.plans_by_default?, id: "message_plan", disabled: !@project.accepts_messages? %>
+                <span>Plan first</span>
+              </label>
+              <span class="composer-hint">⌘↵</span>
+              <%= form.button disabled: !can_send, class: "btn btn-primary btn-icon h-9 w-9", "aria-label": "Send", title: "Send (⌘↵)" do %><%= icon :send %><% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
     </aside>
 
     <%= render "projects/preview", project: @project %>
