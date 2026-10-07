@@ -212,16 +212,17 @@ class AgentTranscript
 
     def record_result(event)
       @finished = true
+      # A turn the owner stopped ends "with an error" that says nothing: it's just stopped.
+      error = event["is_error"] && event["result"].to_s.strip.presence && !@project.stop_requested?
+
       # A failed turn often repeats its last reply as the error; show it once, as the error.
-      if event["is_error"] && (last = @project.messages.last)&.assistant? && last.body.strip == event["result"].to_s.strip
+      if error && (last = @project.messages.last)&.assistant? && last.body.strip == event["result"].to_s.strip
         last.destroy
       end
 
-      @project.messages.create!(
-        role: event["is_error"] ? :error : :result,
-        body: event["is_error"] ? event["result"].to_s : "",
-        data: event.slice("total_cost_usd", "num_turns", "duration_ms", "subtype")
-      )
+      data = event.slice("total_cost_usd", "num_turns", "duration_ms", "subtype")
+      data["stopped"] = true if event["is_error"] && !error
+      @project.messages.create!(role: error ? :error : :result, body: error ? event["result"].to_s : "", data:)
     end
 
     # The plan for this turn is one message whose tasks get ticked off.

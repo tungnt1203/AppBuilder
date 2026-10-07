@@ -138,6 +138,20 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_equal [ "error", "Budget exceeded" ], [ @project.messages.last.role, @project.messages.last.body ]
   end
 
+  test "a stopped turn is summed up, not shown as an empty error" do
+    @project.agent_commands.create!(kind: :interrupt)
+    @project.update!(working_since: 1.minute.ago)
+    record "type" => "result", "is_error" => true, "subtype" => "error_during_execution", "result" => "", "total_cost_usd" => 0.55, "num_turns" => 16, "duration_ms" => 36_000
+
+    message = @project.messages.last
+    assert_equal [ "result", "", true ], [ message.role, message.body, message.data["stopped"] ]
+  end
+
+  test "an error with nothing to say is not shown as an error" do
+    record "type" => "result", "is_error" => true, "subtype" => "error_during_execution", "result" => ""
+    assert_equal "result", @project.messages.last.role
+  end
+
   test "an error that repeats the last reply shows once" do
     record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => "You've hit your session limit" } ] }
     record "type" => "result", "is_error" => true, "result" => "You've hit your session limit"

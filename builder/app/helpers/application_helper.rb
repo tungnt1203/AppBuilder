@@ -114,6 +114,6 @@ module ApplicationHelper
     data = message.data
     duration = distance_of_time_in_words(data["duration_ms"] / 1000.0) if data["duration_ms"]
     cost = number_to_currency(data["total_cost_usd"], precision: 2) if data["total_cost_usd"]
-    [ ("Finished in #{duration}" if duration), (pluralize(data["num_turns"], "step") if data["num_turns"]), cost ].compact.join(", ")
+    [ ("#{data["stopped"] ? "Stopped after" : "Finished in"} #{duration}" if duration), (pluralize(data["num_turns"], "step") if data["num_turns"]), cost ].compact.join(", ")
   end
 end
