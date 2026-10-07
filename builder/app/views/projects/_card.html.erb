@@ -25,7 +25,8 @@
       <% moving = busy || (project.latest_deployment&.in_progress? ? "Wait until publishing finishes" : nil) %>
       <button type="button" class="menu-item" role="menuitem" <%= tag.attributes(disabled: moving.present?, title: moving || project.publish_host) %>
               data-action="app-menu#open" data-app-menu-name-param="address"><%= icon :globe %> Change address…</button>
-      <%= button_to project_duplicate_path(project), class: "menu-item", role: "menuitem", disabled: busy.present?, title: busy,
+      <% copying = busy || (Current.user.app_limit_reached? ? "You have as many apps as an account can have" : nil) %>
+      <%= button_to project_duplicate_path(project), class: "menu-item", role: "menuitem", disabled: copying.present?, title: copying,
             form: { class: "contents" } do %><%= icon :copy %> Duplicate<% end %>
       <button type="button" class="menu-item menu-item-danger" role="menuitem" <%= tag.attributes(disabled: busy.present?, title: busy) %>
               data-action="app-menu#open" data-app-menu-name-param="delete"><%= icon :trash %> Delete…</button>

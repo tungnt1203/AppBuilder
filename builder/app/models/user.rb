@@ -35,6 +35,15 @@ class User < ApplicationRecord
     user.administrator? && !owner? && user != self && projects.none?
   end
 
+  # Members may have a few apps each (config.x.apps_per_account); deleting one makes room.
+  def app_limit
+    Rails.configuration.x.apps_per_account unless administrator?
+  end
+
+  def app_limit_reached?
+    app_limit.present? && projects.count >= app_limit
+  end
+
   # The apps this account may open: its own, or every app for administrators.
   def accessible_projects
     administrator? ? Project.all : projects

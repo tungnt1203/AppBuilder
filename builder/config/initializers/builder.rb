@@ -36,6 +36,9 @@ Rails.application.configure do
     "PIXABAY_API_KEY" => ENV["PIXABAY_API_KEY"].presence || Rails.application.credentials.dig(:pixabay, :api_key)
   }.compact
 
+  # How many apps a member's account may have; administrators have no limit.
+  config.x.apps_per_account = Integer(ENV.fetch("APPS_PER_ACCOUNT", 2))
+
   # Each project's preview server gets its own port, counting up from here.
   config.x.first_preview_port = Integer(ENV.fetch("FIRST_PREVIEW_PORT", 4001))
 

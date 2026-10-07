@@ -15,6 +15,8 @@
           data: { controller: "composer", action: "keydown->composer#submitOnShortcut" } do |form| %>
       <% if @project.errors.any? %>
         <p class="alert mx-5 mt-5"><%= @project.errors.full_messages.to_sentence %></p>
+      <% elsif Current.user.app_limit_reached? %>
+        <p class="flash mx-5 mt-5">You have <%= pluralize(Current.user.app_limit, "app") %>, as many as an account can have. Delete one to build another.</p>
       <% end %>
 
       <%= text_area_tag "project[request]", params.dig(:project, :request), id: "project_request", rows: 3, autofocus: true,
@@ -33,7 +35,7 @@
           <%= check_box_tag "project[plan]", "1", params.dig(:project, :plan) != "0", id: "project_plan" %>
           Plan first
         </label>
-        <%= form.button class: "btn btn-primary ml-auto h-9 px-4", title: "Build app (⌘↵)" do %>
+        <%= form.button class: "btn btn-primary ml-auto h-9 px-4", title: "Build app (⌘↵)", disabled: Current.user.app_limit_reached? do %>
           Build <%= icon :send, size: 15 %>
         <% end %>
       </div>

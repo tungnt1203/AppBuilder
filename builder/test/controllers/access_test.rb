@@ -65,4 +65,23 @@ class AccessTest < ActionDispatch::IntegrationTest
 
     assert_equal users(:member), Project.find_by!(name: "Tiệm bánh").owner
   end
+
+  test "a member at the limit is told so and can't add another app" do
+    Project.create!(name: "Tiệm bánh", language: "vi", owner: users(:member))
+    sign_in_as users(:member)
+
+    get root_path
+    assert_select ".flash", /as many as an account can have/
+    assert_select "button[type=submit][disabled]", text: /Build/
+
+    assert_no_difference -> { Project.count } do
+      post projects_path, params: { project: { name: "Thêm nữa", language: "vi", request: "" } }
+    end
+    assert_response :unprocessable_entity
+    assert_select ".alert", /Delete one to make room/
+
+    assert_no_difference -> { Project.count } do
+      post project_duplicate_path(@own)
+    end
+  end
 end
