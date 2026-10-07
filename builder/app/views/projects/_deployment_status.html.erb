@@ -1,12 +1,12 @@
 <% if deployment.in_progress? %>
-  <span class="status status-working pr-1 whitespace-nowrap text-white/90"><%= deployment.building? ? "Building" : "Deploying" %><span class="hidden sm:inline"> version <%= deployment.version %></span></span>
+  <span class="status status-working pr-1 text-sm whitespace-nowrap muted"><%= deployment.building? ? "Building" : "Deploying" %><span class="hidden sm:inline"> version <%= deployment.version %></span></span>
 <% elsif deployment.live? %>
-  <%= link_to project.publish_url, target: "_blank", class: "btn btn-ghost h-8 gap-1.5 px-2.5 whitespace-nowrap text-white sm:px-3", title: "Open the published app" do %>
-    <span class="size-2 rounded-full bg-[#7ff0c9] shadow-[0_0_10px_#7ff0c9]"></span><span class="sm:hidden">v<%= deployment.version %></span><span class="hidden sm:inline">Version <%= deployment.version %> is live</span><%= icon :external, size: 14 %>
+  <%= link_to project.publish_url, target: "_blank", class: "btn btn-ghost h-8 gap-1.5 px-2.5 whitespace-nowrap", title: "Open the published app" do %>
+    <span class="size-2 rounded-full bg-[var(--ready)] shadow-[0_0_8px_var(--ready)]"></span><span class="sm:hidden">v<%= deployment.version %></span><span class="hidden sm:inline">v<%= deployment.version %> live</span><%= icon :external, size: 14 %>
   <% end %>
 <% else %>
   <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true">
-    <summary class="btn btn-ghost h-8 list-none px-3 whitespace-nowrap text-[#ffd2c4]"><span class="hidden sm:inline">Version <%= deployment.version %>&nbsp;</span>failed</summary>
+    <summary class="btn btn-ghost h-8 list-none px-2.5 whitespace-nowrap text-[var(--danger)]"><span class="hidden sm:inline">v<%= deployment.version %>&nbsp;</span>failed</summary>
     <div class="popover glass glass-frost absolute right-0 z-10 mt-2 w-[min(34rem,90vw)] rounded-[20px] p-4">
       <p class="mb-2 text-sm font-medium">
         <% if live = project.live_deployment %>

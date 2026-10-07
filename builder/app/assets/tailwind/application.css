@@ -529,23 +529,51 @@
   }
 
   /* The preview is content too: a solid frame, not glass. Radii are concentric (30 - 9). */
-  .bezel {
-    padding: 9px;
-    border-radius: 30px;
+  /* The studio: chat and app side by side, edge to edge, each panel with one slim bar on top.
+     On phones and small windows they stack, as cards over the backdrop. */
+  .studio {
+    display: grid;
+    gap: 0.75rem;
+    min-height: 100%;
+    padding: 0.75rem;
+  }
+  .studio-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    border-radius: 24px;
     background: var(--surface);
     box-shadow: 0 24px 60px -24px rgb(6 36 41 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.5);
   }
+  .studio-chat { height: 85vh; height: 85svh; }
+  .studio-main { min-height: 80vh; overflow: hidden; }
+  @media (min-width: 64rem) {
+    .studio { height: 100%; grid-template-columns: clamp(340px, 30vw, 440px) minmax(0, 1fr); gap: 0; padding: 0; }
+    .studio-panel { height: auto; min-height: 0; border-radius: 0; box-shadow: none; }
+    .studio-chat { border-right: 1px solid var(--line); }
+  }
+  .studio-bar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.25rem;
+    height: 3rem;
+    padding: 0 0.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .bezel { position: relative; flex: 1; min-height: 0; }
   .bezel iframe {
     width: 100%;
     height: 100%;
-    border-radius: 21px;
     background: white;
-    box-shadow: 0 0 0 1px var(--line);
     transition: width 320ms cubic-bezier(0.2, 0.9, 0.3, 1), height 320ms cubic-bezier(0.2, 0.9, 0.3, 1), border-radius 320ms;
   }
 
   /* The app, and what covers it while it can't be looked at. */
-  .stage { position: absolute; inset: 9px; display: grid; place-items: center; }
+  .stage { position: absolute; inset: 0; display: grid; place-items: center; }
 
   /* Tablet and phone sizes: the app at that width, centered, shrunk to fit if the window is smaller. */
   .stage[data-size] iframe { box-shadow: 0 0 0 1px var(--line), 0 0 0 7px var(--device-rim), 0 24px 50px -20px rgb(6 36 41 / 0.5); }
@@ -571,13 +599,11 @@
   /* The Code tab covers the stage: files on the left, the open file on the right. */
   .code-pane {
     position: absolute;
-    inset: 9px;
+    inset: 0;
     z-index: 15;
     display: none;
     overflow: hidden;
-    border-radius: 21px;
     background: var(--code-bg);
-    box-shadow: 0 0 0 1px var(--line);
 
     & turbo-frame { display: block; height: 100%; }
   }
@@ -757,7 +783,6 @@
     inset: 0;
     display: grid;
     place-items: center;
-    border-radius: 21px;
     background: var(--surface);
     opacity: 0;
     pointer-events: none;
@@ -767,12 +792,11 @@
 
   .stage-screen {
     position: absolute;
-    inset: 9px;
+    inset: 0;
     display: grid;
     place-items: center;
     padding: 1.5rem;
     overflow-y: auto;
-    border-radius: 21px;
     background: var(--surface);
     backdrop-filter: blur(24px);
     animation: appear 240ms ease-out;
