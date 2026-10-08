@@ -14,7 +14,7 @@ module AgentApi
     def search(query: nil, category: nil, min_price: nil, max_price: nil, sort: nil, limit: 8)
       products = Product.visible.includes(:variants, :collections, images_attachments: :blob)
       products = products.joins(:collections).where(collections: { slug: category.to_s.parameterize }) if category.present?
-      products = matching(products, query).to_a
+      products = ranked(products.to_a, query)
       products.select! { |product| (low = product.price_range&.first) && low >= min_price.to_f * 100 } if min_price.present?
       products.select! { |product| (low = product.price_range&.first) && low <= max_price.to_f * 100 } if max_price.present?
       products = SORTS.fetch(sort.to_s, :itself.to_proc).call(products)
@@ -116,14 +116,24 @@ module AgentApi
     end
 
     private
-      def matching(products, query)
-        words = query.to_s.downcase.scan(/[[:alnum:]]+/)
-        return products if words.empty?
+      # Best matches first: a product scores for each word of the query found in its title (most),
+      # its options (colors, sizes), collections or description. Plurals match ("tees" finds a
+      # tee), and a t-shirt is a tee. No query: newest first. Nothing scoring: nothing.
+      def ranked(products, query)
+        words = query.to_s.downcase.gsub(/\bt[- ]?shirts?\b/, "tee").scan(/[[:alnum:]]+/).map(&:singularize).reject { |word| word.length < 2 }.uniq
+        return products.sort_by { |product| product.published_at || product.created_at }.reverse if words.empty?
 
-        words.reduce(products) do |scope, word|
-          like = "%#{Product.sanitize_sql_like(word)}%"
-          scope.where("LOWER(products.title) LIKE :like OR LOWER(products.description) LIKE :like", like:)
-        end
+        products.filter_map { |product| [ product, score(product, words) ] }.select { |_, score| score.positive? }
+          .sort_by { |product, score| [ -score, product.title ] }.map(&:first)
+      end
+
+      def score(product, words)
+        fields = {
+          3 => product.title,
+          2 => product.options.flat_map { |_slot, name, values| [ name, *values ] }.join(" "),
+          1 => [ product.description, *product.collections.map(&:title) ].join(" ")
+        }.transform_values { |text| text.to_s.downcase.scan(/[[:alnum:]]+/).map(&:singularize) }
+        words.sum { |word| fields.sum { |weight, terms| terms.include?(word) ? weight : 0 } }
       end
 
       def labels(product)

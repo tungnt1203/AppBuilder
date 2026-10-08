@@ -27,6 +27,16 @@ class Agent::StorefrontTest < ActionDispatch::IntegrationTest
     assert_empty response.parsed_body["products"], "drafts aren't for sale"
   end
 
+  test "search ranks by the words a buyer uses: options, plurals and t-shirts count" do
+    [ "black tee", "Tees", "t-shirt" ].each do |query|
+      get agent_storefront_products_path(query:), headers: @headers
+      assert_equal "product-#{products(:tee).slug}", response.parsed_body["products"].first&.dig("product_id"), query
+    end
+
+    get agent_storefront_products_path(query: "zebra"), headers: @headers
+    assert_empty response.parsed_body["products"]
+  end
+
   test "details list a family's variants with their own ids, prices and stock" do
     get agent_storefront_product_path("product-#{products(:tee).slug}"), headers: @headers
     variants = response.parsed_body["variants"]
