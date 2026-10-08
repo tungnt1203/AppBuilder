@@ -1,4 +1,5 @@
-# The shop at a glance: sales, orders waiting on someone, the latest orders.
+# The shop at a glance: sales, orders waiting on someone, the latest orders, and today's
+# appointments when the app takes bookings.
 class Admin::DashboardsController < Admin::BaseController
   def show
     sales = Order.counted_in_sales
@@ -11,5 +12,6 @@ class Admin::DashboardsController < Admin::BaseController
     @recent_orders = Order.where.not(id: Order.unpaid_card).newest_first.limit(8)
     @product_count = Product.active.count
     @store = Store.current
+    @todays_appointments = Appointment.booked.on(Date.current).includes(:staff_member) if booking?
   end
 end

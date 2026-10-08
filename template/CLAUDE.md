@@ -104,7 +104,7 @@ It never sends visitors to `/admin`, and has no link to it; the owner goes to `/
 Every app starts as a working shop. Build on it; don't write a second cart, checkout or order model.
 
 The shop's core (its models, payments, order emails and migrations) is the `shop` gem in
-`vendor/blocks/shop`. Read it to see how things work; never change, move or copy its files. It's
+`vendor/blocks/shop` (and booking's is `vendor/blocks/booking`, see "Booking"). Read it to see how things work; never change, move or copy its files. It's
 the same in every app and gets updated as a whole, so a change there would be lost. The app's own
 files build on it:
 
@@ -156,6 +156,33 @@ files build on it:
 Change the shop's screens freely to fit the owner (design skill), keep its rules (prices from the
 database, statuses through the methods, guest checkout), and add features around it: reviews,
 discount codes, a size guide, gift notes, product pages that look like the owner's brand.
+
+## Booking (built in, off by default)
+
+For businesses people book a time with (a salon, a clinic, a spa, a tutor, a studio), apps also
+have appointments: the `booking` core in `vendor/blocks/booking`, read-only like the shop's.
+Turn it on with `config.x.booking = true` (`config/application.rb`) when the owner's customers
+book times, then `bin/rails db:seed` for sample services and staff in the preview. Off, its pages
+answer 404 and /admin hides them. Build on it; don't write a second calendar or booking model.
+
+- **Services** (`Service`: name, length, price) are done by **staff members** (`StaffMember`: a
+  person, or a chair or room) in their weekly `working_hours`, except for `TimeOff` (one person's,
+  or the whole business closed). `BookingSetting.current`: the step between times offered, the
+  notice, how far ahead, until when customers can cancel.
+- **Free times** come from `Availability.new(service, date, staff_member: nil).slots`; never
+  compute them elsewhere. **Booking** (`Booking`, like `Checkout`) checks the time again as it
+  books and makes the `Appointment` (`booked → completed / no_show`, or `cancelled`, only through
+  its methods). Customers book as guests at `/book` and reach their appointment by its token
+  (`appointment_path`), where they can cancel; staff run the calendar at `/admin/appointments`.
+- **Emails**: confirmation, a reminder the day before (`Appointment::ReminderJob`) and
+  cancellation, in the core; restyle them like the order emails.
+- Payment is at the business for now; don't add online payment for appointments.
+- The screens (`bookings/`, `appointments/`, `admin/appointments/`, `admin/services/`,
+  `admin/staff_members/`…) are the app's: redesign the booking pages for the brand (design
+  skill), link to `/book` from the home page and header, and show the team or services on the site
+  when it suits the business. Tests of these screens call `enable_booking` in `setup`.
+- A business that both sells and books (a salon with products) keeps the shop; one that only books
+  can drop the shop's links from its site (keep the shop's code and /admin screens).
 
 ## Accounts
 

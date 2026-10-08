@@ -1,0 +1,10 @@
+<%= t(".heading", name: @appointment.name) %>
+
+<%= t(".intro", app: Rails.configuration.x.app_name) %>
+
+<%= render "appointment_mailer/details", appointment: @appointment %>
+<% if @store.business_address.present? && !@appointment.cancelled? -%>
+<%= t("appointment_mailer.details.where") %>: <%= @store.business_address %>
+<% end -%>
+
+<%= t(".view") %>: <%= appointment_url(@appointment) %>

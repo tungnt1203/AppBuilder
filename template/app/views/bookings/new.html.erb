@@ -1,0 +1,105 @@
+<% content_for :title, @service ? t(".title_for", service: @service.name) : t(".title") %>
+
+<%# Booking, one choice at a time: service, who with, day, time, then the details. Restyle it for
+    the brand like any page of the site; keep the steps' links and the form's fields. %>
+<div class="mx-auto max-w-4xl px-4 py-12">
+  <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
+
+  <% if @service.nil? %>
+    <% if @services.any? %>
+      <ul class="mt-8 divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+        <% @services.each do |service| %>
+          <li>
+            <%= link_to new_booking_path(service: service.slug), class: "flex items-start justify-between gap-6 p-5 hover:bg-surface-muted" do %>
+              <span class="min-w-0">
+                <span class="block font-medium text-ink"><%= service.name %></span>
+                <% if service.description.present? %>
+                  <span class="mt-1 block text-sm text-muted"><%= service.description %></span>
+                <% end %>
+                <span class="mt-1 block text-sm text-muted"><%= t(".minutes", count: service.duration_minutes) %></span>
+              </span>
+              <span class="shrink-0 font-medium"><%= money(service.price_cents) if service.price_cents.positive? %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="mt-8 text-muted"><%= t(".no_services") %></p>
+    <% end %>
+  <% else %>
+    <div class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+      <span class="font-medium"><%= @service.name %></span>
+      <span class="text-muted"><%= t(".minutes", count: @service.duration_minutes) %><%= " · #{money(@service.price_cents)}" if @service.price_cents.positive? %></span>
+      <%= link_to t(".change_service"), new_booking_path, class: link_classes %>
+    </div>
+
+    <% staff = @service.staff_members.select(&:active?) %>
+    <% if staff.many? %>
+      <section class="mt-8">
+        <h2 class="text-lg font-semibold"><%= t(".who") %></h2>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <% ([ nil ] + staff).each do |member| %>
+            <% chosen = member == @staff_member %>
+            <%= link_to member ? member.name : t(".anyone"), new_booking_path(service: @service.slug, staff: member&.id, date: @date.iso8601),
+                  class: "rounded-full border px-4 py-2 text-sm #{chosen ? "border-brand-600 bg-brand-600 text-white" : "border-line bg-surface hover:bg-surface-muted"}",
+                  aria: { current: (chosen || nil) } %>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-semibold"><%= t(".when") %></h2>
+      <div class="mt-3 flex gap-2 overflow-x-auto pb-2">
+        <% @days.each do |day| %>
+          <% chosen = day == @date %>
+          <%= link_to new_booking_path(service: @service.slug, staff: @staff_member&.id, date: day.iso8601),
+                class: "flex w-16 shrink-0 flex-col items-center rounded-xl border py-2 text-sm #{chosen ? "border-brand-600 bg-brand-600 text-white" : "border-line bg-surface hover:bg-surface-muted"}",
+                aria: { current: (chosen || nil) } do %>
+            <span class="text-xs uppercase <%= chosen ? "text-white/80" : "text-muted" %>"><%= l(day, format: "%a") %></span>
+            <span class="text-lg font-semibold"><%= day.day %></span>
+            <span class="text-xs <%= chosen ? "text-white/80" : "text-muted" %>"><%= l(day, format: "%b") %></span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @slots.any? %>
+        <div class="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6">
+          <% @slots.each do |slot| %>
+            <% chosen = slot.starts_at == @starts_at %>
+            <%= link_to l(slot.starts_at, format: :slot), new_booking_path(service: @service.slug, staff: @staff_member&.id, date: @date.iso8601, time: slot.starts_at.iso8601, anchor: "details"),
+                  class: "rounded-lg border py-2 text-center text-sm #{chosen ? "border-brand-600 bg-brand-600 text-white" : "border-line bg-surface hover:bg-surface-muted"}",
+                  aria: { current: (chosen || nil) } %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="mt-4 text-sm text-muted"><%= t(".no_times") %></p>
+      <% end %>
+    </section>
+
+    <% if @booking %>
+      <section id="details" class="mt-10 scroll-mt-20">
+        <h2 class="text-lg font-semibold"><%= t(".details") %></h2>
+        <%= form_with model: @booking, url: booking_path, scope: :booking, class: "mt-4 grid gap-8 md:grid-cols-[1fr_18rem]", data: { turbo: false } do |form| %>
+          <div class="space-y-4">
+            <%= form.errors %>
+            <%= form.hidden_field :service_id %>
+            <%= form.hidden_field :staff_member_id %>
+            <%= form.hidden_field :starts_at, value: @booking.starts_at&.iso8601 %>
+            <%= form.field :name, required: true, autocomplete: "name" %>
+            <%= form.field :email, :email_field, required: true, autocomplete: "email", hint: t(".email_hint") %>
+            <%= form.field :phone, :telephone_field, autocomplete: "tel" %>
+            <%= form.field :note, :text_area, rows: 2 %>
+          </div>
+          <aside class="h-fit space-y-3 rounded-xl border border-line bg-surface p-5 text-sm">
+            <p class="font-medium"><%= @service.name %></p>
+            <p><%= l(@booking.starts_at, format: :appointment) if @booking.starts_at %></p>
+            <% if @staff_member %><p class="text-muted"><%= t(".with", name: @staff_member.name) %></p><% end %>
+            <% if @service.price_cents.positive? %><p><%= money(@service.price_cents) %></p><% end %>
+            <%= form.submit t(".book"), class: "w-full" %>
+          </aside>
+        <% end %>
+      </section>
+    <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,10 @@
+<h1><%= t(".heading", name: @appointment.name) %></h1>
+<p><%= t(".intro", app: Rails.configuration.x.app_name) %></p>
+
+<%= render "appointment_mailer/details", appointment: @appointment %>
+
+<% if @store.business_address.present? && !@appointment.cancelled? %>
+  <p><strong><%= t("appointment_mailer.details.where") %></strong><br><%= simple_format @store.business_address %></p>
+<% end %>
+
+<p><%= link_to t(".view"), appointment_url(@appointment) %></p>

@@ -1,7 +1,7 @@
 # Every screen of /admin, where the owner and staff run the app, inherits from this.
 # Sign in is required unless a controller calls allow_unauthenticated_access.
 class Admin::BaseController < ActionController::Base
-  include Admin::Authentication, Pagination
+  include Admin::Authentication, BookingSwitch, Pagination
 
   allow_browser versions: :modern
   stale_when_importmap_changes

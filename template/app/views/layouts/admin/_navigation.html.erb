@@ -1,6 +1,12 @@
 <%# The sidebar of /admin. Add one nav_link_to per screen the owner and staff use.
     Group them with nav_section once there are more than a handful. %>
 <%= nav_link_to t("layouts.admin.dashboard"), admin_root_path %>
+<% if booking? %>
+  <%= nav_link_to t("layouts.admin.appointments"), admin_appointments_path, match: "/admin/appointments" %>
+  <%= nav_link_to t("layouts.admin.services"), admin_services_path, match: "/admin/services" %>
+  <%= nav_link_to t("layouts.admin.staff_members"), admin_staff_members_path, match: "/admin/staff_members" %>
+  <%= nav_link_to t("layouts.admin.time_offs"), admin_time_offs_path, match: "/admin/time_offs" %>
+<% end %>
 <%= nav_link_to t("layouts.admin.orders"), admin_orders_path, match: "/admin/orders" %>
 <%= nav_link_to t("layouts.admin.products"), admin_products_path, match: "/admin/products" %>
 <%= nav_link_to t("layouts.admin.collections"), admin_collections_path, match: "/admin/collections" %>

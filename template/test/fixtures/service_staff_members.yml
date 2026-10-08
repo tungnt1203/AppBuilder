@@ -1,0 +1,11 @@
+mai_haircut:
+  service: haircut
+  staff_member: mai
+
+linh_haircut:
+  service: haircut
+  staff_member: linh
+
+mai_consultation:
+  service: consultation
+  staff_member: mai

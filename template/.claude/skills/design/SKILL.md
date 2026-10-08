@@ -108,11 +108,14 @@ picker), a collection, the cart, checkout and the buyer's order page, plus the o
 (`order_mailer/`, in the shop core: copy them from `vendor/blocks/shop/app/views/order_mailer/` to
 `app/views/order_mailer/` to restyle them). Restyle them for the brand and rearrange them freely; keep their forms' fields,
 the Stimulus targets (`variant-picker`, `gallery`) and the links between them working.
+With booking on (CLAUDE.md, "Booking"), so are `/book` (`bookings/new`: service, who, day, time,
+details) and the customer's appointment page (`appointments/show`): restyle them the same way and
+keep their links' parameters and the form's fields.
 
 **A look is the whole site.** Choosing or changing the direction (a new app, "make it look like
 this site", a screenshot, "more premium") isn't done until every page a buyer passes through wears
 it: home, all products, a product, a collection, the cart, checkout, the order page, the policies
-and contact pages, header and footer. A buyer who taps a product and lands on the starting look
+and contact pages, header and footer, and with booking on, /book and the appointment page. A buyer who taps a product and lands on the starting look
 sees a template. Check them all (section 6).
 
 **A reference is a layout, not a palette.** When the owner shows a site or a screenshot, take what

@@ -28,7 +28,7 @@ cafés, boarding houses…), in Vietnamese and English. Working name only.
 |-------------|--------------------------------------------------------------------|---------|
 | `builder/`  | The builder: studio web app, agent runner, publishing, eval         | AGPL-3.0 |
 | `template/` | The Rails 8 app every generated app starts from: ONCE-ready, with auth, a UI kit, and `CLAUDE.md` + skills for the agent | MIT |
-| `blocks/`   | The parts every generated app shares, as Rails engines: `shop/` (catalog, cart, checkout, orders, Stripe) | MIT |
+| `blocks/`   | The parts every generated app shares, as Rails engines: `shop/` (catalog, cart, checkout, orders, Stripe), `booking/` (appointments) | MIT |
 
 New apps start from the last commit of `template/`, with a copy of each block it uses in
 `vendor/blocks/` (see `ProjectSetupJob`): the core is built once there, and each app designs its own
@@ -81,8 +81,7 @@ Before other people use it:
 
 1. Publish to a real server: a VPS, a domain, HTTPS, a private registry and real email.
 
-Then: pushing an app to a GitHub repository, updating the blocks in existing apps, and a
-`booking` block for appointment-based businesses.
+Then: pushing an app to a GitHub repository, and updating the blocks in existing apps.
 
 ## License
 

@@ -32,10 +32,15 @@ module Starter
     # /account then open, and the site header shows a sign-in link. Off, those pages answer 404.
     config.x.customer_accounts = false
 
+    # Appointments (the booking block): customers book a service at a free time at /book, staff run
+    # the calendar at /admin/appointments. Turn this on for businesses people book a time with (a
+    # salon, a clinic, a spa, a tutor). Off, the booking pages answer 404 and /admin hides them.
+    config.x.booking = false
+
     # The whole app is in English: the site, /admin and every email.
     config.i18n.available_locales = %i[ en ]
     config.i18n.default_locale = :en
-    # The owner's time zone: order times in /admin and emails.
+    # The owner's time zone: order and appointment times, opening hours, emails.
     config.time_zone = "UTC"
 
     config.action_view.default_form_builder = "UiFormBuilder"

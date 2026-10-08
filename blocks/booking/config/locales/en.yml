@@ -1,0 +1,121 @@
+# The booking core's own text: model names and errors, the time format of appointments and the
+# appointment emails. An app changes any of it by setting the same key in its own config/locales.
+en:
+  time:
+    formats:
+      appointment: "%A, %B %-d at %-l:%M %p"
+      slot: "%-l:%M %p"
+  activerecord:
+    models:
+      service: Service
+      staff_member: Staff member
+      time_off: Time off
+      appointment: Appointment
+      booking_setting: Booking settings
+    attributes:
+      service:
+        name: Name
+        description: Description
+        duration_minutes: Length (minutes)
+        price: Price
+        status: Status
+        position: Position
+        staff_member_ids: Who does it
+      staff_member:
+        name: Name
+        bio: About
+        active: Takes bookings
+        position: Position
+        photo: Photo
+        service_ids: Services
+      working_hour:
+        weekday: Day
+        opens_at_text: From
+        closes_at_text: Until
+      staff_member/working_hours:
+        opens_at_text: From
+        closes_at_text: Until
+      time_off:
+        staff_member: Who
+        starts_at: From
+        ends_at: Until
+        reason: Reason
+      appointment:
+        service: Service
+        staff_member: With
+        starts_at: Time
+        ends_at: End
+        name: Name
+        email: Email
+        phone: Phone
+        note: Note
+        staff_note: Staff note
+        price: Price
+      booking_setting:
+        slot_minutes: Offer a time every
+        min_notice_minutes: Book at least (minutes ahead)
+        max_days_ahead: Book up to (days ahead)
+        cancel_notice_hours: Customers can cancel up to (hours before)
+    errors:
+      models:
+        working_hour:
+          attributes:
+            opens_at_text:
+              invalid: isn't a time like 9:00
+            closes_at_text:
+              invalid: isn't a time like 17:30
+              before_opening: must be after the start
+        time_off:
+          attributes:
+            ends_at:
+              before_start: must be after the start
+        appointment:
+          attributes:
+            ends_at:
+              before_start: must be after the start
+            starts_at:
+              taken: is no longer free; please pick another time
+  activemodel:
+    errors:
+      models:
+        booking:
+          attributes:
+            starts_at:
+              taken: is no longer free; please pick another time
+            service:
+              blank: must be chosen
+  appointment_mailer:
+    details:
+      what: Service
+      when: When
+      with: With
+      where: Where
+      price: Price
+      minutes:
+        one: 1 minute
+        other: "%{count} minutes"
+    confirmation:
+      subject: "%{app}: %{service} on %{time}"
+      heading: You're booked, %{name}!
+      intro: Here are the details of your appointment at %{app}.
+      view: See or cancel your appointment
+    reminder:
+      subject: "Reminder: %{service} on %{time}"
+      heading: See you soon, %{name}!
+      intro: A reminder of your appointment at %{app}.
+      view: See or cancel your appointment
+    cancelled:
+      subject: "%{app}: your appointment on %{time} is cancelled"
+      heading: Your appointment is cancelled
+      intro: This appointment at %{app} won't take place. You're welcome to book another time.
+      view: See the appointment
+  admin:
+    appointment_mailer:
+      booked:
+        subject: "New booking: %{name}, %{service} on %{time}"
+        intro: "%{name} (%{email}) booked an appointment."
+        open: Open it in admin
+      cancelled:
+        subject: "Cancelled: %{name}, %{service} on %{time}"
+        intro: "%{name} (%{email}) cancelled their appointment."
+        open: Open it in admin

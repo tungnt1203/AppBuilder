@@ -1,0 +1,6 @@
+<%= page_header @staff_member.name, breadcrumbs: [ [ t("admin.staff_members.index.title"), admin_staff_members_path ], [ @staff_member.name, nil ] ] do %>
+  <%= button_to t(".delete"), admin_staff_member_path(@staff_member), method: :delete, class: button_classes(:danger),
+        form: { data: { turbo_confirm: t(".confirm_delete", name: @staff_member.name) } } %>
+<% end %>
+
+<%= render "form", staff_member: @staff_member %>

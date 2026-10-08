@@ -1,0 +1,42 @@
+<%= page_header @appointment.name, l(@appointment.starts_at, format: :appointment),
+      breadcrumbs: [ [ t("admin.appointments.index.title"), admin_appointments_path(date: @appointment.starts_at.to_date.iso8601) ], [ @appointment.name, nil ] ] do %>
+  <%= appointment_status_badge @appointment %>
+  <% if @appointment.can_complete? %>
+    <%= button_to t(".complete"), admin_appointment_completion_path(@appointment), class: button_classes %>
+  <% end %>
+  <% if @appointment.can_mark_no_show? || @appointment.can_cancel? %>
+    <%= menu t(".more") do %>
+      <%= menu_button_to t(".no_show"), admin_appointment_no_show_path(@appointment) if @appointment.can_mark_no_show? %>
+      <%= menu_button_to t(".cancel"), admin_appointment_cancellation_path(@appointment), form: { data: { turbo_confirm: t(".confirm_cancel", name: @appointment.name) } } if @appointment.can_cancel? %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<div class="grid gap-6 lg:grid-cols-[1fr_20rem]">
+  <div class="space-y-6">
+    <%= card do %>
+      <%= description_list [
+            [ t(".service"), "#{@appointment.service_name} · #{t("booking.minutes", count: @appointment.duration_minutes)}" ],
+            [ t(".with"), @appointment.staff_member&.name || t(".anyone") ],
+            [ t(".price"), money(@appointment.price_cents, @appointment.currency) ],
+            [ t(".note"), @appointment.note.presence || "—" ],
+            [ t(".booked_at"), l(@appointment.created_at, format: :long) ],
+            ([ t(".cancelled_at"), "#{l(@appointment.cancelled_at, format: :long)} (#{t(".cancelled_by.#{@appointment.cancelled_by}")})" ] if @appointment.cancelled_at)
+          ].compact %>
+    <% end %>
+
+    <%= card do %>
+      <%= form_with model: @appointment, url: admin_appointment_path(@appointment), class: "space-y-4" do |form| %>
+        <%= form.field :staff_note, :text_area, rows: 3, hint: t(".staff_note_hint") %>
+        <%= form.submit t(".save") %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%= card class: "h-fit space-y-2 text-sm" do %>
+    <h2 class="font-semibold text-ink"><%= t(".customer") %></h2>
+    <p><%= @appointment.name %></p>
+    <p><%= mail_to @appointment.email, class: link_classes %></p>
+    <% if @appointment.phone.present? %><p><%= link_to @appointment.phone, "tel:#{@appointment.phone}", class: link_classes %></p><% end %>
+  <% end %>
+</div>

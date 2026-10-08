@@ -1,0 +1,8 @@
+<%= t("appointment_mailer.details.what") %>: <%= appointment.service_name %> (<%= t("appointment_mailer.details.minutes", count: appointment.duration_minutes) %>)
+<%= t("appointment_mailer.details.when") %>: <%= l(appointment.starts_at, format: :appointment) %>
+<% if appointment.staff_member -%>
+<%= t("appointment_mailer.details.with") %>: <%= appointment.staff_member.name %>
+<% end -%>
+<% if appointment.price_cents.positive? -%>
+<%= t("appointment_mailer.details.price") %>: <%= money(appointment.price_cents, appointment.currency) %>
+<% end -%>

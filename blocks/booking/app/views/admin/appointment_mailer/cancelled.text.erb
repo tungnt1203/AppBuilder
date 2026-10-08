@@ -1,0 +1,5 @@
+<%= t(".intro", name: @appointment.name, email: @appointment.email) %>
+
+<%= render "appointment_mailer/details", appointment: @appointment %>
+
+<%= t(".open") %>: <%= admin_appointment_url(@appointment) %>

@@ -1,0 +1,18 @@
+<%= page_header t(".title"), breadcrumbs: [ [ t("admin.time_offs.index.title"), admin_time_offs_path ], [ t(".title"), nil ] ] %>
+
+<%= form_with model: [ :admin, @time_off ], class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <div class="space-y-1.5">
+      <%= form.label :staff_member_id, TimeOff.human_attribute_name(:staff_member) %>
+      <%= form.collection_select :staff_member_id, StaffMember.ordered, :id, :name, { include_blank: t(".whole_business") } %>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <%= form.field :starts_at, :datetime_local_field, required: true %>
+      <%= form.field :ends_at, :datetime_local_field, required: true %>
+    </div>
+    <%= form.field :reason, placeholder: t(".reason_placeholder") %>
+  <% end %>
+
+  <%= form.submit t(".create") %>
+<% end %>

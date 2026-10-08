@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_132805) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,44 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_132805) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "appointments", force: :cascade do |t|
+    t.integer "service_id"
+    t.integer "staff_member_id"
+    t.integer "customer_id"
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.string "status", default: "booked", null: false
+    t.string "service_name", null: false
+    t.integer "price_cents", default: 0, null: false
+    t.string "currency", null: false
+    t.string "name", null: false
+    t.string "email", null: false
+    t.string "phone"
+    t.text "note"
+    t.text "staff_note"
+    t.string "token", null: false
+    t.string "cancelled_by"
+    t.datetime "cancelled_at"
+    t.datetime "reminded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id"], name: "index_appointments_on_customer_id"
+    t.index ["service_id"], name: "index_appointments_on_service_id"
+    t.index ["staff_member_id", "starts_at"], name: "index_appointments_on_staff_member_id_and_starts_at"
+    t.index ["staff_member_id"], name: "index_appointments_on_staff_member_id"
+    t.index ["status", "starts_at"], name: "index_appointments_on_status_and_starts_at"
+    t.index ["token"], name: "index_appointments_on_token", unique: true
+  end
+
+  create_table "booking_settings", force: :cascade do |t|
+    t.integer "slot_minutes", default: 30, null: false
+    t.integer "min_notice_minutes", default: 120, null: false
+    t.integer "max_days_ahead", default: 60, null: false
+    t.integer "cancel_notice_hours", default: 24, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "cart_items", force: :cascade do |t|
@@ -180,6 +218,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_132805) do
     t.index ["status", "published_at"], name: "index_products_on_status_and_published_at"
   end
 
+  create_table "service_staff_members", force: :cascade do |t|
+    t.integer "service_id", null: false
+    t.integer "staff_member_id", null: false
+    t.index ["service_id", "staff_member_id"], name: "index_service_staff_members_on_service_id_and_staff_member_id", unique: true
+    t.index ["service_id"], name: "index_service_staff_members_on_service_id"
+    t.index ["staff_member_id"], name: "index_service_staff_members_on_staff_member_id"
+  end
+
+  create_table "services", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.text "description"
+    t.integer "duration_minutes", default: 60, null: false
+    t.integer "price_cents", default: 0, null: false
+    t.string "status", default: "active", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_services_on_slug", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -187,6 +246,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_132805) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "staff_members", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "bio"
+    t.boolean "active", default: true, null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "stores", force: :cascade do |t|
@@ -211,6 +279,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_132805) do
     t.text "shipping_policy"
     t.text "privacy_policy"
     t.text "terms_of_service"
+  end
+
+  create_table "time_offs", force: :cascade do |t|
+    t.integer "staff_member_id"
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.string "reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["staff_member_id"], name: "index_time_offs_on_staff_member_id"
+    t.index ["starts_at", "ends_at"], name: "index_time_offs_on_starts_at_and_ends_at"
   end
 
   create_table "users", force: :cascade do |t|
@@ -240,8 +319,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_132805) do
     t.index ["product_id"], name: "index_variants_on_product_id"
   end
 
+  create_table "working_hours", force: :cascade do |t|
+    t.integer "staff_member_id", null: false
+    t.integer "weekday", null: false
+    t.integer "opens_at", null: false
+    t.integer "closes_at", null: false
+    t.index ["staff_member_id", "weekday"], name: "index_working_hours_on_staff_member_id_and_weekday"
+    t.index ["staff_member_id"], name: "index_working_hours_on_staff_member_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "appointments", "customers", on_delete: :nullify
+  add_foreign_key "appointments", "services", on_delete: :nullify
+  add_foreign_key "appointments", "staff_members", on_delete: :nullify
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "variants"
   add_foreign_key "collection_products", "collections"
@@ -252,6 +343,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_132805) do
   add_foreign_key "order_events", "orders"
   add_foreign_key "order_events", "users", on_delete: :nullify
   add_foreign_key "orders", "customers"
+  add_foreign_key "service_staff_members", "services"
+  add_foreign_key "service_staff_members", "staff_members"
   add_foreign_key "sessions", "users"
+  add_foreign_key "time_offs", "staff_members"
   add_foreign_key "variants", "products"
+  add_foreign_key "working_hours", "staff_members"
 end

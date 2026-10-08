@@ -1,0 +1,6 @@
+<%= page_header @service.name, breadcrumbs: [ [ t("admin.services.index.title"), admin_services_path ], [ @service.name, nil ] ] do %>
+  <%= button_to t(".delete"), admin_service_path(@service), method: :delete, class: button_classes(:danger),
+        form: { data: { turbo_confirm: t(".confirm_delete", name: @service.name) } } %>
+<% end %>
+
+<%= render "form", service: @service %>

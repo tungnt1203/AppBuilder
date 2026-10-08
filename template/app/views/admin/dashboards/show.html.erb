@@ -16,6 +16,29 @@
   <% end %>
 <% end %>
 
+<% if @todays_appointments %>
+  <%= card padded: false, class: "mb-6" do %>
+    <div class="flex items-center justify-between border-b border-line px-6 py-4">
+      <h2 class="text-sm font-semibold text-ink"><%= t(".todays_appointments") %></h2>
+      <%= link_to t(".calendar"), admin_appointments_path, class: "text-sm #{link_classes}" %>
+    </div>
+    <% if @todays_appointments.any? %>
+      <ul class="divide-y divide-line">
+        <% @todays_appointments.each do |appointment| %>
+          <li>
+            <%= link_to admin_appointment_path(appointment), class: "flex items-center gap-4 px-6 py-3 hover:bg-surface-muted" do %>
+              <span class="w-20 shrink-0 text-sm font-medium tabular-nums"><%= l(appointment.starts_at, format: :slot) %></span>
+              <span class="min-w-0 flex-1 truncate text-sm"><%= appointment.name %> · <span class="text-muted"><%= [ appointment.service_name, appointment.staff_member&.name ].compact.join(" · ") %></span></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="px-6 py-8 text-center text-sm text-muted"><%= t(".no_appointments_today") %></p>
+    <% end %>
+  <% end %>
+<% end %>
+
 <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
   <%= stat money(@sales_30_days, @store.currency), t(".sales"), hint: t(".last_30_days") %>
   <%= stat @orders_30_days, t(".orders"), hint: t(".today", count: @orders_today) %>

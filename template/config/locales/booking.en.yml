@@ -1,0 +1,206 @@
+# Text for the booking screens (config.x.booking): /book, the customer's appointment page and
+# /admin's appointments, services, staff, time off and booking settings. Model names, errors and
+# the appointment emails come with the booking core (vendor/blocks/booking/config/locales/en.yml).
+en:
+  booking:
+    minutes:
+      one: 1 min
+      other: "%{count} min"
+    no_hours: No hours set
+  layouts:
+    site:
+      book: Book
+    admin:
+      appointments: Appointments
+      services: Services
+      staff_members: Staff
+      time_offs: Time off
+  bookings:
+    rate_limited: Too many tries. Please wait a minute and try again.
+    new:
+      title: Book an appointment
+      title_for: Book %{service}
+      minutes:
+        one: 1 minute
+        other: "%{count} minutes"
+      no_services: Online booking isn't open yet. Please contact us to book.
+      change_service: Change
+      who: Who with
+      anyone: Anyone
+      when: When
+      no_times: No free times on this day. Try another day.
+      details: Your details
+      email_hint: We send the confirmation here.
+      with: with %{name}
+      book: Confirm booking
+  appointments:
+    statuses:
+      booked: Booked
+      completed: Completed
+      no_show: No-show
+      cancelled: Cancelled
+    show:
+      title: Your appointment
+      booked: You're booked, %{name}!
+      confirmation_sent: We've sent the details to %{email}. Keep this page's link to see or cancel your appointment.
+      when: When
+      with: With
+      where: Where
+      price: Price
+      minutes:
+        one: 1 minute
+        other: "%{count} minutes"
+      cancel: Cancel appointment
+      confirm_cancel: Cancel this appointment?
+      cancel_until: You can cancel up to %{hours} hours before.
+      too_late_to_cancel: It's too late to cancel online.
+      contact: 'Please contact us: %{contact}.'
+      book_again: Book another time
+    cancellations:
+      create:
+        notice: Your appointment is cancelled.
+        too_late: It's too late to cancel this appointment online. Please contact us.
+  admin:
+    dashboards:
+      show:
+        todays_appointments: Today's appointments
+        calendar: Calendar
+        no_appointments_today: No appointments today.
+    appointments:
+      invalid_transition: This appointment has already moved on; nothing was changed.
+      index:
+        title: Appointments
+        new: New appointment
+        previous_day: Previous day
+        next_day: Next day
+        day: Day
+        today: Today
+        search: Name, email or phone
+        search_button: Search
+        empty_day: No appointments on this day.
+        no_results: No appointments match.
+      show:
+        complete: Mark completed
+        more: More
+        no_show: Mark as no-show
+        cancel: Cancel appointment
+        confirm_cancel: Cancel %{name}'s appointment? They'll get an email.
+        service: Service
+        with: With
+        anyone: Anyone
+        price: Price
+        note: Customer's note
+        booked_at: Booked
+        cancelled_at: Cancelled
+        cancelled_by:
+          customer: by the customer
+          staff: by staff
+        staff_note_hint: Only staff see this.
+        save: Save note
+        customer: Customer
+      new:
+        title: New appointment
+        description: Book for someone who called or walked in. Any time within the staff member's hours works.
+        anyone: Whoever is free
+        starts_at_hint: In the business's time zone.
+        email_hint: They get the confirmation here.
+        book: Book appointment
+      create:
+        notice: Booked %{name}.
+      update:
+        notice: Saved.
+      completions:
+        create:
+          notice: "%{name}'s appointment is completed."
+      no_shows:
+        create:
+          notice: "%{name} was marked as a no-show."
+      cancellations:
+        create:
+          notice: "%{name}'s appointment is cancelled."
+    services:
+      index:
+        title: Services
+        description: What customers can book, how long it takes and what it costs.
+        new: New service
+        nobody: Nobody does it yet
+        hidden: Hidden
+        empty_title: No services yet
+        empty_description: Add what customers can book, like a haircut or a consultation.
+      form:
+        statuses:
+          active: Bookable
+          hidden: Hidden
+        not_taking_bookings: Not taking bookings
+        no_staff_html: Nobody to book yet. %{link} first.
+        add_staff: Add a staff member
+        create: Create service
+        save: Save
+      new:
+        title: New service
+      edit:
+        delete: Delete
+        confirm_delete: Delete %{name}? Its past appointments stay.
+      create:
+        notice: "%{name} was created."
+      update:
+        notice: "%{name} was saved."
+      destroy:
+        notice: "%{name} was deleted."
+    staff_members:
+      index:
+        title: Staff
+        description: Who customers book, their weekly hours and what they do.
+        new: New staff member
+        not_taking_bookings: Not taking bookings
+        empty_title: No staff yet
+        empty_description: Add the people (or chairs, rooms) customers book, with their hours.
+      form:
+        bio_hint: Shown to customers if the site lists the team.
+        hours: Weekly hours
+        hours_hint: Like 9:00 and 17:30. Leave a day empty when they don't work.
+        from: "%{day}, from"
+        until: "%{day}, until"
+        no_services_html: No services yet. %{link}.
+        add_service: Add a service
+        create: Create staff member
+        save: Save
+      new:
+        title: New staff member
+      edit:
+        delete: Delete
+        confirm_delete: Delete %{name}? Their appointments stay, with nobody assigned.
+      create:
+        notice: "%{name} was added."
+      update:
+        notice: "%{name} was saved."
+      destroy:
+        notice: "%{name} was deleted."
+    time_offs:
+      index:
+        title: Time off
+        description: Holidays and closures. Nobody can book over them.
+        new: Add time off
+        whole_business: Whole business closed
+        delete: Remove
+        confirm_delete: Remove this time off?
+        empty_title: No time off coming up
+        empty_description: Add a holiday, a day off, or a day the business is closed.
+      new:
+        title: Add time off
+        whole_business: Everyone (closed)
+        reason_placeholder: Holiday, training…
+        create: Add time off
+      create:
+        notice: Time off added.
+      destroy:
+        notice: Time off removed.
+    booking_settings:
+      edit:
+        title: Booking
+        slot_hint: Customers see free times at this step, like 9:00, 9:30, 10:00.
+        min_notice_hint: 120 means nobody can book less than two hours ahead.
+        cancel_hint: After that, customers have to contact you to cancel.
+        save: Save
+      update:
+        notice: Booking settings saved.

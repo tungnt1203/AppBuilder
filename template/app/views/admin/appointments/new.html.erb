@@ -1,0 +1,29 @@
+<%= page_header t(".title"), t(".description"), breadcrumbs: [ [ t("admin.appointments.index.title"), admin_appointments_path ], [ t(".title"), nil ] ] %>
+
+<%= form_with model: @booking, url: admin_appointments_path, scope: :booking, class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="space-y-1.5">
+        <%= form.label :service_id, t("activerecord.attributes.appointment.service") %>
+        <%= form.collection_select :service_id, Service.active.ordered, :id, :name, { prompt: true }, required: true %>
+      </div>
+      <div class="space-y-1.5">
+        <%= form.label :staff_member_id, t("activerecord.attributes.appointment.staff_member") %>
+        <%= form.collection_select :staff_member_id, StaffMember.active.ordered, :id, :name, { include_blank: t(".anyone") } %>
+      </div>
+    </div>
+    <%= form.field :starts_at, :datetime_local_field, required: true, value: @booking.starts_at&.strftime("%Y-%m-%dT%H:%M"), hint: t(".starts_at_hint") %>
+  <% end %>
+
+  <%= card class: "space-y-4" do %>
+    <%= form.field :name, required: true %>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <%= form.field :email, :email_field, required: true, hint: t(".email_hint") %>
+      <%= form.field :phone, :telephone_field %>
+    </div>
+    <%= form.field :note, :text_area, rows: 2 %>
+  <% end %>
+
+  <%= form.submit t(".book") %>
+<% end %>

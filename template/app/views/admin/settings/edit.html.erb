@@ -3,6 +3,7 @@
 <%= tabs do %>
   <%= tab_to t(".general"), edit_admin_settings_path %>
   <%= tab_to t("admin.policies.edit.title"), edit_admin_policies_path %>
+  <%= tab_to t("admin.booking_settings.edit.title"), edit_admin_booking_settings_path if booking? && Current.user.administrator? %>
 <% end %>
 
 <div class="max-w-2xl space-y-6">

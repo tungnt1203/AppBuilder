@@ -1,0 +1,30 @@
+<%= page_header t(".title"), t(".description") do %>
+  <%= link_to t(".new"), new_admin_staff_member_path, class: button_classes %>
+<% end %>
+
+<% if @staff_members.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @staff_members.each do |member| %>
+        <li>
+          <%= link_to edit_admin_staff_member_path(member), class: "flex items-center gap-4 px-6 py-3 hover:bg-surface-muted" do %>
+            <% if member.photo.attached? && member.photo.representable? %>
+              <%= image_tag member.photo.variant(:thumb), alt: "", class: "size-10 shrink-0 rounded-full object-cover" %>
+            <% else %>
+              <%= avatar member.name %>
+            <% end %>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-medium text-ink"><%= member.name %></span>
+              <span class="block truncate text-xs text-muted"><%= working_hours_summary(member) %></span>
+            </span>
+            <% unless member.active? %><%= badge t(".not_taking_bookings") %><% end %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") do %>
+    <%= link_to t(".new"), new_admin_staff_member_path, class: button_classes %>
+  <% end %>
+<% end %>

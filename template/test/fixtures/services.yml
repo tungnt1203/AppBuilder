@@ -1,0 +1,13 @@
+haircut:
+  name: Haircut
+  slug: haircut
+  duration_minutes: 60
+  price_cents: 4000
+  position: 1
+
+consultation:
+  name: Consultation
+  slug: consultation
+  duration_minutes: 30
+  price_cents: 0
+  position: 2

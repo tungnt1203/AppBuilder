@@ -1,0 +1,45 @@
+<% content_for :title, t(".title") %>
+<% content_for :head do %>
+  <meta name="robots" content="noindex">
+<% end %>
+
+<div class="mx-auto max-w-2xl px-4 py-12">
+  <% if params[:booked] && @appointment.booked? %>
+    <div class="mb-8 rounded-xl border border-green-200 bg-green-50 p-6 text-green-900">
+      <p class="flex items-center gap-2 text-lg font-semibold"><%= icon "circle-check" %> <%= t(".booked", name: @appointment.name) %></p>
+      <p class="mt-1 text-sm"><%= t(".confirmation_sent", email: @appointment.email) %></p>
+    </div>
+  <% end %>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h1 class="font-display text-3xl font-semibold tracking-tight"><%= @appointment.service_name %></h1>
+    <%= appointment_status_badge @appointment %>
+  </div>
+
+  <dl class="mt-6 space-y-3 rounded-xl border border-line bg-surface p-6 text-sm">
+    <div class="flex gap-4"><dt class="w-20 shrink-0 text-muted"><%= t(".when") %></dt><dd><%= l(@appointment.starts_at, format: :appointment) %> · <%= t(".minutes", count: @appointment.duration_minutes) %></dd></div>
+    <% if @appointment.staff_member %>
+      <div class="flex gap-4"><dt class="w-20 shrink-0 text-muted"><%= t(".with") %></dt><dd><%= @appointment.staff_member.name %></dd></div>
+    <% end %>
+    <% if @store.business_address.present? %>
+      <div class="flex gap-4"><dt class="w-20 shrink-0 text-muted"><%= t(".where") %></dt><dd><%= simple_format @store.business_address, {}, wrapper_tag: "span" %></dd></div>
+    <% end %>
+    <% if @appointment.price_cents.positive? %>
+      <div class="flex gap-4"><dt class="w-20 shrink-0 text-muted"><%= t(".price") %></dt><dd><%= money(@appointment.price_cents, @appointment.currency) %></dd></div>
+    <% end %>
+  </dl>
+
+  <% if @appointment.booked? %>
+    <div class="mt-6 text-sm">
+      <% if @appointment.cancellable_by_customer?(@settings) %>
+        <%= button_to t(".cancel"), appointment_cancellation_path(@appointment), class: button_classes(:secondary),
+              form: { data: { turbo_confirm: t(".confirm_cancel") } } %>
+        <p class="mt-2 text-muted"><%= t(".cancel_until", hours: @settings.cancel_notice_hours) %></p>
+      <% else %>
+        <p class="text-muted"><%= t(".too_late_to_cancel") %><%= " #{t(".contact", contact: [ @store.contact_phone, @store.contact_email ].compact_blank.join(" · "))}" if @store.contact_phone.present? || @store.contact_email.present? %></p>
+      <% end %>
+    </div>
+  <% elsif @appointment.cancelled? %>
+    <p class="mt-6 text-sm"><%= link_to t(".book_again"), new_booking_path, class: link_classes %></p>
+  <% end %>
+</div>

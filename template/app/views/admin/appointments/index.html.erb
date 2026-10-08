@@ -1,0 +1,50 @@
+<%= page_header t(".title") do %>
+  <%= link_to t(".new"), new_admin_appointment_path, class: button_classes %>
+<% end %>
+
+<%= toolbar do %>
+  <% if @date %>
+    <div class="flex items-center gap-2">
+      <%= link_to icon("chevron-left", size: 16), admin_appointments_path(date: (@date - 1).iso8601), class: button_classes(:secondary), aria: { label: t(".previous_day") } %>
+      <%= form_with url: admin_appointments_path, method: :get, data: { controller: "autosubmit" } do |form| %>
+        <%= form.date_field :date, value: @date.iso8601, aria: { label: t(".day") }, data: { action: "autosubmit#submit" } %>
+      <% end %>
+      <%= link_to icon("chevron-right", size: 16), admin_appointments_path(date: (@date + 1).iso8601), class: button_classes(:secondary), aria: { label: t(".next_day") } %>
+      <%= link_to t(".today"), admin_appointments_path, class: button_classes(:ghost) unless @date == Date.current %>
+    </div>
+  <% end %>
+  <%= form_with url: admin_appointments_path, method: :get, class: "flex w-full max-w-sm gap-2 sm:ml-auto" do |form| %>
+    <%= form.search_field :q, value: params[:q], placeholder: t(".search"), aria: { label: t(".search") } %>
+    <%= form.button t(".search_button"), type: "submit", name: nil, class: button_classes(:secondary) %>
+  <% end %>
+<% end %>
+
+<% appointments = @date ? @appointments : @page.records %>
+<% if @date %>
+  <h2 class="mb-3 text-sm font-semibold text-ink"><%= l(@date, format: :long) %></h2>
+<% end %>
+<% if appointments.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% appointments.each do |appointment| %>
+        <li>
+          <%= link_to admin_appointment_path(appointment), class: "flex items-center gap-4 px-6 py-3 hover:bg-surface-muted #{"opacity-60" if appointment.cancelled?}" do %>
+            <span class="w-24 shrink-0 text-sm font-medium text-ink tabular-nums">
+              <%= @date ? l(appointment.starts_at, format: :slot) : l(appointment.starts_at, format: :short) %>
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-medium text-ink"><%= appointment.name %></span>
+              <span class="block truncate text-xs text-muted"><%= [ appointment.service_name, appointment.staff_member&.name ].compact.join(" · ") %></span>
+            </span>
+            <%= appointment_status_badge appointment %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+  <%= render "ui/pagination", page: @page if @page %>
+<% elsif @date %>
+  <%= empty_state t(".empty_day") %>
+<% else %>
+  <%= empty_state t(".no_results") %>
+<% end %>

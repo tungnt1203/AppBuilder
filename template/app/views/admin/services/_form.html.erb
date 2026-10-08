@@ -1,0 +1,41 @@
+<%= form_with model: [ :admin, service ], class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <%= form.field :name, required: true, autofocus: service.new_record? %>
+    <%= form.field :description, :text_area, rows: 3 %>
+    <div class="grid gap-4 sm:grid-cols-3">
+      <div class="space-y-1.5">
+        <%= form.label :duration_minutes %>
+        <%= form.select :duration_minutes, duration_options | [ [ t("booking.minutes", count: service.duration_minutes), service.duration_minutes ] ] %>
+      </div>
+      <%= form.field :price, :text_field, inputmode: "decimal" %>
+      <div class="space-y-1.5">
+        <%= form.label :status %>
+        <%= form.select :status, Service.statuses.keys.map { |status| [ t(".statuses.#{status}"), status ] } %>
+      </div>
+    </div>
+  <% end %>
+
+  <%= card do %>
+    <fieldset>
+      <legend class="text-sm font-semibold text-ink"><%= Service.human_attribute_name(:staff_member_ids) %></legend>
+      <%= hidden_field_tag "service[staff_member_ids][]", "" %>
+      <% staff = StaffMember.ordered %>
+      <% if staff.any? %>
+        <div class="mt-3 space-y-2">
+          <% staff.each do |member| %>
+            <label class="flex items-center gap-2 text-sm">
+              <%= check_box_tag "service[staff_member_ids][]", member.id, service.staff_member_ids.include?(member.id), id: dom_id(member, :service), class: "size-4 rounded border-line accent-brand-600" %>
+              <%= member.name %>
+              <% unless member.active? %><%= badge t(".not_taking_bookings") %><% end %>
+            </label>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="mt-2 text-sm text-muted"><%= t(".no_staff_html", link: link_to(t(".add_staff"), new_admin_staff_member_path, class: link_classes)) %></p>
+      <% end %>
+    </fieldset>
+  <% end %>
+
+  <%= form.submit service.new_record? ? t(".create") : t(".save") %>
+<% end %>

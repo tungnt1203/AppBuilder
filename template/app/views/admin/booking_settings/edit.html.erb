@@ -1,0 +1,25 @@
+<%= page_header t("admin.settings.edit.title"), t("admin.settings.edit.description") %>
+
+<%= tabs do %>
+  <%= tab_to t("admin.settings.edit.general"), edit_admin_settings_path %>
+  <%= tab_to t("admin.policies.edit.title"), edit_admin_policies_path %>
+  <%= tab_to t(".title"), edit_admin_booking_settings_path %>
+<% end %>
+
+<%= form_with model: @booking_setting, url: admin_booking_settings_path, method: :patch, class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <div class="space-y-1.5">
+      <%= form.label :slot_minutes %>
+      <%= form.select :slot_minutes, BookingSetting::SLOT_STEPS.map { |minutes| [ t("booking.minutes", count: minutes), minutes ] } %>
+      <p class="text-xs text-muted"><%= t(".slot_hint") %></p>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <%= form.field :min_notice_minutes, :number_field, min: 0, hint: t(".min_notice_hint") %>
+      <%= form.field :max_days_ahead, :number_field, min: 1, max: 365 %>
+    </div>
+    <%= form.field :cancel_notice_hours, :number_field, min: 0, hint: t(".cancel_hint") %>
+  <% end %>
+
+  <%= form.submit t(".save") %>
+<% end %>

@@ -1,0 +1,26 @@
+<%= page_header t(".title"), t(".description") do %>
+  <%= link_to t(".new"), new_admin_time_off_path, class: button_classes %>
+<% end %>
+
+<% if @time_offs.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @time_offs.each do |time_off| %>
+        <li class="flex items-center gap-4 px-6 py-3">
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-medium text-ink"><%= time_off.staff_member&.name || t(".whole_business") %></span>
+            <span class="block text-xs text-muted">
+              <%= l(time_off.starts_at, format: :short) %> – <%= l(time_off.ends_at, format: :short) %><%= " · #{time_off.reason}" if time_off.reason.present? %>
+            </span>
+          </span>
+          <%= button_to t(".delete"), admin_time_off_path(time_off), method: :delete, class: button_classes(:ghost, size: :sm),
+                form: { data: { turbo_confirm: t(".confirm_delete") } } %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") do %>
+    <%= link_to t(".new"), new_admin_time_off_path, class: button_classes %>
+  <% end %>
+<% end %>

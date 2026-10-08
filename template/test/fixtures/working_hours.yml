@@ -1,0 +1,85 @@
+# Mai and Linh work 9:00–17:00 every day, so tests don't depend on the day they run.
+mai_0:
+  staff_member: mai
+  weekday: 0
+  opens_at: 540
+  closes_at: 1020
+
+mai_1:
+  staff_member: mai
+  weekday: 1
+  opens_at: 540
+  closes_at: 1020
+
+mai_2:
+  staff_member: mai
+  weekday: 2
+  opens_at: 540
+  closes_at: 1020
+
+mai_3:
+  staff_member: mai
+  weekday: 3
+  opens_at: 540
+  closes_at: 1020
+
+mai_4:
+  staff_member: mai
+  weekday: 4
+  opens_at: 540
+  closes_at: 1020
+
+mai_5:
+  staff_member: mai
+  weekday: 5
+  opens_at: 540
+  closes_at: 1020
+
+mai_6:
+  staff_member: mai
+  weekday: 6
+  opens_at: 540
+  closes_at: 1020
+
+linh_0:
+  staff_member: linh
+  weekday: 0
+  opens_at: 540
+  closes_at: 1020
+
+linh_1:
+  staff_member: linh
+  weekday: 1
+  opens_at: 540
+  closes_at: 1020
+
+linh_2:
+  staff_member: linh
+  weekday: 2
+  opens_at: 540
+  closes_at: 1020
+
+linh_3:
+  staff_member: linh
+  weekday: 3
+  opens_at: 540
+  closes_at: 1020
+
+linh_4:
+  staff_member: linh
+  weekday: 4
+  opens_at: 540
+  closes_at: 1020
+
+linh_5:
+  staff_member: linh
+  weekday: 5
+  opens_at: 540
+  closes_at: 1020
+
+linh_6:
+  staff_member: linh
+  weekday: 6
+  opens_at: 540
+  closes_at: 1020
+
