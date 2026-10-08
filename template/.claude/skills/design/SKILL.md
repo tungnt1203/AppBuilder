@@ -105,7 +105,8 @@ The customers' site (everything outside /admin) is designed, not assembled from 
 The shop's pages are already there, working, in a plain starting look: home (`home/show`), all
 products (`products/index`), a product (`products/show`, with its photo gallery and option
 picker), a collection, the cart, checkout and the buyer's order page, plus the order emails
-(`order_mailer/`). Restyle them for the brand and rearrange them freely; keep their forms' fields,
+(`order_mailer/`, in the shop core: copy them from `vendor/blocks/shop/app/views/order_mailer/` to
+`app/views/order_mailer/` to restyle them). Restyle them for the brand and rearrange them freely; keep their forms' fields,
 the Stimulus targets (`variant-picker`, `gallery`) and the links between them working.
 
 **A look is the whole site.** Choosing or changing the direction (a new app, "make it look like

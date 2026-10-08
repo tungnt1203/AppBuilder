@@ -103,6 +103,20 @@ It never sends visitors to `/admin`, and has no link to it; the owner goes to `/
 
 Every app starts as a working shop. Build on it; don't write a second cart, checkout or order model.
 
+The shop's core (its models, payments, order emails and migrations) is the `shop` gem in
+`vendor/blocks/shop`. Read it to see how things work; never change, move or copy its files. It's
+the same in every app and gets updated as a whole, so a change there would be lost. The app's own
+files build on it:
+
+- **Screens**: the site's and /admin's controllers and views are the app's (`app/`); change them freely.
+- **Adding to a core model** (an association, validation, scope, method, a column from a new
+  migration): in `app/models/<model>/extension.rb`, which the core includes:
+  `module Product::Extension; extend ActiveSupport::Concern; included { has_many :reviews, dependent: :destroy }; end`.
+  Never create `app/models/product.rb` (or any file with the same path as one of the core's): it
+  would replace the core's class, and the app refuses to start with one.
+- **Order emails and the core's text**: copy a template from `vendor/blocks/shop/app/views/` to the
+  same path in `app/views/` to change it; set the same key in `config/locales/` to change a message.
+
 - **Catalog**: `Product` (title, description, photos as `images`, status draft/active/archived, up to
   three options like Color × Size) and its `Variant`s, one per combination of option values, each
   with its own price, compare-at price, SKU and "for sale" switch. Saving a product makes and
@@ -127,7 +141,7 @@ Every app starts as a working shop. Build on it; don't write a second cart, chec
   manually with the store's payment instructions (staff mark those orders paid). A card order stays
   `pending` until Stripe confirms it (`Order#confirm_card_payment!`, from the order page or
   `StripeWebhooksController`); refunds of card orders go through Stripe. Every call to Stripe is in
-  `StripeGateway`; tests use `connect_fake_stripe`. Never write other payment code, never ask the
+  `StripeGateway` (in the core); tests use `connect_fake_stripe`. Never write other payment code, never ask the
   owner for keys in chat, and when they ask for card payments point them to Settings. For trying it
   out: a test key (`sk_test_…`) and card 4242 4242 4242 4242.
 - **Policies**: refund, shipping, privacy and terms pages at `/policies/:id` and a `/contact` page,

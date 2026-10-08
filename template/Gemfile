@@ -71,4 +71,5 @@ end
 
 gem "rails-i18n", "~> 8.1"
 
-gem "stripe", "~> 20.0"
+# The shop core: catalog, cart, checkout, orders, Stripe payments. Don't change it here; see CLAUDE.md.
+gem "shop", path: "vendor/blocks/shop"

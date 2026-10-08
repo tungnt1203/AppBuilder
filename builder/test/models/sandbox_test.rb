@@ -50,6 +50,18 @@ class SandboxTest < ActiveSupport::TestCase
     assert_equal [ "docker", "exec", "--workdir", path, "appbuilder-nha-khoa", "bin/rails", "db:prepare" ], host.commands.last
   end
 
+  test "the agent can read the app's blocks but not change them" do
+    blocks = @project.path.join("vendor/blocks")
+    blocks.mkpath
+    host = FakeHost.new(nil)
+    Sandbox::Docker.new(@project, host:).run("bin/rails", "db:prepare")
+
+    create = host.commands.find { |command| command[1] == "run" }
+    assert_includes create.each_cons(2).to_a, [ "--volume", "#{blocks}:#{blocks}:ro" ]
+  ensure
+    FileUtils.rm_rf(blocks)
+  end
+
   test "removing the sandbox removes the container and the agent's settings" do
     home = Rails.configuration.x.sandboxes_root.join(@project.slug, "claude")
     home.mkpath

@@ -35,6 +35,8 @@ Generate, then edit by hand: `bin/rails generate model Review product:references
 - Validations for every rule the owner mentioned. Business logic lives in the model, not the controller.
 - Add `scope :ordered` (or a better-named scope) for the default sort.
 - Migrations must stay backward compatible (see CLAUDE.md).
+- The other side of an association with a shop model (`Product has_many :reviews`) goes in that
+  model's extension, `app/models/product/extension.rb` (CLAUDE.md, "The shop"), never in the core.
 
 ## 3. Controller
 

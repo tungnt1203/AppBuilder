@@ -12,6 +12,10 @@ class ProjectSetupJobTest < ActiveSupport::TestCase
     monorepo.join("builder").mkpath
     monorepo.join("template/config/application.rb").write(%(config.x.app_name = "Starter"\n))
     monorepo.join("builder/app.rb").write("builder")
+    monorepo.join("blocks/shop/lib").mkpath
+    monorepo.join("blocks/shop/lib/shop.rb").write("module Shop; end")
+    monorepo.join("template/vendor/blocks").mkpath
+    File.symlink("../../../blocks/shop", monorepo.join("template/vendor/blocks/shop"))
     git = ProjectShell.new(monorepo)
     git.run("git", "init", "--quiet")
     git.run("git", "add", "--all")
@@ -33,6 +37,17 @@ class ProjectSetupJobTest < ActiveSupport::TestCase
     assert_not project.path.join("README.md").exist?
     assert_not project.path.join("builder").exist?
     assert_equal [ "Start from the template" ], project.shell.run("git", "log", "--format=%s").lines.map(&:chomp)
+  end
+
+  test "the app gets a copy of each block the template links to" do
+    project = projects(:clinic)
+    ProjectSetupJob.new.send(:copy_template, project)
+
+    block = project.path.join("vendor/blocks/shop")
+    assert block.directory?
+    assert_not block.symlink?
+    assert_equal "module Shop; end", block.join("lib/shop.rb").read
+    assert_includes project.shell.run("git", "ls-files"), "vendor/blocks/shop/lib/shop.rb"
   end
 
   test "the app stays in English and gets the owner's time zone" do

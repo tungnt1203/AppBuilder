@@ -14,4 +14,6 @@ class LineItem < ApplicationRecord
   def product
     variant&.product
   end
+
+  Shop.extend_model(self)
 end

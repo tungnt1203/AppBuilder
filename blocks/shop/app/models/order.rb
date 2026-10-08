@@ -165,4 +165,6 @@ class Order < ApplicationRecord
     def assign_number
       self.number ||= [ Order.maximum(:number).to_i + 1, FIRST_NUMBER ].max
     end
+
+  Shop.extend_model(self)
 end

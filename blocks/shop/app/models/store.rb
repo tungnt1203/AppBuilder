@@ -152,4 +152,6 @@ class Store < ApplicationRecord
       unknown = ship_to_countries - Country.codes
       errors.add(:ship_to_countries, :unknown, codes: unknown.join(", ")) if unknown.any?
     end
+
+  Shop.extend_model(self)
 end

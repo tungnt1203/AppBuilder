@@ -1,90 +1,6 @@
-# Text for the shop: the customers' site, /admin's shop screens and the order emails.
+# Text for the shop's screens: the customers' site and /admin. Model names, errors and the
+# order emails come with the shop core (vendor/blocks/shop/config/locales/en.yml).
 en:
-  activerecord:
-    models:
-      product: Product
-      variant: Variant
-      collection: Collection
-      order: Order
-      store: Store
-    attributes:
-      product:
-        title: Title
-        description: Description
-        status: Status
-        slug: Web address
-        base_price: Price
-        images: Photos
-        option1_name: Option 1
-        option2_name: Option 2
-        option3_name: Option 3
-        option1_values: Values of option 1
-        option2_values: Values of option 2
-        option3_values: Values of option 3
-      variant:
-        price: Price
-        compare_at_price: Compare-at price
-        sku: SKU
-        available: For sale
-      collection:
-        title: Title
-        description: Description
-        slug: Web address
-        position: Position
-      order:
-        email: Email
-        phone: Phone
-        shipping_name: Full name
-        shipping_address1: Address
-        shipping_address2: Apartment, suite, etc.
-        shipping_city: City
-        shipping_region: State / province
-        shipping_postal_code: ZIP / postal code
-        shipping_country: Country
-        note: Note for the order
-        staff_note: Staff note
-        tracking_url: Tracking link
-      store:
-        currency: Currency
-        contact_email: Contact email
-        shipping_first_item: Shipping, first item
-        shipping_additional_item: Shipping, each additional item
-        free_shipping_threshold: Free shipping from
-        ship_to_countries: Countries you ship to
-        payment_instructions: Payment instructions
-        manual_payments: Accept manual payment
-        contact_phone: Phone
-        business_address: Business address
-        refund_policy: Refund policy
-        shipping_policy: Shipping policy
-        privacy_policy: Privacy policy
-        terms_of_service: Terms of service
-    errors:
-      models:
-        product:
-          attributes:
-            base:
-              options_in_order: Fill in the options in order, starting with option 1
-              too_many_variants: These options make more than 100 variants; use fewer values
-            images:
-              not_an_image: "%{name} isn't an image"
-        variant:
-          attributes:
-            base:
-              taken: This combination of options already exists
-        store:
-          attributes:
-            ship_to_countries:
-              unknown: 'has codes we don''t know: %{codes}'
-  activemodel:
-    errors:
-      models:
-        checkout:
-          attributes:
-            base:
-              empty_cart: Your cart is empty
-            shipping_country:
-              not_shipped_to: isn't a country we ship to
   products:
     statuses:
       draft: Draft
@@ -140,8 +56,6 @@ en:
       questions: Questions?
       card_processing: If you just paid, it can take a moment to show here. Refresh the page in a minute.
       pay_now: Pay %{total}
-    stripe_not_connected: Card payments aren't available right now. Please contact the shop.
-    payment_not_started: We couldn't open the payment page. Please try again in a moment.
   home:
     show:
       tagline: Original designs, printed on demand and shipped to your door.
@@ -194,25 +108,6 @@ en:
         manual: Bank transfer or other
         manual_hint: After placing the order you'll see how to pay.
       agreement_html: By placing your order you agree to our %{policies}.
-  order_mailer:
-    summary:
-      subtotal: Subtotal
-      shipping: Shipping
-      total: Total
-      ship_to: Shipping to
-    confirmation:
-      subject: "%{app}: order %{number} confirmed"
-      heading: Thank you, %{name}!
-      intro: We've received your order %{number}.
-      payment: How to pay
-      view: View your order
-    shipped:
-      subject: "%{app}: order %{number} is on its way"
-      heading: Order %{number} has shipped
-      intro: Your order is on its way.
-      tracking: Tracking
-      track: Track your package
-      view: View your order
   layouts:
     site:
       shop: Shop
@@ -233,11 +128,6 @@ en:
       next: Next
       page: Page %{number} of %{pages}
   admin:
-    order_mailer:
-      placed:
-        subject: New order %{number} (%{total})
-        intro: New order %{number} from %{name} (%{email}).
-        open: Open the order
     dashboards:
       show:
         title: Dashboard
@@ -469,7 +359,6 @@ en:
       update:
         notice: Settings saved.
     stripe_connections:
-      wrong_key: That doesn't look like a Stripe secret key. It starts with sk_live_, sk_test_, rk_live_ or rk_test_.
       create:
         notice: Stripe is connected.
         failed: 'Stripe didn''t accept that key: %{error}'

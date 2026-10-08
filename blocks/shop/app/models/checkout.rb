@@ -109,4 +109,6 @@ class Checkout
       return if shipping_country.blank?
       errors.add(:shipping_country, :not_shipped_to) unless Country.codes.include?(shipping_country) && @store.ships_to?(shipping_country)
     end
+
+  Shop.extend_model(self)
 end

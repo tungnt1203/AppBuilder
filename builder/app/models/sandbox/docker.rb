@@ -126,7 +126,7 @@ class Sandbox::Docker
       host.run("docker", "run", "--detach", "--init", "--name", name, "--label", "#{LABEL}=#{@project.slug}",
         "--publish", "127.0.0.1:#{@project.port}:#{@project.port}",
         "--volume", "#{path}:#{path}", "--volume", "#{config.sandbox_gems_volume}:/usr/local/bundle",
-        "--volume", "#{home}:/home/dev/.claude", "--workdir", path,
+        "--volume", "#{home}:/home/dev/.claude", *read_only_blocks(path), "--workdir", path,
         "--cpus", config.sandbox_cpus.to_s, "--memory", config.sandbox_memory, "--pids-limit", "1024",
         config.sandbox_image)
     rescue ProjectShell::Error
@@ -134,6 +134,13 @@ class Sandbox::Docker
       # running without its port; remove it so the next start makes it properly.
       host.capture("docker", "rm", "--force", name)
       raise
+    end
+
+    # The blocks (vendor/blocks/shop…) are the same in every app and updated as a whole: inside the
+    # container, the agent can read them but not change them.
+    def read_only_blocks(path)
+      blocks = File.join(path, "vendor/blocks")
+      File.directory?(blocks) ? [ "--volume", "#{blocks}:#{blocks}:ro" ] : []
     end
 
     # Containers of apps that no longer exist (deleted while a job was starting their preview),

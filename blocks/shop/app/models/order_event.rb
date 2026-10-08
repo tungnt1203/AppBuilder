@@ -5,4 +5,6 @@ class OrderEvent < ApplicationRecord
   belongs_to :user, optional: true
 
   validates :action, presence: true
+
+  Shop.extend_model(self)
 end

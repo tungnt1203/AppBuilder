@@ -34,9 +34,24 @@ class ProjectSetupJob < ApplicationJob
         repository.run("git", "archive", "--format=tar", "--output", archive.path, "HEAD:#{folder}")
         project.shell.run("tar", "-xf", archive.path)
       end
+      copy_blocks(repository, folder, project)
       project.shell.run("git", "init", "--quiet", "--initial-branch=main")
       project.shell.run("git", "add", "--all")
       project.shell.run("git", "commit", "--quiet", "-m", "Start from the template")
+    end
+
+    # The template uses the blocks (blocks/shop…) through symlinks in vendor/blocks/; the app gets a
+    # real copy of each, from the same commit, since its sandbox and Docker image only see its folder.
+    def copy_blocks(repository, folder, project)
+      project.path.glob("vendor/blocks/*").select(&:symlink?).each do |link|
+        source = Pathname(folder).join("vendor/blocks", link.readlink).cleanpath
+        link.delete
+        link.mkpath
+        Tempfile.create([ "block", ".tar" ]) do |archive|
+          repository.run("git", "archive", "--format=tar", "--output", archive.path, "HEAD:#{source}")
+          ProjectShell.new(link).run("tar", "-xf", archive.path)
+        end
+      end
     end
 
     def configure(project)

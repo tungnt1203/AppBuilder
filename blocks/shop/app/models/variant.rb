@@ -42,4 +42,6 @@ class Variant < ApplicationRecord
       duplicate = Variant.where(product_id: product_id, option1: option1, option2: option2, option3: option3).where.not(id: id)
       errors.add(:base, :taken) if duplicate.exists?
     end
+
+  Shop.extend_model(self)
 end

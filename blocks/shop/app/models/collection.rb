@@ -19,4 +19,6 @@ class Collection < ApplicationRecord
     end
     collection_products.reset
   end
+
+  Shop.extend_model(self)
 end

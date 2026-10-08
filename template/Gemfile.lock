@@ -1,3 +1,10 @@
+PATH
+  remote: vendor/blocks/shop
+  specs:
+    shop (0.1.0)
+      rails (>= 8.1)
+      stripe (~> 20.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -401,12 +408,12 @@ DEPENDENCIES
   rails (~> 8.1.4)
   rails-i18n (~> 8.1)
   rubocop-rails-omakase
+  shop!
   solid_cable
   solid_cache
   solid_queue
   sqlite3 (>= 2.1)
   stimulus-rails
-  stripe (~> 20.0)
   tailwindcss-rails
   thruster
   turbo-rails

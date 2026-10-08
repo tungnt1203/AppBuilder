@@ -3,4 +3,6 @@ class CollectionProduct < ApplicationRecord
   belongs_to :product
 
   validates :product_id, uniqueness: { scope: :collection_id }
+
+  Shop.extend_model(self)
 end

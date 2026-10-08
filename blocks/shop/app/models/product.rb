@@ -127,4 +127,6 @@ class Product < ApplicationRecord
       end
       variants.reset
     end
+
+  Shop.extend_model(self)
 end

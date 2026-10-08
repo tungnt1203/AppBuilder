@@ -22,7 +22,7 @@ module Evaluation
       @id = Time.current.strftime("%Y%m%d-%H%M")
       @results = []
       @meta = { "id" => id, "note" => note, "started_at" => Time.current.iso8601, "agent_backend" => Rails.configuration.x.agent_backend,
-                "builder" => version_of(Rails.root), "template" => version_of(Rails.configuration.x.template_path),
+                "builder" => version_of(Rails.root), "template" => version_of(Rails.configuration.x.template_path), "blocks" => version_of(Rails.configuration.x.template_path.join("../blocks")),
                 "prompt" => Digest::SHA256.hexdigest(Rails.configuration.x.agent[:append_system_prompt].to_s).first(8),
                 "prompts" => Prompts.digest, "seed" => seed }
     end

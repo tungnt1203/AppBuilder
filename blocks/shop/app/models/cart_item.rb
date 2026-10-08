@@ -10,4 +10,6 @@ class CartItem < ApplicationRecord
   def total_cents
     variant.price_cents * quantity
   end
+
+  Shop.extend_model(self)
 end

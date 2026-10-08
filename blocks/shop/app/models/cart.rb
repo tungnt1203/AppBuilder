@@ -31,4 +31,6 @@ class Cart < ApplicationRecord
   def empty?
     buyable_items.empty?
   end
+
+  Shop.extend_model(self)
 end

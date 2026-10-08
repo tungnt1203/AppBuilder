@@ -1,6 +1,11 @@
 # blocks
 
-Reusable integrations (payments, messaging, login) packaged as Rails engines,
-so generated apps get fixes through `bundle update` instead of copied code.
+The parts of generated apps that are built once and kept the same in every app, packaged as
+Rails engines, so apps get fixes by replacing the gem instead of in copied code.
 
-Not started yet. See `../README.md` for the plan.
+| Block   | What it is |
+|---------|------------|
+| `shop/` | Catalog, cart, checkout, orders, Stripe payments: the core of every app |
+
+The template uses each block through a symlink in `template/vendor/blocks/`; a new app gets a
+real copy there (`ProjectSetupJob`), so its preview, sandbox and Docker image have it.
