@@ -1,0 +1,39 @@
+<%= page_header t("admin.settings.edit.title"), t("admin.settings.edit.description") %>
+
+<%= tabs do %>
+  <%= tab_to t("admin.settings.edit.general"), edit_admin_settings_path %>
+  <%= tab_to t("admin.policies.edit.title"), edit_admin_policies_path %>
+  <%= tab_to t("admin.booking_settings.edit.title"), edit_admin_booking_settings_path if booking? %>
+  <%= tab_to t(".title"), admin_agents_path %>
+<% end %>
+
+<div class="max-w-2xl space-y-6">
+  <p class="text-sm text-muted"><%= t(".intro") %></p>
+
+  <% if @new_key %>
+    <%= card class: "space-y-2 border-brand-200" do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".new_key.#{@new_key["role"]}") %></h2>
+      <p class="text-sm text-muted"><%= t(".new_key.hint") %></p>
+      <input type="text" readonly value="<%= @new_key["key"] %>" class="<%= field_classes %> font-mono text-xs" aria-label="<%= t(".new_key.label") %>">
+      <p class="text-xs text-muted"><%= t(".api_url", url: "#{request.base_url}/agent/v1") %></p>
+    <% end %>
+  <% end %>
+
+  <% Store::AGENT_ROLES.each do |role| %>
+    <%= card class: "space-y-3" do %>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-sm font-semibold text-ink"><%= t(".roles.#{role}.title") %></h2>
+        <%= @store.agent_key?(role) ? badge(t(".connected"), tone: :green) : badge(t(".not_connected")) %>
+      </div>
+      <p class="text-sm text-muted"><%= t(".roles.#{role}.description") %></p>
+      <div class="flex flex-wrap gap-2">
+        <%= button_to t(@store.agent_key?(role) ? ".replace_key" : ".make_key"), admin_agents_path(role:), class: button_classes(@store.agent_key?(role) ? :secondary : :primary),
+              form: (@store.agent_key?(role) ? { data: { turbo_confirm: t(".confirm_replace") } } : {}) %>
+        <% if @store.agent_key?(role) %>
+          <%= button_to t(".revoke"), admin_agents_path(role:), method: :delete, class: button_classes(:ghost),
+                form: { data: { turbo_confirm: t(".confirm_revoke") } } %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

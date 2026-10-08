@@ -1,0 +1,48 @@
+<%= page_header t(".title"), t(".description") %>
+
+<% if @staged.any? %>
+  <div class="space-y-4">
+    <% @staged.each do |change| %>
+      <%= card class: "space-y-3" do %>
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-ink"><%= change.summary %></p>
+            <p class="text-xs text-muted"><%= t(".proposed", who: change.created_by, time: time_ago_in_words(change.created_at)) %></p>
+          </div>
+          <div class="flex gap-2">
+            <%= button_to t(".apply"), admin_agent_change_application_path(change), class: button_classes %>
+            <%= button_to t(".discard"), admin_agent_change_discard_path(change), class: button_classes(:ghost) %>
+          </div>
+        </div>
+        <ul class="divide-y divide-line rounded-lg border border-line text-sm">
+          <% change.items.each do |item| %>
+            <li class="flex flex-wrap gap-x-3 px-3 py-2">
+              <span class="text-muted"><%= item["target"] %> · <%= item["field"] %></span>
+              <span><%= item["before"].nil? ? "—" : item["before"].to_s.truncate(60) %> → <strong><%= item["after"].to_s.truncate(60) %></strong></span>
+            </li>
+          <% end %>
+        </ul>
+        <% change.guardrail_notes.each do |note| %>
+          <%= alert note, tone: :warning %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") %>
+<% end %>
+
+<% if @recent.any? %>
+  <h2 class="mt-8 mb-3 text-sm font-semibold text-ink"><%= t(".recent") %></h2>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @recent.each do |change| %>
+        <li class="flex items-center gap-4 px-6 py-3 text-sm">
+          <span class="min-w-0 flex-1 truncate"><%= change.summary %></span>
+          <span class="text-xs text-muted"><%= change.applied? ? t(".applied_by", who: change.applied_by) : t(".discarded_by", who: change.discarded_by) %></span>
+          <%= badge t(".statuses.#{change.status}"), tone: change.applied? ? :green : :gray %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

@@ -145,6 +145,11 @@ files build on it:
   `/admin/promotions`; don't write other discount or sale logic.
 - **Tax** is Stripe's: with "Let Stripe calculate tax" on in settings, Stripe Tax adds it on its
   payment page and the order records `tax_cents`. Don't calculate tax in the app.
+- **AI agents**: the core has an agent API (`/agent/v1`, `Agent::` controllers) for assistants
+  built on anthropics/commerce-agents: a shopping assistant for buyers and the owner's assistant,
+  whose changes wait as suggestions (`AgentChange`) until someone applies them at
+  `/admin/agent_changes`. Admins connect them at `/admin/settings/agents`. It's finished; don't
+  change it or write another API for agents, and don't add a chat widget unless the owner asks.
 - **Settings**: `Store.current` (currency, flat-rate shipping, free-shipping threshold, countries
   shipped to, how buyers pay, low-stock threshold), edited by admins at `/admin/settings`.
 - **Payment** is built in and finished; don't change it for a feature. Buyers pay by card on

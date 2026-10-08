@@ -179,3 +179,10 @@ en:
       not_started: That code isn't valid yet
       used_up: That code has been used up
       below_minimum: That code needs a bigger order
+  agent_api:
+    fulfillment:
+      eta: Ships to %{countries}; see the shipping policy for times
+      anywhere: most countries
+      free_from: Free shipping on orders from %{amount}
+    contact: Contact
+    claim_expired: That cart link has expired. Ask the assistant for a new one.

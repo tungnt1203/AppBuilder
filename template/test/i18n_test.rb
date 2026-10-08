@@ -20,7 +20,7 @@ class I18nScreensTest < ActionDispatch::IntegrationTest
     sign_in_as users(:owner)
     [ admin_root_path, admin_users_path, new_admin_user_path, edit_admin_user_path(users(:staff)), admin_user_path(users(:staff)),
       admin_discounts_path, new_admin_discount_path, edit_admin_discount_path(discounts(:five_off)), admin_promotions_path, new_admin_promotion_path,
-      edit_admin_product_path(products(:tee)), edit_admin_settings_path ].each do |path|
+      edit_admin_product_path(products(:tee)), edit_admin_settings_path, admin_agents_path, admin_agent_changes_path ].each do |path|
       get path
       assert_response :success
       assert_no_missing_translations

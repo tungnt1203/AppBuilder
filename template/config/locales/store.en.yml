@@ -135,6 +135,7 @@ en:
       settings: Settings
       discounts: Discounts
       promotions: Sales
+      agent_changes: Suggestions
   ui:
     pagination:
       label: Pages
@@ -476,6 +477,61 @@ en:
       cancellations:
         create:
           notice: "%{name} has ended; prices are back."
+    agents:
+      show:
+        title: AI agents
+        intro: Connect AI assistants built with Claude (anthropics/commerce-agents) to your shop. Each gets its own key; it only does what the shop allows, and the owner's assistant changes nothing until you apply its suggestions.
+        roles:
+          storefront:
+            title: Shopping assistant
+            description: Helps buyers find products, answers questions from your policies and fills a cart they check out themselves. It can't take payments or see other buyers.
+          merchant:
+            title: Your assistant
+            description: Explains your sales and stock, and suggests price changes, restocks, edits and sales. Its suggestions wait under Suggestions until you apply them.
+        connected: Connected
+        not_connected: Not connected
+        make_key: Make a key
+        replace_key: Make a new key
+        revoke: Disconnect
+        confirm_replace: Make a new key? The current one stops working.
+        confirm_revoke: Disconnect? The agent loses access right away.
+        new_key:
+          storefront: The shopping assistant's key
+          merchant: Your assistant's key
+          hint: 'Copy it now: it isn''t shown again. Give it only to where the agent runs.'
+          label: Agent key
+        api_url: The agent API is at %{url}.
+      create:
+        notice:
+          storefront: Made a new key for the shopping assistant.
+          merchant: Made a new key for your assistant.
+      destroy:
+        notice:
+          storefront: The shopping assistant is disconnected.
+          merchant: Your assistant is disconnected.
+    agent_changes:
+      index:
+        title: Suggestions
+        description: Changes your assistant proposed. Nothing changes in the shop until you apply one.
+        proposed: Proposed by %{who}, %{time} ago
+        apply: Apply
+        discard: Discard
+        empty_title: No suggestions waiting
+        empty_description: When your assistant proposes a change, it shows up here to apply or discard.
+        recent: Recently
+        applied_by: Applied by %{who}
+        discarded_by: Discarded by %{who}
+        statuses:
+          applied: Applied
+          discarded: Discarded
+          staged: Waiting
+      applications:
+        create:
+          notice: Applied.
+          failed: 'Couldn''t apply it: %{error}'
+      discards:
+        create:
+          notice: Discarded.
   policies:
     titles:
       refund: Refund policy

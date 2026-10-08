@@ -64,6 +64,13 @@ Rails.application.routes.draw do
     resources :time_offs, only: %i[ index new create destroy ]
     resource :settings, only: %i[ edit update ]
     resource :booking_settings, only: %i[ edit update ], path: "settings/booking"
+    resource :agents, only: %i[ show create destroy ], path: "settings/agents"
+    resources :agent_changes, only: :index do
+      scope module: :agent_changes do
+        resource :application, only: :create
+        resource :discard, only: :create
+      end
+    end
     resource :stripe_connection, only: %i[ create update destroy ]
     resource :policies, only: %i[ edit update ], path: "settings/policies"
     resources :users

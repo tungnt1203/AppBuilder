@@ -131,6 +131,34 @@ class Store < ApplicationRecord
     false
   end
 
+  AGENT_ROLES = %w[ storefront merchant ].freeze
+
+  # A new key for AI agents (the agent API, /agent/v1): "storefront" for shopping agents acting
+  # for buyers, "merchant" for the owner's assistant. Only its digest is kept; the key is shown
+  # once. A new key replaces the old one.
+  def generate_agent_key!(role)
+    key = "#{role == "merchant" ? "mk" : "sk"}_agent_#{SecureRandom.base58(40)}"
+    update!("#{agent_role!(role)}_agent_key_digest" => self.class.agent_key_digest(key))
+    key
+  end
+
+  def revoke_agent_key!(role)
+    update!("#{agent_role!(role)}_agent_key_digest" => nil)
+  end
+
+  def agent_key?(role)
+    public_send("#{agent_role!(role)}_agent_key_digest").present?
+  end
+
+  def agent_key_valid?(role, key)
+    digest = public_send("#{agent_role!(role)}_agent_key_digest")
+    digest.present? && key.present? && ActiveSupport::SecurityUtils.secure_compare(digest, self.class.agent_key_digest(key))
+  end
+
+  def self.agent_key_digest(key)
+    OpenSSL::Digest::SHA256.hexdigest(key.to_s)
+  end
+
   def policy(id)
     public_send(POLICIES.fetch(id)).presence
   end
@@ -140,6 +168,10 @@ class Store < ApplicationRecord
   end
 
   private
+    def agent_role!(role)
+      AGENT_ROLES.include?(role.to_s) ? role.to_s : raise(ArgumentError, "Unknown agent role #{role.inspect}")
+    end
+
     # The key, nil when it can't be decrypted (the app's SECRET_KEY_BASE changed): the owner
     # connects Stripe again.
     def stripe_key
