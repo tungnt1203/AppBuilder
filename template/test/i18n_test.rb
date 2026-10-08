@@ -50,6 +50,6 @@ class I18nScreensTest < ActionDispatch::IntegrationTest
 
   private
     def assert_no_missing_translations
-      assert_no_match(/translation missing|Translation missing/i, response.body, "Missing translation on #{request.path}")
+      assert_no_match(/translation[ _]missing/i, response.body, "Missing translation on #{request.path}")
     end
 end

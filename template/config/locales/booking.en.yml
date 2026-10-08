@@ -13,7 +13,7 @@ en:
     admin:
       appointments: Appointments
       services: Services
-      staff_members: Staff
+      staff_members: Team
       time_offs: Time off
   bookings:
     rate_limited: Too many tries. Please wait a minute and try again.
@@ -133,7 +133,7 @@ en:
           hidden: Hidden
         not_taking_bookings: Not taking bookings
         no_staff_html: Nobody to book yet. %{link} first.
-        add_staff: Add a staff member
+        add_staff: Add a team member
         create: Create service
         save: Save
       new:
@@ -149,24 +149,25 @@ en:
         notice: "%{name} was deleted."
     staff_members:
       index:
-        title: Staff
+        title: Team
         description: Who customers book, their weekly hours and what they do.
-        new: New staff member
+        new: New team member
         not_taking_bookings: Not taking bookings
-        empty_title: No staff yet
+        empty_title: No team members yet
         empty_description: Add the people (or chairs, rooms) customers book, with their hours.
       form:
         bio_hint: Shown to customers if the site lists the team.
         hours: Weekly hours
         hours_hint: Like 9:00 and 17:30. Leave a day empty when they don't work.
+        day_off: "Off"
         from: "%{day}, from"
         until: "%{day}, until"
         no_services_html: No services yet. %{link}.
         add_service: Add a service
-        create: Create staff member
+        create: Add team member
         save: Save
       new:
-        title: New staff member
+        title: New team member
       edit:
         delete: Delete
         confirm_delete: Delete %{name}? Their appointments stay, with nobody assigned.

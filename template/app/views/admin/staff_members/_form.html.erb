@@ -24,9 +24,9 @@
               <%= form.fields_for :working_hours, hours do |fields| %>
                 <%= fields.hidden_field :weekday %>
                 <div class="flex items-center gap-2">
-                  <%= fields.text_field :opens_at_text, placeholder: "9:00", inputmode: "numeric", class: "w-24", aria: { label: t(".from", day: weekday_name(weekday)) } %>
+                  <%= fields.text_field :opens_at_text, placeholder: t(".day_off"), inputmode: "numeric", class: "w-24", aria: { label: t(".from", day: weekday_name(weekday)) } %>
                   <span class="text-muted">–</span>
-                  <%= fields.text_field :closes_at_text, placeholder: "17:00", inputmode: "numeric", class: "w-24", aria: { label: t(".until", day: weekday_name(weekday)) } %>
+                  <%= fields.text_field :closes_at_text, inputmode: "numeric", class: "w-24", aria: { label: t(".until", day: weekday_name(weekday)) } %>
                 </div>
                 <% hours.errors.full_messages.each do |message| %>
                   <p class="text-xs text-red-600"><%= message %></p>

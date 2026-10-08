@@ -8,7 +8,7 @@ en:
   activerecord:
     models:
       service: Service
-      staff_member: Staff member
+      staff_member: Team member
       time_off: Time off
       appointment: Appointment
       booking_setting: Booking settings
