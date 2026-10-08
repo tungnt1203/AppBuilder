@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     resource :code, only: :show, module: :projects
     resource :address, only: :update, module: :projects
     resource :share, only: %i[ create destroy ], module: :projects
+    resource :instructions, only: :update, module: :projects
     resource :download, only: :show, module: :projects
     get "messages/:message_id/attachments/:name", to: "projects/attachments#show", as: :attachment, constraints: { name: %r{[^/]+} }
   end

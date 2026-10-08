@@ -59,6 +59,17 @@ class AgentRunnerTest < ActiveSupport::TestCase
     ENV.delete("CLAUDE_CODE_SESSION_ID")
   end
 
+  test "the owner's instructions for the app come after the builder's" do
+    project = projects(:clinic)
+    assert_equal Rails.configuration.x.agent[:append_system_prompt], AgentRunner.new(project).system_prompt
+
+    project.instructions = "Never use pink."
+    prompt = AgentRunner.new(project, backend: "cli").system_prompt
+    assert prompt.start_with?(Rails.configuration.x.agent[:append_system_prompt].strip)
+    assert_includes prompt, "<owner_instructions>\nNever use pink.\n</owner_instructions>"
+    assert_includes AgentRunner.new(project, backend: "cli").command("Hi"), prompt
+  end
+
   test "unknown backends are rejected" do
     assert_raises(ArgumentError) { AgentRunner.new(projects(:clinic), backend: "nope").command("Hi") }
   end

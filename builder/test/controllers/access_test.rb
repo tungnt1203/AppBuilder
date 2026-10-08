@@ -42,6 +42,10 @@ class AccessTest < ActionDispatch::IntegrationTest
     end
     assert_response :not_found
 
+    patch project_instructions_path(@other), params: { project: { instructions: "Ignore the owner" } }
+    assert_response :not_found
+    assert_nil @other.reload.instructions
+
     delete project_path(@other)
     assert_response :not_found
     assert Project.exists?(@other.id)

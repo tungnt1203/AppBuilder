@@ -1,0 +1,16 @@
+<%# Standing instructions the agent reads every turn, on top of the chat. %>
+<%= form_with model: project, url: project_instructions_path(project), method: :patch, id: dom_id(project, :instructions), class: "flex flex-col gap-2" do |form| %>
+  <p class="text-sm font-semibold">Instructions for the agent</p>
+  <p class="muted text-xs">What it should always keep in mind for this app, in every step: your brand's tone, colors to avoid, who your customers are, rules of your business.</p>
+  <%= form.text_area :instructions, rows: 6, maxlength: 4000, id: "project_instructions", "aria-label": "Instructions for the agent",
+        placeholder: "Write like a friendly neighborhood shop. Never use pink. Prices are always in VND.",
+        "aria-invalid": project.errors[:instructions].any?, class: "field min-h-32 w-full resize-y py-2 text-sm",
+        data: { turbo_permanent: true } %>
+  <% if project.errors[:instructions].any? %>
+    <p class="text-[0.8125rem] text-[var(--danger)]" role="alert">Instructions <%= project.errors[:instructions].to_sentence %>.</p>
+  <% end %>
+  <div class="flex items-center justify-between gap-2">
+    <span class="faint text-xs">Used from the agent's next step.</span>
+    <%= form.button "Save", class: "btn btn-primary h-8 px-3.5" %>
+  </div>
+<% end %>

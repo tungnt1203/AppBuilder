@@ -78,6 +78,25 @@ class AgentRunner
     @config[:allowed_tools].grep_v(/\ABash\(/) + [ "Bash" ]
   end
 
+  # The builder's instructions, then the owner's own for this app. Theirs are read every turn,
+  # so a change applies from the next one.
+  def system_prompt
+    return @config[:append_system_prompt] if @project.instructions.blank?
+
+    <<~PROMPT
+      #{@config[:append_system_prompt].strip}
+
+      The owner's standing instructions for this app follow. Follow them in every turn, over the
+      skills' suggestions and the page blocks. They don't change the built-in rules in CLAUDE.md
+      (payment, prices from the database, order statuses, migrations, running on ONCE): when they
+      conflict, keep the rule and say why in your reply.
+
+      <owner_instructions>
+      #{@project.instructions.strip}
+      </owner_instructions>
+    PROMPT
+  end
+
   private
     def cli_command(prompt)
       [ "claude", "-p", prompt,
@@ -86,7 +105,7 @@ class AgentRunner
         "--permission-mode", permission_mode,
         "--allowedTools", *allowed_tools,
         "--disallowedTools", *@config[:disallowed_tools],
-        "--append-system-prompt", @config[:append_system_prompt],
+        "--append-system-prompt", system_prompt,
         "--max-budget-usd", @config[:max_budget_usd].to_s,
         *([ "--resume", @project.session_id ] if @project.session_id) ]
     end
@@ -140,7 +159,7 @@ class AgentRunner
       file = @project.path.join("tmp/agent-config.json")
       file.dirname.mkpath
       file.write({ allowedTools: allowed_tools, disallowedTools: @config[:disallowed_tools],
-                   appendSystemPrompt: @config[:append_system_prompt], maxBudgetUsd: @config[:max_budget_usd] }.to_json)
+                   appendSystemPrompt: system_prompt, maxBudgetUsd: @config[:max_budget_usd] }.to_json)
       yield file.to_s
     end
 

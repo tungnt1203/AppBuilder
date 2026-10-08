@@ -17,6 +17,7 @@ class Project < ApplicationRecord
   validates :owner, presence: true, on: :create
   validate :owner_has_room, on: :create
   validates :language, inclusion: { in: LANGUAGES.keys }
+  validates :instructions, length: { maximum: 4000 }
   validates :subdomain, uniqueness: true, exclusion: { in: RESERVED_SUBDOMAINS, message: "is reserved" },
     format: { with: /\A[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\z/, message: "can only use a-z, 0-9 and dashes, not at either end" }, allow_nil: true
 
