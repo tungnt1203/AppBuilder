@@ -65,4 +65,16 @@ module StoreHelper
     end
     safe_join(blocks)
   end
+
+  # "10% off · from $30 · until Oct 31" for the discounts list.
+  def discount_summary(discount)
+    [ case discount.kind
+      when "percentage" then t("admin.discounts.summary.percentage", percent: discount.percent_off)
+      when "fixed_amount" then t("admin.discounts.summary.fixed_amount", amount: money(discount.amount_off_cents))
+      else t("admin.discounts.summary.free_shipping")
+      end,
+      (t("admin.discounts.summary.minimum", amount: money(discount.minimum_subtotal_cents)) if discount.minimum_subtotal_cents),
+      (t("admin.discounts.summary.until", date: l(discount.ends_at, format: :short)) if discount.ends_at),
+      (t("admin.discounts.summary.limit", count: discount.usage_limit) if discount.usage_limit) ].compact.join(" · ")
+  end
 end

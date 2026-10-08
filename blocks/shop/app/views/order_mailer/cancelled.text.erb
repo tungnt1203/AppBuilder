@@ -1,0 +1,9 @@
+<%= t(".heading", number: @order.name) %>
+
+<%= t(".intro", total: money(@order.total_cents, @order.currency)) %>
+<% if @store.contact_email.present? %>
+
+<%= t(".questions", email: @store.contact_email) %>
+<% end %>
+
+<%= t(".view") %>: <%= order_url(@order) %>

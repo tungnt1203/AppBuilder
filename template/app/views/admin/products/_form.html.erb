@@ -55,6 +55,9 @@
                 <th class="px-3 py-2 font-medium"><%= Variant.human_attribute_name(:price) %></th>
                 <th class="px-3 py-2 font-medium"><%= Variant.human_attribute_name(:compare_at_price) %></th>
                 <th class="px-3 py-2 font-medium"><%= Variant.human_attribute_name(:sku) %></th>
+                <th class="px-3 py-2 font-medium"><%= Variant.human_attribute_name(:cost) %></th>
+                <th class="px-3 py-2 font-medium"><%= Variant.human_attribute_name(:track_inventory) %></th>
+                <th class="px-3 py-2 font-medium"><%= Variant.human_attribute_name(:inventory_quantity) %></th>
                 <th class="px-3 py-2 pr-6 font-medium"><%= Variant.human_attribute_name(:available) %></th>
               </tr>
             </thead>
@@ -65,6 +68,9 @@
                   <td class="px-3 py-2"><%= fields.number_field :price, step: 0.01, min: 0, required: true, class: "min-w-24", aria: { label: Variant.human_attribute_name(:price) } %></td>
                   <td class="px-3 py-2"><%= fields.number_field :compare_at_price, step: 0.01, min: 0, class: "min-w-24", aria: { label: Variant.human_attribute_name(:compare_at_price) } %></td>
                   <td class="px-3 py-2"><%= fields.text_field :sku, class: "min-w-28", aria: { label: Variant.human_attribute_name(:sku) } %></td>
+                  <td class="px-3 py-2"><%= fields.number_field :cost, step: 0.01, min: 0, class: "min-w-24", aria: { label: Variant.human_attribute_name(:cost) } %></td>
+                  <td class="px-3 py-2"><%= fields.check_box :track_inventory, aria: { label: Variant.human_attribute_name(:track_inventory) } %></td>
+                  <td class="px-3 py-2"><%= fields.number_field :inventory_quantity, min: 0, step: 1, class: "w-20", aria: { label: Variant.human_attribute_name(:inventory_quantity) } %></td>
                   <td class="px-3 py-2 pr-6"><%= fields.check_box :available, aria: { label: Variant.human_attribute_name(:available) } %></td>
                 </tr>
               <% end %>

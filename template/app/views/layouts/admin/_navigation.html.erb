@@ -10,6 +10,8 @@
 <%= nav_link_to t("layouts.admin.orders"), admin_orders_path, match: "/admin/orders" %>
 <%= nav_link_to t("layouts.admin.products"), admin_products_path, match: "/admin/products" %>
 <%= nav_link_to t("layouts.admin.collections"), admin_collections_path, match: "/admin/collections" %>
+<%= nav_link_to t("layouts.admin.discounts"), admin_discounts_path, match: "/admin/discounts" %>
+<%= nav_link_to t("layouts.admin.promotions"), admin_promotions_path, match: "/admin/promotions" %>
 <% if Current.user.administrator? %>
   <%= nav_link_to t("layouts.admin.settings"), edit_admin_settings_path, match: "/admin/settings" %>
 <% end %>

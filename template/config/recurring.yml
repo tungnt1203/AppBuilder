@@ -16,6 +16,9 @@ production:
   expire_unpaid_card_orders:
     class: Order::ExpireUnpaidCardJob
     schedule: every hour at minute 25
+  start_and_end_sales:
+    class: Promotion::SyncJob
+    schedule: every 5 minutes
   remind_appointments:
     class: Appointment::ReminderJob
     schedule: every hour at minute 5

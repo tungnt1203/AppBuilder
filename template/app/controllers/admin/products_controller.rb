@@ -56,7 +56,7 @@ class Admin::ProductsController < Admin::BaseController
         :title, :slug, :description, :status, :base_price,
         :option1_name, :option1_values_text, :option2_name, :option2_values_text, :option3_name, :option3_values_text,
         collection_ids: [],
-        variants_attributes: [ [ :id, :price, :compare_at_price, :sku, :available ] ]
+        variants_attributes: [ [ :id, :price, :compare_at_price, :sku, :available, :cost, :track_inventory, :inventory_quantity ] ]
       ])
     end
 

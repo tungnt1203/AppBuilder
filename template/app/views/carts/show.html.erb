@@ -39,6 +39,18 @@
     </ul>
 
     <div class="mt-6 flex flex-col items-end gap-1">
+      <% if (discount = current_cart.discount) %>
+        <div class="mb-2 flex items-center gap-3 text-sm">
+          <span class="rounded-full bg-surface-muted px-3 py-1 font-medium"><%= discount.code %></span>
+          <span><%= discount.free_shipping? ? t(".free_shipping") : "-#{money(discount.amount_for(current_cart.subtotal_cents))}" %></span>
+          <%= button_to t(".remove_code"), cart_discount_path, method: :delete, class: "text-muted underline hover:text-ink" %>
+        </div>
+      <% else %>
+        <%= form_with url: cart_discount_path, class: "mb-3 flex w-full max-w-xs gap-2" do |form| %>
+          <%= form.text_field :code, placeholder: t(".discount_code"), autocomplete: "off", autocapitalize: "characters", aria: { label: t(".discount_code") }, class: "uppercase" %>
+          <%= form.button t(".apply"), class: button_classes(:secondary) %>
+        <% end %>
+      <% end %>
       <p class="text-lg font-medium"><%= t(".subtotal") %>: <%= money(@items.sum(&:total_cents)) %></p>
       <p class="text-sm text-muted"><%= t(".shipping_at_checkout") %></p>
       <%= link_to t(".checkout"), new_checkout_path, class: "#{button_classes} mt-4 w-full py-2.5 sm:w-auto sm:px-8" %>

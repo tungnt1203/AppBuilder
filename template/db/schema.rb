@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_110003) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "agent_changes", force: :cascade do |t|
+    t.string "kind", null: false
+    t.string "status", default: "staged", null: false
+    t.string "summary", null: false
+    t.json "payload", default: {}, null: false
+    t.json "items", default: [], null: false
+    t.json "guardrail_notes", default: [], null: false
+    t.string "created_by", null: false
+    t.string "created_by_kind", default: "agent", null: false
+    t.string "applied_by"
+    t.datetime "applied_at"
+    t.string "discarded_by"
+    t.string "discarded_by_kind"
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status", "created_at"], name: "index_agent_changes_on_status_and_created_at"
   end
 
   create_table "appointments", force: :cascade do |t|
@@ -91,6 +110,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
   create_table "carts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "discount_code"
+    t.string "agent_session_key"
+    t.index ["agent_session_key"], name: "index_carts_on_agent_session_key", unique: true
     t.index ["updated_at"], name: "index_carts_on_updated_at"
   end
 
@@ -131,6 +153,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_customers_on_email_address", unique: true
+  end
+
+  create_table "discounts", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "kind", default: "percentage", null: false
+    t.integer "percent_off"
+    t.integer "amount_off_cents"
+    t.integer "minimum_subtotal_cents"
+    t.datetime "starts_at"
+    t.datetime "ends_at"
+    t.integer "usage_limit"
+    t.integer "times_used", default: 0, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_discounts_on_code", unique: true
   end
 
   create_table "line_items", force: :cascade do |t|
@@ -192,7 +230,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
     t.datetime "updated_at", null: false
     t.string "stripe_checkout_session_id"
     t.integer "cart_id"
+    t.integer "discount_id"
+    t.string "discount_code"
+    t.integer "discount_cents", default: 0, null: false
+    t.integer "tax_cents", default: 0, null: false
     t.index ["customer_id"], name: "index_orders_on_customer_id"
+    t.index ["discount_id"], name: "index_orders_on_discount_id"
     t.index ["email"], name: "index_orders_on_email"
     t.index ["number"], name: "index_orders_on_number", unique: true
     t.index ["status", "created_at"], name: "index_orders_on_status_and_created_at"
@@ -216,6 +259,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_products_on_slug", unique: true
     t.index ["status", "published_at"], name: "index_products_on_status_and_published_at"
+  end
+
+  create_table "promotion_items", force: :cascade do |t|
+    t.integer "promotion_id", null: false
+    t.integer "variant_id", null: false
+    t.integer "original_price_cents"
+    t.integer "original_compare_at_price_cents"
+    t.index ["promotion_id", "variant_id"], name: "index_promotion_items_on_promotion_id_and_variant_id", unique: true
+    t.index ["promotion_id"], name: "index_promotion_items_on_promotion_id"
+    t.index ["variant_id"], name: "index_promotion_items_on_variant_id"
+  end
+
+  create_table "promotions", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "percent_off", null: false
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.string "status", default: "scheduled", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status", "starts_at"], name: "index_promotions_on_status_and_starts_at"
   end
 
   create_table "service_staff_members", force: :cascade do |t|
@@ -279,6 +343,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
     t.text "shipping_policy"
     t.text "privacy_policy"
     t.text "terms_of_service"
+    t.integer "low_stock_threshold", default: 5, null: false
+    t.boolean "stripe_tax", default: false, null: false
+    t.string "storefront_agent_key_digest"
+    t.string "merchant_agent_key_digest"
   end
 
   create_table "time_offs", force: :cascade do |t|
@@ -314,6 +382,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
     t.integer "position", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "track_inventory", default: false, null: false
+    t.integer "inventory_quantity", default: 0, null: false
+    t.integer "cost_cents"
     t.index ["product_id", "option1", "option2", "option3"], name: "index_variants_on_product_and_options", unique: true
     t.index ["product_id", "position"], name: "index_variants_on_product_id_and_position"
     t.index ["product_id"], name: "index_variants_on_product_id"
@@ -343,6 +414,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_100000) do
   add_foreign_key "order_events", "orders"
   add_foreign_key "order_events", "users", on_delete: :nullify
   add_foreign_key "orders", "customers"
+  add_foreign_key "orders", "discounts", on_delete: :nullify
+  add_foreign_key "promotion_items", "promotions"
+  add_foreign_key "promotion_items", "variants", on_delete: :cascade
   add_foreign_key "service_staff_members", "services"
   add_foreign_key "service_staff_members", "staff_members"
   add_foreign_key "sessions", "users"

@@ -1,0 +1,14 @@
+welcome:
+  code: WELCOME10
+  kind: percentage
+  percent_off: 10
+
+five_off:
+  code: FIVEOFF
+  kind: fixed_amount
+  amount_off_cents: 500
+  minimum_subtotal_cents: 3000
+
+ship_free:
+  code: SHIPFREE
+  kind: free_shipping

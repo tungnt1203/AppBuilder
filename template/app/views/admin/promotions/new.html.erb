@@ -1,0 +1,39 @@
+<%= page_header t(".title"), t(".description"), breadcrumbs: [ [ t("admin.promotions.index.title"), admin_promotions_path ], [ t(".title"), nil ] ] %>
+
+<%= form_with model: [ :admin, @promotion ], class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <div class="grid gap-4 sm:grid-cols-[1fr_10rem]">
+      <%= form.field :name, required: true, autofocus: true, placeholder: t(".name_placeholder") %>
+      <%= form.field :percent_off, :number_field, min: -90, max: 90, required: true %>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <%= form.field :starts_at, :datetime_local_field, required: true %>
+      <%= form.field :ends_at, :datetime_local_field, required: true %>
+    </div>
+  <% end %>
+
+  <%= card do %>
+    <fieldset>
+      <legend class="text-sm font-semibold text-ink"><%= Promotion.human_attribute_name(:variant_ids) %></legend>
+      <%= hidden_field_tag "promotion[variant_ids][]", "" %>
+      <div class="mt-3 max-h-96 space-y-3 overflow-y-auto">
+        <% Product.where.not(status: "archived").order(:title).includes(:variants).each do |product| %>
+          <div>
+            <p class="text-sm font-medium text-ink"><%= product.title %></p>
+            <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+              <% product.variants.each do |variant| %>
+                <label class="flex items-center gap-2 text-sm">
+                  <%= check_box_tag "promotion[variant_ids][]", variant.id, @promotion.variant_ids.include?(variant.id), id: dom_id(variant, :promotion), class: "size-4 rounded border-line accent-brand-600" %>
+                  <%= variant.title || t(".all") %> <span class="text-muted"><%= money(variant.price_cents) %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </fieldset>
+  <% end %>
+
+  <%= form.submit t(".create") %>
+<% end %>

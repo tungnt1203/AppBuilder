@@ -22,11 +22,11 @@ class StripeWebhooksController < ActionController::Base
       case event.type
       when "checkout.session.completed", "checkout.session.async_payment_succeeded"
         if object.payment_status == "paid" && (order = order_for(object))
-          order.confirm_card_payment!(payment_intent: object.payment_intent)
+          order.confirm_card_payment!(payment_intent: object.payment_intent, tax_cents: StripeGateway.tax_cents(object))
         end
       when "checkout.session.async_payment_failed", "checkout.session.expired"
         order = order_for(object)
-        order.cancel!(reason: "Payment not completed") if order&.pending? && order.stripe_checkout_session_id == object.id
+        order.cancel!(reason: "Payment not completed", notify: false) if order&.pending? && order.stripe_checkout_session_id == object.id
       when "charge.refunded"
         order = Order.find_by(payment_method: "stripe", payment_reference: object.payment_intent)
         order.refund!(reason: "Refunded in Stripe", stripe: false) if order&.can_refund? && object.refunded

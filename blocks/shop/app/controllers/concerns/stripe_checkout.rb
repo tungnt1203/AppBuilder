@@ -9,7 +9,7 @@ module StripeCheckout
 
       # Stripe fills in {CHECKOUT_SESSION_ID} itself, so it can't be escaped like a URL parameter.
       success_url = "#{order_url(order, placed: 1)}&session_id={CHECKOUT_SESSION_ID}"
-      id, url = gateway.create_checkout(order, success_url:, cancel_url:)
+      id, url = gateway.create_checkout(order, success_url:, cancel_url:, tax: Store.current.stripe_tax?)
       order.update!(stripe_checkout_session_id: id)
       redirect_to url, allow_other_host: true, status: :see_other
     rescue StripeGateway::Error => error

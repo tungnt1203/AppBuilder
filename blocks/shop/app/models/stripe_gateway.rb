@@ -16,12 +16,21 @@ class StripeGateway
   # while the shop keeps every amount in hundredths.
   ZERO_DECIMAL = %w[ VND JPY KRW ].freeze
 
+  # How long a buyer has to pay on Stripe (Stripe's shortest is 30 minutes). Until then the
+  # order holds its stock; Order::ExpireUnpaidCardJob gives it back after.
+  CHECKOUT_EXPIRY = 1.hour
+
   def self.build(secret_key)
     new(secret_key)
   end
 
   def self.amount(cents, currency)
     ZERO_DECIMAL.include?(currency.to_s.upcase) ? cents / 100 : cents
+  end
+
+  # Back from Stripe's amount to the shop's hundredths.
+  def self.cents(amount, currency)
+    ZERO_DECIMAL.include?(currency.to_s.upcase) ? amount.to_i * 100 : amount.to_i
   end
 
   def initialize(secret_key)
@@ -38,13 +47,17 @@ class StripeGateway
     account.settings&.dashboard&.display_name.presence || account.business_profile&.name.presence || account.email.presence || account.id
   end
 
-  # A Checkout Session for the order's items and shipping, as they were when it was placed.
-  # Returns [session id, url to send the buyer to].
-  def create_checkout(order, success_url:, cancel_url:)
+  # A Checkout Session for the order's items, discount and shipping, as they were when it was
+  # placed, open for CHECKOUT_EXPIRY. With tax: true, Stripe Tax works out the tax on top (the
+  # owner sets it up in their Stripe account). Returns [session id, url to send the buyer to].
+  def create_checkout(order, success_url:, cancel_url:, tax: false)
     currency = order.currency.downcase
     session = call do
       Stripe::Checkout::Session.create({
         mode: "payment",
+        expires_at: CHECKOUT_EXPIRY.from_now.to_i,
+        automatic_tax: { enabled: tax },
+        discounts: discounts_for(order),
         customer_email: order.email,
         client_reference_id: order.id.to_s,
         metadata: { order_id: order.id, order_number: order.number },
@@ -62,10 +75,16 @@ class StripeGateway
     [ session.id, session.url ]
   end
 
-  # { paid:, payment_intent:, status: } for a Checkout Session.
+  # { paid:, payment_intent:, status:, tax_cents: } for a Checkout Session.
   def checkout(session_id)
     session = call { Stripe::Checkout::Session.retrieve(session_id, options) }
-    { paid: session.payment_status.in?(%w[ paid no_payment_required ]), payment_intent: payment_intent_id(session.payment_intent), status: session.status }
+    { paid: session.payment_status.in?(%w[ paid no_payment_required ]), payment_intent: payment_intent_id(session.payment_intent),
+      status: session.status, tax_cents: self.class.tax_cents(session) }
+  end
+
+  # The tax Stripe added to a Checkout Session, in the shop's hundredths.
+  def self.tax_cents(session)
+    cents(session.total_details&.amount_tax.to_i, session.currency)
   end
 
   def refund(payment_intent)
@@ -94,6 +113,17 @@ class StripeGateway
   end
 
   private
+    # The order's discount as a one-off Stripe coupon for exactly the amount it took off.
+    def discounts_for(order)
+      return [] unless order.discount_cents.positive?
+
+      coupon = call do
+        Stripe::Coupon.create({ amount_off: self.class.amount(order.discount_cents, order.currency), currency: order.currency.downcase,
+          duration: "once", max_redemptions: 1, name: order.discount_code.presence || "Discount" }, options)
+      end
+      [ { coupon: coupon.id } ]
+    end
+
     def options
       { api_key: @secret_key }
     end

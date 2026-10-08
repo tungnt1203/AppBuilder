@@ -8,6 +8,8 @@ en:
       collection: Collection
       order: Order
       store: Store
+      discount: Discount code
+      promotion: Sale
     attributes:
       product:
         title: Title
@@ -27,6 +29,9 @@ en:
         compare_at_price: Compare-at price
         sku: SKU
         available: For sale
+        cost: Cost
+        track_inventory: Track stock
+        inventory_quantity: In stock
       collection:
         title: Title
         description: Description
@@ -60,6 +65,25 @@ en:
         shipping_policy: Shipping policy
         privacy_policy: Privacy policy
         terms_of_service: Terms of service
+        low_stock_threshold: Low stock from
+        stripe_tax: Let Stripe calculate tax
+      discount:
+        code: Code
+        kind: Type
+        percent_off: Percent off
+        amount_off: Amount off
+        minimum_subtotal: Minimum order
+        starts_at: Starts
+        ends_at: Ends
+        usage_limit: Uses allowed
+        times_used: Used
+        active: Active
+      promotion:
+        name: Name
+        percent_off: Percent off
+        starts_at: Starts
+        ends_at: Ends
+        variant_ids: Products
     errors:
       models:
         product:
@@ -77,6 +101,19 @@ en:
           attributes:
             ship_to_countries:
               unknown: 'has codes we don''t know: %{codes}'
+        discount:
+          attributes:
+            code:
+              letters_and_numbers: can only have letters, numbers, dashes and underscores
+            ends_at:
+              before_start: must be after the start
+        promotion:
+          attributes:
+            ends_at:
+              before_start: must be after the start
+            base:
+              no_items: Choose at least one product
+              overlaps: "%{product} is already in another sale at that time"
   activemodel:
     errors:
       models:
@@ -84,6 +121,11 @@ en:
           attributes:
             base:
               empty_cart: Your cart is empty
+              out_of_stock:
+                one: Only 1 of %{product} is left; change the quantity in your cart
+                other: Only %{count} of %{product} are left; change the quantity in your cart
+                zero: "%{product} just sold out; remove it from your cart"
+              discount_used_up: That discount code was just used up; remove it from your cart
             shipping_country:
               not_shipped_to: isn't a country we ship to
   order_mailer:
@@ -92,6 +134,8 @@ en:
       shipping: Shipping
       total: Total
       ship_to: Shipping to
+      discount: Discount (%{code})
+      tax: Tax
     confirmation:
       subject: "%{app}: order %{number} confirmed"
       heading: Thank you, %{name}!
@@ -105,6 +149,18 @@ en:
       tracking: Tracking
       track: Track your package
       view: View your order
+    cancelled:
+      subject: "%{app}: order %{number} is cancelled"
+      heading: Order %{number} is cancelled
+      intro: Your order is cancelled and won't be sent. If you paid for it, the shop will refund you.
+      questions: Questions? Write to %{email}.
+      view: View your order
+    refunded:
+      subject: "%{app}: order %{number} is refunded"
+      heading: Order %{number} is refunded
+      intro: We've refunded %{total}. It can take a few days to show on your statement.
+      questions: Questions? Write to %{email}.
+      view: View your order
   orders:
     stripe_not_connected: Card payments aren't available right now. Please contact the shop.
     payment_not_started: We couldn't open the payment page. Please try again in a moment.
@@ -116,3 +172,10 @@ en:
         open: Open the order
     stripe_connections:
       wrong_key: That doesn't look like a Stripe secret key. It starts with sk_live_, sk_test_, rk_live_ or rk_test_.
+  discounts:
+    problems:
+      unknown: That code doesn't exist
+      expired: That code has expired
+      not_started: That code isn't valid yet
+      used_up: That code has been used up
+      below_minimum: That code needs a bigger order

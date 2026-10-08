@@ -15,17 +15,18 @@ class Order < ApplicationRecord
 
   STATUSES = %w[ pending paid in_production shipped delivered cancelled refunded ].freeze
   PAYMENT_METHODS = %w[ manual stripe ].freeze
-  UNPAID_CARD_EXPIRY = 1.day
+  UNPAID_CARD_EXPIRY = StripeGateway::CHECKOUT_EXPIRY
   FIRST_NUMBER = 1001
 
   belongs_to :customer, optional: true
+  belongs_to :discount, optional: true
   has_many :line_items, -> { order(:id) }, dependent: :destroy
   has_many :events, -> { order(:created_at, :id) }, class_name: "OrderEvent", dependent: :destroy
 
   has_secure_token :token, length: 32
   enum :status, STATUSES.index_by(&:itself), default: "pending"
 
-  money_attribute :subtotal, :shipping, :total
+  money_attribute :subtotal, :shipping, :tax, :total
 
   validates :email, presence: true, format: { with: EMAIL_FORMAT }, length: { maximum: 254 }
   validates :shipping_name, :shipping_address1, :shipping_city, :shipping_country, presence: true
@@ -111,8 +112,15 @@ class Order < ApplicationRecord
     transition! :delivered, from: :can_mark_delivered?, by:, delivered_at: Time.current
   end
 
-  def cancel!(by: nil, reason: nil)
-    transition! :cancelled, from: :can_cancel?, by:, cancelled_at: Time.current, message: reason
+  # Puts the items back in stock and gives the discount code its use back; tells the buyer
+  # unless notify: false.
+  def cancel!(by: nil, reason: nil, notify: true)
+    transaction do
+      transition! :cancelled, from: :can_cancel?, by:, cancelled_at: Time.current, message: reason
+      line_items.each { |item| item.variant&.return_stock(item.quantity) }
+      discount&.release!
+    end
+    OrderMailer.cancelled(self).deliver_later if notify
   end
 
   # A card order's money goes back through Stripe first (pass stripe: false when Stripe already
@@ -124,21 +132,37 @@ class Order < ApplicationRecord
       gateway.refund(payment_reference)
     end
     transition! :refunded, from: :can_refund?, by:, refunded_at: Time.current, message: reason
+    OrderMailer.refunded(self).deliver_later
   end
 
   # Called when Stripe says the order's Checkout Session is paid (the buyer coming back to the
   # order page, or the webhook; whichever is first). Marks it paid, empties the cart it came from
   # and sends the emails that a manual order sends when it's placed. Safe to call again.
-  def confirm_card_payment!(payment_intent:)
+  # tax_cents: what Stripe Tax added on top, when the store has it on.
+  def confirm_card_payment!(payment_intent:, tax_cents: 0)
     return false unless card? && pending?
 
-    transition! :paid, from: :pending?, by: nil, paid_at: Time.current, payment_reference: payment_intent, message: "Stripe"
-    CartItem.where(cart_id:).delete_all if cart_id
+    transition! :paid, from: :pending?, by: nil, paid_at: Time.current, payment_reference: payment_intent, message: "Stripe",
+      tax_cents: tax_cents.to_i, total_cents: total_cents - self.tax_cents + tax_cents.to_i
+    if cart_id
+      CartItem.where(cart_id:).delete_all
+      Cart.where(id: cart_id).update_all(discount_code: nil)
+    end
     OrderMailer.confirmation(self).deliver_later
     Admin::OrderMailer.placed(self).deliver_later
     true
   rescue InvalidTransition
     false # the other confirmation got there first
+  end
+
+  # Asks Stripe whether the buyer paid this card order (they may just have, and the webhook
+  # can't reach a shop without a public address, like its preview) and confirms it if so.
+  def sync_card_payment!(gateway = Store.current.stripe)
+    return unless card? && pending? && stripe_checkout_session_id && gateway
+
+    result = gateway.checkout(stripe_checkout_session_id)
+    confirm_card_payment!(payment_intent: result[:payment_intent], tax_cents: result[:tax_cents]) if result[:paid]
+    result
   end
 
   # Where staff see the payment in Stripe.

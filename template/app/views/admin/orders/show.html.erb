@@ -48,7 +48,9 @@
       </ul>
       <dl class="space-y-2 border-t border-line px-6 py-4 text-sm">
         <div class="flex justify-between"><dt class="text-muted"><%= t(".subtotal") %></dt><dd><%= money(@order.subtotal_cents, @order.currency) %></dd></div>
+        <% if @order.discount_cents.positive? %><div class="flex justify-between"><dt class="text-muted"><%= t("orders.show.discount", code: @order.discount_code) %></dt><dd>-<%= money(@order.discount_cents, @order.currency) %></dd></div><% end %>
         <div class="flex justify-between"><dt class="text-muted"><%= t(".shipping") %></dt><dd><%= money(@order.shipping_cents, @order.currency) %></dd></div>
+        <% if @order.tax_cents.positive? %><div class="flex justify-between"><dt class="text-muted"><%= t("orders.show.tax") %></dt><dd><%= money(@order.tax_cents, @order.currency) %></dd></div><% end %>
         <div class="flex justify-between font-semibold"><dt><%= t(".total") %></dt><dd><%= money(@order.total_cents, @order.currency) %></dd></div>
       </dl>
     <% end %>

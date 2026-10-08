@@ -14,14 +14,7 @@ class CartItemsController < ApplicationController
   end
 
   def update
-    item = find_item
-    quantity = params[:quantity].to_i
-
-    if quantity.positive?
-      item.update!(quantity: quantity.clamp(1, Cart::MAX_QUANTITY))
-    else
-      item.destroy!
-    end
+    current_cart.update_quantity(find_item, params[:quantity])
     redirect_to cart_path, status: :see_other
   end
 

@@ -64,11 +64,11 @@ class Product < ApplicationRecord
   end
 
   def available_variants
-    variants.select(&:available?)
+    variants.select(&:sellable?)
   end
 
   def available?
-    active? && variants.any?(&:available?)
+    active? && variants.any?(&:sellable?)
   end
 
   def price_range

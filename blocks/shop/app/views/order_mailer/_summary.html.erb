@@ -6,7 +6,13 @@
     </tr>
   <% end %>
   <tr><td><%= t("order_mailer.summary.subtotal") %></td><td align="right"><%= money(order.subtotal_cents, order.currency) %></td></tr>
+  <% if order.discount_cents.positive? %>
+    <tr><td><%= t("order_mailer.summary.discount", code: order.discount_code) %></td><td align="right">-<%= money(order.discount_cents, order.currency) %></td></tr>
+  <% end %>
   <tr><td><%= t("order_mailer.summary.shipping") %></td><td align="right"><%= money(order.shipping_cents, order.currency) %></td></tr>
+  <% if order.tax_cents.positive? %>
+    <tr><td><%= t("order_mailer.summary.tax") %></td><td align="right"><%= money(order.tax_cents, order.currency) %></td></tr>
+  <% end %>
   <tr><td><strong><%= t("order_mailer.summary.total") %></strong></td><td align="right"><strong><%= money(order.total_cents, order.currency) %></strong></td></tr>
 </table>
 <p><%= t("order_mailer.summary.ship_to") %>:<br><%= safe_join(order.shipping_address_lines, tag.br) %></p>

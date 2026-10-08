@@ -1,0 +1,27 @@
+<%= page_header t(".title"), t(".description") do %>
+  <%= link_to t(".new"), new_admin_discount_path, class: button_classes %>
+<% end %>
+
+<% if @discounts.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @discounts.each do |discount| %>
+        <li>
+          <%= link_to edit_admin_discount_path(discount), class: "flex items-center gap-4 px-6 py-3 hover:bg-surface-muted" do %>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate font-mono text-sm font-medium text-ink"><%= discount.code %></span>
+              <span class="block truncate text-xs text-muted"><%= discount_summary(discount) %></span>
+            </span>
+            <span class="text-sm text-muted"><%= t(".used", count: discount.times_used) %></span>
+            <% problem = discount.problem_with(Float::INFINITY) %>
+            <%= problem ? badge(t(".states.#{problem}")) : badge(t(".states.live"), tone: :green) %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") do %>
+    <%= link_to t(".new"), new_admin_discount_path, class: button_classes %>
+  <% end %>
+<% end %>

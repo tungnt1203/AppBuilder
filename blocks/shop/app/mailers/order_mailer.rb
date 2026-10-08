@@ -13,4 +13,16 @@ class OrderMailer < ApplicationMailer
     mail to: order.email, reply_to: @store.contact_email.presence,
       subject: t(".subject", app: Rails.configuration.x.app_name, number: order.name)
   end
+
+  def cancelled(order)
+    @order, @store = order, Store.current
+    mail to: order.email, reply_to: @store.contact_email.presence,
+      subject: t(".subject", app: Rails.configuration.x.app_name, number: order.name)
+  end
+
+  def refunded(order)
+    @order, @store = order, Store.current
+    mail to: order.email, reply_to: @store.contact_email.presence,
+      subject: t(".subject", app: Rails.configuration.x.app_name, number: order.name)
+  end
 end

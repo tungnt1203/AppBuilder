@@ -22,6 +22,6 @@ class Admin::SettingsController < Admin::BaseController
 
     def store_params
       params.expect(store: [ :currency, :contact_email, :shipping_first_item, :shipping_additional_item,
-        :free_shipping_threshold, :ship_to_countries_text, :payment_instructions, :manual_payments ])
+        :free_shipping_threshold, :ship_to_countries_text, :payment_instructions, :manual_payments, :stripe_tax, :low_stock_threshold ])
     end
 end

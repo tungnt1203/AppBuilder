@@ -40,6 +40,16 @@ class OrderTest < ActiveSupport::TestCase
     assert orders(:shipped).refunded?
   end
 
+  test "the buyer hears when their order is cancelled or refunded" do
+    assert_enqueued_email_with OrderMailer, :cancelled, args: [ orders(:pending) ] do
+      orders(:pending).cancel!
+    end
+    assert_enqueued_email_with OrderMailer, :refunded, args: [ orders(:shipped) ] do
+      orders(:shipped).refund!
+    end
+    assert_no_enqueued_emails { orders(:paid).cancel!(notify: false) }
+  end
+
   test "a tracking link must be a web address" do
     assert_raises(ActiveRecord::RecordInvalid) { orders(:paid).ship!(carrier: "UPS", tracking_number: "1", tracking_url: "javascript:alert(1)") }
     assert orders(:paid).reload.paid?

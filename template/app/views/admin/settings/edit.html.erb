@@ -59,6 +59,12 @@
         </label>
       <% end %>
       <%= form.field :payment_instructions, :text_area, rows: 4, hint: t(".payment_hint") %>
+      <% if @store.stripe_connected? %>
+        <label class="flex items-start gap-3 text-sm">
+          <%= form.check_box :stripe_tax, class: "mt-0.5" %>
+          <span><span class="font-medium text-ink"><%= Store.human_attribute_name(:stripe_tax) %></span><span class="block text-muted"><%= t(".stripe_tax_hint") %></span></span>
+        </label>
+      <% end %>
     <% end %>
 
     <%= card class: "space-y-4" do %>
@@ -69,6 +75,7 @@
         <p class="text-xs text-muted"><%= t(".currency_hint") %></p>
       </div>
       <%= form.field :contact_email, :email_field, hint: t(".contact_email_hint") %>
+      <%= form.field :low_stock_threshold, :number_field, min: 0, step: 1, hint: t(".low_stock_hint") %>
     <% end %>
 
     <%= card class: "space-y-4" do %>

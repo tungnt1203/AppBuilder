@@ -5,6 +5,9 @@
 <% @order.line_items.each do |item| -%>
 <%= item.quantity %> × <%= item.product_title %><%= " (#{item.variant_title})" if item.variant_title %>: <%= money(item.total_cents, @order.currency) %>
 <% end -%>
+<% if @order.discount_cents.positive? -%>
+<%= t("order_mailer.summary.discount", code: @order.discount_code) %>: -<%= money(@order.discount_cents, @order.currency) %>
+<% end -%>
 <%= t("order_mailer.summary.shipping") %>: <%= money(@order.shipping_cents, @order.currency) %>
 <%= t("order_mailer.summary.total") %>: <%= money(@order.total_cents, @order.currency) %>
 <% if @order.pending? && !@order.card? && @store.payment_instructions.present? %>

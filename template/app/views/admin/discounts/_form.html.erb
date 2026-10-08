@@ -1,0 +1,30 @@
+<%= form_with model: [ :admin, discount ], class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <%= form.field :code, required: true, autofocus: discount.new_record?, autocapitalize: "characters", class: "font-mono uppercase", hint: t(".code_hint") %>
+    <div class="grid gap-4 sm:grid-cols-3">
+      <div class="space-y-1.5">
+        <%= form.label :kind %>
+        <%= form.select :kind, Discount::KINDS.map { |kind| [ t(".kinds.#{kind}"), kind ] } %>
+      </div>
+      <%= form.field :percent_off, :number_field, min: 1, max: 100, hint: t(".percent_hint") %>
+      <%= form.field :amount_off, :number_field, step: 0.01, min: 0, hint: t(".amount_hint") %>
+    </div>
+  <% end %>
+
+  <%= card class: "space-y-4" do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".limits") %></h2>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <%= form.field :minimum_subtotal, :number_field, step: 0.01, min: 0 %>
+      <%= form.field :usage_limit, :number_field, min: 1, hint: t(".usage_hint") %>
+      <%= form.field :starts_at, :datetime_local_field %>
+      <%= form.field :ends_at, :datetime_local_field %>
+    </div>
+    <label class="flex items-center gap-2 text-sm">
+      <%= form.check_box :active %>
+      <%= Discount.human_attribute_name(:active) %>
+    </label>
+  <% end %>
+
+  <%= form.submit discount.new_record? ? t(".create") : t(".save") %>
+<% end %>

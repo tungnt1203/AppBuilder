@@ -2,24 +2,24 @@
 # FakeStripeGateway that records what the app asked Stripe to do.
 class FakeStripeGateway
   attr_reader :checkouts, :refunds, :webhooks, :deleted_webhooks
-  attr_accessor :paid, :status, :error
+  attr_accessor :paid, :status, :error, :tax_cents
 
   def initialize
     @checkouts, @refunds, @webhooks, @deleted_webhooks = [], [], [], []
-    @paid, @status = false, "open"
+    @paid, @status, @tax_cents = false, "open", 0
   end
 
   def test_mode? = true
   def account_name = fail_or("Fake Shop LLC")
 
-  def create_checkout(order, success_url:, cancel_url:)
+  def create_checkout(order, success_url:, cancel_url:, tax: false)
     fail_or(nil)
-    @checkouts << { order:, success_url:, cancel_url: }
+    @checkouts << { order:, success_url:, cancel_url:, tax: }
     [ "cs_test_#{@checkouts.size}", "https://checkout.stripe.com/c/pay/cs_test_#{@checkouts.size}" ]
   end
 
   def checkout(id)
-    fail_or({ paid:, payment_intent: ("pi_test_1" if paid), status: })
+    fail_or({ paid:, payment_intent: ("pi_test_1" if paid), status:, tax_cents: (paid ? tax_cents : 0) })
   end
 
   def refund(payment_intent)

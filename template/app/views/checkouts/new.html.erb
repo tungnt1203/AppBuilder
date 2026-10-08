@@ -70,8 +70,14 @@
       </ul>
       <dl class="space-y-2 border-t border-line pt-4 text-sm">
         <div class="flex justify-between"><dt class="text-muted"><%= t(".subtotal") %></dt><dd><%= money(@checkout.subtotal_cents) %></dd></div>
+        <% if @checkout.discount_cents.positive? %>
+          <div class="flex justify-between"><dt class="text-muted"><%= t(".discount", code: @checkout.discount.code) %></dt><dd>-<%= money(@checkout.discount_cents) %></dd></div>
+        <% end %>
         <div class="flex justify-between"><dt class="text-muted"><%= t(".shipping_cost") %></dt><dd><%= @checkout.shipping_cents.zero? ? t(".free") : money(@checkout.shipping_cents) %></dd></div>
         <div class="flex justify-between border-t border-line pt-2 text-base font-semibold"><dt><%= t(".total") %></dt><dd><%= money(@checkout.total_cents) %></dd></div>
+        <% if Store.current.stripe_tax? && @checkout.payment_method == "stripe" %>
+          <p class="text-xs text-muted"><%= t(".tax_at_payment") %></p>
+        <% end %>
       </dl>
       <%= form.submit t(".place_order"), class: "w-full py-2.5" %>
       <% if (policies = Store.current.published_policies & %w[ terms refund ]).any? %>

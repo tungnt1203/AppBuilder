@@ -56,6 +56,8 @@ en:
       questions: Questions?
       card_processing: If you just paid, it can take a moment to show here. Refresh the page in a minute.
       pay_now: Pay %{total}
+      discount: Discount (%{code})
+      tax: Tax
   home:
     show:
       tagline: Original designs, printed on demand and shipped to your door.
@@ -82,6 +84,14 @@ en:
       unavailable:
         one: An item in your cart is no longer available and was left out.
         other: "%{count} items in your cart are no longer available and were left out."
+      free_shipping: Free shipping
+      remove_code: Remove
+      discount_code: Discount code
+      apply: Apply
+    discounts:
+      rate_limited: Too many tries. Please wait a minute.
+      create:
+        notice: Discount applied.
   cart_items:
     create:
       added: "%{product} was added to your cart."
@@ -108,6 +118,8 @@ en:
         manual: Bank transfer or other
         manual_hint: After placing the order you'll see how to pay.
       agreement_html: By placing your order you agree to our %{policies}.
+      discount: Discount (%{code})
+      tax_at_payment: Tax, if any, is added on the payment page.
   layouts:
     site:
       shop: Shop
@@ -121,6 +133,8 @@ en:
       products: Products
       collections: Collections
       settings: Settings
+      discounts: Discounts
+      promotions: Sales
   ui:
     pagination:
       label: Pages
@@ -277,7 +291,7 @@ en:
         variants: Variants
         pricing: Pricing
         variant: Variant
-        variants_hint: Compare-at price shows the old price crossed out. Untick "For sale" to hide a variant from buyers.
+        variants_hint: Compare-at price shows the old price crossed out. Untick "For sale" to hide a variant from buyers. Tick "Track stock" for things you keep a count of; leave it off for made-to-order products. Cost is only for your margins.
         status_hint: Only active products are on the site.
         base_price_hint: Every variant starts at this price; change them one by one after saving.
         slug_hint: "%{url}"
@@ -356,6 +370,8 @@ en:
           title: Manual payment
           accept: Also accept manual payment
           accept_hint: Buyers can choose to pay by bank transfer or another way you describe below; you mark those orders as paid.
+        stripe_tax_hint: Stripe works out sales tax or VAT for card payments and adds it on its payment page. Set up Stripe Tax in your Stripe dashboard first.
+        low_stock_hint: Products that track stock count as low at or below this number.
       update:
         notice: Settings saved.
     stripe_connections:
@@ -381,6 +397,85 @@ en:
         save: Save and publish
       update:
         notice: Policies saved.
+    discounts:
+      index:
+        title: Discounts
+        description: Codes buyers enter in their cart.
+        new: New discount code
+        used:
+          one: Used once
+          other: Used %{count} times
+          zero: Not used yet
+        states:
+          live: Live
+          expired: Ended
+          not_started: Scheduled
+          used_up: Used up
+          below_minimum: Live
+        empty_title: No discount codes yet
+        empty_description: Make a code for a launch, a newsletter or a returning customer.
+      form:
+        code_hint: What buyers type, like SUMMER10. Letters, numbers, dashes.
+        kinds:
+          percentage: Percentage off
+          fixed_amount: Amount off
+          free_shipping: Free shipping
+        percent_hint: For a percentage off.
+        amount_hint: For an amount off.
+        limits: Limits
+        usage_hint: 'Empty: no limit.'
+        create: Create code
+        save: Save
+      new:
+        title: New discount code
+      edit:
+        used:
+          one: Used once
+          other: Used %{count} times
+          zero: Not used yet
+        delete: Delete
+        confirm_delete: Delete %{code}? Orders that used it keep their discount.
+      create:
+        notice: "%{code} was created."
+      update:
+        notice: "%{code} was saved."
+      destroy:
+        notice: "%{code} was deleted."
+      summary:
+        percentage: "%{percent}% off"
+        fixed_amount: "%{amount} off"
+        free_shipping: Free shipping
+        minimum: from %{amount}
+        until: until %{date}
+        limit:
+          one: 1 use
+          other: "%{count} uses"
+    promotions:
+      index:
+        title: Sales
+        description: Prices lowered for a while. They start and end on their own.
+        new: New sale
+        statuses:
+          scheduled: Scheduled
+          active: On now
+          ended: Ended
+          cancelled: Called off
+        end_now: End now
+        call_off: Call off
+        confirm_end: End %{name}? Prices go back to what they were.
+        empty_title: No sales yet
+        empty_description: Put products on sale for a weekend, a holiday or a launch.
+      new:
+        title: New sale
+        description: The products show the sale price, with the old price crossed out, from the start until the end.
+        name_placeholder: Black Friday
+        all: Default
+        create: Schedule sale
+      create:
+        notice: "%{name} is scheduled."
+      cancellations:
+        create:
+          notice: "%{name} has ended; prices are back."
   policies:
     titles:
       refund: Refund policy

@@ -1,0 +1,9 @@
+<h1><%= t(".heading", number: @order.name) %></h1>
+<p><%= t(".intro", total: money(@order.total_cents, @order.currency)) %></p>
+
+<%= render "order_mailer/summary", order: @order %>
+
+<% if @store.contact_email.present? %>
+  <p><%= t(".questions", email: @store.contact_email) %></p>
+<% end %>
+<p><%= link_to t(".view"), order_url(@order) %></p>

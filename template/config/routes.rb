@@ -4,7 +4,9 @@ Rails.application.routes.draw do
 
   resources :products, only: %i[ index show ]
   resources :collections, only: :show
-  resource :cart, only: :show
+  resource :cart, only: :show do
+    resource :discount, only: %i[ create destroy ], module: :carts
+  end
   resources :cart_items, only: %i[ create update destroy ]
   resource :checkout, only: %i[ new create ]
   resources :orders, only: :show do
@@ -36,6 +38,10 @@ Rails.application.routes.draw do
       resources :images, only: :destroy, module: :products
     end
     resources :collections
+    resources :discounts, except: :show
+    resources :promotions, only: %i[ index new create ] do
+      resource :cancellation, only: :create, module: :promotions
+    end
     resources :orders, only: %i[ index show update ] do
       scope module: :orders do
         resource :payment, only: :create

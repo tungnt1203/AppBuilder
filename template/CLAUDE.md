@@ -128,13 +128,25 @@ files build on it:
 - **Orders**: `Order` moves through `pending → paid → in_production → shipped → delivered` (or
   `cancelled`, `refunded`) only with its methods (`mark_paid!`, `start_production!`, `ship!`,
   `mark_delivered!`, `cancel!`, `refund!`), which check the step is allowed, record an `OrderEvent`
-  in the timeline and send the buyer's emails (`OrderMailer`). Never set `status` directly. Buyers
+  in the timeline and send the buyer's emails (`OrderMailer`: confirmation, shipped, cancelled,
+  refunded). Never set `status` directly. Buyers
   reach an order by its token (`order_path(order)`); staff at `/admin/orders`.
 - **Money** is integer cents in `*_cents` columns, edited as decimals through `money_attribute`
   (`price` / `price=`), and shown with `money(cents)` and `price_range(product)` (`MoneyHelper`) in
   the shop's currency. Never use floats for money, and never total prices in a view.
+- **Stock** is per variant and optional: `track_inventory` with `inventory_quantity` for things the
+  owner counts; made-to-order products leave it off and never run out. `Variant#buyable?` covers
+  stock; checkout takes it (`take_stock`) and cancelling gives it back. Never change
+  `inventory_quantity` anywhere else. `cost` is the owner's cost, for margins only.
+- **Discount codes** (`Discount`: percentage, amount off or free shipping; minimum order, dates,
+  uses) are entered in the cart (`Cart#apply_discount_code`) and taken off by `Checkout`; the order
+  keeps `discount_code` and `discount_cents`. **Sales** (`Promotion`) lower variants' prices for a
+  time and put them back (`Promotion::SyncJob`). Both are managed at `/admin/discounts` and
+  `/admin/promotions`; don't write other discount or sale logic.
+- **Tax** is Stripe's: with "Let Stripe calculate tax" on in settings, Stripe Tax adds it on its
+  payment page and the order records `tax_cents`. Don't calculate tax in the app.
 - **Settings**: `Store.current` (currency, flat-rate shipping, free-shipping threshold, countries
-  shipped to, how buyers pay), edited by admins at `/admin/settings`.
+  shipped to, how buyers pay, low-stock threshold), edited by admins at `/admin/settings`.
 - **Payment** is built in and finished; don't change it for a feature. Buyers pay by card on
   Stripe Checkout once the owner pastes their Stripe secret key in `/admin/settings` (stored
   encrypted; the app registers its own webhook when it runs on a public https address), and/or
@@ -155,7 +167,7 @@ files build on it:
 
 Change the shop's screens freely to fit the owner (design skill), keep its rules (prices from the
 database, statuses through the methods, guest checkout), and add features around it: reviews,
-discount codes, a size guide, gift notes, product pages that look like the owner's brand.
+a size guide, gift notes, product pages that look like the owner's brand.
 
 ## Booking (built in, off by default)
 

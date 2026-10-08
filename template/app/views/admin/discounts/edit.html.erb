@@ -1,0 +1,7 @@
+<%= page_header @discount.code, t(".used", count: @discount.times_used),
+      breadcrumbs: [ [ t("admin.discounts.index.title"), admin_discounts_path ], [ @discount.code, nil ] ] do %>
+  <%= button_to t(".delete"), admin_discount_path(@discount), method: :delete, class: button_classes(:danger),
+        form: { data: { turbo_confirm: t(".confirm_delete", code: @discount.code) } } %>
+<% end %>
+
+<%= render "form", discount: @discount %>
