@@ -32,6 +32,11 @@ module Starter
     # /account then open, and the site header shows a sign-in link. Off, those pages answer 404.
     config.x.customer_accounts = false
 
+    # The shop: catalog, cart, checkout and orders, on the site and in /admin. Turn it off for apps
+    # that sell nothing (a club, a lending shed, a festival, a portfolio). Off, the shop's pages
+    # answer 404 and /admin hides them; policies, contact and the rest keep working.
+    config.x.shop = true
+
     # Appointments (the booking block): customers book a service at a free time at /book, staff run
     # the calendar at /admin/appointments. Turn this on for businesses people book a time with (a
     # salon, a clinic, a spa, a tutor). Off, the booking pages answer 404 and /admin hides them.

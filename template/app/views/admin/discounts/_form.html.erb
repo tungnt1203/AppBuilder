@@ -2,13 +2,17 @@
   <%= card class: "space-y-4" do %>
     <%= form.errors %>
     <%= form.field :code, required: true, autofocus: discount.new_record?, autocapitalize: "characters", class: "font-mono uppercase", hint: t(".code_hint") %>
-    <div class="grid gap-4 sm:grid-cols-3">
+    <div class="grid gap-4 sm:grid-cols-2" data-controller="show-for">
       <div class="space-y-1.5">
         <%= form.label :kind %>
-        <%= form.select :kind, Discount::KINDS.map { |kind| [ t(".kinds.#{kind}"), kind ] } %>
+        <%= form.select :kind, Discount::KINDS.map { |kind| [ t(".kinds.#{kind}"), kind ] }, {}, data: { show_for_target: "select", action: "show-for#update" } %>
       </div>
-      <%= form.field :percent_off, :number_field, min: 1, max: 100, hint: t(".percent_hint") %>
-      <%= form.field :amount_off, :number_field, step: 0.01, min: 0, hint: t(".amount_hint") %>
+      <div data-show-for-target="field" data-show-for="percentage">
+        <%= form.field :percent_off, :number_field, min: 1, max: 100, hint: t(".percent_hint") %>
+      </div>
+      <div data-show-for-target="field" data-show-for="fixed_amount">
+        <%= form.field :amount_off, :number_field, step: 0.01, min: 0, hint: t(".amount_hint") %>
+      </div>
     </div>
   <% end %>
 

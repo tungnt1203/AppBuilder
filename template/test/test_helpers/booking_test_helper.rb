@@ -1,13 +1,19 @@
-# Booking is off by default (config.x.booking). Tests of the booking screens turn it on for
+# Tests start with booking off (config.x.booking), whatever the app sets, so the tests of booking
+# being off keep passing in an app that turned it on. Tests of the booking screens turn it on for
 # themselves: `setup { enable_booking }`.
 module BookingTestHelper
+  def before_setup
+    @booking_was = Rails.configuration.x.booking
+    Rails.configuration.x.booking = false
+    super
+  end
+
   def enable_booking
-    @booking_was = Rails.configuration.x.booking unless defined?(@booking_was)
     Rails.configuration.x.booking = true
   end
 
   def after_teardown
-    Rails.configuration.x.booking = @booking_was if defined?(@booking_was)
+    Rails.configuration.x.booking = @booking_was
     super
   end
 

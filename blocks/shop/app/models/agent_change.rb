@@ -62,8 +62,28 @@ class AgentChange < ApplicationRecord
     }
   end
 
+  # What an item changes, for people: "Good Things Tee – Black / S" rather than "variant-30".
+  def item_label(item)
+    case (record = AgentApi::Ids.find(item["target"]))
+    when Variant then label(record)
+    when Product then record.title
+    else item["target"]
+    end
+  end
+
+  # An item's before or after value, for people: prices in the shop's currency, yes or no.
+  def item_value(item, value)
+    case value
+    when nil then nil
+    when true then "Yes"
+    when false then "No"
+    else item["field"] == "price" ? display_money((BigDecimal(value.to_s) * 100).round.to_i) : value
+    end
+  end
+
   private
     def money(cents) = AgentApi::Ids.money(cents)
+    def display_money(cents) = ApplicationController.helpers.money(cents)
 
     def variant!(id)
       AgentApi::Ids.buyable_variant(id) or raise ActiveRecord::RecordNotFound, "No variant #{id} (a product with options needs one of its variants)"
@@ -103,7 +123,7 @@ class AgentChange < ApplicationRecord
         payload["margin_before_pct"] = margin(variant.price_cents, cost)
         payload["margin_after_pct"] = margin(cents, cost)
       end
-      self.summary = rows.one? ? "#{label(rows.first.first)}: #{money(rows.first.first.price_cents)} → #{money(rows.first.last)}" : "New prices for #{rows.size} variants"
+      self.summary = rows.one? ? "#{label(rows.first.first)}: #{display_money(rows.first.first.price_cents)} → #{display_money(rows.first.last)}" : "New prices for #{rows.size} variants"
     end
 
     def apply_price_update
@@ -114,10 +134,10 @@ class AgentChange < ApplicationRecord
 
     def price_notes(variant, cents)
       notes = []
-      notes << "#{label(variant)} would sell below its cost (#{money(variant.cost_cents)})" if variant.cost_cents && cents < variant.cost_cents
+      notes << "#{label(variant)} would sell below its cost (#{display_money(variant.cost_cents)})" if variant.cost_cents && cents < variant.cost_cents
       if variant.price_cents.positive?
         move = ((cents - variant.price_cents) * 100.0 / variant.price_cents).round(1)
-        notes << "#{label(variant)} moves #{move}%, over the #{AgentApi::Merchant::MAX_PRICE_DELTA_PCT.to_i}% cap" if move.abs > AgentApi::Merchant::MAX_PRICE_DELTA_PCT
+        notes << "#{label(variant)} #{move.negative? ? "drops" : "rises"} #{move.abs}%, over the #{AgentApi::Merchant::MAX_PRICE_DELTA_PCT.to_i}% cap" if move.abs > AgentApi::Merchant::MAX_PRICE_DELTA_PCT
       end
       notes << "#{label(variant)} is in a sale now; its price goes back when the sale ends" if variant.promotion_items.joins(:promotion).merge(Promotion.active).exists?
       notes
@@ -146,8 +166,8 @@ class AgentChange < ApplicationRecord
           raise NotApplicable, "Unknown action #{row["action"].inspect}: restock, pause or activate"
         end
       end
-      self.guardrail_notes = items.select { |item| item[:field] == "stock" && item[:before].nil? }.map { |item| "#{item[:target]} didn't track stock; it will from now on" }
-      self.summary = rows.one? ? "#{rows.first["action"].capitalize} #{rows.first["listing_id"]}" : "Stock and availability for #{rows.size} items"
+      self.guardrail_notes = items.select { |item| item[:field] == "stock" && item[:before].nil? }.map { |item| "#{item_label(item.stringify_keys)} didn't track stock; it will from now on" }
+      self.summary = rows.one? ? "#{rows.first["action"].capitalize} #{item_label("target" => rows.first["listing_id"])}" : "Stock and availability for #{rows.size} items"
     end
 
     def apply_inventory_action
@@ -207,9 +227,9 @@ class AgentChange < ApplicationRecord
         { target: AgentApi::Ids.variant(variant), field: "price", before: money(variant.price_cents), after: money(promotion.sale_price_cents(variant.price_cents)) }
       end
       self.guardrail_notes = variants.filter_map do |variant|
-        "#{label(variant)} would sell below its cost (#{money(variant.cost_cents)})" if variant.cost_cents && promotion.sale_price_cents(variant.price_cents) < variant.cost_cents
+        "#{label(variant)} would sell below its cost (#{display_money(variant.cost_cents)})" if variant.cost_cents && promotion.sale_price_cents(variant.price_cents) < variant.cost_cents
       end
-      self.summary = "#{promotion.name}: #{promotion.percent_off}% off #{variants.size} variants, #{promotion.starts_at.to_date} to #{promotion.ends_at.to_date}"
+      self.summary = "#{promotion.name}: #{promotion.percent_off}% off #{variants.size} #{"variant".pluralize(variants.size)}, #{I18n.l(promotion.starts_at.to_date, format: :long)} to #{I18n.l(promotion.ends_at.to_date, format: :long)}"
       self.summary = summary.truncate(200)
     end
 

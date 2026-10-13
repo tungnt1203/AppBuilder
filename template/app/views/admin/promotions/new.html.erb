@@ -19,17 +19,29 @@
       <%= hidden_field_tag "promotion[variant_ids][]", "" %>
       <div class="mt-3 max-h-96 space-y-3 overflow-y-auto">
         <% Product.where.not(status: "archived").order(:title).includes(:variants).each do |product| %>
-          <div>
-            <p class="text-sm font-medium text-ink"><%= product.title %></p>
-            <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1">
-              <% product.variants.each do |variant| %>
-                <label class="flex items-center gap-2 text-sm">
-                  <%= check_box_tag "promotion[variant_ids][]", variant.id, @promotion.variant_ids.include?(variant.id), id: dom_id(variant, :promotion), class: "size-4 rounded border-line accent-brand-600" %>
-                  <%= variant.title || t(".all") %> <span class="text-muted"><%= money(variant.price_cents) %></span>
-                </label>
-              <% end %>
+          <% next if product.variants.none? %>
+          <% if product.variants.many? %>
+            <div data-controller="check-all">
+              <label class="flex items-center gap-2 text-sm font-medium text-ink">
+                <%= check_box_tag nil, nil, false, id: dom_id(product, :promotion), class: "size-4 rounded border-line accent-brand-600", data: { check_all_target: "all", action: "check-all#toggle" } %>
+                <%= product.title %> <span class="font-normal text-muted"><%= price_range(product) %></span>
+              </label>
+              <div class="mt-1 ml-6 flex flex-wrap gap-x-4 gap-y-1">
+                <% product.variants.each do |variant| %>
+                  <label class="flex items-center gap-2 text-sm">
+                    <%= check_box_tag "promotion[variant_ids][]", variant.id, @promotion.variant_ids.include?(variant.id), id: dom_id(variant, :promotion), class: "size-4 rounded border-line accent-brand-600", data: { check_all_target: "item", action: "check-all#sync" } %>
+                    <%= variant.title %> <span class="text-muted"><%= money(variant.price_cents) %></span>
+                  </label>
+                <% end %>
+              </div>
             </div>
-          </div>
+          <% else %>
+            <% variant = product.variants.first %>
+            <label class="flex items-center gap-2 text-sm font-medium text-ink">
+              <%= check_box_tag "promotion[variant_ids][]", variant.id, @promotion.variant_ids.include?(variant.id), id: dom_id(variant, :promotion), class: "size-4 rounded border-line accent-brand-600" %>
+              <%= product.title %> <span class="font-normal text-muted"><%= money(variant.price_cents) %></span>
+            </label>
+          <% end %>
         <% end %>
       </div>
     </fieldset>

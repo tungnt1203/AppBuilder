@@ -17,7 +17,7 @@ module Evaluation
       JSON.parse(ROOT.join(id, "results.json").read)
     end
 
-    def initialize(cases:, concurrency: 3, note: nil, seed: nil)
+    def initialize(cases:, concurrency: 1, note: nil, seed: nil)
       @cases, @concurrency = cases, concurrency
       @id = Time.current.strftime("%Y%m%d-%H%M")
       @results = []

@@ -129,6 +129,7 @@ en:
         other: Cart, %{count} items
       footer_navigation: Shop information
     admin:
+      shop: Shop
       orders: Orders
       products: Products
       collections: Collections
@@ -421,8 +422,8 @@ en:
           percentage: Percentage off
           fixed_amount: Amount off
           free_shipping: Free shipping
-        percent_hint: For a percentage off.
-        amount_hint: For an amount off.
+        percent_hint: Off the items, before shipping.
+        amount_hint: Off the items, never more than they cost.
         limits: Limits
         usage_hint: 'Empty: no limit.'
         create: Create code
@@ -470,7 +471,6 @@ en:
         title: New sale
         description: The products show the sale price, with the old price crossed out, from the start until the end.
         name_placeholder: Black Friday
-        all: Default
         create: Schedule sale
       create:
         notice: "%{name} is scheduled."

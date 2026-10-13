@@ -121,7 +121,7 @@ The same seed picks the same sample, so compare runs on the same seed; use other
 then so the prompts aren't tuned to a few requests.
 
 ```sh
-bin/eval                      # 8 requests (seed 1), three at a time
+bin/eval                      # 8 requests (seed 1), one at a time
 bin/eval -n 20 -s 2           # 20 requests, another sample
 bin/eval p004 p017 -j 2       # these requests
 bin/eval -m "shorter prompt"  # note what changed in this run

@@ -11,6 +11,7 @@ en:
     site:
       book: Book
     admin:
+      bookings: Bookings
       appointments: Appointments
       services: Services
       staff_members: Team

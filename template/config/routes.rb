@@ -2,15 +2,18 @@ Rails.application.routes.draw do
   # The customers' site: the shop, and customers' own accounts (when config.x.customer_accounts).
   root "home#show"
 
-  resources :products, only: %i[ index show ]
-  resources :collections, only: :show
-  resource :cart, only: :show do
-    resource :discount, only: %i[ create destroy ], module: :carts
-  end
-  resources :cart_items, only: %i[ create update destroy ]
-  resource :checkout, only: %i[ new create ]
-  resources :orders, only: :show do
-    resource :payment, only: :create, module: :orders
+  # The shop (config.x.shop): off, these routes don't match and answer 404.
+  constraints ShopSwitch::ON do
+    resources :products, only: %i[ index show ]
+    resources :collections, only: :show
+    resource :cart, only: :show do
+      resource :discount, only: %i[ create destroy ], module: :carts
+    end
+    resources :cart_items, only: %i[ create update destroy ]
+    resource :checkout, only: %i[ new create ]
+    resources :orders, only: :show do
+      resource :payment, only: :create, module: :orders
+    end
   end
   resources :policies, only: :show
   # Appointments (config.x.booking): book at /book, the customer's appointment by its token.
@@ -34,23 +37,33 @@ Rails.application.routes.draw do
     resources :passwords, only: %i[ new create edit update ], param: :token
     resource :first_run, only: %i[ new create ]
     resources :invitations, only: %i[ show update ], param: :token
-    resources :products do
-      resources :images, only: :destroy, module: :products
-    end
-    resources :collections
-    resources :discounts, except: :show
-    resources :promotions, only: %i[ index new create ] do
-      resource :cancellation, only: :create, module: :promotions
-    end
-    resources :orders, only: %i[ index show update ] do
-      scope module: :orders do
-        resource :payment, only: :create
-        resource :production, only: :create
-        resource :shipment, only: :create
-        resource :delivery, only: :create
-        resource :cancellation, only: :create
-        resource :refund, only: :create
+    constraints ShopSwitch::ON do
+      resources :products do
+        resources :images, only: :destroy, module: :products
       end
+      resources :collections
+      resources :discounts, except: :show
+      resources :promotions, only: %i[ index new create ] do
+        resource :cancellation, only: :create, module: :promotions
+      end
+      resources :orders, only: %i[ index show update ] do
+        scope module: :orders do
+          resource :payment, only: :create
+          resource :production, only: :create
+          resource :shipment, only: :create
+          resource :delivery, only: :create
+          resource :cancellation, only: :create
+          resource :refund, only: :create
+        end
+      end
+      resource :agents, only: %i[ show create destroy ], path: "settings/agents"
+      resources :agent_changes, only: :index do
+        scope module: :agent_changes do
+          resource :application, only: :create
+          resource :discard, only: :create
+        end
+      end
+      resource :stripe_connection, only: %i[ create update destroy ]
     end
     resources :appointments, only: %i[ index show new create update ] do
       scope module: :appointments do
@@ -64,14 +77,6 @@ Rails.application.routes.draw do
     resources :time_offs, only: %i[ index new create destroy ]
     resource :settings, only: %i[ edit update ]
     resource :booking_settings, only: %i[ edit update ], path: "settings/booking"
-    resource :agents, only: %i[ show create destroy ], path: "settings/agents"
-    resources :agent_changes, only: :index do
-      scope module: :agent_changes do
-        resource :application, only: :create
-        resource :discard, only: :create
-      end
-    end
-    resource :stripe_connection, only: %i[ create update destroy ]
     resource :policies, only: %i[ edit update ], path: "settings/policies"
     resources :users
   end

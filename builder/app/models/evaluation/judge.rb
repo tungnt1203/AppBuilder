@@ -16,7 +16,9 @@ module Evaluation
       each screenshot listed below with the Read tool, then judge the app as that person would
       on first use. Empty lists are expected (there's no data yet); judge whether the empty
       states help. Pages are captured whole, top to bottom, so a fixed or sticky bar can show
-      up in the middle of a capture; that isn't a problem in the app.
+      up in the middle of a capture; that isn't a problem in the app. Apps are built in English
+      whatever language the request is in, by design: English text isn't a problem either,
+      unless the request explicitly asks for the app itself in another language.
 
       First list what the person explicitly asked for: every concrete thing in their request (a
       screen, a feature, a rule, who may do what, content such as names, prices and hours,

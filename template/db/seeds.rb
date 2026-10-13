@@ -2,7 +2,7 @@
 # print-on-demand products with mockup photos (db/seeds/images). Replace it with the owner's real
 # products (seed them here, idempotently, when they give them), and their photos with the owner's
 # or ones that fit the shop (bin/images).
-if Rails.env.development? && Product.none?
+if Rails.env.development? && Rails.configuration.x.shop && Product.none?
   Store.current
   images = Rails.root.join("db/seeds/images")
   photos = ->(product, *names) do

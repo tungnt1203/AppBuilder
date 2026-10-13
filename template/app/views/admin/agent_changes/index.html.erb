@@ -17,8 +17,8 @@
         <ul class="divide-y divide-line rounded-lg border border-line text-sm">
           <% change.items.each do |item| %>
             <li class="flex flex-wrap gap-x-3 px-3 py-2">
-              <span class="text-muted"><%= item["target"] %> · <%= item["field"] %></span>
-              <span><%= item["before"].nil? ? "—" : item["before"].to_s.truncate(60) %> → <strong><%= item["after"].to_s.truncate(60) %></strong></span>
+              <span class="text-muted"><%= change.item_label(item) %> · <%= item["field"].humanize %></span>
+              <span><%= change.item_value(item, item["before"]).to_s.truncate(60).presence || "—" %> → <strong><%= change.item_value(item, item["after"]).to_s.truncate(60) %></strong></span>
             </li>
           <% end %>
         </ul>

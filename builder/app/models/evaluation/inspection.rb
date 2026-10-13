@@ -26,7 +26,8 @@ module Evaluation
       @dir.mkpath
       browser = Ferrum::Browser.new(browser_path: Rails.configuration.x.chrome_bin, window_size: [ 1280, 800 ], timeout: 30, process_timeout: 30)
       browser.go_to(@project.preview_gate.entry_url) # past the preview's gate, which keeps a cookie
-      public, private = candidate_pages.partition { |path| public?(path) }
+      answers = candidate_pages.index_with { |path| answer(path) }.reject { |_path, code| code == 404 } # switched off, like booking in a shop
+      public, private = answers.keys.partition { |path| answers[path].between?(200, 299) }
       public.first(MAX_PUBLIC_PAGES).each_with_index { |path, index| visit browser, path, name: "visitor-#{index + 1}", signed_in: false }
       @signed_in = create_owner && sign_in(browser)
       ([ @project.staff_home_path ] + private).uniq.first(MAX_PAGES).each_with_index { |path, index| visit browser, path, name: "page-#{index + 1}", signed_in: @signed_in }
@@ -80,12 +81,12 @@ module Evaluation
         [ public.find { |path| path != "/" } || public.first, private.first || @project.staff_home_path ].compact.uniq
       end
 
-      # Whether a visitor who isn't signed in gets the page rather than the sign-in screen.
-      def public?(path)
-        response = Net::HTTP.start("127.0.0.1", @project.port, open_timeout: 2, read_timeout: 30) { |http| http.get(path, @project.preview_gate.headers) }
-        response.code.to_i.between?(200, 299)
+      # What a visitor who isn't signed in gets: 2xx for a public page, a redirect to sign in for
+      # /admin's, 404 for a part of the app that's off. 0 when the app didn't answer.
+      def answer(path)
+        Net::HTTP.start("127.0.0.1", @project.port, open_timeout: 2, read_timeout: 30) { |http| http.get(path, @project.preview_gate.headers) }.code.to_i
       rescue SystemCallError, IOError, Net::ReadTimeout
-        false
+        0
       end
 
       # The owner the app would have after its first run, made directly in the app's database.

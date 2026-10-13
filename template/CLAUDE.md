@@ -1,7 +1,7 @@
 # CLAUDE.md
 
-This is a Rails 8 app, an online shop to start with (see "The shop"), that its owner self-hosts
-with ONCE (https://github.com/basecamp/once).
+This is a Rails 8 app that its owner self-hosts with ONCE (https://github.com/basecamp/once). It
+starts as an online shop (see "The shop"); an app that sells nothing turns the shop off.
 The people describing features are usually not programmers: build what they ask for as a
 complete, working feature, and explain the result in plain language. Reply to the owner in the
 language they write in, but build the app itself in English (see "Language and time zone").
@@ -99,9 +99,19 @@ It never sends visitors to `/admin`, and has no link to it; the owner goes to `/
 (a new install starts the owner's first-run setup there). Test site pages with no users
 (`User.delete_all`).
 
-## The shop (built in)
+## The shop (built in, on by default)
 
 Every app starts as a working shop. Build on it; don't write a second cart, checkout or order model.
+
+**An app that sells nothing turns it off**: a club, a lending shed, a festival, a school, a
+portfolio, a booking-only salon. Set `config.x.shop = false` (`config/application.rb`) in the
+first turn: the shop's pages (`/products`, `/cart`, checkout, orders) then answer 404, the header
+loses the shop link and cart, /admin hides orders, products, discounts and sales, and the sample
+catalog isn't seeded. Never leave the template's sample products reachable in an app that doesn't
+sell them, and never hide the shop only by removing links. Views check `shop?`. Tests start with
+the shop on and booking off whatever the app sets, so the built-in tests keep passing; tests of
+the app's pages as they really run call `disable_shop` (and `enable_booking`) in `setup`.
+Policies, contact, staff and settings keep working.
 
 The shop's core (its models, payments, order emails and migrations) is the `shop` gem in
 `vendor/blocks/shop` (and booking's is `vendor/blocks/booking`, see "Booking"). Read it to see how things work; never change, move or copy its files. It's
@@ -199,7 +209,7 @@ answer 404 and /admin hides them. Build on it; don't write a second calendar or 
   skill), link to `/book` from the home page and header, and show the team or services on the site
   when it suits the business. Tests of these screens call `enable_booking` in `setup`.
 - A business that both sells and books (a salon with products) keeps the shop; one that only books
-  can drop the shop's links from its site (keep the shop's code and /admin screens).
+  turns it off (`config.x.shop = false`, see "The shop").
 
 ## Accounts
 

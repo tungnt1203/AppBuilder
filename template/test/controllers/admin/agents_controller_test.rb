@@ -26,7 +26,8 @@ class Admin::AgentsControllerTest < ActionDispatch::IntegrationTest
     change = AgentChange.stage!("price_update", { items: [ { listing_id: "variant-#{variants(:mug).id}", new_price: 12 } ] }, by: "olivia")
 
     get admin_agent_changes_path
-    assert_select "p", change.summary
+    assert_select "p", "Morning Mug: $15.00 → $12.00"
+    assert_select "li", /Morning Mug · Price\s*\$15.00 → \$12.00/
 
     post admin_agent_change_application_path(change)
     assert change.reload.applied?
@@ -36,5 +37,14 @@ class Admin::AgentsControllerTest < ActionDispatch::IntegrationTest
     other = AgentChange.stage!("price_update", { items: [ { listing_id: "variant-#{variants(:mug).id}", new_price: 99 } ] }, by: "olivia")
     post admin_agent_change_discard_path(other)
     assert other.reload.discarded?
+  end
+
+  test "a paused product reads as the product, not its id" do
+    sign_in_as users(:owner)
+    AgentChange.stage!("inventory_action", { items: [ { listing_id: "variant-#{variants(:mug).id}", action: "pause" } ] }, by: "olivia")
+
+    get admin_agent_changes_path
+    assert_select "p", "Pause Morning Mug"
+    assert_select "li", /For sale\s*Yes → No/
   end
 end
