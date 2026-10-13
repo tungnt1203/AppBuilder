@@ -1,6 +1,7 @@
 # Requests bin/eval builds, written by `bin/eval generate` (Evaluation::Prompts).
 # Keep this file fixed: runs are only comparable on the same prompts. To change the
-# set, generate a new one and start a new baseline.
+# set, generate a new one and start a new baseline. p061 and after were added by hand: print-on-
+# demand shops selling from ads, the apps AppBuilder is made for first (bin/eval p061 … p068).
 - id: p001
   name: Rêu Xanh
   language: vi
@@ -468,3 +469,56 @@
   request: 'I collect mechanical keyboards and want a catalogue page for my collection:
     each board with photos, switches, keycaps, case material and sound clip, plus
     a ''for sale or trade'' flag.'
+- id: p061
+  name: Mèo Mập Tees
+  language: vi
+  request: 'Mình bán áo thun in hình mèo béo cho khách Mỹ, sản phẩm làm trên Printify rồi,
+    tên shop là Mèo Mập Tees (Chubby Cat Tees cũng được). Mình sẽ chạy ads Facebook nên trang
+    sản phẩm phải chốt đơn tốt trên điện thoại, có bảng size, free ship cho đơn từ $50. Màu chủ
+    đạo cam đào, vui vẻ dễ thương.'
+- id: p062
+  name: Dad Joke Depot
+  language: en
+  request: 'I sell dad joke t-shirts and coffee mugs, all print on demand through Printify, and
+    I run TikTok ads to them. I need a store that loads fast and makes people buy on their phone:
+    a bold, funny look (think comic book), a Father''s Day collection, and a 15% off code
+    DADJOKE15 shown at the top of every page.'
+- id: p063
+  name: Nurse Life Co.
+  language: en
+  request: 'Apparel for nurses: scrub-friendly tees, sweatshirts and tote bags with nurse humor.
+    Collections by specialty (ER, NICU, ICU, L&D). Shipping is 5 to 9 business days, free over
+    $60. Make it clean and trustworthy, soft teal and white, with a returns page that says we
+    reprint for free if the print is damaged.'
+- id: p064
+  name: Tranh Treo Tường Lặng
+  language: vi
+  request: 'Shop tranh poster và canvas tối giản (đường nét, phong cảnh, chữ), in qua Printify,
+    bán cho khách Úc và Mỹ. Muốn web nhìn như một gallery: nền trắng ngà, chữ serif, nhiều khoảng
+    trống. Khách chọn kích thước thì giá đổi theo. Có mục "Bộ 3 tranh" giá ưu đãi.'
+- id: p065
+  name: Good Boy Hoodies
+  language: en
+  request: 'Hoodies and tees with illustrated dog breeds (golden retriever, corgi, dachshund,
+    frenchie, husky...). Each breed should be its own collection so I can send ads for corgis
+    straight to the corgi page. Colorful and playful look. When someone picks a color I want the
+    photo to show that color.'
+- id: p066
+  name: Hội Chạy Bộ Sông Hàn
+  language: vi
+  request: 'CLB chạy bộ của mình muốn bán áo và mũ kỷ niệm giải chạy Sông Hàn 2026 qua Printify
+    cho thành viên và người thân ở nước ngoài. Chỉ bán đến hết 30/11, có đếm ngược ngày đóng
+    đơn. Giao diện năng động, xanh biển và vàng chanh. Có trang giới thiệu CLB.'
+- id: p067
+  name: Grace & Thread
+  language: en
+  request: 'Faith-based apparel for women: soft tees and sweatshirts with scripture and
+    encouraging words. Gentle, warm look with a handwritten feel. New customers get WELCOME10 for
+    10% off. I want a short story about why I started this on the home page, and a size guide
+    for the women''s relaxed fit.'
+- id: p068
+  name: Stack Overflowing
+  language: en
+  request: 'Programmer humor shop: tees, mugs and stickers. Dark mode look, monospace headings,
+    neon green accents. I already connected Meta Pixel ads so tracking must work. Bundle idea:
+    any 3 stickers for $10.'
