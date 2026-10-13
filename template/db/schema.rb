@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -352,6 +352,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_120000) do
     t.string "announcement"
     t.integer "delivery_days_min"
     t.integer "delivery_days_max"
+    t.string "meta_pixel_id"
+    t.string "tiktok_pixel_id"
+    t.string "google_tag_id"
   end
 
   create_table "time_offs", force: :cascade do |t|

@@ -11,6 +11,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     browser_options: { "no-sandbox" => nil } # needed when Chrome runs in a container
   }
 
+  # Pages in a container can take a few seconds; waiting longer beats failing for no reason.
+  Capybara.default_max_wait_time = 5
+
   # Owner or staff, through /admin's sign-in screen, like a person. Fixtures' password is "password".
   def sign_in_as(user, password: "password")
     visit new_admin_session_path

@@ -28,10 +28,14 @@ class Store < ApplicationRecord
   validates :business_address, length: { maximum: 500 }
   validates :refund_policy, :shipping_policy, :privacy_policy, :terms_of_service, length: { maximum: 50_000 }
   validates :announcement, length: { maximum: 160 }
+  validates :meta_pixel_id, format: { with: /\A\d{8,20}\z/ }, allow_blank: true
+  validates :tiktok_pixel_id, format: { with: /\A[A-Z0-9]{8,32}\z/ }, allow_blank: true
+  validates :google_tag_id, format: { with: /\A(G|AW)-[A-Z0-9]{4,20}\z/ }, allow_blank: true
   validates :delivery_days_min, :delivery_days_max, numericality: { only_integer: true, in: 1..90 }, allow_nil: true
   validate :countries_are_known
   validate :delivery_days_in_order
 
+  normalizes :meta_pixel_id, :tiktok_pixel_id, :google_tag_id, with: ->(id) { id.strip.upcase.presence }
   normalizes :ship_to_countries, with: ->(codes) { Array(codes).map { |code| code.to_s.strip.upcase }.compact_blank.uniq.sort }
 
   def self.current
@@ -61,6 +65,11 @@ class Store < ApplicationRecord
 
     remaining = free_shipping_threshold_cents - subtotal_cents
     remaining if remaining.positive?
+  end
+
+  # Whether any ad account is connected, so the site loads their tags.
+  def ad_tracking?
+    [ meta_pixel_id, tiktok_pixel_id, google_tag_id ].any?(&:present?)
   end
 
   # Empty means anywhere.

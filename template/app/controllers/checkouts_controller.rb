@@ -9,6 +9,7 @@ class CheckoutsController < ApplicationController
 
   def new
     @checkout = Checkout.new(cart: current_cart, **prefill)
+    track :initiate_checkout, items: @checkout.items.map { |item| tracked_variant(item.variant, item.quantity) }, value_cents: @checkout.subtotal_cents
   end
 
   def create

@@ -202,6 +202,12 @@ each part working and fill it with the owner's real details:
   Seed them for the preview when the owner says (free shipping over $50, ships in 5–9 days).
 - Product cards show a Sale badge. Prices, sale prices and shipping always come from the core.
 
+- **Ads tracking**: the owner pastes their Meta Pixel, TikTok Pixel and Google tag IDs in
+  /admin/settings (never ask for them in chat). The site then sends page views, ViewContent,
+  AddToCart, InitiateCheckout and Purchase (`Tracking` concern, `track` in controllers,
+  `app/javascript/tracking.js`). Keep `layouts/site/tracking_tags` in the head and
+  `tracking_events` in the body of the site's layout, and don't add other ad or analytics tags.
+
 Don't add fake urgency or fake social proof (invented stock counts, countdowns that reset,
 made-up reviews or "23 people are viewing this"): ad networks and Stripe ban shops for it.
 

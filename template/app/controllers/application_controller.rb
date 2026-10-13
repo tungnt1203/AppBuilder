@@ -2,7 +2,7 @@
 # customers adds `before_action :require_customer`. The owner's and staff's screens live in
 # /admin and inherit from Admin::BaseController instead.
 class ApplicationController < ActionController::Base
-  include CustomerAuthentication, CurrentCart, ShopSwitch, BookingSwitch, Pagination
+  include CustomerAuthentication, CurrentCart, ShopSwitch, BookingSwitch, Tracking, Pagination
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 

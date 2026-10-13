@@ -1,0 +1,4 @@
+<%# This page's events for the ad accounts (see Tracking), read by app/javascript/tracking.js. %>
+<% if Store.current.ad_tracking? %>
+  <script type="application/json" id="tracking-events"><%= raw json_escape(tracking_events.to_json) %></script>
+<% end %>

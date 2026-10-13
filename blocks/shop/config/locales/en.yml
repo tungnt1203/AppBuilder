@@ -71,6 +71,9 @@ en:
         announcement: Announcement
         delivery_days_min: Delivery, fastest (business days)
         delivery_days_max: Delivery, slowest (business days)
+        meta_pixel_id: Meta Pixel ID
+        tiktok_pixel_id: TikTok Pixel ID
+        google_tag_id: Google tag ID
       discount:
         code: Code
         kind: Type

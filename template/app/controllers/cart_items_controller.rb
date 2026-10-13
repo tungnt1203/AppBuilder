@@ -6,7 +6,9 @@ class CartItemsController < ApplicationController
     variant = Variant.includes(:product).find_by(id: params[:variant_id])
 
     if variant&.buyable?
-      current_cart!.add(variant, params.fetch(:quantity, 1).to_i.clamp(1, Cart::MAX_QUANTITY))
+      quantity = params.fetch(:quantity, 1).to_i.clamp(1, Cart::MAX_QUANTITY)
+      current_cart!.add(variant, quantity)
+      track :add_to_cart, items: [ tracked_variant(variant, quantity) ], redirect: true
       redirect_to cart_path, notice: t(".added", product: variant.product.title)
     else
       redirect_back_or_to products_path, alert: t(".unavailable")

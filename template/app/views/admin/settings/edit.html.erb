@@ -101,6 +101,18 @@
       <% end %>
     <% end %>
 
+    <% if shop? %>
+      <%= card class: "space-y-4", id: "ads" do %>
+        <div>
+          <h2 class="text-sm font-semibold text-ink"><%= t(".ads.title") %></h2>
+          <p class="mt-1 text-sm text-muted"><%= t(".ads.intro") %></p>
+        </div>
+        <%= form.field :meta_pixel_id, placeholder: "123456789012345", inputmode: "numeric", hint: t(".ads.meta_hint") %>
+        <%= form.field :tiktok_pixel_id, placeholder: "C4ABCDEFGHIJ1234567", class: "uppercase", hint: t(".ads.tiktok_hint") %>
+        <%= form.field :google_tag_id, placeholder: "G-XXXXXXXXXX", class: "uppercase", hint: t(".ads.google_hint") %>
+      <% end %>
+    <% end %>
+
     <%= form.submit t(".save") %>
   <% end %>
 </div>

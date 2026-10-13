@@ -371,6 +371,12 @@ en:
         contact_email_hint: Shown on the site and used as the reply-to address of order emails.
         announcement_placeholder: Free shipping on orders over $50
         announcement_hint: A short line across the top of every page. Leave empty for none.
+        ads:
+          title: Ads tracking
+          intro: Connect your ad accounts so they learn which visits turn into orders. The shop sends page views, products viewed, adds to cart, checkouts and purchases.
+          meta_hint: In Meta Events Manager, under Data sources. Numbers only.
+          tiktok_hint: In TikTok Ads Manager, under Assets › Events › Web events.
+          google_hint: A Google Analytics 4 measurement ID (G-…) or a Google Ads tag (AW-…).
         delivery_hint: From order to door, printing included. Product pages and the cart show the dates buyers can expect.
         shipping: Shipping
         free_shipping_hint: Leave empty for no free shipping.
