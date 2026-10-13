@@ -22,6 +22,12 @@ class Variant < ApplicationRecord
     [ option1, option2, option3 ].compact
   end
 
+  # The id ad catalogs and pixels know this variant by (the product feed, Tracking): its SKU, or
+  # "variant-12" without one. They must be the same in both, or ads can't match views to products.
+  def catalog_id
+    sku.presence || "variant-#{id}"
+  end
+
   # "Black / M", or nil for a product without options.
   def title
     option_values.join(" / ").presence

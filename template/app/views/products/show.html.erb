@@ -2,6 +2,7 @@
 <% content_for :head do %>
   <meta name="description" content="<%= truncate(strip_tags(@product.description.to_s).squish, length: 160) %>">
   <meta property="og:type" content="product">
+  <%= product_structured_data @product %>
   <meta property="og:title" content="<%= @product.title %>">
   <% if @product.cover_image&.representable? %>
     <meta property="og:image" content="<%= url_for(@product.cover_image.variant(:large)) %>">

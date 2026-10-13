@@ -63,4 +63,12 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", /Printed just for you/
     assert_select "dialog#size-guide", count: 0
   end
+
+  test "product pages describe the product for search engines" do
+    get product_path(products(:tee))
+    data = JSON.parse(css_select("script[type='application/ld+json']").first.text)
+    assert_equal [ "Product", "Cat Mom Tee" ], data.values_at("@type", "name")
+    assert_equal "TEE-BLK-S", data["offers"].first["sku"]
+    assert_includes data["offers"].map { _1["availability"] }, "https://schema.org/OutOfStock"
+  end
 end

@@ -100,6 +100,34 @@ class StripePaymentsTest < ActiveSupport::TestCase
     assert order.reload.paid?
   end
 
+  test "a buyer who left Stripe gets one reminder, and the order is cancelled after a day" do
+    gateway = connect_fake_stripe
+    order = orders(:pending).tap { |o| o.update!(payment_method: "stripe", stripe_checkout_session_id: "cs_old", created_at: 2.hours.ago) }
+
+    gateway.status = "open"
+    assert_no_enqueued_emails { Order::ExpireUnpaidCardJob.perform_now }
+
+    gateway.status = "expired"
+    assert_enqueued_email_with OrderMailer, :recovery, args: [ order ] do
+      Order::ExpireUnpaidCardJob.perform_now
+    end
+    assert order.reload.pending?
+    assert order.recovery_sent_at
+    assert_no_enqueued_emails { Order::ExpireUnpaidCardJob.perform_now }
+
+    order.update!(created_at: 25.hours.ago)
+    Order::ExpireUnpaidCardJob.perform_now
+    assert order.reload.cancelled?
+  end
+
+  test "the reminder links back to the order to pay" do
+    order = orders(:pending)
+    mail = OrderMailer.recovery(order)
+    assert_equal [ order.email ], mail.to
+    assert_includes mail.html_part.body.to_s, "/orders/#{order.token}"
+    assert_includes mail.text_part.body.to_s, "Finish your order"
+  end
+
   test "unpaid card orders are cancelled after a day, unless Stripe says they were paid" do
     gateway = connect_fake_stripe
     stale = orders(:pending).tap { |o| o.update!(payment_method: "stripe", stripe_checkout_session_id: "cs_old", created_at: 2.days.ago) }

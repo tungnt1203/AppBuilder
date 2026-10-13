@@ -88,6 +88,9 @@ en:
   collections:
     show:
       empty: Nothing in this collection yet.
+  feeds:
+    products:
+      description: Everything %{app} sells.
   carts:
     show:
       title: Your cart
@@ -132,6 +135,8 @@ en:
       free: Free
       total: Total
       place_order: Place order
+      pay: Pay %{total}
+      secure: Payment is secure and encrypted. We never see your card.
       payment: Payment
       methods:
         stripe: Card
@@ -284,6 +289,7 @@ en:
           refunded: Refunded
           edited: Order details edited
           fulfillment_failed: Didn't reach Printify
+          recovery_sent: Reminder sent to finish paying
         customer: Customer
         ship_to: Shipping to
         buyer_note: Note from the buyer
@@ -429,6 +435,8 @@ en:
           meta_hint: In Meta Events Manager, under Data sources. Numbers only.
           tiktok_hint: In TikTok Ads Manager, under Assets › Events › Web events.
           google_hint: A Google Analytics 4 measurement ID (G-…) or a Google Ads tag (AW-…).
+          feed: Product feed
+          feed_hint: Add this address as a scheduled feed in Meta Commerce Manager (catalog ads) and Google Merchant Center (Shopping). It lists every variant with its photo, price and stock.
         delivery_hint: From order to door, printing included. Product pages and the cart show the dates buyers can expect.
         shipping: Shipping
         free_shipping_hint: Leave empty for no free shipping.

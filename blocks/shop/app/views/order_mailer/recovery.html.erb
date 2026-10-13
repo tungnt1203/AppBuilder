@@ -1,0 +1,9 @@
+<h1><%= t(".heading", name: @order.shipping_name.to_s.split.first) %></h1>
+<p><%= t(".intro") %></p>
+
+<%= render "order_mailer/summary", order: @order %>
+
+<p><%= link_to t(".finish", total: money(@order.total_cents, @order.currency)), order_url(@order) %></p>
+<% if @store.contact_email.present? %>
+  <p><%= t(".questions", email: @store.contact_email) %></p>
+<% end %>

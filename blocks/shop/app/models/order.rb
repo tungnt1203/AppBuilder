@@ -16,6 +16,8 @@ class Order < ApplicationRecord
   STATUSES = %w[ pending paid in_production shipped delivered cancelled refunded ].freeze
   PAYMENT_METHODS = %w[ manual stripe ].freeze
   UNPAID_CARD_EXPIRY = StripeGateway::CHECKOUT_EXPIRY
+  # How long a card order the buyer didn't pay stays open for them to finish after the reminder.
+  UNPAID_CARD_RECOVERY = 1.day
   FIRST_NUMBER = 1001
 
   belongs_to :customer, optional: true

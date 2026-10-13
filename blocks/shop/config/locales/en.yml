@@ -162,6 +162,12 @@ en:
       intro: Your order is cancelled and won't be sent. If you paid for it, the shop will refund you.
       questions: Questions? Write to %{email}.
       view: View your order
+    recovery:
+      subject: "%{app}: your order is waiting for you"
+      heading: Still want it, %{name}?
+      intro: You left before paying, so we kept your order for you. It's here whenever you're ready, for the next day.
+      finish: Finish your order (%{total})
+      questions: Questions? Write to %{email}.
     refunded:
       subject: "%{app}: order %{number} is refunded"
       heading: Order %{number} is refunded

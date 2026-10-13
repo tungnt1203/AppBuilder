@@ -52,4 +52,13 @@ class CheckoutsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal customers(:casey), Order.last.customer
   end
+
+  test "with only cards, the button says what they pay" do
+    connect_fake_stripe(manual: false)
+    post cart_items_path, params: { variant_id: variants(:tee_black_s).id }
+
+    get new_checkout_path
+    assert_select "input[type=submit][value=?]", "Pay $29.00"
+    assert_select "li", /never see your card/
+  end
 end

@@ -105,6 +105,11 @@
         <%= form.field :meta_pixel_id, placeholder: "123456789012345", inputmode: "numeric", hint: t(".ads.meta_hint") %>
         <%= form.field :tiktok_pixel_id, placeholder: "C4ABCDEFGHIJ1234567", class: "uppercase", hint: t(".ads.tiktok_hint") %>
         <%= form.field :google_tag_id, placeholder: "G-XXXXXXXXXX", class: "uppercase", hint: t(".ads.google_hint") %>
+        <div class="space-y-1.5">
+          <label for="products_feed_url" class="block text-sm font-medium text-ink"><%= t(".ads.feed") %></label>
+          <input id="products_feed_url" type="text" readonly value="<%= products_feed_url %>" class="<%= field_classes %> font-mono text-xs">
+          <p class="text-xs text-muted"><%= t(".ads.feed_hint") %></p>
+        </div>
       <% end %>
     <% end %>
 

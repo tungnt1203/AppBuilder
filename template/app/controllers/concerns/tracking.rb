@@ -25,11 +25,11 @@ module Tracking
     end
 
     def tracked_variant(variant, quantity = 1)
-      tracked_item(variant.sku.presence || "variant-#{variant.id}", [ variant.product.title, variant.title ].compact.join(" – "), variant.price_cents, quantity)
+      tracked_item(variant.catalog_id, [ variant.product.title, variant.title ].compact.join(" – "), variant.price_cents, quantity)
     end
 
     def tracked_line(line_item)
-      tracked_item(line_item.sku.presence || "variant-#{line_item.variant_id}", [ line_item.product_title, line_item.variant_title ].compact.join(" – "),
+      tracked_item(line_item.variant&.catalog_id || line_item.sku.presence || "variant-#{line_item.variant_id}", [ line_item.product_title, line_item.variant_title ].compact.join(" – "),
         line_item.unit_price_cents, line_item.quantity)
     end
 

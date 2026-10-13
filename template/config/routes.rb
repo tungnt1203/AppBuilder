@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     resources :orders, only: :show do
       resource :payment, only: :create, module: :orders
     end
+    get "feeds/products", to: "feeds#products", defaults: { format: :xml }, as: :products_feed
   end
   resources :policies, only: :show
   # Appointments (config.x.booking): book at /book, the customer's appointment by its token.

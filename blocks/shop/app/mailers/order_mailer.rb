@@ -20,6 +20,14 @@ class OrderMailer < ApplicationMailer
       subject: t(".subject", app: Rails.configuration.x.app_name, number: order.name)
   end
 
+  # The buyer left Stripe's payment page without paying: one reminder, with a link back to the
+  # order, where they can pay.
+  def recovery(order)
+    @order, @store = order, Store.current
+    mail to: order.email, reply_to: @store.contact_email.presence,
+      subject: t(".subject", app: Rails.configuration.x.app_name)
+  end
+
   def refunded(order)
     @order, @store = order, Store.current
     mail to: order.email, reply_to: @store.contact_email.presence,

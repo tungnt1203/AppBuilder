@@ -45,6 +45,29 @@ module StoreHelper
     t("products.delivery.arrives", dates: range)
   end
 
+  # schema.org Product data for search engines: one offer per variant, with its price and stock.
+  def product_structured_data(product)
+    currency = Store.current.currency
+    data = {
+      "@context" => "https://schema.org", "@type" => "Product", "name" => product.title,
+      "description" => strip_tags(product.description.to_s).squish.presence,
+      "image" => product.images.select(&:representable?).first(5).map { |image| url_for(image.variant(:large)) },
+      "brand" => { "@type" => "Brand", "name" => Rails.configuration.x.app_name },
+      "offers" => product.variants.map { |variant|
+        { "@type" => "Offer", "sku" => variant.catalog_id, "price" => format("%.2f", variant.price_cents / 100.0), "priceCurrency" => currency,
+          "availability" => "https://schema.org/#{variant.buyable? ? "InStock" : "OutOfStock"}", "itemCondition" => "https://schema.org/NewCondition",
+          "url" => product_url(product, options: variant.option_values.presence) }
+      }
+    }.compact
+    tag.script(raw(json_escape(data.to_json)), type: "application/ld+json")
+  end
+
+  # "24.00 USD", how product feeds write a price.
+  def feed_price(cents, currency)
+    format = Store::CURRENCIES.fetch(currency)
+    "#{number_with_precision(BigDecimal(cents) / 100, precision: format[:precision])} #{currency}"
+  end
+
   # How much a variant on sale saves, as a whole percentage: 20.
   def sale_percent(variant)
     return unless variant&.on_sale?

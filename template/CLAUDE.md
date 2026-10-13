@@ -214,6 +214,11 @@ each part working and fill it with the owner's real details:
   `app/javascript/tracking.js`). Keep `layouts/site/tracking_tags` in the head and
   `tracking_events` in the body of the site's layout, and don't add other ad or analytics tags.
 
+- **Product feed** at `/feeds/products.xml` (Meta catalog ads, Google Shopping) and schema.org
+  data on product pages, with the same ids as the pixels (`Variant#catalog_id`). Keep both.
+- **Unfinished card checkouts**: a buyer who leaves Stripe without paying gets one email to
+  finish (`OrderMailer#recovery`); the order is cancelled a day later.
+
 Don't add fake urgency or fake social proof (invented stock counts, countdowns that reset,
 made-up reviews or "23 people are viewing this"): ad networks and Stripe ban shops for it.
 
