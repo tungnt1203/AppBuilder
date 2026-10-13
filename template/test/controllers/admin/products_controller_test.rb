@@ -82,4 +82,16 @@ class Admin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "input[name*='variants_attributes']", minimum: 4
   end
+
+  test "sets a size guide and which color each photo shows" do
+    products(:tee).images.attach(fixture_file_upload("product.png", "image/png"))
+    image = products(:tee).images.first
+
+    get edit_admin_product_path(products(:tee))
+    assert_select "select[name=?]", "product[photo_options][#{image.id}]"
+
+    patch admin_product_path(products(:tee)), params: { product: { title: "Cat Mom Tee", size_guide: "Size | Chest", photo_options: { image.id => "White" } } }
+    assert_equal "Size | Chest", products(:tee).reload.size_guide
+    assert_equal({ "White" => image.id }, products(:tee).option_images)
+  end
 end

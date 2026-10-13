@@ -3,7 +3,18 @@
 # products (seed them here, idempotently, when they give them), and their photos with the owner's
 # or ones that fit the shop (bin/images).
 if Rails.env.development? && Rails.configuration.x.shop && Product.none?
-  Store.current
+  Store.current.update!(announcement: "Free shipping on orders over $50", free_shipping_threshold: "50",
+    shipping_first_item: "4.99", shipping_additional_item: "2", delivery_days_min: 5, delivery_days_max: 9)
+  tee_sizes = <<~GUIDE
+    Size | Chest (in) | Length (in)
+    S | 18 | 28
+    M | 20 | 29
+    L | 22 | 30
+    XL | 24 | 31
+    2XL | 26 | 32
+
+    Measured flat across the chest. Unisex fit: size down for a closer fit.
+  GUIDE
   images = Rails.root.join("db/seeds/images")
   photos = ->(product, *names) do
     names.each { |name| product.images.attach(io: images.join("#{name}.jpg").open, filename: "#{name}.jpg", content_type: "image/jpeg") }
@@ -11,15 +22,16 @@ if Rails.env.development? && Rails.configuration.x.shop && Product.none?
   end
 
   tee = Product.create!(title: "Good Things Tee", status: "active", base_price: "24",
-    description: "Heavyweight cotton tee with a quiet reminder on the front. Printed to order and shipped in 3–5 days.",
-    option1_name: "Color", option1_values_text: "Black, White, Navy", option2_name: "Size", option2_values_text: "S, M, L, XL, 2XL")
+    description: "Heavyweight 100% cotton tee with a quiet reminder on the front. Printed to order, just for you.",
+    option1_name: "Color", option1_values_text: "Black, White, Navy", option2_name: "Size", option2_values_text: "S, M, L, XL, 2XL",
+    size_guide: tee_sizes)
   tee.variants.where(option2: "2XL").find_each { |variant| variant.update!(price: "27") }
   photos.(tee, "classic-tee-black", "classic-tee-white", "classic-tee-navy")
 
   sunset = Product.create!(title: "Stay Golden Tee", status: "active", base_price: "26",
     description: "A retro sunset on soft forest-green cotton. Printed to order.",
-    option1_name: "Size", option1_values_text: "S, M, L, XL")
-  sunset.variants.first.update!(compare_at_price: "32")
+    option1_name: "Size", option1_values_text: "S, M, L, XL", size_guide: tee_sizes)
+  sunset.variants.each { |variant| variant.update!(compare_at_price: "32") }
   photos.(sunset, "sunset-tee", "sunset-tee-detail")
 
   hoodie = Product.create!(title: "Weekend Mode Hoodie", status: "active", base_price: "48",

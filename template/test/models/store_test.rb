@@ -37,4 +37,23 @@ class StoreTest < ActiveSupport::TestCase
       Store.current
     end
   end
+
+  test "delivery dates count business days from the order" do
+    assert_nil @store.delivery_dates
+
+    @store.update!(delivery_days_min: 3, delivery_days_max: 5)
+    friday = Date.new(2026, 10, 16)
+    assert_equal [ Date.new(2026, 10, 21), Date.new(2026, 10, 23) ], @store.delivery_dates(from: friday)
+
+    @store.delivery_days_max = 2
+    assert_not @store.valid?
+  end
+
+  test "what's left to spend for free shipping" do
+    assert_equal 2600, @store.free_shipping_remaining_cents(7400)
+    assert_nil @store.free_shipping_remaining_cents(10_000)
+
+    @store.free_shipping_threshold_cents = nil
+    assert_nil @store.free_shipping_remaining_cents(100)
+  end
 end

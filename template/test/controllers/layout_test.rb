@@ -29,4 +29,10 @@ class LayoutTest < ActionDispatch::IntegrationTest
 
     assert_select "a[href=?]", admin_users_path, count: 0
   end
+
+  test "the owner's announcement runs across the top of the site" do
+    stores(:main).update!(announcement: "Free shipping over $50")
+    get root_path
+    assert_select "body > div", "Free shipping over $50"
+  end
 end

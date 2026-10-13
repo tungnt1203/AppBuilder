@@ -24,6 +24,7 @@ class Product < ApplicationRecord
 
   validates :title, presence: true, length: { maximum: 200 }
   validates :base_price_cents, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :size_guide, length: { maximum: 10_000 }
   validate :options_are_consistent
   validate :images_are_images
 
@@ -84,7 +85,49 @@ class Product < ApplicationRecord
     variants.find { |variant| variant.matches?(selected) }
   end
 
+  # Other products to show under this one ("You may also like"): from its collections first,
+  # then the newest.
+  def related(limit: 4)
+    others = Product.visible.where.not(id:).with_attached_images.includes(:variants)
+    picked = others.joins(:collection_products).where(collection_products: { collection_id: collection_ids }).distinct.newest_first.limit(limit).to_a
+    picked + others.where.not(id: picked.map(&:id)).newest_first.limit(limit - picked.size).to_a
+  end
+
+  # The photo that shows a variant: the one the owner set for one of its option values
+  # (option_images, {"White" => attachment id}), else one whose file name has its color in it
+  # ("tee-white.jpg", as mockup generators name them), else the cover.
+  def image_for(variant)
+    return cover_image unless variant
+
+    photos = images.select(&:representable?)
+    chosen = variant.option_values.lazy.filter_map { |value| photos.find { |photo| photo.id == option_images[value].to_i } }.first
+    chosen ||= color_value(variant)&.then { |color| photos.find { |photo| photo.filename.base.parameterize.split("-").each_cons(color.size).include?(color) } }
+    chosen || cover_image
+  end
+
+  # The option value a photo shows ("White"), for the product form.
+  def photo_option(image)
+    option_images.key(image.id)
+  end
+
+  # From the product form: {attachment id => "White"}, one value per photo.
+  def photo_options=(map)
+    self.option_images = map.to_h.each_with_object({}) { |(id, value), images| images[value.to_s] = id.to_i if value.present? }
+  end
+
+  # The size option's name when the product has one ("Size"), where a size guide goes.
+  def size_option_name
+    option_names.find { |name| name.match?(/\bsize\b/i) }
+  end
+
   private
+    # The variant's color as file-name words ("Forest Green" => ["forest", "green"]), when the
+    # product has a color option.
+    def color_value(variant)
+      slot = OPTION_SLOTS.find { |slot| public_send("option#{slot}_name").to_s.match?(/\bcolou?r\b/i) }
+      variant.public_send("option#{slot}").to_s.parameterize.split("-").presence if slot
+    end
+
     def stamp_published_at
       self.published_at ||= Time.current if active?
     end

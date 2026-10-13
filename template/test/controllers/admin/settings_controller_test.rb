@@ -26,4 +26,12 @@ class Admin::SettingsControllerTest < ActionDispatch::IntegrationTest
     patch admin_settings_path, params: { store: { currency: "XYZ" } }
     assert_response :unprocessable_entity
   end
+
+  test "sets the announcement and how long delivery takes" do
+    sign_in_as users(:admin)
+    patch admin_settings_path, params: { store: { announcement: "10% off with HELLO10", delivery_days_min: "5", delivery_days_max: "9" } }
+
+    store = Store.current
+    assert_equal [ "10% off with HELLO10", 5, 9 ], [ store.announcement, store.delivery_days_min, store.delivery_days_max ]
+  end
 end

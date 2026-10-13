@@ -5,15 +5,22 @@
     <%= card class: "space-y-4" do %>
       <%= form.field :title, required: true, autofocus: product.new_record? %>
       <%= form.field :description, :text_area, rows: 6 %>
+      <%= form.field :size_guide, :text_area, rows: 5, class: "font-mono text-sm", placeholder: "Size | Chest (in) | Length (in)\nS | 18 | 28\nM | 20 | 29", hint: t(".size_guide_hint") %>
     <% end %>
 
     <%= card do %>
       <h2 class="text-sm font-semibold text-ink"><%= t(".photos") %></h2>
       <% if product.persisted? && product.images.attached? %>
+        <%# Which color (or other option value) each photo shows: picking it on the site shows the photo. %>
+        <% _slot, photo_option_name, photo_option_values = product.options.find { |_, name, _| color_option?(name) } || product.options.first %>
         <ul class="mt-4 flex flex-wrap gap-3">
           <% product.images.each do |image| %>
-            <li class="relative">
+            <li class="relative w-24">
               <%= product_image product, image:, size: :thumb, class: "size-24 rounded-lg" %>
+              <% if photo_option_values %>
+                <%= select_tag "product[photo_options][#{image.id}]", options_for_select([ [ "—", "" ] ] + photo_option_values, product.photo_option(image)),
+                      class: "mt-1.5 w-full rounded-md border border-line bg-surface px-1.5 py-1 text-xs", aria: { label: t(".photo_shows", option: photo_option_name) } %>
+              <% end %>
               <%# Removing is a separate form (forms can't nest), tied to its button with form=. %>
               <button type="submit" form="<%= dom_id(image, :remove) %>" class="absolute -top-2 -right-2 grid size-6 place-items-center rounded-full bg-surface text-muted shadow ring-1 ring-line hover:text-red-600" aria-label="<%= t(".remove_photo") %>">
                 <%= icon "x", size: 14 %>

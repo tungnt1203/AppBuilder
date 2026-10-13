@@ -14,6 +14,7 @@ en:
       product:
         title: Title
         description: Description
+        size_guide: Size guide
         status: Status
         slug: Web address
         base_price: Price
@@ -67,6 +68,9 @@ en:
         terms_of_service: Terms of service
         low_stock_threshold: Low stock from
         stripe_tax: Let Stripe calculate tax
+        announcement: Announcement
+        delivery_days_min: Delivery, fastest (business days)
+        delivery_days_max: Delivery, slowest (business days)
       discount:
         code: Code
         kind: Type

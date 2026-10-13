@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Product page: picks the variant that matches the chosen options, shows its price and
 // whether it can be bought, and puts its id in the add-to-cart form.
 export default class extends Controller {
-  static targets = [ "option", "variantId", "price", "compareAtPrice", "submit", "unavailable" ]
+  static targets = [ "option", "variantId", "price", "compareAtPrice", "saving", "choice", "submit", "unavailable" ]
   static values = { variants: Array }
 
   connect() {
@@ -15,9 +15,14 @@ export default class extends Controller {
     const variant = this.variantsValue.find((candidate) => candidate.options.every((value, index) => value === chosen[index]))
 
     this.markUnavailableChoices(chosen)
+    this.choiceTargets.forEach((choice) => {
+      const value = chosen[Number(choice.dataset.position)]
+      choice.textContent = value ? `: ${value}` : ""
+    })
     if (!variant) return this.show(null)
     this.variantIdTarget.value = variant.id
     this.show(variant)
+    if (variant.image) this.dispatch("image", { detail: { url: variant.image } })
   }
 
   chosenOptions() {
@@ -34,6 +39,10 @@ export default class extends Controller {
     if (this.hasCompareAtPriceTarget) {
       this.compareAtPriceTarget.textContent = variant?.compare_at_price || ""
       this.compareAtPriceTarget.hidden = !variant?.compare_at_price
+    }
+    if (this.hasSavingTarget) {
+      this.savingTarget.textContent = variant?.saving || ""
+      this.savingTarget.hidden = !variant?.saving
     }
     this.submitTarget.disabled = !available
     if (this.hasUnavailableTarget) this.unavailableTarget.hidden = available

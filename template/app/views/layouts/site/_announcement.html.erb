@@ -1,0 +1,5 @@
+<%# A line across the top of every page, written by the owner in /admin/settings: free shipping
+    over $50, a code for a first order, a sale's last day. Restyle it; keep it short. %>
+<% if (announcement = Store.current.announcement.presence) %>
+  <div class="bg-ink px-4 py-2 text-center text-sm font-medium text-canvas"><%= announcement %></div>
+<% end %>

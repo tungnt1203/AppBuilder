@@ -83,4 +83,27 @@ class ProductTest < ActiveSupport::TestCase
     assert_not product.valid?
     assert product.errors.include?(:base_price)
   end
+
+  test "a variant shows the photo set for its color, else one named after it, else the cover" do
+    product = products(:tee)
+    %w[ cover tee-white ].each { |name| product.images.attach(io: file_fixture("product.png").open, filename: "#{name}.png", content_type: "image/png") }
+    product.save!
+    cover, white = product.images.to_a
+    black, white_s = variants(:tee_black_s), variants(:tee_white_s)
+
+    assert_equal white, product.image_for(white_s)
+    assert_equal cover, product.image_for(black)
+    assert_equal cover, product.image_for(nil)
+
+    product.update!(photo_options: { white.id.to_s => "Black", cover.id.to_s => "" })
+    assert_equal({ "Black" => white.id }, product.option_images)
+    assert_equal white, product.image_for(black)
+    assert_equal "Black", product.photo_option(white)
+  end
+
+  test "related products come from its collections first" do
+    related = products(:tee).related(limit: 4)
+    assert_not_includes related, products(:tee)
+    assert related.all?(&:active?)
+  end
 end

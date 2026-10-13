@@ -31,7 +31,7 @@
           <li class="flex items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6">
             <% if item.product %>
               <%= link_to edit_admin_product_path(item.product), class: "shrink-0" do %>
-                <%= product_image item.product, size: :thumb, class: "size-12 rounded-lg" %>
+                <%= product_image item.product, image: item.product.image_for(item.variant), size: :thumb, class: "size-12 rounded-lg" %>
               <% end %>
             <% else %>
               <div class="grid size-12 shrink-0 place-items-center rounded-lg bg-surface-muted text-muted"><%= icon "package", size: 18 %></div>

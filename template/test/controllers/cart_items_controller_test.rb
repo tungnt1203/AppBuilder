@@ -48,4 +48,15 @@ class CartItemsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     assert CartItem.exists?(other.id)
   end
+
+  test "the cart shows how far it is from free shipping" do
+    post cart_items_path, params: { variant_id: variants(:tee_black_m).id, quantity: 1 }
+    follow_redirect!
+    assert_select "[role=progressbar]"
+    assert_select "p", /away from free shipping/
+
+    post cart_items_path, params: { variant_id: variants(:tee_black_m).id, quantity: 9 }
+    follow_redirect!
+    assert_select "p", /You've got free shipping/
+  end
 end

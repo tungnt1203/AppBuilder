@@ -80,6 +80,7 @@
         <p class="text-xs text-muted"><%= t(".currency_hint") %></p>
       </div>
       <%= form.field :contact_email, :email_field, hint: t(".contact_email_hint") %>
+      <%= form.field :announcement, placeholder: t(".announcement_placeholder"), hint: t(".announcement_hint") %>
       <%= form.field :low_stock_threshold, :number_field, min: 0, step: 1, hint: t(".low_stock_hint") if shop? %>
     <% end %>
 
@@ -91,6 +92,11 @@
           <%= form.field :shipping_additional_item, :number_field, step: 0.01, min: 0 %>
         </div>
         <%= form.field :free_shipping_threshold, :number_field, step: 0.01, min: 0, hint: t(".free_shipping_hint") %>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <%= form.field :delivery_days_min, :number_field, min: 1, max: 90, step: 1 %>
+          <%= form.field :delivery_days_max, :number_field, min: 1, max: 90, step: 1 %>
+        </div>
+        <p class="-mt-2 text-xs text-muted"><%= t(".delivery_hint") %></p>
         <%= form.field :ship_to_countries_text, label: Store.human_attribute_name(:ship_to_countries), placeholder: "US, CA, GB, AU", hint: t(".countries_hint") %>
       <% end %>
     <% end %>

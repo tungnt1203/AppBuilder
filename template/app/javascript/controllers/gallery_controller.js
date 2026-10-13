@@ -9,4 +9,11 @@ export default class extends Controller {
     this.mainTarget.src = thumb.dataset.large
     this.thumbTargets.forEach((other) => other.setAttribute("aria-current", String(other === thumb)))
   }
+
+  // The photo of the color the buyer picked (variant-picker:image).
+  showImage({ detail: { url } }) {
+    if (!this.hasMainTarget) return
+    this.mainTarget.src = url
+    this.thumbTargets.forEach((thumb) => thumb.setAttribute("aria-current", String(thumb.dataset.large === url)))
+  }
 }

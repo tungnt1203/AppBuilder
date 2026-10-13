@@ -1,6 +1,9 @@
 # Text for the shop's screens: the customers' site and /admin. Model names, errors and the
 # order emails come with the shop core (vendor/blocks/shop/config/locales/en.yml).
 en:
+  date:
+    formats:
+      delivery: "%b %-d"
   products:
     statuses:
       draft: Draft
@@ -8,6 +11,7 @@ en:
       archived: Archived
     product:
       sold_out: Sold out
+      sale: Sale
     index:
       title: Shop
       search: Search products
@@ -22,6 +26,21 @@ en:
       quantity: Quantity
       add_to_cart: Add to cart
       unavailable: This option is sold out.
+      save: Save %{percent}%
+      size_guide: Size guide
+      made_to_order: Printed just for you when you order
+      free_shipping_over: Free shipping over %{amount}
+      free_shipping: Free shipping
+      shipping_from: Shipping from %{amount}
+      returns: Easy returns
+      secure_checkout: Secure checkout
+      details: Details
+      shipping_and_returns: Shipping & returns
+      shipping_policy: Shipping policy
+      refund_policy: Refund policy
+      related: You may also like
+    delivery:
+      arrives: Arrives %{dates}
   orders:
     statuses:
       pending: Awaiting payment
@@ -77,6 +96,8 @@ en:
       remove: Remove
       subtotal: Subtotal
       shipping_at_checkout: Shipping is added at checkout.
+      free_shipping_remaining_html: You're <strong>%{amount}</strong> away from free shipping.
+      free_shipping_unlocked: You've got free shipping.
       checkout: Check out
       continue: Continue shopping
       empty: Your cart is empty.
@@ -276,8 +297,10 @@ en:
       form:
         photos: Photos
         add_photos: Add photos
-        photos_hint: The first photo is the one shown in lists. Images up to 20 MB.
+        photos_hint: The first photo is the one shown in lists. Under each photo, pick the color it shows, so buyers see it when they pick that color. Images up to 20 MB.
         remove_photo: Remove photo
+        photo_shows: Which %{option} this photo shows
+        size_guide_hint: 'Shown next to the size option. One row per line, cells split by "|", the first row is the header.'
         options: Options
         options_hint: Like Color and Size. Separate the values with commas; a variant is made for each combination.
         option_name: Option %{number}
@@ -346,6 +369,9 @@ en:
         store: Store
         currency_hint: Prices are in this currency. Orders keep the currency they were placed in.
         contact_email_hint: Shown on the site and used as the reply-to address of order emails.
+        announcement_placeholder: Free shipping on orders over $50
+        announcement_hint: A short line across the top of every page. Leave empty for none.
+        delivery_hint: From order to door, printing included. Product pages and the cart show the dates buyers can expect.
         shipping: Shipping
         free_shipping_hint: Leave empty for no free shipping.
         countries_hint: Two-letter codes, separated by commas. Leave empty to ship everywhere.

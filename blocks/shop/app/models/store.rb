@@ -27,7 +27,10 @@ class Store < ApplicationRecord
   validates :contact_phone, length: { maximum: 50 }
   validates :business_address, length: { maximum: 500 }
   validates :refund_policy, :shipping_policy, :privacy_policy, :terms_of_service, length: { maximum: 50_000 }
+  validates :announcement, length: { maximum: 160 }
+  validates :delivery_days_min, :delivery_days_max, numericality: { only_integer: true, in: 1..90 }, allow_nil: true
   validate :countries_are_known
+  validate :delivery_days_in_order
 
   normalizes :ship_to_countries, with: ->(codes) { Array(codes).map { |code| code.to_s.strip.upcase }.compact_blank.uniq.sort }
 
@@ -42,6 +45,22 @@ class Store < ApplicationRecord
     return 0 if free_shipping_threshold_cents && subtotal_cents >= free_shipping_threshold_cents
 
     shipping_first_item_cents + shipping_additional_item_cents * (item_count - 1)
+  end
+
+  # When an order placed now arrives, counting business days: [first, last] dates, or nil when
+  # the owner hasn't said how long delivery takes.
+  def delivery_dates(from: Date.current)
+    return unless delivery_days_min
+
+    [ delivery_days_min, delivery_days_max || delivery_days_min ].map { |days| business_days_after(from, days) }
+  end
+
+  # What's left to spend for free shipping, or nil when there's no threshold or it's reached.
+  def free_shipping_remaining_cents(subtotal_cents)
+    return unless free_shipping_threshold_cents
+
+    remaining = free_shipping_threshold_cents - subtotal_cents
+    remaining if remaining.positive?
   end
 
   # Empty means anywhere.
@@ -168,6 +187,15 @@ class Store < ApplicationRecord
   end
 
   private
+    def business_days_after(date, days)
+      days.times { date = date.next_day; date = date.next_day while date.on_weekend? }
+      date
+    end
+
+    def delivery_days_in_order
+      errors.add(:delivery_days_max, :greater_than_or_equal_to, count: delivery_days_min) if delivery_days_min && delivery_days_max && delivery_days_max < delivery_days_min
+    end
+
     def agent_role!(role)
       AGENT_ROLES.include?(role.to_s) ? role.to_s : raise(ArgumentError, "Unknown agent role #{role.inspect}")
     end

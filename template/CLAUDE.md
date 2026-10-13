@@ -180,9 +180,34 @@ files build on it:
 - **Development data**: `db/seeds.rb` adds a sample catalog for the preview. When the owner gives
   their real products, replace the samples there.
 
+### Selling from ads (keep these when you redesign)
+
+Most buyers arrive from an ad on a phone, look at one product page and decide in seconds. The
+built-in screens carry what turns that visit into an order; restyle them for the brand, but keep
+each part working and fill it with the owner's real details:
+
+- **Product page** (`products/show`): photos, price with the sale price and "Save 20%", options as
+  color swatches (`swatch_color`) and size buttons, the add-to-cart button, and right under it when
+  it arrives (`delivery_estimate`), shipping (free over…) and returns. On a phone a bar keeps the
+  button in reach once it scrolls away (`sticky-buy`). Then details, shipping & returns, and "You
+  may also like" (`Product#related`).
+- **The photo of each color**: picking White shows the white mockup (`Product#image_for`): the
+  owner picks the color under each photo in /admin, or files named after the color
+  (`tee-white.jpg`) match by themselves. Name seeded mockups that way.
+- **Size guide** (`Product#size_guide`): a table written as `Size | Chest | Length` lines, shown
+  in a dialog next to the size option. Apparel always gets one; fill it from the owner's blanks.
+- **Cart**: how far it is from free shipping, with a bar; trust lines by the checkout button.
+- **Announcement** (`Store#announcement`) across the top of every page, and **delivery days**
+  (`Store#delivery_days_min/max`, business days from order to door), both in /admin/settings.
+  Seed them for the preview when the owner says (free shipping over $50, ships in 5–9 days).
+- Product cards show a Sale badge. Prices, sale prices and shipping always come from the core.
+
+Don't add fake urgency or fake social proof (invented stock counts, countdowns that reset,
+made-up reviews or "23 people are viewing this"): ad networks and Stripe ban shops for it.
+
 Change the shop's screens freely to fit the owner (design skill), keep its rules (prices from the
 database, statuses through the methods, guest checkout), and add features around it: reviews,
-a size guide, gift notes, product pages that look like the owner's brand.
+gift notes, product pages that look like the owner's brand.
 
 ## Booking (built in, off by default)
 

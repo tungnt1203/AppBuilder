@@ -8,8 +8,11 @@
   <% end %>
 <% end %>
 
-<div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12">
-  <div data-controller="gallery">
+<%# A product page made to sell from an ad: photos, price, options, the button, and right under it
+    what buyers want to know before they pay (when it arrives, shipping, returns). On a phone the
+    button follows the buyer once the main one scrolls away. Restyle it; keep those parts. %>
+<div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy">
+  <div data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
     <% images = @product.images.select(&:representable?) %>
     <div class="aspect-4/5 overflow-hidden rounded-xl">
       <% if images.any? %>
@@ -33,22 +36,36 @@
 
   <div data-controller="variant-picker" data-variant-picker-variants-value="<%= variants_json(@product) %>">
     <h1 class="font-display text-3xl font-semibold tracking-tight text-balance"><%= @product.title %></h1>
-    <p class="mt-3 flex items-baseline gap-2 text-xl">
+    <p class="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xl">
       <span data-variant-picker-target="price"><%= money(@variant&.price_cents) %></span>
       <s class="text-base text-muted" data-variant-picker-target="compareAtPrice" <%= "hidden" unless @variant&.on_sale? %>><%= money(@variant.compare_at_price_cents) if @variant&.on_sale? %></s>
+      <span class="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-semibold text-white" data-variant-picker-target="saving" <%= "hidden" unless @variant&.on_sale? %>><%= t(".save", percent: sale_percent(@variant)) if @variant&.on_sale? %></span>
     </p>
 
-    <%= form_with url: cart_items_path, class: "mt-8 space-y-6" do |form| %>
+    <%= form_with url: cart_items_path, id: "buy", class: "mt-8 space-y-6" do |form| %>
       <% @product.options.each_with_index do |(slot, name, values), position| %>
+        <% swatches = color_option?(name) && values.all? { |value| swatch_color(value) } %>
         <fieldset>
-          <legend class="text-sm font-medium text-ink"><%= name %></legend>
+          <div class="flex items-baseline justify-between gap-4">
+            <legend class="text-sm font-medium text-ink">
+              <%= name %><span class="font-normal text-muted" data-variant-picker-target="choice" data-position="<%= position %>"><%= ": #{@variant.public_send("option#{slot}")}" if @variant %></span>
+            </legend>
+            <% if name == @product.size_option_name && @product.size_guide.present? %>
+              <button type="button" class="text-sm <%= link_classes %>" data-controller="dialog-trigger" data-dialog-trigger-id-value="size-guide" data-action="dialog-trigger#open"><%= t(".size_guide") %></button>
+            <% end %>
+          </div>
           <div class="mt-2 flex flex-wrap gap-2">
             <% values.each do |value| %>
-              <label class="cursor-pointer">
+              <label class="cursor-pointer" title="<%= value %>">
                 <input type="radio" name="options[<%= position %>]" value="<%= value %>" class="peer sr-only"
                        <%= "checked" if @variant&.public_send("option#{slot}") == value %>
                        data-position="<%= position %>" data-variant-picker-target="option" data-action="variant-picker#update">
-                <span class="inline-flex min-w-12 items-center justify-center rounded-lg border border-line bg-surface px-3 py-2 text-sm peer-checked:border-ink peer-checked:ring-1 peer-checked:ring-ink peer-focus-visible:outline-2 peer-focus-visible:outline-brand-500"><%= value %></span>
+                <% if swatches %>
+                  <span class="block size-9 rounded-full border border-line ring-offset-2 ring-offset-canvas peer-checked:ring-2 peer-checked:ring-ink peer-focus-visible:outline-2 peer-focus-visible:outline-brand-500" style="background-color: <%= swatch_color(value) %>"></span>
+                  <span class="sr-only"><%= value %></span>
+                <% else %>
+                  <span class="inline-flex min-w-12 items-center justify-center rounded-lg border border-line bg-surface px-3 py-2 text-sm peer-checked:border-ink peer-checked:ring-1 peer-checked:ring-ink peer-focus-visible:outline-2 peer-focus-visible:outline-brand-500"><%= value %></span>
+                <% end %>
               </label>
             <% end %>
           </div>
@@ -58,17 +75,90 @@
       <%= hidden_field_tag :variant_id, @variant&.id, data: { variant_picker_target: "variantId" } %>
 
       <div class="flex items-end gap-3">
-        <div class="w-24 space-y-1.5">
+        <div class="w-20 space-y-1.5">
           <%= form.label :quantity, t(".quantity") %>
           <%= form.number_field :quantity, value: 1, min: 1, max: Cart::MAX_QUANTITY, inputmode: "numeric", class: field_classes %>
         </div>
-        <%= form.submit t(".add_to_cart"), class: "#{button_classes} flex-1 py-2.5", disabled: !@variant&.buyable?, data: { variant_picker_target: "submit" } %>
+        <%= form.submit t(".add_to_cart"), class: "#{button_classes} flex-1 py-3 text-base", disabled: !@variant&.buyable?, data: { variant_picker_target: "submit", sticky_buy_target: "button" } %>
       </div>
       <p class="text-sm text-muted" data-variant-picker-target="unavailable" <%= "hidden" if @variant&.buyable? %>><%= t(".unavailable") %></p>
     <% end %>
 
-    <% if @product.description.present? %>
-      <div class="mt-10 border-t border-line pt-8 leading-relaxed text-ink/90"><%= simple_format @product.description %></div>
-    <% end %>
+    <% store = Store.current %>
+    <ul class="mt-6 space-y-2.5 text-sm text-ink">
+      <li class="flex items-center gap-2.5">
+        <%= icon "truck", size: 18, class: "shrink-0 text-muted" %>
+        <span><%= delivery_estimate(store) || t(".made_to_order") %></span>
+      </li>
+      <li class="flex items-center gap-2.5">
+        <%= icon "package", size: 18, class: "shrink-0 text-muted" %>
+        <span>
+          <% if store.free_shipping_threshold_cents %>
+            <%= t(".free_shipping_over", amount: money(store.free_shipping_threshold_cents)) %>
+          <% elsif store.shipping_first_item_cents.zero? %>
+            <%= t(".free_shipping") %>
+          <% else %>
+            <%= t(".shipping_from", amount: money(store.shipping_first_item_cents)) %>
+          <% end %>
+        </span>
+      </li>
+      <% if store.policy("refund") %>
+        <li class="flex items-center gap-2.5">
+          <%= icon "rotate-ccw", size: 18, class: "shrink-0 text-muted" %>
+          <%= link_to t(".returns"), policy_path("refund"), class: "underline decoration-line underline-offset-4 hover:decoration-ink" %>
+        </li>
+      <% end %>
+      <li class="flex items-center gap-2.5">
+        <%= icon "lock", size: 18, class: "shrink-0 text-muted" %>
+        <span><%= t(".secure_checkout") %></span>
+      </li>
+    </ul>
+
+    <div class="mt-10 divide-y divide-line border-y border-line">
+      <% if @product.description.present? %>
+        <details class="group py-4" open>
+          <summary class="flex cursor-pointer list-none items-center justify-between font-medium text-ink"><%= t(".details") %><%= icon "chevron-down", size: 18, class: "transition group-open:rotate-180" %></summary>
+          <div class="mt-3 leading-relaxed text-ink/90"><%= simple_format @product.description %></div>
+        </details>
+      <% end %>
+      <details class="group py-4">
+        <summary class="flex cursor-pointer list-none items-center justify-between font-medium text-ink"><%= t(".shipping_and_returns") %><%= icon "chevron-down", size: 18, class: "transition group-open:rotate-180" %></summary>
+        <div class="mt-3 space-y-2 text-sm leading-relaxed text-ink/90">
+          <p><%= shipping_summary(store) %></p>
+          <% if (estimate = delivery_estimate(store)) %>
+            <p><%= estimate %>.</p>
+          <% end %>
+          <p class="flex gap-4">
+            <%= link_to t(".shipping_policy"), policy_path("shipping"), class: link_classes if store.policy("shipping") %>
+            <%= link_to t(".refund_policy"), policy_path("refund"), class: link_classes if store.policy("refund") %>
+          </p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <%# On a phone, once the main button has scrolled away. %>
+  <div class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 px-4 py-3 backdrop-blur md:hidden" data-sticky-buy-target="bar" hidden>
+    <div class="flex items-center gap-3">
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-medium text-ink"><%= @product.title %></p>
+        <p class="text-sm text-muted"><%= price_range(@product) %></p>
+      </div>
+      <button type="submit" form="buy" class="<%= button_classes %> px-6 py-3" data-sticky-buy-target="copy"><%= t(".add_to_cart") %></button>
+    </div>
   </div>
 </div>
+
+<% if @product.size_guide.present? %>
+  <%= dialog id: "size-guide", title: t(".size_guide") do %>
+    <div class="text-sm leading-relaxed"><%= policy_text @product.size_guide %></div>
+  <% end %>
+<% end %>
+
+<% related = @product.related %>
+<% if related.any? %>
+  <section class="mx-auto max-w-6xl px-4 pb-8">
+    <h2 class="font-display text-2xl font-semibold tracking-tight"><%= t(".related") %></h2>
+    <div class="mt-6"><%= render "products/grid", products: related %></div>
+  </section>
+<% end %>
