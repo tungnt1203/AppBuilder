@@ -2,7 +2,8 @@
 
 The shop core every app made with AppBuilder starts with: catalog (products, variants,
 collections), cart, guest checkout, orders and their timeline, card payments on Stripe Checkout,
-the store's settings and the order emails.
+the store's settings and the order emails, discount codes and sales, ad tracking IDs, and
+print-on-demand with Printify (importing products, sending paid orders, bringing back tracking).
 
 It runs inside an app made from `template/` (it uses the app's `ApplicationRecord`,
 `ApplicationMailer`, `ApplicationJob`, `User` and `Customer`). Each app gets a copy in

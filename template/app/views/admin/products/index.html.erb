@@ -1,4 +1,7 @@
 <%= page_header t(".title") do %>
+  <% if Store.current.printify_connected? %>
+    <%= link_to t(".import_printify"), admin_printify_imports_path, class: button_classes(:secondary) %>
+  <% end %>
   <%= link_to t(".new"), new_admin_product_path, class: button_classes %>
 <% end %>
 

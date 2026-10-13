@@ -1,0 +1,58 @@
+<%= page_header t("admin.settings.edit.title"), t("admin.settings.edit.description") %>
+
+<%= render "admin/settings/tabs" %>
+
+<div class="max-w-2xl space-y-6">
+  <p class="text-sm text-muted"><%= t(".intro") %></p>
+
+  <% if @store.printify_connected? %>
+    <%= card class: "space-y-4" do %>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-sm font-semibold text-ink"><%= t(".title") %></h2>
+        <%= badge t(".connected", shop: @store.printify_shop_title), tone: :green %>
+      </div>
+      <p class="text-sm text-muted"><%= t(".how_it_works") %></p>
+      <div class="flex flex-wrap gap-2">
+        <%= link_to t(".import"), admin_printify_imports_path, class: button_classes %>
+        <%= button_to t(".disconnect"), admin_printify_connection_path, method: :delete, class: button_classes(:ghost),
+              form: { data: { turbo_confirm: t(".confirm_disconnect") } } %>
+      </div>
+    <% end %>
+
+    <%= form_with model: @store, url: admin_printify_connection_path, method: :patch do |form| %>
+      <%= card class: "space-y-4" do %>
+        <h2 class="text-sm font-semibold text-ink"><%= t(".orders") %></h2>
+        <label class="flex items-start gap-3 text-sm">
+          <%= form.check_box :printify_send_to_production, class: "mt-0.5" %>
+          <span><span class="font-medium text-ink"><%= t(".send_to_production") %></span><span class="block text-muted"><%= t(".send_to_production_hint") %></span></span>
+        </label>
+        <div class="space-y-1.5">
+          <%= form.label :printify_shipping_method, t(".shipping_method") %>
+          <%= form.select :printify_shipping_method, PrintifyGateway::SHIPPING_METHODS.invert %>
+          <p class="text-xs text-muted"><%= t(".shipping_method_hint") %></p>
+        </div>
+        <%= form.submit t(".save") %>
+      <% end %>
+    <% end %>
+  <% elsif @shops %>
+    <%= card class: "space-y-4" do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".pick_shop") %></h2>
+      <%= form_with model: @store, url: admin_printify_connection_path, method: :patch, class: "space-y-3" do |form| %>
+        <%= form.select :printify_shop_id, @shops.map { |shop| [ shop["title"], shop["id"] ] }, {}, aria: { label: t(".pick_shop") } %>
+        <%= form.submit t(".use_shop") %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= card class: "space-y-4" do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".title") %></h2>
+      <%= form_with url: admin_printify_connection_path, class: "space-y-3" do |form| %>
+        <div class="space-y-1.5">
+          <%= form.label :token, t(".token"), class: "block text-sm font-medium text-ink" %>
+          <%= form.password_field :token, required: true, autocomplete: "off", spellcheck: false, class: field_classes %>
+          <p class="text-xs text-muted"><%= t(".token_hint_html", link: link_to("printify.com/app/account/api", "https://printify.com/app/account/api", target: "_blank", rel: "noopener", class: link_classes)) %></p>
+        </div>
+        <%= form.button t(".connect"), class: button_classes %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

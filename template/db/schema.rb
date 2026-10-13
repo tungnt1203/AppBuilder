@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_13_160000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -234,6 +234,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
     t.string "discount_code"
     t.integer "discount_cents", default: 0, null: false
     t.integer "tax_cents", default: 0, null: false
+    t.string "printify_order_id"
+    t.text "fulfillment_error"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["discount_id"], name: "index_orders_on_discount_id"
     t.index ["email"], name: "index_orders_on_email"
@@ -259,6 +261,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
     t.datetime "updated_at", null: false
     t.text "size_guide"
     t.json "option_images", default: {}, null: false
+    t.string "printify_product_id"
+    t.index ["printify_product_id"], name: "index_products_on_printify_product_id", unique: true
     t.index ["slug"], name: "index_products_on_slug", unique: true
     t.index ["status", "published_at"], name: "index_products_on_status_and_published_at"
   end
@@ -355,6 +359,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
     t.string "meta_pixel_id"
     t.string "tiktok_pixel_id"
     t.string "google_tag_id"
+    t.text "printify_token"
+    t.string "printify_shop_id"
+    t.string "printify_shop_title"
+    t.boolean "printify_send_to_production", default: true, null: false
+    t.integer "printify_shipping_method", default: 1, null: false
   end
 
   create_table "time_offs", force: :cascade do |t|
@@ -393,6 +402,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
     t.boolean "track_inventory", default: false, null: false
     t.integer "inventory_quantity", default: 0, null: false
     t.integer "cost_cents"
+    t.integer "printify_variant_id"
     t.index ["product_id", "option1", "option2", "option3"], name: "index_variants_on_product_and_options", unique: true
     t.index ["product_id", "position"], name: "index_variants_on_product_id_and_position"
     t.index ["product_id"], name: "index_variants_on_product_id"

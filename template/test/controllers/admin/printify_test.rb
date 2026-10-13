@@ -1,0 +1,89 @@
+require "test_helper"
+
+class Admin::PrintifyTest < ActionDispatch::IntegrationTest
+  test "an admin connects Printify, picking the shop when there are several" do
+    printify = connect_fake_printify
+    Store.current.update!(printify_token: nil, printify_shop_id: nil)
+    printify.shop_list = [ FakePrintifyGateway::SHOP, { "id" => 77, "title" => "Second shop" } ]
+    sign_in_as users(:admin)
+
+    get admin_printify_connection_path
+    assert_select "input[name=token]"
+
+    post admin_printify_connection_path, params: { token: "fake-token" }
+    follow_redirect!
+    assert_select "select[name='store[printify_shop_id]'] option", 2
+
+    patch admin_printify_connection_path, params: { store: { printify_shop_id: "77" } }
+    assert_equal [ "77", "Second shop" ], Store.current.values_at(:printify_shop_id, :printify_shop_title)
+    follow_redirect!
+    assert_select "a[href=?]", admin_printify_imports_path
+
+    patch admin_printify_connection_path, params: { store: { printify_send_to_production: "0", printify_shipping_method: "2" } }
+    assert_equal [ false, 2 ], Store.current.values_at(:printify_send_to_production, :printify_shipping_method)
+
+    delete admin_printify_connection_path
+    assert_not Store.current.printify_connected?
+  end
+
+  test "a token Printify refuses is said so" do
+    printify = connect_fake_printify
+    Store.current.update!(printify_token: nil, printify_shop_id: nil)
+    printify.error = "Printify didn't accept the token."
+    sign_in_as users(:admin)
+
+    post admin_printify_connection_path, params: { token: "nope" }
+    follow_redirect!
+    assert_select "div", /didn't accept the token/
+  end
+
+  test "only admins connect Printify" do
+    sign_in_as users(:staff)
+    get admin_printify_connection_path
+    assert_response :redirect
+    assert_not_equal admin_printify_connection_path, URI(response.location).path
+  end
+
+  test "staff import a Printify product into the shop" do
+    connect_fake_printify
+    sign_in_as users(:staff)
+
+    get admin_products_path
+    assert_select "a[href=?]", admin_printify_imports_path
+
+    get admin_printify_imports_path
+    assert_select "li", /Sunset Tee/
+    assert_select "button", "Import"
+
+    assert_difference -> { Product.count } do
+      post admin_printify_imports_path, params: { printify_product_id: "pf-tee" }
+    end
+    follow_redirect!
+    assert_select "button", "Update"
+    assert_select "a[href=?]", edit_admin_product_path(Product.find_by!(printify_product_id: "pf-tee"))
+  end
+
+  test "importing needs Printify connected" do
+    sign_in_as users(:staff)
+    get admin_printify_imports_path
+    assert_redirected_to admin_printify_connection_path
+  end
+
+  test "an order that didn't reach Printify can be sent again" do
+    printify = connect_fake_printify
+    product = Printify::Import.new.call("pf-tee")
+    order = orders(:paid)
+    order.line_items.first.update!(variant: product.variant_for(%w[ Black S ]))
+    order.update!(fulfillment_error: "Address is invalid")
+    sign_in_as users(:staff)
+
+    get admin_order_path(order)
+    assert_select "p", "Address is invalid"
+
+    post admin_order_fulfillment_path(order)
+    assert order.reload.in_production?
+    assert_equal 1, printify.orders.size
+    follow_redirect!
+    assert_select "a[href=?]", order.printify_url
+  end
+end

@@ -8,6 +8,7 @@
       <% if Current.user.administrator? %>
         <li><%= link_to t(".setup.settings"), edit_admin_settings_path, class: link_classes %></li>
         <li><%= link_to t(".setup.stripe"), edit_admin_settings_path(anchor: "payments"), class: link_classes %></li>
+        <li><%= link_to t(".setup.printify"), admin_printify_connection_path, class: link_classes %></li>
         <li><%= link_to t(".setup.policies"), edit_admin_policies_path, class: link_classes %></li>
         <li><%= link_to t(".setup.staff"), admin_users_path, class: link_classes %></li>
       <% end %>

@@ -18,7 +18,7 @@ class Store < ApplicationRecord
 
   money_attribute :shipping_first_item, :shipping_additional_item, :free_shipping_threshold
 
-  encrypts :stripe_secret_key, :stripe_webhook_secret
+  encrypts :stripe_secret_key, :stripe_webhook_secret, :printify_token
 
   validates :currency, inclusion: { in: CURRENCIES.keys }
   validates :shipping_first_item_cents, :shipping_additional_item_cents, numericality: { greater_than_or_equal_to: 0, only_integer: true }
@@ -27,6 +27,7 @@ class Store < ApplicationRecord
   validates :contact_phone, length: { maximum: 50 }
   validates :business_address, length: { maximum: 500 }
   validates :refund_policy, :shipping_policy, :privacy_policy, :terms_of_service, length: { maximum: 50_000 }
+  validates :printify_shipping_method, inclusion: { in: PrintifyGateway::SHIPPING_METHODS.keys }
   validates :announcement, length: { maximum: 160 }
   validates :meta_pixel_id, format: { with: /\A\d{8,20}\z/ }, allow_blank: true
   validates :tiktok_pixel_id, format: { with: /\A[A-Z0-9]{8,32}\z/ }, allow_blank: true
@@ -110,6 +111,28 @@ class Store < ApplicationRecord
 
   def stripe
     StripeGateway.build(stripe_key) if stripe_connected?
+  end
+
+  # Printify prints and ships the orders once the owner connected a token and picked a shop.
+  def printify_connected?
+    printify_token.present? && printify_shop_id.present?
+  end
+
+  def printify
+    PrintifyGateway.build(printify_token) if printify_token.present?
+  end
+
+  # Checks the token with Printify and saves it; picks the shop when the account has one.
+  # Returns the account's shops. Raises PrintifyGateway::Error when the token doesn't work.
+  def connect_printify!(token)
+    shops = PrintifyGateway.build(token.to_s.strip).shops
+    shop = shops.one? ? shops.first : nil
+    update!(printify_token: token.to_s.strip, printify_shop_id: shop&.dig("id")&.to_s, printify_shop_title: shop&.dig("title"))
+    shops
+  end
+
+  def disconnect_printify!
+    update!(printify_token: nil, printify_shop_id: nil, printify_shop_title: nil)
   end
 
   # Checks the key with Stripe, saves it, and registers the webhook when the shop has a public

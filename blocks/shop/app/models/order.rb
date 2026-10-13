@@ -94,10 +94,20 @@ class Order < ApplicationRecord
 
   def mark_paid!(by: nil, reference: nil)
     transition! :paid, from: :can_mark_paid?, by:, paid_at: Time.current, payment_reference: reference.presence || payment_reference
+    fulfill_later
   end
 
-  def start_production!(by: nil)
-    transition! :in_production, from: :can_start_production?, by:
+  def start_production!(by: nil, message: nil)
+    transition! :in_production, from: :can_start_production?, by:, message:
+  end
+
+  # Paid orders with products from Printify go there to be printed (Printify::Fulfillment).
+  def fulfill_later
+    Order::FulfillJob.perform_later(self) if Store.current.printify_connected?
+  end
+
+  def printify_url
+    "https://printify.com/app/order/#{printify_order_id}" if printify_order_id.present?
   end
 
   def ship!(carrier:, tracking_number:, tracking_url: nil, by: nil)
@@ -150,6 +160,7 @@ class Order < ApplicationRecord
     end
     OrderMailer.confirmation(self).deliver_later
     Admin::OrderMailer.placed(self).deliver_later
+    fulfill_later
     true
   rescue InvalidTransition
     false # the other confirmation got there first

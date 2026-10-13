@@ -1,0 +1,87 @@
+# Every call to Printify goes through here, with the owner's personal access token
+# (Store#printify). Printify prints and ships the shop's products: the shop imports them from it
+# (Printify::Import), sends it paid orders and asks it for their shipments (Printify::Fulfillment).
+#
+# Tests replace PrintifyGateway.build with a fake (see test/test_helpers/printify_test_helper.rb).
+class PrintifyGateway
+  Error = Class.new(StandardError)
+
+  BASE = "https://api.printify.com/v1".freeze
+  SHIPPING_METHODS = { 1 => "Standard", 2 => "Priority", 3 => "Printify Express", 4 => "Economy" }.freeze
+
+  def self.build(token)
+    new(token)
+  end
+
+  def initialize(token)
+    @token = token
+  end
+
+  # [{ "id" => 123, "title" => "My shop", "sales_channel" => "custom_integration" }]
+  def shops
+    get("/shops.json")
+  end
+
+  # One page of a shop's products: { "data" => [...], "last_page" => 3 }.
+  def products(shop_id, page: 1)
+    get("/shops/#{shop_id}/products.json?limit=50&page=#{page.to_i}")
+  end
+
+  def product(shop_id, product_id)
+    get("/shops/#{shop_id}/products/#{product_id}.json")
+  end
+
+  # Returns Printify's order id.
+  def create_order(shop_id, order)
+    post("/shops/#{shop_id}/orders.json", order).fetch("id")
+  end
+
+  def send_to_production(shop_id, order_id)
+    post("/shops/#{shop_id}/orders/#{order_id}/send_to_production.json", {})
+  end
+
+  def order(shop_id, order_id)
+    get("/shops/#{shop_id}/orders/#{order_id}.json")
+  end
+
+  # A mockup photo from Printify's image servers, as an IO to attach.
+  def download(url)
+    uri = URI(url)
+    response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 10, read_timeout: 30) { |http| http.get(uri.request_uri) }
+    raise Error, "Couldn't download a mockup (#{response.code})" unless response.is_a?(Net::HTTPSuccess)
+
+    StringIO.new(response.body)
+  rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError => error
+    raise Error, "Couldn't download a mockup (#{error.class.name.demodulize})"
+  end
+
+  private
+    def get(path) = request(Net::HTTP::Get.new(URI(BASE + path)))
+
+    def post(path, body)
+      request(Net::HTTP::Post.new(URI(BASE + path)).tap { |request| request.body = body.to_json })
+    end
+
+    def request(request)
+      request["Authorization"] = "Bearer #{@token}"
+      request["Content-Type"] = "application/json;charset=utf-8"
+      request["User-Agent"] = "AppBuilder shop"
+      response = Net::HTTP.start(request.uri.host, request.uri.port, use_ssl: true, open_timeout: 10, read_timeout: 30) { |http| http.request(request) }
+      body = response.body.present? ? JSON.parse(response.body) : {}
+      return body if response.is_a?(Net::HTTPSuccess)
+
+      raise Error, error_message(response, body)
+    rescue JSON::ParserError, SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError => error
+      raise Error, "Printify didn't answer (#{error.class.name.demodulize})"
+    end
+
+    def error_message(response, body)
+      case response.code.to_i
+      when 401, 403 then "Printify didn't accept the token. Make a new one in Printify › My profile › Connections."
+      when 429 then "Printify is busy (too many requests). Try again in a minute."
+      else
+        details = body.is_a?(Hash) ? [ body["error"], body["message"], body.dig("errors", "reason") ].compact.join(": ") : nil
+        details.presence || "Printify answered #{response.code}"
+      end
+    end
+end

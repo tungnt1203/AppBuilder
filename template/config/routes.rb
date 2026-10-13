@@ -54,8 +54,11 @@ Rails.application.routes.draw do
           resource :delivery, only: :create
           resource :cancellation, only: :create
           resource :refund, only: :create
+          resource :fulfillment, only: :create
         end
       end
+      resource :printify_connection, only: %i[ show create update destroy ], path: "settings/printify"
+      resources :printify_imports, only: %i[ index create ], path: "printify/products"
       resource :agents, only: %i[ show create destroy ], path: "settings/agents"
       resources :agent_changes, only: :index do
         scope module: :agent_changes do

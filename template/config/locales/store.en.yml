@@ -165,6 +165,46 @@ en:
       next: Next
       page: Page %{number} of %{pages}
   admin:
+    printify_connections:
+      show:
+        title: Printify
+        intro: Printify prints and ships your products. Connect it to import your products with their mockups, prices and costs, and to send paid orders to be printed; their tracking comes back by itself.
+        token: Personal access token
+        token_hint_html: In Printify, %{link} › Generate. Allow shops, products and orders. It works for a year.
+        connect: Connect Printify
+        pick_shop: Which Printify shop sells here?
+        use_shop: Use this shop
+        connected: "Connected: %{shop}"
+        how_it_works: Paid orders with Printify products go to Printify. The order moves to In production, and to Shipped with its tracking once Printify ships it; the buyer is emailed.
+        import: Import products
+        disconnect: Disconnect
+        confirm_disconnect: Disconnect Printify? Orders stop going there; products stay in the shop.
+        orders: Orders
+        send_to_production: Send paid orders straight to production
+        send_to_production_hint: Off, they wait in Printify for you to review and send them yourself.
+        shipping_method: Shipping
+        shipping_method_hint: What Printify ships with. Price your shipping in General to cover it.
+        save: Save
+      create:
+        notice: Printify is connected.
+      update:
+        notice: Printify settings saved.
+        unknown_shop: That shop isn't in your Printify account.
+      destroy:
+        notice: Printify is disconnected.
+    printify_imports:
+      not_connected: Connect Printify first.
+      index:
+        title: Import from Printify
+        description: Your Printify products. Importing brings their options, prices, costs and mockups; updating again keeps your titles and prices.
+        in_shop: In the shop
+        import: Import
+        update: Update
+        importing: Importing…
+        empty_title: No products in Printify yet
+        empty_description: Make a product in Printify, then import it here.
+      create:
+        notice: "%{title} is in the shop."
     dashboards:
       show:
         title: Dashboard
@@ -186,6 +226,7 @@ en:
           product: Add your first product
           settings: Set your currency and shipping rates
           stripe: Connect Stripe to take card payments
+          printify: Connect Printify to import products and print orders
           policies: Publish your refund, shipping and privacy policies
           staff: Invite your staff
           view: Look at your shop
@@ -207,6 +248,11 @@ en:
         no_results: Nothing matches "%{query}".
       show:
         title: Order %{number}
+        printify:
+          failed: This order didn't reach Printify.
+          retry: Send to Printify again
+          sent: Printify is making this order; it ships here with its tracking.
+          open: Open in Printify
         mark_paid: Mark as paid
         start_production: Start production
         mark_delivered: Mark as delivered
@@ -237,6 +283,7 @@ en:
           cancelled: Cancelled
           refunded: Refunded
           edited: Order details edited
+          fulfillment_failed: Didn't reach Printify
         customer: Customer
         ship_to: Shipping to
         buyer_note: Note from the buyer
@@ -262,6 +309,10 @@ en:
       productions:
         create:
           notice: Order %{number} is in production.
+      fulfillments:
+        create:
+          notice: Order %{number} is with Printify now.
+          failed: "Printify didn't take it: %{error}"
       shipments:
         create:
           notice: Order %{number} is marked as shipped. The buyer was emailed.
@@ -279,6 +330,7 @@ en:
       index:
         title: Products
         new: Add product
+        import_printify: Import from Printify
         all: All
         search: Search products
         search_button: Search

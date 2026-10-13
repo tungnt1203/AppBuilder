@@ -6,6 +6,7 @@ require_relative "test_helpers/customer_accounts_test_helper"
 require_relative "test_helpers/stripe_test_helper"
 require_relative "test_helpers/booking_test_helper"
 require_relative "test_helpers/shop_test_helper"
+require_relative "test_helpers/printify_test_helper"
 
 module ActiveSupport
   class TestCase
