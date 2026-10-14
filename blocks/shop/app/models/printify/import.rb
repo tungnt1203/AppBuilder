@@ -8,6 +8,8 @@ class Printify::Import
   MAX_PHOTOS = 12
   EXTENSIONS = { "image/png" => ".png", "image/webp" => ".webp", "image/jpeg" => ".jpg" }.freeze
   OPTION_NAMES = { "color" => "Color", "size" => "Size" }.freeze
+  # Lines of Printify's descriptions about its print providers, for sellers rather than buyers.
+  SELLER_ONLY = /print providers?|fulfilled by/i
 
   def initialize(store = Store.current)
     @store = store
@@ -137,8 +139,13 @@ class Printify::Import
       picked.each_with_object({}) { |(image, color), by_src| by_src[image["src"]] = [ image, by_src.dig(image["src"], 1) || color ] }.values.first(MAX_PHOTOS)
     end
 
+    # Printify's description as buyers should read it: plain text, its ".:" points as "- " list
+    # items, and without the lines meant for sellers (which print provider makes what).
     def plain_text(html)
       text = html.to_s.gsub(%r{<br\s*/?>|</li>}i, "\n").gsub(%r{</p>}i, "\n\n")
-      ActionController::Base.helpers.strip_tags(text).gsub(/\n{3,}/, "\n\n").strip
+      text = CGI.unescapeHTML(ActionController::Base.helpers.strip_tags(text))
+      lines = text.lines.map(&:rstrip).reject { |line| line.match?(SELLER_ONLY) }.map { |line| line.sub(/\A\s*\.:\s*/, "- ") }
+      text = lines.join("\n").gsub(/^Disclaimer:\s*\n(?=\n|\z)/i, "")
+      text.gsub(/\n{3,}/, "\n\n").strip
     end
 end

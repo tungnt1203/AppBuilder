@@ -35,6 +35,14 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_equal %w[ Black White ], product.option_images.keys
   end
 
+  test "the description reads for buyers: points as a list, without the lines about print providers" do
+    @printify.product_data["description"] = "<p>Soft tee.</p><p>Disclaimer:<br>- Sleeve prints are made with DTF by the print providers OPT OnDemand and Shirt Monkey.<br></p>" \
+      "<p>.: 100% cotton<br>.: Tear-away label &amp; no side seams</p>"
+    product = Printify::Import.new.call("pf-tee")
+
+    assert_equal "Soft tee.\n\n- 100% cotton\n- Tear-away label & no side seams", product.description
+  end
+
   test "importing again keeps the owner's title and prices, and brings costs and new variants" do
     product = Printify::Import.new.call("pf-tee")
     product.update!(title: "Golden Hour Tee")
