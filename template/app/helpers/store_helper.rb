@@ -28,9 +28,10 @@ module StoreHelper
     name.to_s.match?(/\bcolou?r\b/i)
   end
 
-  # The swatch for a color value ("Forest Green" => "#2f4a35"), or nil when it isn't a known color.
-  def swatch_color(value)
-    SWATCHES[value.to_s.downcase.squish]
+  # The swatch for a color value ("Forest Green" => "#2f4a35"): the product's own (from Printify),
+  # else a known color's, else nil.
+  def swatch_color(value, product = nil)
+    product&.option_colors&.dig(value.to_s) || SWATCHES[value.to_s.downcase.squish]
   end
 
   # "Arrives Oct 21 – 24" for an order placed today, when the shop says how long delivery takes.
@@ -45,7 +46,6 @@ module StoreHelper
     t("products.delivery.arrives", dates: range)
   end
 
-  # schema.org Product data for search engines: one offer per variant, with its price and stock.
   # Five stars, filled up to rating (rounded to the nearest whole star), read out as "Rated 4.6 out of 5".
   def rating_stars(rating, size: 16, **options)
     filled = rating.to_f.round
@@ -54,6 +54,8 @@ module StoreHelper
     end
   end
 
+  # schema.org Product data for search engines: one offer per variant, with its price and stock,
+  # and its buyers' ratings.
   def product_structured_data(product)
     currency = Store.current.currency
     rating = product.rating_summary

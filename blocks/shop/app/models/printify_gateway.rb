@@ -36,6 +36,11 @@ class PrintifyGateway
     post("/shops/#{shop_id}/orders.json", order).fetch("id")
   end
 
+  # One page of the shop's orders, newest first: { "data" => [...], "last_page" => 3 }.
+  def orders(shop_id, page: 1)
+    get("/shops/#{shop_id}/orders.json?limit=50&page=#{page.to_i}")
+  end
+
   def send_to_production(shop_id, order_id)
     post("/shops/#{shop_id}/orders/#{order_id}/send_to_production.json", {})
   end

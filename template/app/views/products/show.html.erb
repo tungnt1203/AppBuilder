@@ -13,7 +13,7 @@
     what buyers want to know before they pay (when it arrives, shipping, returns). On a phone the
     button follows the buyer once the main one scrolls away. Restyle it; keep those parts. %>
 <div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy">
-  <div data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
+  <div class="min-w-0" data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
     <% images = @product.images.select(&:representable?) %>
     <div class="aspect-4/5 overflow-hidden rounded-xl">
       <% if images.any? %>
@@ -50,7 +50,7 @@
 
     <%= form_with url: cart_items_path, id: "buy", class: "mt-8 space-y-6" do |form| %>
       <% @product.options.each_with_index do |(slot, name, values), position| %>
-        <% swatches = color_option?(name) && values.all? { |value| swatch_color(value) } %>
+        <% swatches = color_option?(name) && values.all? { |value| swatch_color(value, @product) } %>
         <fieldset>
           <div class="flex items-baseline justify-between gap-4">
             <legend class="text-sm font-medium text-ink">
@@ -67,7 +67,7 @@
                        <%= "checked" if @variant&.public_send("option#{slot}") == value %>
                        data-position="<%= position %>" data-variant-picker-target="option" data-action="variant-picker#update">
                 <% if swatches %>
-                  <span class="block size-9 rounded-full border border-line ring-offset-2 ring-offset-canvas peer-checked:ring-2 peer-checked:ring-ink peer-focus-visible:outline-2 peer-focus-visible:outline-brand-500" style="background-color: <%= swatch_color(value) %>"></span>
+                  <span class="block size-9 rounded-full border border-line ring-offset-2 ring-offset-canvas peer-checked:ring-2 peer-checked:ring-ink peer-focus-visible:outline-2 peer-focus-visible:outline-brand-500" style="background-color: <%= swatch_color(value, @product) %>"></span>
                   <span class="sr-only"><%= value %></span>
                 <% else %>
                   <span class="inline-flex min-w-12 items-center justify-center rounded-lg border border-line bg-surface px-3 py-2 text-sm peer-checked:border-ink peer-checked:ring-1 peer-checked:ring-ink peer-focus-visible:outline-2 peer-focus-visible:outline-brand-500"><%= value %></span>

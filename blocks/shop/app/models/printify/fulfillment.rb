@@ -13,14 +13,19 @@ class Printify::Fulfillment
   end
 
   # Sends the order to Printify once; a failure is kept on the order (fulfillment_error) for
-  # staff to see and send again from /admin.
+  # staff to see and send again from /admin. When Printify already has it (sent twice at once, or
+  # a retry after an answer that got lost), the shop takes that order instead of failing.
   def submit!
     return unless applies? && @order.paid? && @order.printify_order_id.blank?
 
-    id = gateway.create_order(@store.printify_shop_id, payload)
-    gateway.send_to_production(@store.printify_shop_id, id) if @store.printify_send_to_production?
+    id = create_or_find_order
+    @order.reload
+    return unless @order.paid? && @order.printify_order_id.blank? # the other submission got there first
+
     @order.update!(printify_order_id: id, fulfillment_error: nil)
     @order.start_production!(message: "Printify #{id}")
+  rescue Order::InvalidTransition
+    nil
   rescue PrintifyGateway::Error => error
     @order.update!(fulfillment_error: error.message)
     @order.record "fulfillment_failed", message: error.message
@@ -44,6 +49,30 @@ class Printify::Fulfillment
   end
 
   private
+    def create_or_find_order
+      id = gateway.create_order(@store.printify_shop_id, payload)
+      gateway.send_to_production(@store.printify_shop_id, id) if @store.printify_send_to_production?
+      id
+    rescue PrintifyGateway::Error => error
+      existing = (find_existing_order if error.message.match?(/already exists/i)) or raise
+      if @store.printify_send_to_production? && existing["status"] == "on-hold"
+        gateway.send_to_production(@store.printify_shop_id, existing["id"])
+      end
+      existing["id"]
+    end
+
+    # The Printify order made for this one (Printify keeps its number as shop_order_id), among the
+    # shop's latest orders.
+    def find_existing_order
+      1.upto(3).each do |page|
+        result = gateway.orders(@store.printify_shop_id, page:)
+        found = Array(result["data"]).find { |order| order.dig("metadata", "shop_order_id").to_s == @order.number.to_s }
+        return found if found
+        break if page >= result["last_page"].to_i
+      end
+      nil
+    end
+
     def cancelled_by_printify!
       return unless @order.in_production? && @order.fulfillment_error.blank?
 

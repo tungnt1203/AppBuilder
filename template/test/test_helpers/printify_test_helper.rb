@@ -2,8 +2,8 @@
 # FakePrintifyGateway with one t-shirt (Black and White, S and M; White M isn't made) and records
 # the orders the app sends.
 class FakePrintifyGateway
-  attr_reader :orders, :sent_to_production, :deleted_webhooks
-  attr_accessor :error, :shipments, :product_data, :shop_list, :status, :existing_webhooks, :fail_webhook_after
+  attr_reader :sent_to_production, :deleted_webhooks
+  attr_accessor :error, :shipments, :product_data, :shop_list, :status, :existing_webhooks, :fail_webhook_after, :existing_orders
 
   SHOP = { "id" => 4242, "title" => "Fake Printify shop", "sales_channel" => "custom_integration" }.freeze
 
@@ -36,9 +36,15 @@ class FakePrintifyGateway
 
   def create_order(shop_id, order)
     fail_or(nil)
+    if Array(existing_orders).any? { |existing| existing.dig("metadata", "shop_order_id") == order[:external_id] }
+      raise PrintifyGateway::Error, "Operation failed.: Order already exists for the given external_id."
+    end
     @orders << order.merge(shop_id:)
     "pf-order-#{@orders.size}"
   end
+
+  # Called with a shop id: what Printify has (existing_orders); without: those the app sent.
+  def orders(shop_id = nil, page: 1) = shop_id ? fail_or({ "data" => Array(existing_orders), "last_page" => 1 }) : @orders
 
   def send_to_production(_shop_id, order_id) = fail_or(@sent_to_production << order_id)
   def order(_shop_id, id) = fail_or({ "id" => id, "status" => status || (shipments.any? ? "fulfilled" : "in-production"), "shipments" => shipments })

@@ -28,9 +28,11 @@ class Printify::Import
     offered = data["variants"].select { |variant| variant["is_enabled"] && variant["is_available"] != false }
     raise PrintifyGateway::Error, "#{data["title"]} has no variants on sale in Printify" if offered.empty?
 
-    options = options_from(data["options"], offered)
     product = Product.find_or_initialize_by(printify_product_id: data["id"].to_s)
     new_product = product.new_record?
+    options = options_from(data["options"], offered)
+    # An imported product keeps its order of options: another order would remake its variants.
+    options = options.sort_by { |name, _| product.option_names.index(name) || options.size } unless new_product
 
     Product.transaction do
       if new_product
@@ -41,6 +43,7 @@ class Printify::Import
         product.public_send("option#{index + 1}_name=", name)
         product.public_send("option#{index + 1}_values=", values.map { |value| value[:title] })
       end
+      product.option_colors = product.option_colors.merge(colors_from(options))
       product.save!
       update_variants(product, options, offered, new_product)
     end
@@ -50,14 +53,21 @@ class Printify::Import
   end
 
   private
-    # [["Color", [{ id: 521, title: "Black" }, …]], ["Size", …]]: the options and the values
-    # some offered variant uses, in Printify's order, at most three.
+    # [["Color", [{ id: 521, title: "Black", hex: "#000000" }, …]], ["Size", …]]: the options and
+    # the values some offered variant uses, at most three, Color first (buyers pick it first, and
+    # it changes the photo).
     def options_from(options, offered)
       used = offered.flat_map { |variant| variant["options"] }.to_set
-      options.first(Product::OPTION_SLOTS.size).filter_map do |option|
-        values = option["values"].select { |value| used.include?(value["id"]) }.map { |value| { id: value["id"], title: value["title"].to_s.squish } }
+      options.sort_by { |option| option["type"].to_s == "color" ? 0 : 1 }.first(Product::OPTION_SLOTS.size).filter_map do |option|
+        values = option["values"].select { |value| used.include?(value["id"]) }
+          .map { |value| { id: value["id"], title: value["title"].to_s.squish, hex: Array(value["colors"]).first } }
         [ OPTION_NAMES.fetch(option["type"].to_s, option["name"].to_s.squish.singularize.titleize), values ] if values.any?
       end
+    end
+
+    def colors_from(options)
+      colors = options.find { |name, _| name == "Color" }&.last.to_a
+      colors.each_with_object({}) { |value, map| map[value[:title]] = value[:hex] if value[:hex].to_s.match?(/\A#\h{6}\z/) }
     end
 
     def update_variants(product, options, offered, new_product)

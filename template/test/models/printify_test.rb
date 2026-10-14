@@ -95,6 +95,31 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_not Printify::Fulfillment.new(other).applies?
   end
 
+  test "an order Printify already has (sent twice, or a retry after a lost answer) is taken, not failed" do
+    product = Printify::Import.new.call("pf-tee")
+    order = place_order(product.variant_for(%w[ Black M ]))
+    @printify.existing_orders = [ { "id" => "pf-earlier", "status" => "on-hold", "metadata" => { "shop_order_id" => order.number.to_s } } ]
+
+    Printify::Fulfillment.new(order).submit!
+    assert order.reload.in_production?
+    assert_equal [ "pf-earlier", nil ], [ order.printify_order_id, order.fulfillment_error ]
+    assert_equal [ "pf-earlier" ], @printify.sent_to_production, "it was waiting in Printify; the shop sends it to production"
+    assert_not_includes order.events.map(&:action), "fulfillment_failed"
+  end
+
+  test "importing puts Color first, with Printify's swatches, and a re-import keeps the order" do
+    @printify.product_data["options"].reverse!
+    product = Printify::Import.new.call("pf-tee")
+    assert_equal %w[ Color Size ], product.option_names
+    assert_equal({ "Black" => "#000000", "White" => "#ffffff" }, product.option_colors)
+
+    product.update!(option1_name: "Size", option1_values: %w[ S M ], option2_name: "Color", option2_values: %w[ Black White ])
+    variants = product.variants.reload.map(&:id).sort
+    Printify::Import.new.call("pf-tee")
+    assert_equal %w[ Size Color ], product.reload.option_names
+    assert_equal variants, product.variants.reload.map(&:id).sort
+  end
+
   test "owners can review orders in Printify before they're printed" do
     Store.current.update!(printify_send_to_production: false)
     product = Printify::Import.new.call("pf-tee")

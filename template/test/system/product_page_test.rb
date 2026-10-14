@@ -3,12 +3,13 @@ require "application_system_test_case"
 class ProductPageTest < ApplicationSystemTestCase
   test "picking a color shows its photo, and on a phone the button follows the buyer" do
     product = products(:tee)
-    %w[ tee-black tee-white ].each { |name| product.images.attach(io: file_fixture("product.png").open, filename: "#{name}.png", content_type: "image/png") }
+    %w[ tee-black tee-white tee-back tee-side tee-detail tee-flat ].each { |name| product.images.attach(io: file_fixture("product.png").open, filename: "#{name}.png", content_type: "image/png") }
     product.update!(description: "Soft cotton.\n\n" * 40)
 
     on_phone do
       visit product_path(product)
       assert_selector "[data-gallery-target=main][src*='tee-black']"
+      assert_operator evaluate_script("document.documentElement.scrollWidth"), :<=, 390, "six photos don't make the page wider than the phone"
 
       find("label[title=White]").click
       assert_selector "[data-gallery-target=main][src*='tee-white']"
