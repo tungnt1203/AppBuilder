@@ -9,6 +9,7 @@ module Evaluation
     EMAIL = "eval-owner@example.com"
     PASSWORD = "eval-password-2026"
     MAX_PUBLIC_PAGES = 3
+    FIXTURES = Rails.root.join("eval/fixtures")
     MAX_PAGES = 5
     # The starter app's own screens and Rails' internals; the pages the agent made are the point.
     SKIP = %r{\A/(checkout|cart_items|zip_codes|feeds|printify|stripe|rails|up|session|passwords|first_run|invitations|registration|account|_blocks|_preview|cable|assets|recede_historical_location|resume_historical_location|refresh_historical_location|service-worker|manifest|admin/(users|session|passwords|first_run|invitations))(/|\z)}
@@ -26,6 +27,7 @@ module Evaluation
       @dir.mkpath
       browser = Ferrum::Browser.new(browser_path: Rails.configuration.x.chrome_bin, window_size: [ 1280, 800 ], timeout: 30, process_timeout: 30)
       browser.go_to(@project.preview_gate.entry_url) # past the preview's gate, which keeps a cookie
+      stock_shop
       answers = candidate_pages.index_with { |path| answer(path) }.reject { |_path, code| code == 404 } # switched off, like booking in a shop
       public, private = answers.keys.partition { |path| answers[path].between?(200, 299) }
       public.first(MAX_PUBLIC_PAGES).each_with_index { |path, index| visit browser, path, name: "visitor-#{index + 1}", signed_in: false }
@@ -111,6 +113,32 @@ module Evaluation
         20.times { break unless browser.current_url.include?("/session"); sleep 0.25 }
         settle browser
         !browser.current_url.include?("/session")
+      end
+
+      # A shop starts without products until the owner imports theirs from Printify, so one
+      # product is put in as an import would (options, prices, costs, a mockup per color, a size
+      # guide), for the product page, where ads land, to be seen and judged. Apps without a shop,
+      # or with products of their own, are left as they are.
+      def stock_shop
+        photos = @project.path.join("tmp/eval")
+        photos.mkpath
+        %w[ tee-black tee-white ].each { |name| FileUtils.cp(FIXTURES.join("#{name}.jpg"), photos.join("#{name}.jpg")) }
+        @project.sandbox.capture("bin/rails", "runner", <<~RUBY)
+          if defined?(Product) && Rails.configuration.x.try(:shop) != false && Product.where(status: "active").none?
+            tee = Product.create!(title: "Classic Tee", status: "active", base_price: "24", printify_product_id: "eval-tee",
+              description: "Soft, lightweight cotton tee with a classic fit.\n\n- 100% ring-spun cotton\n- Printed to order",
+              option1_name: "Color", option1_values_text: "Black, White", option2_name: "Size", option2_values_text: "S, M, L, XL, 2XL",
+              size_guide: "Size | Chest (in) | Length (in)\nS | 18 | 28\nM | 20 | 29\nL | 22 | 30\nXL | 24 | 31\n2XL | 26 | 32")
+            tee.variants.each { |variant| variant.update!(cost: "11.50", printify_variant_id: variant.id) }
+            tee.variants.where(option2: "2XL").find_each { |variant| variant.update!(price: "27") }
+            %w[ black white ].each do |color|
+              tee.images.attach(io: File.open("tmp/eval/tee-\#{color}.jpg"), filename: "classic-tee-\#{color}.jpg", content_type: "image/jpeg")
+            end
+            tee.save!
+          end
+        RUBY
+      rescue ProjectShell::Error => error
+        Rails.logger.warn "Eval: couldn't add a product to #{@project.slug}: #{error.message.truncate(300)}"
       end
 
       # The home page first, then a product page when the app sells some (where ads land), then

@@ -107,9 +107,8 @@ Every app starts as a working shop. Build on it; don't write a second cart, chec
 **An app that sells nothing turns it off**: a club, a lending shed, a festival, a school, a
 portfolio, a booking-only salon. Set `config.x.shop = false` (`config/application.rb`) in the
 first turn: the shop's pages (`/products`, `/cart`, checkout, orders) then answer 404, the header
-loses the shop link and cart, /admin hides orders, products, discounts and sales, and the sample
-catalog isn't seeded. Never leave the template's sample products reachable in an app that doesn't
-sell them, and never hide the shop only by removing links. Views check `shop?`. Tests start with
+loses the shop link and cart, and /admin hides orders, products, discounts and sales. Never hide
+the shop only by removing links. Views check `shop?`. Tests start with
 the shop on and booking off whatever the app sets, so the built-in tests keep passing; tests of
 the app's pages as they really run call `disable_shop` (and `enable_booking`) in `setup`.
 Policies, contact, staff and settings keep working.
@@ -198,12 +197,13 @@ files build on it:
   `/admin/reviews`. Keep the stars and the section when you redesign the product page (restyle
   them), don't write another review model, and never seed or invent reviews, not even samples
   for the preview: the section stays hidden until real buyers write some.
-- **Development data**: `db/seeds.rb` adds a sample catalog for the preview. When the owner gives
-  their real products, replace the samples there.
-  The sample photos print the samples' own designs ("Good things take time" on the Good Things
-  Tee): when you rename samples to fit the shop (cat tees), give them photos that match from
-  `bin/images`, or keep the samples as they are; a cat tee's title on a slogan tee's photo
-  looks broken to the owner.
+- **No sample products**: a new shop has none. The home page and /products show that products
+  are coming (`products/_coming_soon`, keep it when you redesign), and in the preview it tells
+  the owner how to add theirs: import from Printify in /admin. Don't invent products, prices or
+  photos for the preview. When the owner describes their products in the chat (with photos or
+  mockups they attach), seed those in `db/seeds.rb`, idempotently; otherwise point them to the
+  Printify import in your reply. Design the product grid and product page so they work once
+  products arrive (the tests have products to check them with).
 
 ### Selling from ads (keep these when you redesign)
 

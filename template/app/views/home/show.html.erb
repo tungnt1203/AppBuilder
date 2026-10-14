@@ -32,7 +32,7 @@
       <% if @products.any? %>
         <%= render "products/grid", products: @products %>
       <% else %>
-        <p class="rounded-xl border border-dashed border-line px-6 py-16 text-center text-muted"><%= t(".opening_soon") %></p>
+        <%= render "products/coming_soon" %>
       <% end %>
     </div>
   </section>

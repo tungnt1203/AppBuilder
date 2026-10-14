@@ -6,6 +6,17 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "a shop without products says they're coming, and only the preview tells the owner how to add them" do
+    Product.update_all(status: "draft")
+
+    get root_path
+    assert_select "p", "Our first products are on their way. Check back soon."
+    assert_no_match "Import from Printify", response.body, "visitors of the real shop never see the owner's hint"
+
+    get products_path
+    assert_select "p", "Our first products are on their way. Check back soon."
+  end
+
   test "without customer accounts there's no sign in, and the account pages don't exist" do
     get root_path
     assert_select "a[href=?]", new_session_path, count: 0

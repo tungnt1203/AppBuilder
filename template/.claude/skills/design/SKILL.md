@@ -152,10 +152,10 @@ design.
 - **Composition**: vary the sections: split layouts, full-bleed bands of brand color, a big number,
   an asymmetric grid, a horizontal scroller of cards. Generous space (`py-16 md:py-24` between
   sections), one clear max width, text `text-base`/`text-lg`.
-- **Product photos**: every product has at least one. The sample products come with mockups
-  (`db/seeds/images`); when you add products, attach the owner's photos (print-on-demand sellers
-  have mockups from Printify or Printful: ask for them in the chat), else a sample mockup that fits,
-  else one from `bin/images`. A grid of gray placeholders makes the shop look empty.
+- **Product photos**: every product has at least one. Products imported from Printify come with
+  their mockups; when you seed products the owner described, attach the photos they sent (ask
+  for their mockups in the chat). Don't invent products to fill the grid: a new shop shows its
+  coming-soon state (`products/_coming_soon`) until the owner's products are in.
 - **Images**: use what the owner gives first (Active Storage uploads, attach in seeds when they
   provide files). When a page needs photos they haven't given (a hero, the services, the classes),
   get free stock photos with `bin/images`:

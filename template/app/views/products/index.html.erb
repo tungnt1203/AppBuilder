@@ -14,10 +14,10 @@
     <% if @page.records.any? %>
       <%= render "products/grid", products: @page.records %>
       <%= render "ui/pagination", page: @page %>
+    <% elsif params[:q].present? %>
+      <p class="rounded-xl border border-dashed border-line px-6 py-16 text-center text-muted"><%= t(".no_results", query: params[:q]) %></p>
     <% else %>
-      <p class="rounded-xl border border-dashed border-line px-6 py-16 text-center text-muted">
-        <%= params[:q].present? ? t(".no_results", query: params[:q]) : t(".empty") %>
-      </p>
+      <%= render "products/coming_soon" %>
     <% end %>
   </div>
 </div>
