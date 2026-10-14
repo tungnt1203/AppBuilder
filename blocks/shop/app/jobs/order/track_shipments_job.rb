@@ -1,8 +1,9 @@
-# Every hour: orders Printify is making are shipped once Printify has their tracking.
+# Every hour: orders sent to Printify move along with it (see Printify::Fulfillment#sync!).
 class Order::TrackShipmentsJob < ApplicationJob
   def perform
     return unless Store.current.printify_connected?
 
-    Order.in_production.where.not(printify_order_id: nil).find_each { |order| Printify::Fulfillment.new(order).sync! }
+    orders = Order.where(status: %w[ paid in_production ]).or(Order.shipped.where(shipped_at: 2.months.ago..))
+    orders.where.not(printify_order_id: nil).find_each { |order| Printify::Fulfillment.new(order).sync! }
   end
 end

@@ -120,7 +120,7 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_equal variants, product.variants.reload.map(&:id).sort
   end
 
-  test "owners can review orders in Printify before they're printed" do
+  test "owners can review orders in Printify before they're printed; the order stays cancellable until then" do
     Store.current.update!(printify_send_to_production: false)
     product = Printify::Import.new.call("pf-tee")
     order = place_order(product.variant_for(%w[ Black S ]))
@@ -128,6 +128,68 @@ class PrintifyTest < ActiveSupport::TestCase
     Printify::Fulfillment.new(order).submit!
     assert_equal 1, @printify.orders.size
     assert_empty @printify.sent_to_production
+    assert order.reload.paid?
+    assert_equal "sent_to_printify", order.events.last.action
+    assert order.can_cancel?
+
+    @printify.status = "on-hold"
+    Order::TrackShipmentsJob.perform_now
+    assert order.reload.paid?
+
+    @printify.status = "in-production"
+    Order::TrackShipmentsJob.perform_now
+    assert order.reload.in_production?, "approved in Printify"
+  end
+
+  test "cancelling or refunding cancels the order in Printify, or tells staff it couldn't" do
+    product = Printify::Import.new.call("pf-tee")
+    order = place_order(product.variant_for(%w[ Black S ]))
+    order.update!(printify_order_id: "pf-1")
+    order.cancel!
+    assert_equal [ "pf-1" ], @printify.cancelled
+    assert_equal "printify_cancelled", order.events.last.action
+
+    printing = place_order(product.variant_for(%w[ Black M ]), status: "in_production")
+    printing.update!(printify_order_id: "pf-2")
+    @printify.error = "Order can't be cancelled"
+    printing.refund!(stripe: false)
+    assert printing.reload.refunded?
+    assert_match "cancel it in Printify", printing.fulfillment_error
+  end
+
+  test "an order Printify splits ships once every package has, with all the tracking" do
+    product = Printify::Import.new.call("pf-tee")
+    order = place_order(product.variant_for(%w[ Black S ]), status: "in_production")
+    order.update!(printify_order_id: "pf-3")
+
+    @printify.status = "partially-fulfilled"
+    @printify.shipments = [ { "carrier" => "usps", "number" => "111", "url" => "https://track.example/111" } ]
+    Printify::Fulfillment.new(order).sync!
+    assert order.reload.in_production?
+
+    @printify.status = "fulfilled"
+    @printify.shipments << { "carrier" => "ups", "number" => "222", "url" => "https://track.example/222" }
+    Printify::Fulfillment.new(order).sync!
+    assert order.reload.shipped?
+    assert_equal [ "usps, ups", "111, 222", "https://track.example/111" ], [ order.carrier, order.tracking_number, order.tracking_url ]
+
+    @printify.shipments.first["delivered_at"] = Time.current.iso8601
+    Printify::Fulfillment.new(order).sync!
+    assert order.reload.shipped?, "one package still on its way"
+    @printify.shipments.last["delivered_at"] = Time.current.iso8601
+    Printify::Fulfillment.new(order).sync!
+    assert order.reload.delivered?
+  end
+
+  test "staff hear when Printify needs something" do
+    product = Printify::Import.new.call("pf-tee")
+    order = place_order(product.variant_for(%w[ Black S ]), status: "in_production")
+    order.update!(printify_order_id: "pf-4")
+
+    @printify.status = "payment-not-received"
+    2.times { Printify::Fulfillment.new(order).sync! }
+    assert_match "waiting for your payment", order.reload.fulfillment_error
+    assert_equal 1, order.events.where(action: "fulfillment_failed").count
   end
 
   private

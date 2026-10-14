@@ -1,8 +1,14 @@
 # A paid order's trip through Printify: its Printify items go there to be printed (and straight
-# to production, unless the owner reviews orders in Printify first), the order moves to "in
-# production", and once Printify ships it, the order is shipped with the tracking link and the
-# buyer gets the shipped email. Items not from Printify stay with staff, as before.
+# to production, unless the owner reviews orders in Printify first: the order then stays paid,
+# so it can still be cancelled, until Printify starts it), the order moves to "in production",
+# and once Printify has shipped all of it, the order is shipped with the tracking and the buyer
+# gets the shipped email. Cancelling or refunding the order cancels it in Printify while
+# Printify still allows it. Items not from Printify stay with staff, as before.
 class Printify::Fulfillment
+  # Printify's statuses for an order being made, and for one waiting on the owner.
+  PRINTING = %w[ sending-to-production in-production partially-fulfilled fulfilled ].freeze
+  STUCK = %w[ has-issues unfulfillable payment-not-received ].freeze
+
   def initialize(order, store = Store.current)
     @order, @store = order, store
   end
@@ -23,7 +29,11 @@ class Printify::Fulfillment
     return unless @order.paid? && @order.printify_order_id.blank? # the other submission got there first
 
     @order.update!(printify_order_id: id, fulfillment_error: nil)
-    @order.start_production!(message: "Printify #{id}")
+    if @store.printify_send_to_production?
+      @order.start_production!(message: "Printify #{id}")
+    else
+      @order.record "sent_to_printify", message: "Printify #{id}"
+    end
   rescue Order::InvalidTransition
     nil
   rescue PrintifyGateway::Error => error
@@ -32,20 +42,36 @@ class Printify::Fulfillment
   end
 
   # Asks Printify about the order (from the hourly check, or when Printify's webhook says it
-  # changed): ships it when Printify has a shipment, marks it delivered when the carrier delivered
-  # it, and tells staff when Printify cancelled it.
+  # changed): moves an order the owner approved in Printify to production, ships it once Printify
+  # shipped all of it (Printify splits orders between print providers, each with its own
+  # package), marks it delivered when every package arrived, and tells staff when Printify
+  # cancelled it or needs something from them.
   def sync!
-    return unless @order.printify_order_id.present? && (@order.in_production? || @order.shipped?) && @store.printify
+    return unless @order.printify_order_id.present? && (@order.paid? || @order.in_production? || @order.shipped?) && @store.printify
 
     printify_order = gateway.order(@store.printify_shop_id, @order.printify_order_id)
-    shipment = Array(printify_order["shipments"]).first
-    if shipment && @order.in_production?
-      @order.ship!(carrier: shipment["carrier"], tracking_number: shipment["number"], tracking_url: shipment["url"])
-    end
-    @order.mark_delivered! if shipment && shipment["delivered_at"].present? && @order.shipped?
-    cancelled_by_printify! if printify_order["status"] == "canceled"
+    status = printify_order["status"].to_s
+    shipments = Array(printify_order["shipments"])
+    @order.start_production!(message: "Printify") if @order.paid? && PRINTING.include?(status)
+    ship(shipments) if status == "fulfilled" && shipments.any? && @order.can_ship?
+    @order.mark_delivered! if @order.shipped? && shipments.any? && shipments.all? { |shipment| shipment["delivered_at"].present? }
+    cancelled_by_printify! if status == "canceled"
+    stuck!(status) if STUCK.include?(status)
   rescue PrintifyGateway::Error => error
     Rails.logger.warn "Couldn't check order #{@order.number} with Printify: #{error.message}"
+  end
+
+  # Cancels the order in Printify (when the shop cancels or refunds it before it shipped).
+  # Printify only allows it before printing starts; otherwise staff are told to sort it out there.
+  def cancel!
+    return unless @order.printify_order_id.present? && @order.shipped_at.nil? && @store.printify
+
+    gateway.cancel_order(@store.printify_shop_id, @order.printify_order_id)
+    @order.record "printify_cancelled", message: "Printify #{@order.printify_order_id}"
+  rescue PrintifyGateway::Error => error
+    message = I18n.t("orders.printify_not_cancelled", error: error.message)
+    @order.update!(fulfillment_error: message)
+    @order.record "fulfillment_failed", message:
   end
 
   private
@@ -74,11 +100,26 @@ class Printify::Fulfillment
     end
 
     def cancelled_by_printify!
-      return unless @order.in_production? && @order.fulfillment_error.blank?
+      return unless (@order.paid? || @order.in_production?) && @order.fulfillment_error.blank?
 
       message = I18n.t("orders.printify_cancelled")
       @order.update!(fulfillment_error: message)
       @order.record "fulfillment_failed", message:
+    end
+
+    def stuck!(status)
+      message = I18n.t("orders.printify_stuck.#{status}")
+      return if @order.fulfillment_error == message
+
+      @order.update!(fulfillment_error: message)
+      @order.record "fulfillment_failed", message:
+    end
+
+    # Every package's tracking: the first one's link, all of their numbers.
+    def ship(shipments)
+      @order.ship!(carrier: shipments.map { |shipment| shipment["carrier"] }.compact_blank.uniq.join(", "),
+        tracking_number: shipments.map { |shipment| shipment["number"] }.compact_blank.join(", "),
+        tracking_url: shipments.first["url"])
     end
 
     def gateway

@@ -45,6 +45,11 @@ class PrintifyGateway
     post("/shops/#{shop_id}/orders/#{order_id}/send_to_production.json", {})
   end
 
+  # Printify only cancels an order it hasn't started printing (on hold, or not paid yet).
+  def cancel_order(shop_id, order_id)
+    post("/shops/#{shop_id}/orders/#{order_id}/cancel.json", {})
+  end
+
   def order(shop_id, order_id)
     get("/shops/#{shop_id}/orders/#{order_id}.json")
   end

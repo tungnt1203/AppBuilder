@@ -294,6 +294,7 @@ en:
         printify:
           failed: This order didn't reach Printify.
           stopped: Printify stopped this order.
+          still_there: Printify still has this order.
           retry: Send to Printify again
           sent: Printify is making this order; it ships here with its tracking.
           open: Open in Printify
@@ -334,6 +335,8 @@ en:
           edited: Order details edited
           fulfillment_failed: Didn't reach Printify
           recovery_sent: Reminder sent to finish paying
+          sent_to_printify: Sent to Printify, waiting for your approval there
+          printify_cancelled: Cancelled in Printify
           partially_refunded: Partly refunded in Stripe
           restocked: Items put back in stock
         customer: Customer

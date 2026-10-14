@@ -165,6 +165,7 @@ class Order < ApplicationRecord
       restock
       discount&.release!
     end
+    Printify::Fulfillment.new(self).cancel!
     OrderMailer.cancelled(self).deliver_later if notify
   end
 
@@ -179,6 +180,7 @@ class Order < ApplicationRecord
       transition! :refunded, from: :can_refund?, by:, refunded_at: Time.current, refunded_cents: total_cents, message: reason
       restock unless shipped
     end
+    Printify::Fulfillment.new(self).cancel!
     OrderMailer.refunded(self).deliver_later
   end
 

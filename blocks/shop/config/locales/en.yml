@@ -200,6 +200,11 @@ en:
     stripe_not_connected: Card payments aren't available right now. Please contact the shop.
     payment_not_started: We couldn't open the payment page. Please try again in a moment.
     printify_cancelled: Printify cancelled it. Check why in Printify, then ship it another way or cancel and refund it here.
+    printify_not_cancelled: "Printify didn't cancel it (%{error}). It may be printing already: cancel it in Printify if you can, so you aren't charged for it."
+    printify_stuck:
+      has-issues: Printify has a problem with this order. Open it in Printify to see what it needs.
+      unfulfillable: Printify can't make this order. Open it in Printify to see why, then refund the buyer here.
+      payment-not-received: Printify is waiting for your payment for this order. Add funds or a card in Printify.
   admin:
     order_mailer:
       placed:

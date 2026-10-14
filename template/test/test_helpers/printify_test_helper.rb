@@ -2,13 +2,13 @@
 # FakePrintifyGateway with one t-shirt (Black and White, S and M; White M isn't made) and records
 # the orders the app sends.
 class FakePrintifyGateway
-  attr_reader :sent_to_production, :deleted_webhooks
+  attr_reader :sent_to_production, :deleted_webhooks, :cancelled
   attr_accessor :error, :shipments, :product_data, :shop_list, :status, :existing_webhooks, :fail_webhook_after, :existing_orders
 
   SHOP = { "id" => 4242, "title" => "Fake Printify shop", "sales_channel" => "custom_integration" }.freeze
 
   def initialize
-    @orders, @sent_to_production, @shipments, @shop_list, @webhooks, @deleted_webhooks = [], [], [], [ SHOP ], [], []
+    @orders, @sent_to_production, @shipments, @shop_list, @webhooks, @deleted_webhooks, @cancelled = [], [], [], [ SHOP ], [], [], []
     @product_data = {
       "id" => "pf-tee", "title" => "Sunset Tee", "description" => "<p>Soft cotton.</p><p>Printed to order.</p>",
       "options" => [
@@ -47,6 +47,7 @@ class FakePrintifyGateway
   def orders(shop_id = nil, page: 1) = shop_id ? fail_or({ "data" => Array(existing_orders), "last_page" => 1 }) : @orders
 
   def send_to_production(_shop_id, order_id) = fail_or(@sent_to_production << order_id)
+  def cancel_order(_shop_id, order_id) = fail_or(@cancelled << order_id)
   def order(_shop_id, id) = fail_or({ "id" => id, "status" => status || (shipments.any? ? "fulfilled" : "in-production"), "shipments" => shipments })
 
 

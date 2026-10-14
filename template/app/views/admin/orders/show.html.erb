@@ -33,7 +33,7 @@
   <div class="space-y-6">
     <% if @order.fulfillment_error.present? %>
       <%= alert tone: :danger do %>
-        <p class="font-medium"><%= @order.printify_order_id.present? ? t(".printify.stopped") : t(".printify.failed") %></p>
+        <p class="font-medium"><%= @order.printify_order_id.blank? ? t(".printify.failed") : t(@order.cancelled? || @order.refunded? ? ".printify.still_there" : ".printify.stopped") %></p>
         <p class="mt-1"><%= @order.fulfillment_error %></p>
         <% if @order.paid? %>
           <%= button_to t(".printify.retry"), admin_order_fulfillment_path(@order), class: "mt-3 #{button_classes(:secondary, size: :sm)}" %>
