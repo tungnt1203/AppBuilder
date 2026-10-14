@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     resource :checkout, only: %i[ new create ] do
       get :shipping
     end
+    resources :zip_codes, only: :show
     resources :orders, only: :show do
       resource :payment, only: :create, module: :orders
       resource :review, only: %i[ new create ], module: :orders

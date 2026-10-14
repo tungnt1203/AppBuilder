@@ -12,3 +12,5 @@ It runs inside an app made from `template/` (it uses the app's `ApplicationRecor
 An app builds its own screens on the core and adds to its models in
 `app/models/<model>/extension.rb` (see `Shop.extend_model`). Its views, mailer templates and
 translations override the engine's ones with the same name.
+
+US ZIP codes (`lib/shop/data/us_zip_codes.tsv`) are from [GeoNames](https://www.geonames.org/), licensed CC BY 4.0.

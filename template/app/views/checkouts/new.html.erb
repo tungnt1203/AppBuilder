@@ -17,7 +17,7 @@
       </fieldset>
 
       <% regions = Region.for(@checkout.shipping_country) %>
-      <fieldset class="space-y-4" data-controller="region" data-region-names-value="<%= Region::NAMES.to_json %>">
+      <fieldset class="space-y-4" data-controller="region" data-region-names-value="<%= Region::NAMES.to_json %>" data-region-lookup-url-value="<%= zip_code_path("ZIP") %>">
         <legend class="mb-4 text-lg font-semibold"><%= t(".shipping") %></legend>
         <div class="space-y-1.5">
           <%= form.label :shipping_country %>
@@ -28,7 +28,9 @@
         <%= form.field :shipping_address1, required: true, autocomplete: "address-line1" %>
         <%= form.field :shipping_address2, autocomplete: "address-line2" %>
         <div class="grid gap-4 sm:grid-cols-3">
-          <%= form.field :shipping_city, required: true, autocomplete: "address-level2" %>
+          <%= form.field :shipping_postal_code, autocomplete: "postal-code", required: regions.present?, inputmode: (@checkout.shipping_country == "US" ? "numeric" : nil),
+                data: { region_target: "postalCode", action: "input->region#lookup" } %>
+          <%= form.field :shipping_city, required: true, autocomplete: "address-level2", data: { region_target: "city" } %>
           <div class="space-y-1.5">
             <%= form.label :shipping_region %>
             <%= form.select :shipping_region, (regions || {}).map { |code, name| [ name, code ] }, { include_blank: t(".choose_region") },
@@ -36,7 +38,6 @@
             <%= form.text_field :shipping_region, autocomplete: "address-level1", hidden: regions.present?, disabled: regions.present?,
                   id: "checkout_shipping_region_text", data: { region_target: "input" } %>
           </div>
-          <%= form.field :shipping_postal_code, autocomplete: "postal-code", required: regions.present?, data: { region_target: "postalCode" } %>
         </div>
         <%= form.field :note, :text_area, rows: 2 %>
       </fieldset>
