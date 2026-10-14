@@ -78,4 +78,8 @@ Rails.application.configure do
 
   # The builder shows this app in an iframe from another port while it's being built.
   config.action_dispatch.default_headers.delete("X-Frame-Options")
+
+  # A tunnel (ngrok, Cloudflare) gives the preview a public https address, so Stripe and
+  # Printify can reach its webhooks while the owner tries them before going live.
+  config.hosts.push(".ngrok-free.app", ".ngrok-free.dev", ".ngrok.app", ".ngrok.io", ".trycloudflare.com")
 end

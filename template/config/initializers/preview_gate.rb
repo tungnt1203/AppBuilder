@@ -2,7 +2,7 @@
 # the builder lets in. The builder writes a secret to tmp/preview_secret and opens the
 # preview through /_preview/enter with a short-lived ticket signed with it; that sets a
 # cookie good for this preview. The builder's own checks and bin/look send the pass in
-# the X-Preview-Pass header or that cookie. Without tmp/preview_secret (the app run
+# the X-Preview-Pass header or that cookie. /up and the payment and print webhooks are open. Without tmp/preview_secret (the app run
 # outside the builder) it lets everyone in. Never runs in production. Don't change or
 # remove it.
 if Rails.env.development?
@@ -10,7 +10,9 @@ if Rails.env.development?
 
   class PreviewGate
     ENTER = "/_preview/enter"
-    OPEN = [ "/up" ].freeze
+    # Stripe's and Printify's webhooks check their own signatures, and must reach the preview
+    # through a tunnel while the owner tries payments and fulfillment.
+    OPEN = [ "/up", "/stripe/webhook", "/printify/webhook" ].freeze
     SECRET = Rails.root.join("tmp/preview_secret")
 
     def self.pass(secret)
