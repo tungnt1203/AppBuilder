@@ -55,7 +55,9 @@ class Printify::Fulfillment
     shipments = Array(printify_order["shipments"])
     record_cost(printify_order)
     @order.start_production!(message: "Printify") if @order.paid? && PRINTING.include?(status)
-    ship(shipments) if status == "fulfilled" && shipments.any? && @order.can_ship?
+    if status == "fulfilled" && shipments.any? && @order.can_ship?
+      own_items? ? printify_part_shipped(shipments) : ship(shipments)
+    end
     @order.mark_delivered! if @order.shipped? && shipments.any? && shipments.all? { |shipment| shipment["delivered_at"].present? }
     cancelled_by_printify! if status == "canceled"
     stuck!(status) if STUCK.include?(status)
@@ -130,6 +132,19 @@ class Printify::Fulfillment
 
       @order.update!(fulfillment_error: message)
       @order.record "fulfillment_failed", message:
+    end
+
+    # Items the shop sends itself, in the same order as Printify's.
+    def own_items?
+      printify_items.any? && @order.line_items.size > printify_items.size
+    end
+
+    # Printify sent its part of an order that has the shop's own items too: staff are told (once)
+    # with Printify's tracking, and the order ships when they send the rest.
+    def printify_part_shipped(shipments)
+      return if @order.events.exists?(action: "printify_shipped")
+
+      @order.record "printify_shipped", message: shipments.map { |shipment| [ shipment["carrier"], shipment["number"] ].compact_blank.join(" ") }.join(", ")
     end
 
     # Every package's tracking: the first one's link, all of their numbers.

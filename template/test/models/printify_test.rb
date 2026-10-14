@@ -227,6 +227,18 @@ class PrintifyTest < ActiveSupport::TestCase
     assert order.reload.delivered?
   end
 
+  test "an order with the shop's own items too waits for staff to send them" do
+    product = Printify::Import.new.call("pf-tee")
+    order = place_order(product.variant_for(%w[ Black S ]), status: "in_production")
+    order.line_items.create!(variant: variants(:mug), product_title: "Mug", unit_price_cents: 1200, quantity: 1)
+    order.update!(printify_order_id: "pf-5")
+    @printify.shipments = [ { "carrier" => "usps", "number" => "333", "url" => "https://track.example/333" } ]
+
+    2.times { Printify::Fulfillment.new(order).sync! }
+    assert order.reload.in_production?
+    assert_equal [ "usps 333" ], order.events.where(action: "printify_shipped").pluck(:message)
+  end
+
   test "staff hear when Printify needs something" do
     product = Printify::Import.new.call("pf-tee")
     order = place_order(product.variant_for(%w[ Black S ]), status: "in_production")
