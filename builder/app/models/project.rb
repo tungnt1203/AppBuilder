@@ -228,6 +228,19 @@ class Project < ApplicationRecord
     ProjectHistory.new(self)
   end
 
+  def blocks
+    ProjectBlocks.new(self)
+  end
+
+  # The owner asked for the latest blocks (see BlockUpdateJob).
+  def update_blocks
+    return false unless accepts_messages?
+
+    update!(status: :working, activity: "Updating the #{blocks.titles}")
+    BlockUpdateJob.perform_later(self)
+    true
+  end
+
   def code
     ProjectCode.new(self)
   end

@@ -1,0 +1,19 @@
+<%# A newer version of the app's blocks (the shop core…) is ready: the owner updates when it suits them. %>
+<% blocks = project.blocks %>
+<% if blocks.outdated? %>
+  <% changes = blocks.updates.values.flatten %>
+  <div class="activity" id="block-update">
+    <%= icon :download, size: 14 %>
+    <details class="min-w-0 flex-1">
+      <summary class="cursor-pointer truncate">A newer <%= blocks.titles %> is ready<%= " (#{pluralize(changes.size, "change")})" if changes.any? %></summary>
+      <% if changes.any? %>
+        <ul class="faint mt-1 list-disc space-y-0.5 pl-4 text-xs">
+          <% changes.first(10).each do |change| %><li><%= change %></li><% end %>
+        </ul>
+      <% end %>
+      <p class="faint mt-1 text-xs">Updating keeps what you built and adds a version you can go back from.</p>
+    </details>
+    <%= button_to "Update", project_block_update_path(project), class: "btn btn-ghost h-6 px-2 text-xs",
+          form: { data: { turbo_confirm: "Update the #{blocks.titles}? The preview restarts on it." } } %>
+  </div>
+<% end %>
