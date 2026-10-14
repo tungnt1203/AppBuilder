@@ -5,7 +5,7 @@ class ProjectBlocks
   # Shown to the owner, by block.
   TITLES = { "shop" => "shop core", "booking" => "booking core" }.freeze
 
-  def initialize(project, source = BlockSource.new)
+  def initialize(project, source = TemplateSource.new)
     @project, @source = project, source
   end
 

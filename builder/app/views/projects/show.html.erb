@@ -62,7 +62,7 @@
       <%# In the flow under the chat: as the message grows, the chat above gets shorter instead of hidden. %>
       <div class="composer-dock">
         <% if @project.accepts_messages? && @project.built? %>
-          <%= render "projects/block_update", project: @project %>
+          <%= render "projects/update", project: @project %>
         <% end %>
         <% if @project.setting_up? || @project.working? %>
           <div class="activity"

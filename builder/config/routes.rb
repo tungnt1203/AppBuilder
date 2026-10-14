@@ -10,7 +10,7 @@ Rails.application.routes.draw do
     resources :messages, only: :create, module: :projects
     resources :deployments, only: :create, module: :projects
     resources :restorations, only: :create, module: :projects
-    resource :block_update, only: :create, module: :projects
+    resource :update, only: :create, module: :projects
     resource :build, only: :create, module: :projects
     resource :stop, only: :create, module: :projects
     resource :preview, only: %i[ show create ], module: :projects

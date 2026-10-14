@@ -229,15 +229,29 @@ class Project < ApplicationRecord
   end
 
   def blocks
-    ProjectBlocks.new(self)
+    @blocks ||= ProjectBlocks.new(self)
   end
 
-  # The owner asked for the latest blocks (see BlockUpdateJob).
-  def update_blocks
+  def template
+    @template ||= ProjectTemplate.new(self)
+  end
+
+  # Whether a newer shop core (or other block) or new template changes are ready for the app.
+  def updatable?
+    blocks.outdated? || template.outdated?
+  end
+
+  # "shop core and new features": what an update brings, for the owner.
+  def update_title(block_names = blocks.updates.keys, template = self.template.outdated?)
+    [ *(blocks.titles(block_names).presence), *("new features" if template) ].to_sentence.presence || "app"
+  end
+
+  # The owner asked for the latest blocks and template (see ProjectUpdateJob).
+  def update_app
     return false unless accepts_messages?
 
-    update!(status: :working, activity: "Updating the #{blocks.titles}")
-    BlockUpdateJob.perform_later(self)
+    update!(status: :working, activity: "Updating the #{update_title}")
+    ProjectUpdateJob.perform_later(self)
     true
   end
 

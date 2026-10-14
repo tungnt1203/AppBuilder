@@ -1,0 +1,19 @@
+<%# A newer version of what the app is made of (the shop core, the template's features) is ready:
+    the owner updates when it suits them. %>
+<% if project.updatable? %>
+  <% changes = (project.template.changes + project.blocks.updates.values.flatten).uniq %>
+  <div class="activity" id="app-update">
+    <%= icon :download, size: 14 %>
+    <details class="min-w-0 flex-1">
+      <summary class="cursor-pointer truncate">Update ready: <%= project.update_title %><%= " (#{pluralize(changes.size, "change")})" if changes.any? %></summary>
+      <% if changes.any? %>
+        <ul class="faint mt-1 list-disc space-y-0.5 pl-4 text-xs">
+          <% changes.first(10).each do |change| %><li><%= change %></li><% end %>
+        </ul>
+      <% end %>
+      <p class="faint mt-1 text-xs">Updating keeps what you built and adds a version you can go back from. Where your app's pages were changed for you, the agent brings the new parts in.</p>
+    </details>
+    <%= button_to "Update", project_update_path(project), class: "btn btn-ghost h-6 px-2 text-xs",
+          form: { data: { turbo_confirm: "Update the #{project.update_title}? The preview restarts on it." } } %>
+  </div>
+<% end %>

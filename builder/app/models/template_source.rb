@@ -1,8 +1,9 @@
-# Where apps get their blocks (blocks/shop…): the template links each one from vendor/blocks/,
-# and an app gets a real copy of it, from the last commit of the repository the template is in
-# (see ProjectSetupJob and ProjectBlocks). A block's version is its git tree hash: the same files
-# have the same hash in the repository and in an app's own repository.
-class BlockSource
+# Where apps come from: the template's last commit, in the repository it's in (a folder of the
+# monorepo, or a repository of its own), and the blocks (blocks/shop…) it links from
+# vendor/blocks/, of which an app gets a real copy (see ProjectSetupJob). Apps are brought up to
+# later versions of both (ProjectBlocks, ProjectTemplate). A block's version is its git tree hash:
+# the same files have the same hash in the repository and in an app's own repository.
+class TemplateSource
   def initialize(template_path = Rails.configuration.x.template_path)
     @template_path = Pathname(template_path)
     @template = ProjectShell.new(@template_path)
@@ -48,6 +49,45 @@ class BlockSource
     commits.first(index).map(&:last) if index
   rescue ProjectShell::Error
     nil
+  end
+
+  # The repository's last commit: the template version new apps start from.
+  def head
+    repository.run("git", "rev-parse", "HEAD").strip
+  end
+
+  # The last commit made before time: the version an app made then started from.
+  def commit_before(time)
+    repository.run("git", "rev-list", "-1", "--before=#{time.iso8601}", "HEAD").strip.presence
+  end
+
+  # Template files changed between two commits, as [status, path in the app] with status "A"
+  # (added), "M" or "D" (deleted); a renamed file is one deleted and one added.
+  def changed_files(from, to = head)
+    repository.run("git", "diff", "--name-status", "--no-renames", from, to, "--", folder.presence || ".").lines.filter_map do |line|
+      status, path = line.chomp.split("\t", 2)
+      [ status[0], path.delete_prefix(folder) ] if path
+    end
+  end
+
+  # A template file's bytes at a commit, nil when it isn't there.
+  def file(commit, path)
+    output, found = repository.capture("git", "cat-file", "blob", "#{commit}:#{folder}#{path}")
+    output.b if found
+  end
+
+  def executable?(commit, path)
+    repository.run("git", "ls-tree", commit, "--", "#{folder}#{path}").start_with?("100755")
+  end
+
+  # What changed in one template file between two commits, as a diff of the template's paths.
+  def diff(from, to, path)
+    repository.run("git", "diff", "--no-renames", from, to, "--", "#{folder}#{path}")
+  end
+
+  # The subjects of the commits that changed the template between two commits, newest first.
+  def subjects(from, to = head, limit: 50)
+    repository.run("git", "log", "--format=%s", "-n", limit.to_s, "#{from}..#{to}", "--", folder.presence || ".").lines.map(&:chomp)
   end
 
   # The repository's root: git archive only sees paths from there.
