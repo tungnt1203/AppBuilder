@@ -46,6 +46,8 @@ class ProjectUpdateJob < ApplicationJob
       end
       lines << "These files were taken from the template as they are (the app hadn't changed them): #{result.updated.first(40).join(", ")}." if result.updated.any?
       lines << "Read CLAUDE.md again: it may describe new built-in parts." if result.updated.include?("CLAUDE.md")
+      lines << "Updating changes the app's code, never its data: don't delete or reset records in its database " \
+        "(the owner's products, orders and settings are there), even when the template now seeds things differently."
       lines.join("\n")
     end
 

@@ -204,6 +204,11 @@ files build on it:
   mockups they attach), seed those in `db/seeds.rb`, idempotently; otherwise point them to the
   Printify import in your reply. Design the product grid and product page so they work once
   products arrive (the tests have products to check them with).
+- **Never delete the app's data** (`destroy_all`, `delete_all`, `db:reset`, `db:seed:replant`, a
+  migration that removes rows): the development database holds the owner's real products,
+  imported from Printify or added in /admin, and their orders, and you can't tell them from
+  samples by looking. Change `db/seeds.rb` for new installs only; samples an older version
+  seeded stay until the owner removes them in /admin (say so in your reply).
 
 ### Selling from ads (keep these when you redesign)
 
