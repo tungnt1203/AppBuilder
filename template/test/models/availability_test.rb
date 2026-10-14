@@ -62,4 +62,27 @@ class AvailabilityTest < ActiveSupport::TestCase
     assert_equal [ staff_members(:mai) ], Availability.new(@haircut, @day, staff_member: staff_members(:mai)).staff_free_at(bookable_time(11, 10))
     assert_empty Availability.new(@haircut, @day, staff_member: staff_members(:mai)).staff_free_at(bookable_time(16, 10))
   end
+
+  test "hours past midnight give the evening's times and the next morning's, and a service can cross midnight" do
+    mai = staff_members(:mai)
+    mai.working_hours.where(weekday: @day.wday).update_all(opens_at: 18 * 60, closes_at: 26 * 60) # 18:00 to 2:00
+    mai.reload
+    only_mai = ->(date) { Availability.new(@haircut, date, staff_member: mai).slots.map { |slot| slot.starts_at.strftime("%H:%M") } }
+
+    evening = only_mai.(@day)
+    assert_equal "18:00", evening.first
+    assert_equal "23:30", evening.last, "the 23:30 haircut ends at 0:30, within her hours"
+
+    morning = only_mai.(@day + 1)
+    assert_includes morning, "00:00"
+    assert_includes morning, "01:00"
+    assert_not_includes morning, "01:30", "it would end after 2:00"
+
+    late = Availability.new(@haircut, @day, staff_member: mai).staff_free_at(@day.in_time_zone.change(hour: 23, min: 30))
+    assert_equal [ mai ], late
+    Appointment.create!(service: @haircut, staff_member: mai, starts_at: @day.in_time_zone.change(hour: 23, min: 30), ends_at: (@day + 1).in_time_zone.change(hour: 0, min: 30),
+      service_name: "Haircut", price_cents: 4000, currency: "USD", name: "Ana", email: "ana@example.com")
+    assert_not_includes only_mai.(@day + 1), "00:00", "taken by the haircut that started before midnight"
+  end
+
 end

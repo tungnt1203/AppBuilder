@@ -159,7 +159,7 @@ en:
       form:
         bio_hint: Shown to customers if the site lists the team.
         hours: Weekly hours
-        hours_hint: Like 9:00 and 17:30. Leave a day empty when they don't work.
+        hours_hint: Like 9:00 and 17:30, or 18:00 and 2:00 for hours that end after midnight. Leave a day empty when they don't work.
         day_off: "Off"
         from: "%{day}, from"
         until: "%{day}, until"
