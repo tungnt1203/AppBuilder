@@ -4,7 +4,8 @@
   <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
 
   <%= form_with model: @checkout, url: checkout_path, scope: :checkout, class: "mt-8 grid gap-10 md:grid-cols-[1fr_22rem]",
-        data: { turbo: false, controller: "leave-frame" } do |form| %>
+        data: { turbo: false, controller: "leave-frame checkout-totals", checkout_totals_url_value: shipping_checkout_path,
+                action: "change->checkout-totals#refresh" } do |form| %>
     <div class="space-y-8">
       <%= form.errors %>
 
@@ -81,18 +82,7 @@
           </li>
         <% end %>
       </ul>
-      <dl class="space-y-2 border-t border-line pt-4 text-sm">
-        <div class="flex justify-between"><dt class="text-muted"><%= t(".subtotal") %></dt><dd><%= money(@checkout.subtotal_cents) %></dd></div>
-        <% if @checkout.discount_cents.positive? %>
-          <div class="flex justify-between"><dt class="text-muted"><%= t(".discount", code: @checkout.discount.code) %></dt><dd>-<%= money(@checkout.discount_cents) %></dd></div>
-        <% end %>
-        <div class="flex justify-between"><dt class="text-muted"><%= t(".shipping_cost") %></dt><dd><%= @checkout.shipping_cents.zero? ? t(".free") : money(@checkout.shipping_cents) %></dd></div>
-        <div class="flex justify-between border-t border-line pt-2 text-base font-semibold"><dt><%= t(".total") %></dt><dd><%= money(@checkout.total_cents) %></dd></div>
-        <% if Store.current.stripe_tax? && @checkout.payment_method == "stripe" %>
-          <p class="text-xs text-muted"><%= t(".tax_at_payment") %></p>
-        <% end %>
-      </dl>
-      <%= form.submit t(@checkout.payment_method == "stripe" && @checkout.payment_methods.one? ? ".pay" : ".place_order", total: money(@checkout.total_cents)), class: "w-full py-3 text-base" %>
+      <%= render "checkouts/totals", checkout: @checkout %>
       <ul class="space-y-1.5 text-xs text-muted">
         <% if @checkout.payment_methods.include?("stripe") %>
           <li class="flex items-center gap-1.5"><%= icon "lock", size: 14 %> <%= t(".secure") %></li>

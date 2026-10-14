@@ -10,7 +10,7 @@ class StripeCheckoutTest < ActionDispatch::IntegrationTest
     post cart_items_path, params: { variant_id: variants(:mug).id }
     get new_checkout_path
     assert_select "input[type=radio][name='checkout[payment_method]']", 2
-    assert_select "form[data-turbo=false][data-controller=leave-frame]"
+    assert_select "form[data-turbo=false][data-controller~=leave-frame]"
 
     post checkout_path, params: { checkout: ADDRESS.merge(payment_method: "stripe") }
 

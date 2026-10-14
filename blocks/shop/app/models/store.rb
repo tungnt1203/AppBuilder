@@ -51,10 +51,13 @@ class Store < ApplicationRecord
   # Flat-rate shipping: one price for the first item, another for each one after it, free above
   # the threshold.
   def shipping_cents_for(item_count:, subtotal_cents:)
-    return 0 if item_count.zero?
-    return 0 if free_shipping_threshold_cents && subtotal_cents >= free_shipping_threshold_cents
+    return 0 if item_count.zero? || free_shipping_for?(subtotal_cents)
 
     shipping_first_item_cents + shipping_additional_item_cents * (item_count - 1)
+  end
+
+  def free_shipping_for?(subtotal_cents)
+    free_shipping_threshold_cents.present? && subtotal_cents >= free_shipping_threshold_cents
   end
 
   # When an order placed now arrives, counting business days: [first, last] dates, or nil when

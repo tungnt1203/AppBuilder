@@ -183,7 +183,9 @@ files build on it:
   prices, costs and a mockup per color at /admin/printify/products, and paid orders go to Printify
   by themselves, move to In production, and to Shipped with Printify's tracking (the buyer gets the
   shipped email) once every package has, then Delivered. Cancelling or refunding an order cancels it in
-  Printify while Printify still allows it. Printify's webhooks (`/printify/webhook`, registered by
+  Printify while Printify still allows it. Checkout charges Printify's items the shipping Printify quotes for the buyer's address
+  (`Printify::ShippingQuote`; the totals reload as the address is filled in), so keep the
+  `checkouts/totals` partial in the checkout page. Printify's webhooks (`/printify/webhook`, registered by
   themselves on a public https address) bring this right away, the hourly check otherwise. Other
   products are fulfilled by staff by hand, as before. Don't write other
   print-on-demand or fulfillment API code; when the owner asks about Printful or Gelato, say

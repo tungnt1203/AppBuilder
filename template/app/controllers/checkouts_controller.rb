@@ -26,6 +26,14 @@ class CheckoutsController < ApplicationController
     end
   end
 
+  # The totals again for the address being filled in (Printify's shipping depends on it).
+  def shipping
+    checkout = Checkout.new(cart: current_cart, **params.permit(*SHIPPING_FIELDS).to_h.symbolize_keys)
+    render partial: "checkouts/totals", locals: { checkout: }
+  end
+
+  SHIPPING_FIELDS = %i[ shipping_country shipping_region shipping_postal_code payment_method ].freeze
+
   private
     def require_items
       redirect_to cart_path, alert: t("checkouts.empty") if current_cart.nil? || current_cart.empty?

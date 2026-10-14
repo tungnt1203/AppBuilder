@@ -3,6 +3,8 @@
 # the orders the app sends.
 class FakePrintifyGateway
   attr_reader :sent_to_production, :deleted_webhooks, :cancelled
+  attr_reader :shipping_requests
+  attr_accessor :shipping_cost
   attr_accessor :error, :shipments, :product_data, :shop_list, :status, :existing_webhooks, :fail_webhook_after, :existing_orders
 
   SHOP = { "id" => 4242, "title" => "Fake Printify shop", "sales_channel" => "custom_integration" }.freeze
@@ -48,6 +50,12 @@ class FakePrintifyGateway
 
   def send_to_production(_shop_id, order_id) = fail_or(@sent_to_production << order_id)
   def cancel_order(_shop_id, order_id) = fail_or(@cancelled << order_id)
+
+  def shipping_costs(_shop_id, line_items:, address_to:)
+    fail_or(nil)
+    (@shipping_requests ||= []) << { line_items:, address_to: }
+    { "standard" => shipping_cost || 475, "express" => 1299 }
+  end
   def order(_shop_id, id) = fail_or({ "id" => id, "status" => status || (shipments.any? ? "fulfilled" : "in-production"), "shipments" => shipments })
 
 

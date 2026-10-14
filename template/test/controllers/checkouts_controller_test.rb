@@ -61,4 +61,21 @@ class CheckoutsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type=submit][value=?]", "Pay $29.00"
     assert_select "li", /never see your card/
   end
+
+  test "Printify's shipping shows once the address is in, and the button says what they pay" do
+    connect_fake_stripe(manual: false)
+    printify = connect_fake_printify
+    printify.shipping_cost = 650
+    variants(:tee_black_s).update!(printify_variant_id: 1001)
+    variants(:tee_black_s).product.update!(printify_product_id: "pf-tee")
+    post cart_items_path, params: { variant_id: variants(:tee_black_s).id }
+
+    get new_checkout_path
+    assert_select "turbo-frame#checkout_totals", /Enter your address/
+    assert_select "input[type=submit][value=?]", "Continue to payment"
+
+    get shipping_checkout_path(shipping_country: "US", shipping_region: "TX", shipping_postal_code: "78701", payment_method: "stripe")
+    assert_select "turbo-frame#checkout_totals dd", "$6.50"
+    assert_select "input[type=submit][value=?]", "Pay $30.50"
+  end
 end

@@ -71,9 +71,39 @@ class CheckoutTest < ActiveSupport::TestCase
 
     connect_fake_printify
     variants(:mug).update!(printify_variant_id: 12)
+    variants(:mug).product.update!(printify_product_id: "pf-mug")
     placing = checkout(phone: "")
     assert placing.phone_required?
     assert placing.tap(&:valid?).errors.added?(:phone, :blank)
+  end
+
+  test "Printify's items ship at what Printify charges for the address, the rest at the store's rates" do
+    printify = connect_fake_printify
+    variants(:mug).update!(printify_variant_id: 12)
+    variants(:mug).product.update!(printify_product_id: "pf-mug")
+    printify.shipping_cost = 799
+    Store.current.update!(free_shipping_threshold: nil)
+
+    assert_not checkout(shipping_postal_code: "").shipping_known?, "not before the address is complete"
+
+    placing = checkout(phone: "+1 512 555 0100")
+    assert placing.shipping_known?
+    flat = Store.current.shipping_cents_for(item_count: 2, subtotal_cents: 0) # the two tees
+    assert_equal 799 + flat, placing.shipping_cents
+    assert_equal [ { product_id: "pf-mug", variant_id: 12, quantity: 1 } ], printify.shipping_requests.last[:line_items]
+    assert_equal({ country: "US", region: "TX", zip: "78701" }, printify.shipping_requests.last[:address_to])
+
+    Store.current.update!(free_shipping_threshold: 1)
+    assert_equal 0, checkout.shipping_cents, "free shipping stays free: the shop pays Printify"
+    Store.current.update!(free_shipping_threshold: nil)
+
+    order = placing.place
+    assert_equal 799 + flat, order.shipping_cents
+
+    @cart = Cart.create!.tap { |cart| cart.add(variants(:mug)) }
+    printify.error = "Printify is down"
+    assert_equal Store.current.shipping_cents_for(item_count: 1, subtotal_cents: 0), checkout(shipping_postal_code: "78702").shipping_cents,
+      "the store's rates when Printify can't quote"
   end
 
   test "an empty cart can't be checked out" do

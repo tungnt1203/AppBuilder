@@ -44,7 +44,13 @@ class Checkout
 
   # Printify (and its carriers) won't take an order without the buyer's phone.
   def phone_required?
-    @store.printify_connected? && items.any? { |item| item.variant.printify_variant_id.present? }
+    printify_items.any?
+  end
+
+  def printify_items
+    return [] unless @store.printify_connected?
+
+    items.select { |item| item.variant.printify_variant_id.present? && item.product.printify_product_id.present? }
   end
 
   def self.human_attribute_name(attribute, options = {})
@@ -68,9 +74,20 @@ class Checkout
     discount ? discount.amount_for(subtotal_cents) : 0
   end
 
+  # Printify's items ship at what Printify charges for this address (Printify::ShippingQuote),
+  # the rest at the store's rates; free over the store's threshold or with a free-shipping code,
+  # the shop paying Printify. Until the address is complete enough to quote, shipping isn't known
+  # (#shipping_known?) and this counts the store's rates; so does an order Printify couldn't
+  # quote, rather than turning the buyer away.
   def shipping_cents
-    return 0 if discount&.free_shipping?
-    @store.shipping_cents_for(item_count: items.sum(&:quantity), subtotal_cents:)
+    return 0 if items.empty? || discount&.free_shipping? || @store.free_shipping_for?(subtotal_cents)
+    return flat_shipping_cents(items) if printify_shipping_cents.nil?
+
+    printify_shipping_cents + flat_shipping_cents(items - printify_items)
+  end
+
+  def shipping_known?
+    printify_items.empty? || discount&.free_shipping? || @store.free_shipping_for?(subtotal_cents) || printify_shipping_cents.present?
   end
 
   def total_cents
@@ -155,6 +172,17 @@ class Checkout
         errors.add(:shipping_region, :not_a_region)
       end
       errors.add(:shipping_postal_code, :blank) if shipping_postal_code.blank?
+    end
+
+    def printify_shipping_cents
+      return @printify_shipping_cents if defined?(@printify_shipping_cents)
+
+      @printify_shipping_cents = Printify::ShippingQuote.new(@store).cents(printify_items.map { |item| [ item.variant, item.quantity ] },
+        country: shipping_country, region: shipping_region, postal_code: shipping_postal_code)
+    end
+
+    def flat_shipping_cents(items)
+      @store.shipping_cents_for(item_count: items.sum(&:quantity), subtotal_cents: 0)
     end
 
     def ships_to_country

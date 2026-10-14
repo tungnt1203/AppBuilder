@@ -1,0 +1,32 @@
+<%# The checkout's totals and its button, reloaded (checkouts#shipping) as the buyer fills in the
+    address, since Printify's shipping depends on it. %>
+<%= turbo_frame_tag "checkout_totals", class: "block space-y-4", data: { checkout_totals_target: "frame" } do %>
+  <dl class="space-y-2 border-t border-line pt-4 text-sm">
+    <div class="flex justify-between"><dt class="text-muted"><%= t("checkouts.new.subtotal") %></dt><dd><%= money(checkout.subtotal_cents) %></dd></div>
+    <% if checkout.discount_cents.positive? %>
+      <div class="flex justify-between"><dt class="text-muted"><%= t("checkouts.new.discount", code: checkout.discount.code) %></dt><dd>-<%= money(checkout.discount_cents) %></dd></div>
+    <% end %>
+    <div class="flex justify-between gap-4">
+      <dt class="text-muted"><%= t("checkouts.new.shipping_cost") %></dt>
+      <dd class="text-right">
+        <% if !checkout.shipping_known? %>
+          <span class="text-muted"><%= t("checkouts.new.shipping_from_address") %></span>
+        <% elsif checkout.shipping_cents.zero? %>
+          <%= t("checkouts.new.free") %>
+        <% else %>
+          <%= money(checkout.shipping_cents) %>
+        <% end %>
+      </dd>
+    </div>
+    <div class="flex justify-between border-t border-line pt-2 text-base font-semibold">
+      <dt><%= t("checkouts.new.total") %></dt>
+      <dd><%= checkout.shipping_known? ? money(checkout.total_cents) : t("checkouts.new.total_before_shipping", total: money(checkout.total_cents - checkout.shipping_cents)) %></dd>
+    </div>
+    <% if Store.current.stripe_tax? && checkout.payment_method == "stripe" %>
+      <p class="text-xs text-muted"><%= t("checkouts.new.tax_at_payment") %></p>
+    <% end %>
+  </dl>
+  <% paying_now = checkout.payment_method == "stripe" && checkout.payment_methods.one? %>
+  <%= submit_tag t(paying_now ? (checkout.shipping_known? ? "checkouts.new.pay" : "checkouts.new.continue_to_payment") : "checkouts.new.place_order", total: money(checkout.total_cents)),
+        name: nil, class: "#{button_classes(:primary)} w-full py-3 text-base" %>
+<% end %>

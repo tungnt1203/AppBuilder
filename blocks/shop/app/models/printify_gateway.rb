@@ -8,6 +8,8 @@ class PrintifyGateway
 
   BASE = "https://api.printify.com/v1".freeze
   SHIPPING_METHODS = { 1 => "Standard", 2 => "Priority", 3 => "Printify Express", 4 => "Economy" }.freeze
+  # Each method's name in Printify's shipping costs (#shipping_costs).
+  SHIPPING_COST_KEYS = { 1 => "standard", 2 => "priority", 3 => "printify_express", 4 => "economy" }.freeze
 
   def self.build(token)
     new(token)
@@ -43,6 +45,12 @@ class PrintifyGateway
 
   def send_to_production(shop_id, order_id)
     post("/shops/#{shop_id}/orders/#{order_id}/send_to_production.json", {})
+  end
+
+  # What Printify charges the shop to ship these items there, in cents, by shipping method:
+  # { "standard" => 475, "express" => 1299, … } (methods it can't use there are left out).
+  def shipping_costs(shop_id, line_items:, address_to:)
+    post("/shops/#{shop_id}/orders/shipping.json", { line_items:, address_to: })
   end
 
   # Printify only cancels an order it hasn't started printing (on hold, or not paid yet).

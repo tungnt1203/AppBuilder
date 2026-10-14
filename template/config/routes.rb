@@ -10,7 +10,9 @@ Rails.application.routes.draw do
       resource :discount, only: %i[ create destroy ], module: :carts
     end
     resources :cart_items, only: %i[ create update destroy ]
-    resource :checkout, only: %i[ new create ]
+    resource :checkout, only: %i[ new create ] do
+      get :shipping
+    end
     resources :orders, only: :show do
       resource :payment, only: :create, module: :orders
       resource :review, only: %i[ new create ], module: :orders

@@ -165,6 +165,9 @@ en:
       summary: Order summary
       subtotal: Subtotal
       shipping_cost: Shipping
+      shipping_from_address: Enter your address
+      total_before_shipping: "%{total} + shipping"
+      continue_to_payment: Continue to payment
       free: Free
       total: Total
       place_order: Place order
