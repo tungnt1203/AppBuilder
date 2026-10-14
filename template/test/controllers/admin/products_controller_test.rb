@@ -9,6 +9,28 @@ class Admin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_admin_session_path
   end
 
+  test "an admin adds demo products to an empty shop, sees they're there, and removes them" do
+    sign_in_as users(:owner)
+    Product.destroy_all
+
+    get admin_products_path
+    assert_select "button", "Add demo products"
+
+    post admin_demo_products_path
+    assert_redirected_to admin_products_path
+    follow_redirect!
+    assert_select "[role=status]", /demo products, and visitors see them/
+    assert_select "button", "Remove demo products"
+
+    delete admin_demo_products_path
+    assert_equal 0, Product.count
+  end
+
+  test "staff can't add or remove demo products" do
+    post admin_demo_products_path
+    assert_not DemoCatalog.present?
+  end
+
   test "lists, filters and searches products" do
     get admin_products_path
     assert_select "a[href=?]", edit_admin_product_path(products(:hoodie))

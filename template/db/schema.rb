@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_210000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -134,6 +134,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_200000) do
     t.integer "position", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "demo", default: false, null: false
     t.index ["slug"], name: "index_collections_on_slug", unique: true
   end
 
@@ -285,6 +286,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_200000) do
     t.json "option_images", default: {}, null: false
     t.string "printify_product_id"
     t.json "option_colors", default: {}, null: false
+    t.boolean "demo", default: false, null: false
     t.index ["printify_product_id"], name: "index_products_on_printify_product_id", unique: true
     t.index ["slug"], name: "index_products_on_slug", unique: true
     t.index ["status", "published_at"], name: "index_products_on_status_and_published_at"

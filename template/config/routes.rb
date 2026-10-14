@@ -47,6 +47,7 @@ Rails.application.routes.draw do
       resources :products do
         resources :images, only: :destroy, module: :products
       end
+      resource :demo_products, only: %i[ create destroy ]
       resources :collections
       resources :discounts, except: :show
       resources :product_reviews, only: %i[ index update ], path: "reviews"

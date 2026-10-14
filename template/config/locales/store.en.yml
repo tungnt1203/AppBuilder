@@ -11,7 +11,7 @@ en:
       archived: Archived
     coming_soon:
       visitors: Our first products are on their way. Check back soon.
-      owner: "Only you see this, in the preview: your products aren't in the shop yet. In /admin, connect Printify (Settings → Printify), then Products → Import from Printify. Or describe your products in the chat."
+      owner: "Only you see this, in the preview: your products aren't in the shop yet. In /admin, connect Printify (Settings → Printify), then Products → Import from Printify, or describe them in the chat. To show the shop first, add demo products in /admin → Products."
     product:
       sold_out: Sold out
       unavailable: Not available
@@ -399,6 +399,15 @@ en:
       cancellations:
         create:
           notice: Order %{number} was cancelled.
+      demo_products:
+        create:
+          notice:
+            one: 1 demo product is in the shop.
+            other: "%{count} demo products are in the shop."
+        destroy:
+          notice:
+            one: Removed 1 demo product.
+            other: Removed %{count} demo products.
       restocks:
         create:
           notice: The items of order %{number} are back in stock.
@@ -430,6 +439,13 @@ en:
           other: "%{count} variants"
         empty_title: No products yet
         empty_description: Add what you sell, with its photos, options and prices.
+        demo:
+          add: Add demo products
+          add_hint: Six sample products with mockups, to show the shop or try buying before yours are in. You remove them with one click.
+          present: Your shop has demo products, and visitors see them. Remove them before you start selling.
+          remove: Remove demo products
+          confirm_remove: Remove the demo products and their collections? Your own products stay.
+          badge: Demo
         no_results: No products match.
       new:
         title: Add product

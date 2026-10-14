@@ -5,6 +5,18 @@
   <%= link_to t(".new"), new_admin_product_path, class: button_classes %>
 <% end %>
 
+<% if DemoCatalog.present? %>
+  <%= alert tone: :warning, class: "mb-6" do %>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <p><%= t(".demo.present") %></p>
+      <% if Current.user.administrator? %>
+        <%= button_to t(".demo.remove"), admin_demo_products_path, method: :delete, class: button_classes(:secondary, size: :sm),
+              form: { data: { turbo_confirm: t(".demo.confirm_remove") } } %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+
 <%= tabs do %>
   <%= tab_to t(".all"), admin_products_path(q: params[:q].presence) %>
   <% Product.statuses.each_key do |status| %>
@@ -32,6 +44,7 @@
               <span class="block truncate text-xs text-muted"><%= t(".variants", count: product.variants.size) %></span>
             </span>
             <span class="hidden text-sm text-ink sm:block"><%= price_range(product) %></span>
+            <% if product.demo? %><%= badge t(".demo.badge"), tone: :yellow %><% end %>
             <span class="w-20 text-right"><%= product_status_badge product %></span>
           <% end %>
         </li>
@@ -43,6 +56,17 @@
   <%= empty_state t(".no_results") %>
 <% else %>
   <%= empty_state t(".empty_title"), t(".empty_description") do %>
-    <%= link_to t(".new"), new_admin_product_path, class: button_classes %>
+    <div class="flex flex-wrap justify-center gap-2">
+      <% if Store.current.printify_connected? %>
+        <%= link_to t(".import_printify"), admin_printify_imports_path, class: button_classes %>
+      <% end %>
+      <%= link_to t(".new"), new_admin_product_path, class: button_classes(Store.current.printify_connected? ? :secondary : :primary) %>
+      <% if Current.user.administrator? %>
+        <%= button_to t(".demo.add"), admin_demo_products_path, class: button_classes(:secondary) %>
+      <% end %>
+    </div>
+    <% if Current.user.administrator? %>
+      <p class="mt-3 text-xs text-muted"><%= t(".demo.add_hint") %></p>
+    <% end %>
   <% end %>
 <% end %>

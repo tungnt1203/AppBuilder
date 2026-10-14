@@ -199,8 +199,10 @@ files build on it:
   for the preview: the section stays hidden until real buyers write some.
 - **No sample products**: a new shop has none. The home page and /products show that products
   are coming (`products/_coming_soon`, keep it when you redesign), and in the preview it tells
-  the owner how to add theirs: import from Printify in /admin. Don't invent products, prices or
-  photos for the preview. When the owner describes their products in the chat (with photos or
+  the owner how to add theirs: import from Printify in /admin, or "Add demo products" there
+  (`DemoCatalog`: six sample products marked `demo`, to show the shop before theirs are in, removed
+  with one click). Only the owner adds or removes demo products; don't, unless they ask. Don't
+  invent products, prices or photos for the preview. When the owner describes their products in the chat (with photos or
   mockups they attach), seed those in `db/seeds.rb`, idempotently; otherwise point them to the
   Printify import in your reply. Design the product grid and product page so they work once
   products arrive (the tests have products to check them with).
