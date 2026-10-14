@@ -84,5 +84,4 @@ class AvailabilityTest < ActiveSupport::TestCase
       service_name: "Haircut", price_cents: 4000, currency: "USD", name: "Ana", email: "ana@example.com")
     assert_not_includes only_mai.(@day + 1), "00:00", "taken by the haircut that started before midnight"
   end
-
 end
