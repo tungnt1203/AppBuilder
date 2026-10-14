@@ -86,8 +86,10 @@ class Appointment < ApplicationRecord
       errors.add(:ends_at, :before_start) if starts_at && ends_at && ends_at <= starts_at
     end
 
-    # Two bookings for the same staff member at the same time: the second one fails. Runs inside
-    # the booking's transaction, which SQLite gives to one writer at a time.
+    # Two bookings for the same staff member at the same time: the second one fails. It runs
+    # inside the save's transaction, which Rails begins IMMEDIATE on SQLite: the write lock is
+    # taken before this check reads, so a second booking waits and then sees the first
+    # (test/models/booking_race_test.rb). Don't make transactions DEFERRED.
     def staff_member_is_free
       return unless staff_member_id && starts_at && ends_at
 

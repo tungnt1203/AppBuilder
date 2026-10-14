@@ -41,7 +41,9 @@ class Booking
     @staff_member ||= StaffMember.active.find_by(id: staff_member_id) if staff_member_id
   end
 
-  # Books the appointment. Returns it, or nil with errors on the booking.
+  # Books the appointment. Returns it, or nil with errors on the booking. The free times are read
+  # inside the transaction, which holds SQLite's write lock from its start (see
+  # Appointment#staff_member_is_free), so two visitors can't both get the same time.
   def place
     ActiveRecord::Base.transaction do
       next unless valid?
