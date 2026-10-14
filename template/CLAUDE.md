@@ -140,7 +140,8 @@ files build on it:
   `cancelled`, `refunded`) only with its methods (`mark_paid!`, `start_production!`, `ship!`,
   `mark_delivered!`, `cancel!`, `refund!`), which check the step is allowed, record an `OrderEvent`
   in the timeline and send the buyer's emails (`OrderMailer`: confirmation, shipped, cancelled,
-  refunded). Never set `status` directly. Buyers
+  refunded). Cancelling a paid card order refunds it in Stripe; refunds put unshipped items back
+  in stock, and `return_to_stock!` puts shipped ones back when they return. Never set `status` directly. Buyers
   reach an order by its token (`order_path(order)`); staff at `/admin/orders`.
 - **Money** is integer cents in `*_cents` columns, edited as decimals through `money_attribute`
   (`price` / `price=`), and shown with `money(cents)` and `price_range(product)` (`MoneyHelper`) in

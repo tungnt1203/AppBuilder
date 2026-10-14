@@ -301,6 +301,11 @@ en:
         more: More
         cancel: Cancel order
         confirm_cancel: Cancel order %{number}?
+        cancel_and_refund: Cancel and refund
+        confirm_cancel_and_refund: Cancel order %{number} and refund %{total} to the buyer's card? Stripe sends the money back right away, and the items go back in stock.
+        return_to_stock: Put items back in stock
+        confirm_return_to_stock: Did the items of order %{number} come back? They go back in stock.
+        refunded: Refunded
         refund: Mark as refunded
         confirm_refund: Mark order %{number} as refunded? Refund the money with your payment provider too.
         sku: SKU %{sku}
@@ -327,6 +332,8 @@ en:
           edited: Order details edited
           fulfillment_failed: Didn't reach Printify
           recovery_sent: Reminder sent to finish paying
+          partially_refunded: Partly refunded in Stripe
+          restocked: Items put back in stock
         customer: Customer
         ship_to: Shipping to
         buyer_note: Note from the buyer
@@ -365,6 +372,9 @@ en:
       cancellations:
         create:
           notice: Order %{number} was cancelled.
+      restocks:
+        create:
+          notice: The items of order %{number} are back in stock.
       refunds:
         create:
           notice: Order %{number} is marked as refunded.

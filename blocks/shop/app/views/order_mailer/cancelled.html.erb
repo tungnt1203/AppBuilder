@@ -1,5 +1,5 @@
 <h1><%= t(".heading", number: @order.name) %></h1>
-<p><%= t(".intro", total: money(@order.total_cents, @order.currency)) %></p>
+<p><%= t(@order.refunded_cents.positive? ? ".intro_refunded" : ".intro", total: money(@order.refunded_cents.positive? ? @order.refunded_cents : @order.total_cents, @order.currency)) %></p>
 
 <%= render "order_mailer/summary", order: @order %>
 

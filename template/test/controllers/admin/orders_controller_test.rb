@@ -72,6 +72,28 @@ class Admin::OrdersControllerTest < ActionDispatch::IntegrationTest
     assert orders(:shipped).reload.refunded?
   end
 
+  test "a paid card order is cancelled with its refund, and a refunded one's items go back in stock" do
+    gateway = connect_fake_stripe
+    orders(:paid).update!(payment_method: "stripe", payment_reference: "pi_4")
+    get admin_order_path(orders(:paid))
+    assert_select "button", text: "Cancel and refund"
+
+    post admin_order_cancellation_path(orders(:paid))
+    assert orders(:paid).reload.cancelled?
+    assert_equal [ "pi_4" ], gateway.refunds
+
+    order = orders(:shipped)
+    order.line_items.first.variant.update!(track_inventory: true, inventory_quantity: 0)
+    post admin_order_refund_path(order)
+    get admin_order_path(order)
+    assert_select "button", text: "Put items back in stock"
+
+    assert_difference -> { order.line_items.first.variant.reload.inventory_quantity }, order.line_items.first.quantity do
+      post admin_order_restock_path(order)
+    end
+    assert_redirected_to admin_order_path(order)
+  end
+
   test "saves a staff note and corrects the address" do
     patch admin_order_path(orders(:paid)), params: { order: { staff_note: "Gift wrap", shipping_address1: "2 Main St" } }
 

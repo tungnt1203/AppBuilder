@@ -6,6 +6,11 @@
 #   pending (placed, waiting for payment) → paid → in_production → shipped → delivered
 #   cancelled from pending or paid, refunded from any paid status.
 #
+# Cancelling gives the buyer's card payment back and puts the items back in stock. Refunding puts
+# them back while the order hasn't shipped; once it has, staff put them back
+# (#return_to_stock!) only when they come back. refunded_cents is what went back to the buyer,
+# a part of the total when refunded partly in Stripe's dashboard.
+#
 # Payment is "manual" (the buyer follows the shop's payment instructions and staff mark the order
 # paid) or "stripe" (the buyer pays by card on Stripe Checkout; see #confirm_card_payment!). A card
 # order stays pending until Stripe says it's paid; until then it's a checkout the buyer hasn't
@@ -94,6 +99,10 @@ class Order < ApplicationRecord
   def can_mark_delivered? = shipped?
   def can_cancel? = pending? || paid?
   def can_refund? = paid_status?
+  def can_return_to_stock? = refunded? && restocked_at.nil? && line_items.any? { |item| item.variant&.track_inventory? }
+
+  # A card order already paid, whose money goes back to the buyer when it's cancelled.
+  def card_payment_taken? = card? && paid? && payment_reference.present?
 
   def mark_paid!(by: nil, reference: nil)
     transition! :paid, from: :can_mark_paid?, by:, paid_at: Time.current, payment_reference: reference.presence || payment_reference
@@ -143,27 +152,56 @@ class Order < ApplicationRecord
     transition! :delivered, from: :can_mark_delivered?, by:, delivered_at: Time.current
   end
 
-  # Puts the items back in stock and gives the discount code its use back; tells the buyer
-  # unless notify: false.
+  # Puts the items back in stock and gives the discount code its use back; a card payment
+  # already taken goes back through Stripe first (raises StripeGateway::Error when Stripe
+  # refuses). Tells the buyer unless notify: false.
   def cancel!(by: nil, reason: nil, notify: true)
+    raise InvalidTransition, "#{name} can't be cancelled while #{status}" unless can_cancel?
+    refunding = card_payment_taken?
+    refund_in_stripe if refunding
     transaction do
-      transition! :cancelled, from: :can_cancel?, by:, cancelled_at: Time.current, message: reason
-      line_items.each { |item| item.variant&.return_stock(item.quantity) }
+      transition! :cancelled, from: :can_cancel?, by:, cancelled_at: Time.current, message: reason,
+        **(refunding ? { refunded_at: Time.current, refunded_cents: total_cents } : {})
+      restock
       discount&.release!
     end
     OrderMailer.cancelled(self).deliver_later if notify
   end
 
   # A card order's money goes back through Stripe first (pass stripe: false when Stripe already
-  # refunded it). Raises StripeGateway::Error when Stripe refuses.
+  # refunded it). Raises StripeGateway::Error when Stripe refuses. Items not shipped yet go back
+  # in stock.
   def refund!(by: nil, reason: nil, stripe: card?)
     raise InvalidTransition, "#{name} can't be refunded while #{status}" unless can_refund?
-    if stripe
-      gateway = Store.current.stripe or raise StripeGateway::Error, I18n.t("orders.stripe_not_connected")
-      gateway.refund(payment_reference)
+    refund_in_stripe if stripe
+    transaction do
+      shipped = shipped_at.present?
+      transition! :refunded, from: :can_refund?, by:, refunded_at: Time.current, refunded_cents: total_cents, message: reason
+      restock unless shipped
     end
-    transition! :refunded, from: :can_refund?, by:, refunded_at: Time.current, message: reason
     OrderMailer.refunded(self).deliver_later
+  end
+
+  # Puts a refunded order's items back in stock once they came back to the shop.
+  def return_to_stock!(by: nil)
+    transaction do
+      lock!
+      raise InvalidTransition, "#{name}'s items can't go back in stock" unless can_return_to_stock?
+      restock
+      record "restocked", by:
+    end
+  end
+
+  # A refund of part of the order made in Stripe's dashboard (refunded: Stripe's total refunded
+  # so far, in the shop's hundredths). The order stays as it was; the timeline shows the amount.
+  def record_partial_refund!(refunded)
+    return if refunded <= refunded_cents || refunded >= total_cents
+
+    transaction do
+      lock!
+      update!(refunded_cents: refunded)
+      record "partially_refunded", message: ApplicationController.helpers.money(refunded, currency)
+    end
   end
 
   # Called when Stripe says the order's Checkout Session is paid (the buyer coming back to the
@@ -217,6 +255,18 @@ class Order < ApplicationRecord
         update!(status:, **attributes)
         record status, by:, message:
       end
+    end
+
+    def refund_in_stripe
+      gateway = Store.current.stripe or raise StripeGateway::Error, I18n.t("orders.stripe_not_connected")
+      gateway.refund(payment_reference)
+    end
+
+    def restock
+      return if restocked_at
+
+      line_items.each { |item| item.variant&.return_stock(item.quantity) }
+      update!(restocked_at: Time.current)
     end
 
     def assign_number

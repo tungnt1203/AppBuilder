@@ -90,6 +90,30 @@ class StripePaymentsTest < ActiveSupport::TestCase
     assert order.refunded?
   end
 
+  test "cancelling a card order already paid gives the money back" do
+    gateway = connect_fake_stripe
+    order = orders(:paid)
+    order.update!(payment_method: "stripe", payment_reference: "pi_3")
+
+    assert_enqueued_email_with OrderMailer, :cancelled, args: [ order ] do
+      order.cancel!(reason: "Out of stock")
+    end
+    assert_equal [ "pi_3" ], gateway.refunds
+    assert order.cancelled?
+    assert_equal order.total_cents, order.refunded_cents
+    assert_includes OrderMailer.cancelled(order).text_part.body.to_s, "refunded $20.00 to your card"
+  end
+
+  test "a cancel Stripe can't refund leaves the order paid" do
+    gateway = connect_fake_stripe
+    order = orders(:paid)
+    order.update!(payment_method: "stripe", payment_reference: "pi_3")
+    gateway.error = "No such payment"
+
+    assert_raises(StripeGateway::Error) { order.cancel! }
+    assert order.reload.paid?
+  end
+
   test "a refund Stripe refuses leaves the order paid" do
     gateway = connect_fake_stripe
     order = orders(:paid)

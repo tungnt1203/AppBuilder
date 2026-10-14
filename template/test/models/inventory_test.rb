@@ -34,6 +34,35 @@ class InventoryTest < ActiveSupport::TestCase
     assert_equal 3, @variant.reload.inventory_quantity
   end
 
+  test "a refund before shipping gives the stock back, once" do
+    cart = Cart.create!
+    cart.add(@variant, 2)
+    order = place(cart)
+    order.mark_paid!
+
+    order.refund!
+    assert_equal 3, @variant.reload.inventory_quantity
+    assert_not order.can_return_to_stock?
+  end
+
+  test "a refund after shipping keeps the stock until staff say the items came back" do
+    cart = Cart.create!
+    cart.add(@variant, 2)
+    order = place(cart)
+    order.mark_paid!
+    order.ship!(carrier: "USPS", tracking_number: "1Z")
+
+    order.refund!
+    assert_equal 1, @variant.reload.inventory_quantity
+    assert order.can_return_to_stock?
+
+    order.return_to_stock!
+    assert_equal 3, @variant.reload.inventory_quantity
+    assert_equal "restocked", order.events.last.action
+    assert_raises(Order::InvalidTransition) { order.return_to_stock! }
+    assert_equal 3, @variant.reload.inventory_quantity
+  end
+
   test "an order for more than is left is refused, and nothing is taken" do
     cart = Cart.create!
     cart.add(@variant, 3)

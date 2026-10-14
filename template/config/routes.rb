@@ -58,6 +58,7 @@ Rails.application.routes.draw do
           resource :delivery, only: :create
           resource :cancellation, only: :create
           resource :refund, only: :create
+          resource :restock, only: :create
           resource :fulfillment, only: :create
         end
       end

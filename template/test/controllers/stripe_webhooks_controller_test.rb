@@ -40,6 +40,16 @@ class StripeWebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_empty @gateway.refunds
   end
 
+  test "a partial refund made in Stripe shows on the order, which stays paid" do
+    @order.confirm_card_payment!(payment_intent: "pi_7")
+    deliver "charge.refunded", id: "ch_1", payment_intent: "pi_7", refunded: false, amount_refunded: 500, currency: "usd"
+
+    @order.reload
+    assert @order.paid?
+    assert_equal 500, @order.refunded_cents
+    assert_equal [ "partially_refunded", "$5.00" ], [ @order.events.last.action, @order.events.last.message ]
+  end
+
   test "requests Stripe didn't sign are refused" do
     payload = event_json("checkout.session.completed", id: "cs_live_1", payment_status: "paid", payment_intent: "pi_7")
     post stripe_webhook_path, params: payload, headers: { "Stripe-Signature" => stripe_signature(payload, secret: "whsec_other"), "CONTENT_TYPE" => "application/json" }

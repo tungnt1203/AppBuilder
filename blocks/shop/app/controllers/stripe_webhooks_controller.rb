@@ -31,7 +31,11 @@ class StripeWebhooksController < ActionController::Base
         order.cancel!(reason: "Payment not completed", notify: false) if order&.pending? && order.stripe_checkout_session_id == object.id
       when "charge.refunded"
         order = Order.find_by(payment_method: "stripe", payment_reference: object.payment_intent)
-        order.refund!(reason: "Refunded in Stripe", stripe: false) if order&.can_refund? && object.refunded
+        if order&.can_refund? && object.refunded
+          order.refund!(reason: "Refunded in Stripe", stripe: false)
+        elsif order&.can_refund?
+          order.record_partial_refund!(StripeGateway.cents(object.amount_refunded, object.currency))
+        end
       end
     end
 
