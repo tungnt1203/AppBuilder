@@ -78,10 +78,13 @@ class PrintifyGateway
     ActiveSupport::SecurityUtils.secure_compare(expected, header.to_s)
   end
 
-  # A mockup photo from Printify's image servers, as an IO to attach.
-  def download(url)
+  # A mockup photo from Printify's image servers, as an IO to attach (following a few redirects).
+  def download(url, redirects: 3)
     uri = URI(url)
     response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 10, read_timeout: 30) { |http| http.get(uri.request_uri) }
+    if response.is_a?(Net::HTTPRedirection) && redirects.positive? && response["location"].present?
+      return download(URI.join(url, response["location"]).to_s, redirects: redirects - 1)
+    end
     raise Error, "Couldn't download a mockup (#{response.code})" unless response.is_a?(Net::HTTPSuccess)
 
     StringIO.new(response.body)

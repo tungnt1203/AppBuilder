@@ -5,6 +5,7 @@
 # offered and new variants come from Printify.
 class Printify::Import
   MAX_PHOTOS = 12
+  EXTENSIONS = { "image/png" => ".png", "image/webp" => ".webp", "image/jpeg" => ".jpg" }.freeze
   OPTION_NAMES = { "color" => "Color", "size" => "Size" }.freeze
 
   def initialize(store = Store.current)
@@ -48,7 +49,7 @@ class Printify::Import
       update_variants(product, options, offered, new_product)
     end
 
-    attach_photos(product, data["images"], options, offered) if product.images.none?
+    sync_photos(product, data["images"], options, offered)
     product
   end
 
@@ -87,9 +88,33 @@ class Printify::Import
       options.map { |_name, values| values.find { |value| variant["options"].include?(value[:id]) }&.dig(:title) }
     end
 
+    # Printify's mockups, as the product's photos: on the first import, and again when they
+    # changed in Printify (a new design). Photos the owner added stay; so do the photos of a
+    # product imported before the shop kept track of which photos are Printify's. All of them
+    # are downloaded before any is changed, so a failed download leaves the photos as they were.
+    def sync_photos(product, images, options, offered)
+      picked = pick_photos(Array(images), options, offered)
+      from_printify = product.images.attachments.select { |photo| photo.blob.metadata["printify_src"] }
+      return if product.images.any? && from_printify.empty?
+      return if from_printify.map { |photo| photo.blob.metadata["printify_src"] } == picked.map { |image, _| image["src"] }
+
+      files = picked.map { |image, color| [ image["src"], color, @gateway.download(image["src"]) ] }
+      kept_colors = product.option_images.reject { |_color, id| from_printify.map(&:id).include?(id) }
+      from_printify.each(&:purge)
+      files.each_with_index do |(src, color, io), index|
+        type = Marcel::MimeType.for(io).tap { io.rewind }
+        product.images.attach(io:, filename: "#{product.slug}-#{color ? color.parameterize : "main-#{index}"}#{EXTENSIONS.fetch(type, ".jpg")}",
+          content_type: type, metadata: { printify_src: src })
+      end
+      product.save!
+      added = product.images.attachments.reload.select { |photo| photo.blob.metadata["printify_src"] }.sort_by(&:id)
+      colors = added.zip(files.map { |_src, color, _io| color }).each_with_object({}) { |(photo, color), map| map[color] = photo.id if color }
+      product.update!(option_images: colors.merge(kept_colors))
+    end
+
     # The default mockup first, then one for each color (named after the color, so the product
     # page shows it when the color is picked), then the default color's other views (the back).
-    def attach_photos(product, images, options, offered)
+    def pick_photos(images, options, offered)
       color_index = options.index { |name, _| name == "Color" }
       sorted = images.sort_by { |image| [ image["is_default"] ? 0 : 1, image["position"].to_s == "front" ? 0 : 1 ] }
       picked = []
@@ -107,13 +132,7 @@ class Printify::Import
       end
 
       # One of each photo, keeping the color it shows when it's picked twice (the cover is a color's too).
-      picked = picked.each_with_object({}) { |(image, color), by_src| by_src[image["src"]] = [ image, by_src.dig(image["src"], 1) || color ] }.values.first(MAX_PHOTOS)
-      picked.each_with_index do |(image, color), index|
-        product.images.attach(io: @gateway.download(image["src"]), filename: "#{product.slug}-#{color ? color.parameterize : "main-#{index}"}.jpg", content_type: "image/jpeg")
-      end
-      product.save!
-      colors = picked.map(&:last)
-      product.update!(option_images: product.images.attachments.order(:id).zip(colors).each_with_object({}) { |(photo, color), map| map[color] = photo.id if color })
+      picked.each_with_object({}) { |(image, color), by_src| by_src[image["src"]] = [ image, by_src.dig(image["src"], 1) || color ] }.values.first(MAX_PHOTOS)
     end
 
     def plain_text(html)

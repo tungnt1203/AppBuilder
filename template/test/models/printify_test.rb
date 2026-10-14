@@ -31,7 +31,7 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_not product.variant_for(%w[ White M ]).available, "Printify doesn't make it"
 
     assert_equal 3, product.images.count
-    assert_equal "sunset-tee-white.jpg", product.image_for(product.variant_for(%w[ White S ])).filename.to_s
+    assert_equal "sunset-tee-white.png", product.image_for(product.variant_for(%w[ White S ])).filename.to_s
     assert_equal %w[ Black White ], product.option_images.keys
   end
 
@@ -105,6 +105,42 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_equal [ "pf-earlier", nil ], [ order.printify_order_id, order.fulfillment_error ]
     assert_equal [ "pf-earlier" ], @printify.sent_to_production, "it was waiting in Printify; the shop sends it to production"
     assert_not_includes order.events.map(&:action), "fulfillment_failed"
+  end
+
+  test "a new design in Printify brings new mockups; the owner's own photos stay" do
+    product = Printify::Import.new.call("pf-tee")
+    product.images.attach(io: file_fixture("product.png").open, filename: "lifestyle.png", content_type: "image/png")
+    product.save!
+    own = product.images.attachments.order(:id).last
+
+    @printify.product_data["images"].each { |image| image["src"] = image["src"].sub(".jpg", "-v2.jpg") }
+    @printify.error = "Couldn't download a mockup (500)"
+    @printify.define_singleton_method(:product) { |_shop, _id| product_data } # only downloads fail
+    assert_raises(PrintifyGateway::Error) { Printify::Import.new.call("pf-tee") }
+    assert_equal 4, product.reload.images.count, "a failed download changes nothing"
+
+    @printify.error = nil
+    Printify::Import.new.call("pf-tee")
+    product.reload
+    assert_equal 4, product.images.count
+    assert_includes product.images.attachments.map(&:id), own.id
+    assert product.images.blobs.all? { |blob| blob.id == own.blob_id || blob.metadata["printify_src"].end_with?("-v2.jpg") }
+    assert_equal "sunset-tee-white.png", product.image_for(product.variant_for(%w[ White S ])).filename.to_s
+  end
+
+  test "a product of a few hundred variants can be imported" do
+    sizes = %w[ XS S M L XL 2XL 3XL 4XL 5XL ]
+    colors = 30.times.map { |index| { "id" => 600 + index, "title" => "Color #{index}", "colors" => [ "#0000#{format("%02x", index)}" ] } }
+    @printify.product_data["options"] = [
+      { "name" => "Colors", "type" => "color", "values" => colors },
+      { "name" => "Sizes", "type" => "size", "values" => sizes.each_with_index.map { |size, index| { "id" => 700 + index, "title" => size } } }
+    ]
+    @printify.product_data["variants"] = colors.product(sizes.each_index.to_a).each_with_index.map do |(color, size), index|
+      { "id" => 5000 + index, "sku" => "V#{index}", "price" => 2500, "cost" => 1100, "is_enabled" => true, "is_available" => true, "options" => [ color["id"], 700 + size ] }
+    end
+
+    product = Printify::Import.new.call("pf-tee")
+    assert_equal 270, product.variants.count
   end
 
   test "importing puts Color first, with Printify's swatches, and a re-import keeps the order" do

@@ -4,6 +4,8 @@ class Product < ApplicationRecord
   include Sluggable, MoneyAttributes
 
   OPTION_SLOTS = [ 1, 2, 3 ].freeze
+  # A Printify tee comes in dozens of colors and several sizes.
+  MAX_VARIANTS = 400
 
   has_many :variants, -> { order(:position, :id) }, dependent: :destroy, inverse_of: :product
   has_many :collection_products, dependent: :destroy
@@ -146,7 +148,7 @@ class Product < ApplicationRecord
         errors.add(:"option#{slot}_name", :blank) if name.nil? && values.any?
       end
       errors.add(:base, :options_in_order) if option_names.size != OPTION_SLOTS.take_while { |slot| public_send("option#{slot}_name") }.size
-      errors.add(:base, :too_many_variants) if variant_combinations.size > 100
+      errors.add(:base, :too_many_variants, count: MAX_VARIANTS) if variant_combinations.size > MAX_VARIANTS
     end
 
     def images_are_images

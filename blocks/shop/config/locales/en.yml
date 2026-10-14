@@ -104,7 +104,7 @@ en:
           attributes:
             base:
               options_in_order: Fill in the options in order, starting with option 1
-              too_many_variants: These options make more than 100 variants; use fewer values
+              too_many_variants: These options make more than %{count} variants; use fewer values
             images:
               not_an_image: "%{name} isn't an image"
         variant:
