@@ -15,6 +15,7 @@ class CheckoutsController < ApplicationController
   def create
     @checkout = Checkout.new(cart: current_cart, **checkout_params)
     @checkout.customer = Current.customer if customer_signed_in?
+    @checkout.attribution = tracking_attribution
 
     if (order = @checkout.place) && order.card?
       pay_with_stripe order, cancel_url: cart_url

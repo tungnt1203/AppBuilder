@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_100000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -237,6 +237,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_180000) do
     t.string "printify_order_id"
     t.text "fulfillment_error"
     t.datetime "recovery_sent_at"
+    t.json "attribution"
+    t.datetime "purchase_reported_at"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["discount_id"], name: "index_orders_on_discount_id"
     t.index ["email"], name: "index_orders_on_email"
@@ -365,6 +367,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_180000) do
     t.string "printify_shop_title"
     t.boolean "printify_send_to_production", default: true, null: false
     t.integer "printify_shipping_method", default: 1, null: false
+    t.text "meta_access_token"
+    t.string "meta_test_event_code"
+    t.string "meta_error"
   end
 
   create_table "time_offs", force: :cascade do |t|

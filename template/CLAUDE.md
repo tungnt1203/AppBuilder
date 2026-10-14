@@ -213,6 +213,9 @@ each part working and fill it with the owner's real details:
   AddToCart, InitiateCheckout and Purchase (`Tracking` concern, `track` in controllers,
   `app/javascript/tracking.js`). Keep `layouts/site/tracking_tags` in the head and
   `tracking_events` in the body of the site's layout, and don't add other ad or analytics tags.
+  With a Conversions API token in settings, purchases also go to Meta from the server
+  (`Meta::Purchase`, with the same event id as the pixel); keep `@checkout.attribution =
+  tracking_attribution` in the checkout controller. Tests use `connect_fake_meta`.
 
 - **Product feed** at `/feeds/products.xml` (Meta catalog ads, Google Shopping) and schema.org
   data on product pages, with the same ids as the pixels (`Variant#catalog_id`). Keep both.

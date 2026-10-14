@@ -18,7 +18,7 @@ class Store < ApplicationRecord
 
   money_attribute :shipping_first_item, :shipping_additional_item, :free_shipping_threshold
 
-  encrypts :stripe_secret_key, :stripe_webhook_secret, :printify_token
+  encrypts :stripe_secret_key, :stripe_webhook_secret, :printify_token, :meta_access_token
 
   validates :currency, inclusion: { in: CURRENCIES.keys }
   validates :shipping_first_item_cents, :shipping_additional_item_cents, numericality: { greater_than_or_equal_to: 0, only_integer: true }
@@ -32,12 +32,17 @@ class Store < ApplicationRecord
   validates :meta_pixel_id, format: { with: /\A\d{8,20}\z/ }, allow_blank: true
   validates :tiktok_pixel_id, format: { with: /\A[A-Z0-9]{8,32}\z/ }, allow_blank: true
   validates :google_tag_id, format: { with: /\A(G|AW)-[A-Z0-9]{4,20}\z/ }, allow_blank: true
+  validates :meta_access_token, format: { with: /\A[A-Za-z0-9]{20,1000}\z/ }, allow_blank: true
+  validates :meta_test_event_code, format: { with: /\A[A-Za-z0-9]{3,32}\z/ }, allow_blank: true
   validates :delivery_days_min, :delivery_days_max, numericality: { only_integer: true, in: 1..90 }, allow_nil: true
   validate :countries_are_known
   validate :delivery_days_in_order
 
   normalizes :meta_pixel_id, :tiktok_pixel_id, :google_tag_id, with: ->(id) { id.strip.upcase.presence }
+  normalizes :meta_access_token, :meta_test_event_code, with: ->(value) { value.strip.presence }
   normalizes :ship_to_countries, with: ->(codes) { Array(codes).map { |code| code.to_s.strip.upcase }.compact_blank.uniq.sort }
+
+  before_save -> { self.meta_error = nil }, if: :meta_access_token_changed?
 
   def self.current
     first || create!
@@ -71,6 +76,16 @@ class Store < ApplicationRecord
   # Whether any ad account is connected, so the site loads their tags.
   def ad_tracking?
     [ meta_pixel_id, tiktok_pixel_id, google_tag_id ].any?(&:present?)
+  end
+
+  # Purchases also go to Meta from the server (Meta::Purchase) once the owner pasted a
+  # Conversions API access token for their pixel.
+  def meta_conversions?
+    meta_pixel_id.present? && meta_token.present?
+  end
+
+  def meta
+    MetaGateway.build(meta_token) if meta_conversions?
   end
 
   # Empty means anywhere.
@@ -236,6 +251,13 @@ class Store < ApplicationRecord
     # connects Stripe again.
     def stripe_key
       stripe_secret_key
+    rescue ActiveRecord::Encryption::Errors::Decryption
+      nil
+    end
+
+    # The token, nil when it can't be decrypted (see stripe_key).
+    def meta_token
+      meta_access_token
     rescue ActiveRecord::Encryption::Errors::Decryption
       nil
     end

@@ -433,6 +433,10 @@ en:
           title: Ads tracking
           intro: Connect your ad accounts so they learn which visits turn into orders. The shop sends page views, products viewed, adds to cart, checkouts and purchases.
           meta_hint: In Meta Events Manager, under Data sources. Numbers only.
+          meta_token_hint: Optional, recommended. Purchases then also go to Meta from the shop's server, so ads still learn about the ones the pixel misses (ad blockers, iPhones). In Events Manager › your pixel › Settings › Conversions API › Generate access token.
+          meta_token_saved: Saved. Paste a new one to replace it.
+          meta_token_remove: Remove the access token
+          meta_test_code_hint: To check it works, paste the code from Events Manager › Test events and place an order; empty it afterwards, or Meta won't count purchases.
           tiktok_hint: In TikTok Ads Manager, under Assets › Events › Web events.
           google_hint: A Google Analytics 4 measurement ID (G-…) or a Google Ads tag (AW-…).
           feed: Product feed

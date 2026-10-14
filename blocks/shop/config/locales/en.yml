@@ -72,6 +72,8 @@ en:
         delivery_days_min: Delivery, fastest (business days)
         delivery_days_max: Delivery, slowest (business days)
         meta_pixel_id: Meta Pixel ID
+        meta_access_token: Meta Conversions API access token
+        meta_test_event_code: Meta test event code
         tiktok_pixel_id: TikTok Pixel ID
         google_tag_id: Google tag ID
       discount:

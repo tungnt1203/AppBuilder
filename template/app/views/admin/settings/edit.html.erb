@@ -103,6 +103,17 @@
           <p class="mt-1 text-sm text-muted"><%= t(".ads.intro") %></p>
         </div>
         <%= form.field :meta_pixel_id, placeholder: "123456789012345", inputmode: "numeric", hint: t(".ads.meta_hint") %>
+        <% if @store.meta_error.present? %>
+          <%= alert @store.meta_error, tone: :warning %>
+        <% end %>
+        <%= form.field :meta_access_token, :password_field, value: nil, autocomplete: "off", spellcheck: false,
+              placeholder: (t(".ads.meta_token_saved") if @store.meta_access_token.present?), hint: t(".ads.meta_token_hint") %>
+        <% if @store.meta_access_token.present? %>
+          <label class="-mt-2 flex items-center gap-2 text-sm text-muted">
+            <%= check_box_tag :remove_meta_access_token, "1", false %> <%= t(".ads.meta_token_remove") %>
+          </label>
+          <%= form.field :meta_test_event_code, placeholder: "TEST12345", hint: t(".ads.meta_test_code_hint") %>
+        <% end %>
         <%= form.field :tiktok_pixel_id, placeholder: "C4ABCDEFGHIJ1234567", class: "uppercase", hint: t(".ads.tiktok_hint") %>
         <%= form.field :google_tag_id, placeholder: "G-XXXXXXXXXX", class: "uppercase", hint: t(".ads.google_hint") %>
         <div class="space-y-1.5">

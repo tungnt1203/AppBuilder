@@ -108,6 +108,12 @@ class Order < ApplicationRecord
     Order::FulfillJob.perform_later(self) if Store.current.printify_connected?
   end
 
+  # A placed order goes to Meta's Conversions API too (Meta::Purchase): manual orders when placed,
+  # card orders once paid, like the pixel's Purchase.
+  def report_purchase_later
+    Order::ReportPurchaseJob.perform_later(self) if Store.current.meta_conversions?
+  end
+
   def printify_url
     "https://printify.com/app/order/#{printify_order_id}" if printify_order_id.present?
   end
@@ -162,6 +168,7 @@ class Order < ApplicationRecord
     end
     OrderMailer.confirmation(self).deliver_later
     Admin::OrderMailer.placed(self).deliver_later
+    report_purchase_later
     fulfill_later
     true
   rescue InvalidTransition

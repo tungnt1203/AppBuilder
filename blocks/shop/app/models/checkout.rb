@@ -21,7 +21,8 @@ class Checkout
   attribute :payment_method, :string
 
   attr_reader :cart, :order
-  attr_accessor :customer
+  # The buyer's browser, for Meta (see Order#attribution): { "fbp", "fbc", "ip", "user_agent", "url" }.
+  attr_accessor :customer, :attribution
 
   validates :email, presence: true, format: { with: ApplicationRecord::EMAIL_FORMAT }
   validates :shipping_name, :shipping_address1, :shipping_city, :shipping_country, presence: true
@@ -94,6 +95,7 @@ class Checkout
     unless @order.card?
       OrderMailer.confirmation(@order).deliver_later
       Admin::OrderMailer.placed(@order).deliver_later
+      @order.report_purchase_later
     end
     @order
   rescue ActiveRecord::RecordInvalid
@@ -126,7 +128,7 @@ class Checkout
     def order_attributes
       attributes.symbolize_keys.merge(customer:, currency: @store.currency,
         subtotal_cents:, discount_cents:, shipping_cents:, total_cents:, cart_id: cart.id,
-        discount:, discount_code: discount&.code)
+        discount:, discount_code: discount&.code, attribution: attribution.presence)
     end
 
     def cart_has_items
