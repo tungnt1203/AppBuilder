@@ -50,6 +50,16 @@ class Store < ApplicationRecord
 
   # Flat-rate shipping: one price for the first item, another for each one after it, free above
   # the threshold.
+  # This shop's own code ("k3x9qp"), made on first use. An owner's shops can share one Stripe
+  # account and one Printify shop: the code tells this shop's orders apart from theirs there
+  # (Stripe's metadata, Printify's external_id), where order numbers alone would collide.
+  def uid
+    self[:uid] || begin
+      update_column(:uid, SecureRandom.alphanumeric(6).downcase)
+      self[:uid]
+    end
+  end
+
   def shipping_cents_for(item_count:, subtotal_cents:)
     return 0 if item_count.zero? || free_shipping_for?(subtotal_cents)
 

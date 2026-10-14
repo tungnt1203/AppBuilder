@@ -66,7 +66,7 @@ class PrintifyTest < ActiveSupport::TestCase
     perform_enqueued_jobs(only: Order::FulfillJob) { order.mark_paid! }
 
     sent = @printify.orders.sole
-    assert_equal [ order.number.to_s, 1, false ], sent.values_at(:external_id, :shipping_method, :send_shipping_notification)
+    assert_equal [ "#{Store.current.uid}-#{order.number}", 1, false ], sent.values_at(:external_id, :shipping_method, :send_shipping_notification)
     assert_equal [ { product_id: "pf-tee", variant_id: 1003, quantity: 2 } ], sent[:line_items]
     assert_equal [ "Robin", "Buyer", "US", "78701" ], sent[:address_to].values_at(:first_name, :last_name, :country, :zip)
     assert_equal [ "pf-order-1" ], @printify.sent_to_production
@@ -108,13 +108,23 @@ class PrintifyTest < ActiveSupport::TestCase
   test "an order Printify already has (sent twice, or a retry after a lost answer) is taken, not failed" do
     product = Printify::Import.new.call("pf-tee")
     order = place_order(product.variant_for(%w[ Black M ]))
-    @printify.existing_orders = [ { "id" => "pf-earlier", "status" => "on-hold", "metadata" => { "shop_order_id" => order.number.to_s } } ]
+    @printify.existing_orders = [ { "id" => "pf-earlier", "status" => "on-hold", "metadata" => { "shop_order_id" => "#{Store.current.uid}-#{order.number}" } } ]
 
     Printify::Fulfillment.new(order).submit!
     assert order.reload.in_production?
     assert_equal [ "pf-earlier", nil ], [ order.printify_order_id, order.fulfillment_error ]
     assert_equal [ "pf-earlier" ], @printify.sent_to_production, "it was waiting in Printify; the shop sends it to production"
     assert_not_includes order.events.map(&:action), "fulfillment_failed"
+  end
+
+  test "another shop of the owner sending the same order number to the same Printify shop doesn't clash" do
+    product = Printify::Import.new.call("pf-tee")
+    order = place_order(product.variant_for(%w[ Black M ]))
+    @printify.existing_orders = [ { "id" => "pf-other-shop", "status" => "on-hold", "metadata" => { "shop_order_id" => "othershop-#{order.number}" } } ]
+
+    Printify::Fulfillment.new(order).submit!
+    assert_equal "pf-order-1", order.reload.printify_order_id, "its own order, not the other shop's"
+    assert_equal "#{Store.current.uid}-#{order.number}", @printify.orders.sole[:external_id]
   end
 
   test "a new design in Printify brings new mockups; the owner's own photos stay" do

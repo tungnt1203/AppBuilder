@@ -15,6 +15,15 @@ class StripeWebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal "pi_7", @order.payment_reference
   end
 
+  test "a payment of the owner's other shop on the same Stripe account doesn't touch this shop's order with the same id" do
+    @order.update!(stripe_checkout_session_id: "cs_this_shop")
+    deliver "checkout.session.completed", id: "cs_other_shop", payment_status: "paid", payment_intent: "pi_other", metadata: { order_id: @order.id, shop: "othershop" }
+    assert @order.reload.pending?
+
+    deliver "checkout.session.completed", id: "cs_lost", payment_status: "paid", payment_intent: "pi_8", metadata: { order_id: @order.id, shop: Store.current.uid }
+    assert @order.reload.paid?, "this shop's own session, found by its id when the session wasn't saved"
+  end
+
   test "a checkout still waiting for a bank payment stays pending" do
     deliver "checkout.session.completed", id: "cs_live_1", payment_status: "unpaid", payment_intent: "pi_7", metadata: {}
     assert @order.reload.pending?

@@ -60,8 +60,9 @@ class StripeGateway
         discounts: discounts_for(order),
         customer_email: order.email,
         client_reference_id: order.id.to_s,
-        metadata: { order_id: order.id, order_number: order.number },
-        payment_intent_data: { description: "Order #{order.name}", metadata: { order_id: order.id, order_number: order.number } },
+        metadata: { order_id: order.id, order_number: order.number, shop: Store.current.uid },
+        payment_intent_data: { description: "#{Rails.configuration.x.app_name} order #{order.name}",
+          metadata: { order_id: order.id, order_number: order.number, shop: Store.current.uid } },
         line_items: order.line_items.map { |item|
           { quantity: item.quantity,
             price_data: { currency:, unit_amount: self.class.amount(item.unit_price_cents, order.currency),

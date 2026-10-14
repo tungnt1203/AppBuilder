@@ -97,12 +97,18 @@ class Printify::Fulfillment
       existing["id"]
     end
 
-    # The Printify order made for this one (Printify keeps its number as shop_order_id), among the
+    # Unique in a Printify shop the owner's other shops may send orders to as well: this shop's
+    # code (Store#uid) and the order's number, "k3x9qp-1001".
+    def external_id
+      "#{@store.uid}-#{@order.number}"
+    end
+
+    # The Printify order made for this one (Printify keeps its external_id as shop_order_id), among the
     # shop's latest orders.
     def find_existing_order
       1.upto(3).each do |page|
         result = gateway.orders(@store.printify_shop_id, page:)
-        found = Array(result["data"]).find { |order| order.dig("metadata", "shop_order_id").to_s == @order.number.to_s }
+        found = Array(result["data"]).find { |order| order.dig("metadata", "shop_order_id").to_s == external_id }
         return found if found
         break if page >= result["last_page"].to_i
       end
@@ -165,7 +171,7 @@ class Printify::Fulfillment
     def payload
       first_name, last_name = @order.shipping_name.to_s.split(" ", 2)
       {
-        external_id: @order.number.to_s,
+        external_id:,
         label: @order.name,
         line_items: printify_items.map { |item|
           { product_id: item.variant.product.printify_product_id, variant_id: item.variant.printify_variant_id, quantity: item.quantity }

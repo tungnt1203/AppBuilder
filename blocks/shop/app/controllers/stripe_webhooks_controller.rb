@@ -39,7 +39,11 @@ class StripeWebhooksController < ActionController::Base
       end
     end
 
+    # The Stripe account may be shared by the owner's other shops, whose events come here too:
+    # an order is this shop's by its Checkout session, or by its id when the session says it's
+    # from this shop (Store#uid). Order ids alone repeat from shop to shop.
     def order_for(session)
-      Order.find_by(stripe_checkout_session_id: session.id) || Order.find_by(id: session.metadata&.[](:order_id), payment_method: "stripe")
+      Order.find_by(stripe_checkout_session_id: session.id) ||
+        (Order.find_by(id: session.metadata&.[](:order_id), payment_method: "stripe") if session.metadata&.[](:shop) == Store.current.uid)
     end
 end
