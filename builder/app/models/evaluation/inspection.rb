@@ -18,6 +18,10 @@ module Evaluation
 
     attr_reader :shots
 
+    # Whether the eval put in the shop's product (see #stock_shop), for the judge to know it isn't
+    # the app's.
+    def stocked? = @stocked
+
     def initialize(project, dir)
       @project, @dir = project, dir
       @shots = []
@@ -123,7 +127,7 @@ module Evaluation
         photos = @project.path.join("tmp/eval")
         photos.mkpath
         %w[ tee-black tee-white ].each { |name| FileUtils.cp(FIXTURES.join("#{name}.jpg"), photos.join("#{name}.jpg")) }
-        @project.sandbox.capture("bin/rails", "runner", <<~RUBY)
+        output, = @project.sandbox.capture("bin/rails", "runner", <<~RUBY)
           if defined?(Product) && Rails.configuration.x.try(:shop) != false && Product.where(status: "active").none?
             tee = Product.create!(title: "Classic Tee", status: "active", base_price: "24", printify_product_id: "eval-tee",
               description: "Soft, lightweight cotton tee with a classic fit.\n\n- 100% ring-spun cotton\n- Printed to order",
@@ -135,8 +139,10 @@ module Evaluation
               tee.images.attach(io: File.open("tmp/eval/tee-\#{color}.jpg"), filename: "classic-tee-\#{color}.jpg", content_type: "image/jpeg")
             end
             tee.save!
+            puts "stocked"
           end
         RUBY
+        @stocked = output.to_s.include?("stocked")
       rescue ProjectShell::Error => error
         Rails.logger.warn "Eval: couldn't add a product to #{@project.slug}: #{error.message.truncate(300)}"
       end

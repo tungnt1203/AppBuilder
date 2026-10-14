@@ -38,6 +38,14 @@ module Evaluation
        "notes": "two or three sentences: the biggest problems, most important first"}
     TEXT
 
+    STAND_IN = <<~TEXT
+      The shop had no products yet (its owner imports theirs from Printify later), so the reviewer
+      put in one, "Classic Tee", with a stock mockup, to see the product pages. Judge the product
+      grid and product page by their layout and parts (photos, options, price, button, size guide,
+      delivery), not by that tee's design or photos; it isn't the owner's product and doesn't count
+      against what they asked for.
+    TEXT
+
     # Share of what was asked that the app visibly does, leaving out what can't be seen.
     def self.asked_rate(judge)
       verdicts = Array(judge&.dig("asked")).map { |item| item["verdict"] }
@@ -86,6 +94,7 @@ module Evaluation
 
           Screenshots:
           #{shots.join("\n")}
+          #{STAND_IN if @inspection.stocked?}
         TEXT
       end
   end
