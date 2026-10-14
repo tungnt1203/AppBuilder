@@ -29,6 +29,7 @@ class Printify::Fulfillment
     return unless @order.paid? && @order.printify_order_id.blank? # the other submission got there first
 
     @order.update!(printify_order_id: id, fulfillment_error: nil)
+    sync_cost
     if @store.printify_send_to_production?
       @order.start_production!(message: "Printify #{id}")
     else
@@ -52,6 +53,7 @@ class Printify::Fulfillment
     printify_order = gateway.order(@store.printify_shop_id, @order.printify_order_id)
     status = printify_order["status"].to_s
     shipments = Array(printify_order["shipments"])
+    record_cost(printify_order)
     @order.start_production!(message: "Printify") if @order.paid? && PRINTING.include?(status)
     ship(shipments) if status == "fulfilled" && shipments.any? && @order.can_ship?
     @order.mark_delivered! if @order.shipped? && shipments.any? && shipments.all? { |shipment| shipment["delivered_at"].present? }
@@ -75,6 +77,12 @@ class Printify::Fulfillment
   end
 
   private
+    def sync_cost
+      record_cost(gateway.order(@store.printify_shop_id, @order.printify_order_id))
+    rescue PrintifyGateway::Error
+      nil # the hourly check brings it
+    end
+
     def create_or_find_order
       id = gateway.create_order(@store.printify_shop_id, payload)
       gateway.send_to_production(@store.printify_shop_id, id) if @store.printify_send_to_production?
@@ -105,6 +113,15 @@ class Printify::Fulfillment
       message = I18n.t("orders.printify_cancelled")
       @order.update!(fulfillment_error: message)
       @order.record "fulfillment_failed", message:
+    end
+
+    # Printify's bill for the order, for the owner's margin (Order#margin_cents).
+    def record_cost(printify_order)
+      parts = printify_order.values_at("total_price", "total_shipping", "total_tax")
+      return if parts.all?(&:nil?)
+
+      cost = parts.sum(&:to_i)
+      @order.update!(fulfillment_cost_cents: cost) unless @order.fulfillment_cost_cents == cost
     end
 
     def stuck!(status)

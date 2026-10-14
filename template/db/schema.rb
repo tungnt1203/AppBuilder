@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_200000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -242,6 +242,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_180000) do
     t.datetime "review_requested_at"
     t.integer "refunded_cents", default: 0, null: false
     t.datetime "restocked_at"
+    t.integer "fulfillment_cost_cents"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["discount_id"], name: "index_orders_on_discount_id"
     t.index ["email"], name: "index_orders_on_email"

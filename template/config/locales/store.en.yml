@@ -310,6 +310,9 @@ en:
         cancel_and_refund: Cancel and refund
         confirm_cancel_and_refund: Cancel order %{number} and refund %{total} to the buyer's card? Stripe sends the money back right away, and the items go back in stock.
         return_to_stock: Put items back in stock
+        printify_cost: Printify's bill
+        margin: You keep
+        margin_hint: The total less tax, refunds and what Printify bills you, before payment fees.
         confirm_return_to_stock: Did the items of order %{number} come back? They go back in stock.
         refunded: Refunded
         refund: Mark as refunded

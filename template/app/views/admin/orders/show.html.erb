@@ -71,6 +71,10 @@
         <div class="flex justify-between"><dt class="text-muted"><%= t(".shipping") %></dt><dd><%= money(@order.shipping_cents, @order.currency) %></dd></div>
         <% if @order.tax_cents.positive? %><div class="flex justify-between"><dt class="text-muted"><%= t("orders.show.tax") %></dt><dd><%= money(@order.tax_cents, @order.currency) %></dd></div><% end %>
         <div class="flex justify-between font-semibold"><dt><%= t(".total") %></dt><dd><%= money(@order.total_cents, @order.currency) %></dd></div>
+        <% if (margin = @order.margin_cents) %>
+          <div class="flex justify-between border-t border-line pt-2 text-muted"><dt><%= t(".printify_cost") %></dt><dd>-<%= money(@order.fulfillment_cost_cents, @order.currency) %></dd></div>
+          <div class="flex justify-between font-medium <%= margin.negative? ? "text-red-600" : "text-ink" %>"><dt title="<%= t(".margin_hint") %>"><%= t(".margin") %></dt><dd><%= money(margin, @order.currency) %></dd></div>
+        <% end %>
         <% if @order.refunded_cents.positive? %><div class="flex justify-between text-muted"><dt><%= t(".refunded") %></dt><dd>-<%= money(@order.refunded_cents, @order.currency) %></dd></div><% end %>
       </dl>
     <% end %>

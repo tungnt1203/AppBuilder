@@ -64,6 +64,8 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_equal [ "pf-order-1" ], @printify.sent_to_production
     assert order.reload.in_production?
     assert_equal "pf-order-1", order.printify_order_id
+    assert_equal 1150 + 475, order.fulfillment_cost_cents
+    assert_equal order.total_cents - 1625, order.margin_cents
 
     Order::TrackShipmentsJob.perform_now
     assert order.reload.in_production?, "nothing shipped yet"

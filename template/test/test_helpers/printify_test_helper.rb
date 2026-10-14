@@ -56,7 +56,10 @@ class FakePrintifyGateway
     (@shipping_requests ||= []) << { line_items:, address_to: }
     { "standard" => shipping_cost || 475, "express" => 1299 }
   end
-  def order(_shop_id, id) = fail_or({ "id" => id, "status" => status || (shipments.any? ? "fulfilled" : "in-production"), "shipments" => shipments })
+  def order(_shop_id, id)
+    fail_or({ "id" => id, "status" => status || (shipments.any? ? "fulfilled" : "in-production"), "shipments" => shipments,
+      "total_price" => 1150, "total_shipping" => 475, "total_tax" => 0 })
+  end
 
 
   # Called with a shop id: what Printify has (existing_webhooks); without: those the app created.
