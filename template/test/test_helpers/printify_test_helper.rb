@@ -2,8 +2,8 @@
 # FakePrintifyGateway with one t-shirt (Black and White, S and M; White M isn't made) and records
 # the orders the app sends.
 class FakePrintifyGateway
-  attr_reader :orders, :sent_to_production, :webhooks, :deleted_webhooks
-  attr_accessor :error, :shipments, :product_data, :shop_list, :status
+  attr_reader :orders, :sent_to_production, :deleted_webhooks
+  attr_accessor :error, :shipments, :product_data, :shop_list, :status, :existing_webhooks, :fail_webhook_after
 
   SHOP = { "id" => 4242, "title" => "Fake Printify shop", "sales_channel" => "custom_integration" }.freeze
 
@@ -43,7 +43,12 @@ class FakePrintifyGateway
   def send_to_production(_shop_id, order_id) = fail_or(@sent_to_production << order_id)
   def order(_shop_id, id) = fail_or({ "id" => id, "status" => status || (shipments.any? ? "fulfilled" : "in-production"), "shipments" => shipments })
 
+
+  # Called with a shop id: what Printify has (existing_webhooks); without: those the app created.
+  def webhooks(shop_id = nil) = shop_id ? fail_or(Array(existing_webhooks)) : @webhooks
+
   def create_webhook(shop_id, topic:, url:, secret:)
+    raise PrintifyGateway::Error, "Printify answered 500" if fail_webhook_after && @webhooks.size >= fail_webhook_after
     fail_or(@webhooks << { shop_id:, topic:, url:, secret: })
     "wh-#{@webhooks.size}"
   end

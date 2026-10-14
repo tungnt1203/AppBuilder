@@ -56,13 +56,19 @@ class Meta::Purchase
       zip = @order.shipping_postal_code.to_s.downcase.delete(" ")
       zip = zip[0, 5] if @order.shipping_country == "US"
       {
-        em: hashed(@order.email), ph: hashed(@order.phone.to_s.gsub(/\D/, "")),
+        em: hashed(@order.email), ph: hashed(phone),
         fn: hashed(first_name), ln: hashed(last_name), ct: hashed(@order.shipping_city.to_s.downcase.delete(" ")),
         st: hashed(@order.shipping_region.to_s.downcase.delete(" ")), zp: hashed(zip), country: hashed(@order.shipping_country),
         external_id: hashed(@order.customer_id ? "customer-#{@order.customer_id}" : @order.email),
         fbp: attribution["fbp"], fbc: attribution["fbc"],
         client_ip_address: attribution["ip"], client_user_agent: attribution["user_agent"]
       }.compact_blank
+    end
+
+    # Digits with the country code; US and Canadian numbers are often written without their 1.
+    def phone
+      digits = @order.phone.to_s.gsub(/\D/, "")
+      digits.length == 10 && %w[ US CA ].include?(@order.shipping_country) ? "1#{digits}" : digits
     end
 
     def hashed(value)

@@ -32,7 +32,8 @@ class OrderMailer < ApplicationMailer
   # the order's review page.
   def review_request(order)
     @order, @store = order, Store.current
-    @products = order.reviewable_products.with_attached_images
+    @products = order.reviewable_products.with_attached_images.to_a
+    return if @products.empty? # reviewed from the order page in the meantime
     mail to: order.email, reply_to: @store.contact_email.presence,
       subject: t(".subject", app: Rails.configuration.x.app_name)
   end

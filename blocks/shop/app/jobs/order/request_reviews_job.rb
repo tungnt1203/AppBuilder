@@ -8,7 +8,7 @@ class Order::RequestReviewsJob < ApplicationJob
 
   def perform
     Order.where(review_requested_at: nil).placed_since(NOT_OLDER_THAN.ago)
-      .merge(Order.where(status: "delivered", delivered_at: ..AFTER_DELIVERY.ago).or(Order.where(status: "shipped", shipped_at: ..AFTER_SHIPPING.ago)))
+      .and(Order.where(status: "delivered", delivered_at: ..AFTER_DELIVERY.ago).or(Order.where(status: "shipped", shipped_at: ..AFTER_SHIPPING.ago)))
       .find_each do |order|
         order.update_columns(review_requested_at: Time.current)
         OrderMailer.review_request(order).deliver_later if order.reviewable_products.any?

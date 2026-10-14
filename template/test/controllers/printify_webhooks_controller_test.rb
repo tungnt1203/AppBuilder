@@ -28,6 +28,20 @@ class PrintifyWebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ [], nil ], store.reload.values_at(:printify_webhook_ids, :printify_webhook_secret)
   end
 
+  test "webhooks left at Printify for this address are replaced, and a failure leaves none behind" do
+    store = Store.current
+    @printify.existing_webhooks = [ { "id" => "old-1", "url" => "https://new.example.com/printify/webhook" }, { "id" => "other", "url" => "https://elsewhere.example/hook" } ]
+    store.register_printify_webhooks!("https://new.example.com/printify/webhook")
+    assert_includes @printify.deleted_webhooks, [ "old-1", "new.example.com" ]
+    assert_not_includes @printify.deleted_webhooks.map(&:first), "other"
+
+    @printify.existing_webhooks = []
+    @printify.fail_webhook_after = @printify.webhooks.size + 1
+    assert_raises(PrintifyGateway::Error) { store.register_printify_webhooks!("https://shop.example.com/printify/webhook") }
+    assert_includes @printify.deleted_webhooks.map(&:first), "wh-#{@printify.webhooks.size}"
+    assert_equal [ [], nil, nil ], store.reload.values_at(:printify_webhook_ids, :printify_webhook_secret, :printify_webhook_url)
+  end
+
   test "a shipment ships the order with what Printify itself says, and emails the buyer" do
     @printify.shipments = [ { "carrier" => "usps", "number" => "9400111", "url" => "https://tools.usps.com/t/9400111" } ]
 

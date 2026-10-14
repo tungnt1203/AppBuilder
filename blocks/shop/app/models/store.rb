@@ -32,7 +32,7 @@ class Store < ApplicationRecord
   validates :meta_pixel_id, format: { with: /\A\d{8,20}\z/ }, allow_blank: true
   validates :tiktok_pixel_id, format: { with: /\A[A-Z0-9]{8,32}\z/ }, allow_blank: true
   validates :google_tag_id, format: { with: /\A(G|AW)-[A-Z0-9]{4,20}\z/ }, allow_blank: true
-  validates :meta_access_token, format: { with: /\A[A-Za-z0-9]{20,1000}\z/ }, allow_blank: true
+  validates :meta_access_token, format: { with: /\A[A-Za-z0-9]{20,1000}\z/ }, allow_blank: true, if: :meta_access_token_changed?
   validates :meta_test_event_code, format: { with: /\A[A-Za-z0-9]{3,32}\z/ }, allow_blank: true
   validates :delivery_days_min, :delivery_days_max, numericality: { only_integer: true, in: 1..90 }, allow_nil: true
   validate :countries_are_known
@@ -160,9 +160,21 @@ class Store < ApplicationRecord
     return unless printify_connected? && self.class.public_url?(url)
 
     remove_printify_webhooks
-    secret = SecureRandom.hex(32)
-    ids = PRINTIFY_WEBHOOK_TOPICS.map { |topic| printify.create_webhook(printify_shop_id, topic:, url:, secret:) }
-    update!(printify_webhook_url: url, printify_webhook_secret: secret, printify_webhook_ids: ids)
+    gateway = printify
+    # Left behind by an earlier install or a failed attempt: Printify won't take the same one twice.
+    gateway.webhooks(printify_shop_id).each do |webhook|
+      gateway.delete_webhook(printify_shop_id, webhook["id"], host: URI(url).host) if webhook["url"] == url
+    end
+
+    # Saved first: Printify may call the address as soon as a webhook exists.
+    update!(printify_webhook_url: url, printify_webhook_secret: SecureRandom.hex(32), printify_webhook_ids: [])
+    PRINTIFY_WEBHOOK_TOPICS.each do |topic|
+      id = gateway.create_webhook(printify_shop_id, topic:, url:, secret: printify_webhook_secret)
+      update!(printify_webhook_ids: printify_webhook_ids + [ id ])
+    end
+  rescue PrintifyGateway::Error
+    remove_printify_webhooks
+    raise
   end
 
   def printify_webhooks?(url)
@@ -283,14 +295,14 @@ class Store < ApplicationRecord
 
     # Best effort: webhooks Printify no longer has, or a token it refuses, don't stop the owner.
     def remove_printify_webhooks
-      if printify_webhook_ids.any? && printify_shop_id
+      if printify_webhook_ids.any? && printify_shop_id && printify
         host = URI.parse(printify_webhook_url.to_s).host
         printify_webhook_ids.each { |id| printify.delete_webhook(printify_shop_id, id, host:) }
       end
     rescue PrintifyGateway::Error, URI::InvalidURIError => error
       Rails.logger.warn "Couldn't remove Printify's webhooks: #{error.message}"
     ensure
-      update!(printify_webhook_url: nil, printify_webhook_secret: nil, printify_webhook_ids: []) if printify_webhook_ids.any?
+      update!(printify_webhook_url: nil, printify_webhook_secret: nil, printify_webhook_ids: []) if printify_webhook_ids.any? || printify_webhook_url
     end
 
     # The token, nil when it can't be decrypted (see stripe_key).

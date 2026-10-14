@@ -11,7 +11,7 @@
   <%= form_with url: order_review_path(@order), class: "mt-8 space-y-6" do |form| %>
     <% @products.each do |product| %>
       <% review = @reviews&.find { |candidate| candidate.product_id == product.id } %>
-      <% fields = params.dig(:reviews, product.id.to_s) || {} %>
+      <% fields = review_fields(product) %>
       <fieldset class="rounded-xl border border-line bg-surface p-5">
         <legend class="sr-only"><%= product.title %></legend>
         <div class="flex items-center gap-4">

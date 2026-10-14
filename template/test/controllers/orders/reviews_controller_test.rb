@@ -48,6 +48,20 @@ class Orders::ReviewsControllerTest < ActionDispatch::IntegrationTest
     assert_empty ProductReview.all
   end
 
+  test "odd form data and a double tap don't break anything" do
+    post order_review_path(@order), params: { author_name: "Sam", reviews: "x" }
+    assert_response :unprocessable_entity
+    post order_review_path(@order), params: { author_name: "Sam", reviews: { products(:tee).id => "5" } }
+    assert_response :unprocessable_entity
+
+    # The other tap saved it between this one's checks and its save.
+    ProductReview.define_singleton_method(:transaction) { |*| raise ActiveRecord::RecordNotUnique }
+    post order_review_path(@order), params: { author_name: "Sam", reviews: { products(:tee).id => { rating: "5" } } }
+    assert_redirected_to order_path(@order)
+  ensure
+    ProductReview.singleton_class.remove_method(:transaction) if ProductReview.singleton_methods(false).include?(:transaction)
+  end
+
   test "an order is found by its token only" do
     get new_order_review_path(@order.id)
     assert_response :not_found

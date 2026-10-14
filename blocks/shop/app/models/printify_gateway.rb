@@ -44,6 +44,11 @@ class PrintifyGateway
     get("/shops/#{shop_id}/orders/#{order_id}.json")
   end
 
+  # [{ "id" => "…", "topic" => "order:updated", "url" => "https://…", "shop_id" => 123 }]
+  def webhooks(shop_id)
+    get("/shops/#{shop_id}/webhooks.json")
+  end
+
   # Printify posts each topic's events to url, signed with secret (see .valid_signature?).
   # Returns the webhook's id.
   def create_webhook(shop_id, topic:, url:, secret:)

@@ -4,8 +4,9 @@
 # Tests replace MetaGateway.build with a fake (see test/test_helpers/meta_test_helper.rb).
 class MetaGateway
   Error = Class.new(StandardError)
-  # The token is wrong or was revoked: sending again won't help until the owner pastes a new one.
-  TokenError = Class.new(Error)
+  # Meta refused the call (a wrong or revoked token, a wrong pixel ID): sending again won't help
+  # until the owner fixes their settings.
+  Refused = Class.new(Error)
 
   BASE = "https://graph.facebook.com/v24.0".freeze
 
@@ -41,10 +42,13 @@ class MetaGateway
 
     def error_for(response, body)
       error = body.is_a?(Hash) ? body["error"].to_h : {}
+      message = error["error_user_msg"].presence || error["message"].presence || "Meta answered #{response.code}"
       if error["code"] == 190 || response.code.to_i == 401
-        TokenError.new("Meta didn't accept the access token. Make a new one in Events Manager › your pixel › Settings › Conversions API.")
+        Refused.new("Meta didn't accept the access token. Make a new one in Events Manager › your pixel › Settings › Conversions API.")
+      elsif response.code.to_i.between?(400, 499) && response.code.to_i != 429
+        Refused.new("Meta refused the purchases sent from the server: #{message}")
       else
-        Error.new(error["error_user_msg"].presence || error["message"].presence || "Meta answered #{response.code}")
+        Error.new(message)
       end
     end
 end

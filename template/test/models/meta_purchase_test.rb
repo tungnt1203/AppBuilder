@@ -63,13 +63,34 @@ class MetaPurchaseTest < ActiveSupport::TestCase
 
     clear_enqueued_jobs
     Order::ReportPurchaseJob.perform_later(order)
-    @meta.error = MetaGateway::TokenError.new("Meta didn't accept the access token.")
+    @meta.error = MetaGateway::Refused.new("Meta didn't accept the access token.")
     perform_enqueued_jobs(only: Order::ReportPurchaseJob)
     assert_no_enqueued_jobs(only: Order::ReportPurchaseJob)
     assert_equal "Meta didn't accept the access token.", Store.current.meta_error
 
     Store.current.update!(meta_access_token: "EAAnewtoken12345678901")
     assert_nil Store.current.meta_error
+  end
+
+  test "Meta refusing the pixel isn't tried again and shows in settings" do
+    order = place
+    @meta.error = MetaGateway::Refused.new("Meta refused the purchases sent from the server: Invalid pixel")
+    perform_enqueued_jobs(only: Order::ReportPurchaseJob)
+    assert_no_enqueued_jobs(only: Order::ReportPurchaseJob)
+    assert_match "Invalid pixel", Store.current.meta_error
+    assert_nil order.reload.purchase_reported_at
+  end
+
+  test "a US phone written without its 1 gets it" do
+    order = place
+    order.update!(phone: "(512) 555-0100")
+    assert_equal [ sha("15125550100") ], Meta::Purchase.new(order).event.dig(:user_data, :ph)
+  end
+
+  test "the shop's settings still save when the token can't be decrypted (a new SECRET_KEY_BASE)" do
+    Store.connection.execute("UPDATE stores SET meta_access_token = 'not decryptable'")
+    assert Store.current.update(announcement: "Hello")
+    assert_not Store.current.meta_conversions?
   end
 
   test "the access token is stored encrypted" do
