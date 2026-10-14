@@ -179,6 +179,7 @@ en:
   orders:
     stripe_not_connected: Card payments aren't available right now. Please contact the shop.
     payment_not_started: We couldn't open the payment page. Please try again in a moment.
+    printify_cancelled: Printify cancelled it. Check why in Printify, then ship it another way or cancel and refund it here.
   admin:
     order_mailer:
       placed:

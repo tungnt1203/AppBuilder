@@ -44,6 +44,25 @@ class PrintifyGateway
     get("/shops/#{shop_id}/orders/#{order_id}.json")
   end
 
+  # Printify posts each topic's events to url, signed with secret (see .valid_signature?).
+  # Returns the webhook's id.
+  def create_webhook(shop_id, topic:, url:, secret:)
+    post("/shops/#{shop_id}/webhooks.json", { topic:, url:, secret: }).fetch("id")
+  end
+
+  def delete_webhook(shop_id, id, host:)
+    request(Net::HTTP::Delete.new(URI("#{BASE}/shops/#{shop_id}/webhooks/#{id}.json?host=#{CGI.escape(host.to_s)}")))
+  end
+
+  # Whether a webhook's body came from Printify: its X-Pfy-Signature header is "sha256=" and the
+  # body's HMAC-SHA256 with the webhook's secret.
+  def self.valid_signature?(body, header, secret)
+    return false if secret.blank? || header.blank?
+
+    expected = "sha256=#{OpenSSL::HMAC.hexdigest("SHA256", secret, body)}"
+    ActiveSupport::SecurityUtils.secure_compare(expected, header.to_s)
+  end
+
   # A mockup photo from Printify's image servers, as an IO to attach.
   def download(url)
     uri = URI(url)

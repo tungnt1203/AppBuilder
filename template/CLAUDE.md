@@ -180,7 +180,9 @@ files build on it:
   /admin/settings/printify (never ask for it in chat), imports products with their options,
   prices, costs and a mockup per color at /admin/printify/products, and paid orders go to Printify
   by themselves, move to In production, and to Shipped with Printify's tracking (the buyer gets the
-  shipped email). Other products are fulfilled by staff by hand, as before. Don't write other
+  shipped email), then Delivered. Printify's webhooks (`/printify/webhook`, registered by
+  themselves on a public https address) bring this right away, the hourly check otherwise. Other
+  products are fulfilled by staff by hand, as before. Don't write other
   print-on-demand or fulfillment API code; when the owner asks about Printful or Gelato, say
   Printify is the one connected for now. Tests use `connect_fake_printify`.
 - **Development data**: `db/seeds.rb` adds a sample catalog for the preview. When the owner gives

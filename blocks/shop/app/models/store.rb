@@ -18,7 +18,7 @@ class Store < ApplicationRecord
 
   money_attribute :shipping_first_item, :shipping_additional_item, :free_shipping_threshold
 
-  encrypts :stripe_secret_key, :stripe_webhook_secret, :printify_token, :meta_access_token
+  encrypts :stripe_secret_key, :stripe_webhook_secret, :printify_token, :printify_webhook_secret, :meta_access_token
 
   validates :currency, inclusion: { in: CURRENCIES.keys }
   validates :shipping_first_item_cents, :shipping_additional_item_cents, numericality: { greater_than_or_equal_to: 0, only_integer: true }
@@ -147,7 +147,33 @@ class Store < ApplicationRecord
   end
 
   def disconnect_printify!
+    remove_printify_webhooks
     update!(printify_token: nil, printify_shop_id: nil, printify_shop_title: nil)
+  end
+
+  # What Printify tells the shop about (PrintifyWebhooksController): an order shipping or
+  # arriving, sooner than the hourly check (Order::TrackShipmentsJob), which stays as a fallback.
+  PRINTIFY_WEBHOOK_TOPICS = %w[ order:shipment:created order:shipment:delivered order:updated ].freeze
+
+  # (Re)registers Printify's webhooks at url, when the shop has a public https address.
+  def register_printify_webhooks!(url)
+    return unless printify_connected? && self.class.public_url?(url)
+
+    remove_printify_webhooks
+    secret = SecureRandom.hex(32)
+    ids = PRINTIFY_WEBHOOK_TOPICS.map { |topic| printify.create_webhook(printify_shop_id, topic:, url:, secret:) }
+    update!(printify_webhook_url: url, printify_webhook_secret: secret, printify_webhook_ids: ids)
+  end
+
+  def printify_webhooks?(url)
+    printify_connected? && printify_webhook_ids.any? && printify_webhook_url == url
+  end
+
+  # The webhooks' secret, nil when unreadable (see stripe_key).
+  def printify_signing_secret
+    printify_webhook_secret
+  rescue ActiveRecord::Encryption::Errors::Decryption
+    nil
   end
 
   # Checks the key with Stripe, saves it, and registers the webhook when the shop has a public
@@ -253,6 +279,18 @@ class Store < ApplicationRecord
       stripe_secret_key
     rescue ActiveRecord::Encryption::Errors::Decryption
       nil
+    end
+
+    # Best effort: webhooks Printify no longer has, or a token it refuses, don't stop the owner.
+    def remove_printify_webhooks
+      if printify_webhook_ids.any? && printify_shop_id
+        host = URI.parse(printify_webhook_url.to_s).host
+        printify_webhook_ids.each { |id| printify.delete_webhook(printify_shop_id, id, host:) }
+      end
+    rescue PrintifyGateway::Error, URI::InvalidURIError => error
+      Rails.logger.warn "Couldn't remove Printify's webhooks: #{error.message}"
+    ensure
+      update!(printify_webhook_url: nil, printify_webhook_secret: nil, printify_webhook_ids: []) if printify_webhook_ids.any?
     end
 
     # The token, nil when it can't be decrypted (see stripe_key).

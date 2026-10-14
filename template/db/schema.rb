@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_120000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -370,6 +370,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_100000) do
     t.text "meta_access_token"
     t.string "meta_test_event_code"
     t.string "meta_error"
+    t.string "printify_webhook_url"
+    t.text "printify_webhook_secret"
+    t.json "printify_webhook_ids", default: [], null: false
   end
 
   create_table "time_offs", force: :cascade do |t|

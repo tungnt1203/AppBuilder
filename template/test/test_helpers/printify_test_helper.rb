@@ -2,13 +2,13 @@
 # FakePrintifyGateway with one t-shirt (Black and White, S and M; White M isn't made) and records
 # the orders the app sends.
 class FakePrintifyGateway
-  attr_reader :orders, :sent_to_production
-  attr_accessor :error, :shipments, :product_data, :shop_list
+  attr_reader :orders, :sent_to_production, :webhooks, :deleted_webhooks
+  attr_accessor :error, :shipments, :product_data, :shop_list, :status
 
   SHOP = { "id" => 4242, "title" => "Fake Printify shop", "sales_channel" => "custom_integration" }.freeze
 
   def initialize
-    @orders, @sent_to_production, @shipments, @shop_list = [], [], [], [ SHOP ]
+    @orders, @sent_to_production, @shipments, @shop_list, @webhooks, @deleted_webhooks = [], [], [], [ SHOP ], [], []
     @product_data = {
       "id" => "pf-tee", "title" => "Sunset Tee", "description" => "<p>Soft cotton.</p><p>Printed to order.</p>",
       "options" => [
@@ -41,7 +41,14 @@ class FakePrintifyGateway
   end
 
   def send_to_production(_shop_id, order_id) = fail_or(@sent_to_production << order_id)
-  def order(_shop_id, id) = fail_or({ "id" => id, "status" => shipments.any? ? "fulfilled" : "in-production", "shipments" => shipments })
+  def order(_shop_id, id) = fail_or({ "id" => id, "status" => status || (shipments.any? ? "fulfilled" : "in-production"), "shipments" => shipments })
+
+  def create_webhook(shop_id, topic:, url:, secret:)
+    fail_or(@webhooks << { shop_id:, topic:, url:, secret: })
+    "wh-#{@webhooks.size}"
+  end
+
+  def delete_webhook(_shop_id, id, host:) = fail_or(@deleted_webhooks << [ id, host ])
   def download(_url) = fail_or(StringIO.new(Rails.root.join("test/fixtures/files/product.png").binread))
 
   private

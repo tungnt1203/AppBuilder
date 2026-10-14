@@ -12,6 +12,16 @@
         <%= badge t(".connected", shop: @store.printify_shop_title), tone: :green %>
       </div>
       <p class="text-sm text-muted"><%= t(".how_it_works") %></p>
+      <% if @store.printify_webhooks?(printify_webhook_url) %>
+        <p class="flex items-center gap-2 text-sm text-muted"><%= icon "circle-check", size: 16, class: "text-green-600" %> <%= t(".webhooks_on") %></p>
+      <% elsif Store.public_url?(printify_webhook_url) %>
+        <%= alert tone: :warning do %>
+          <p><%= t(".webhooks_off") %></p>
+          <%= button_to t(".webhooks_register"), admin_printify_connection_path(register_webhooks: 1), method: :patch, class: "mt-2 #{button_classes(:secondary, size: :sm)}" %>
+        <% end %>
+      <% else %>
+        <p class="text-sm text-muted"><%= t(".webhooks_later") %></p>
+      <% end %>
       <div class="flex flex-wrap gap-2">
         <%= link_to t(".import"), admin_printify_imports_path, class: button_classes %>
         <%= button_to t(".disconnect"), admin_printify_connection_path, method: :delete, class: button_classes(:ghost),

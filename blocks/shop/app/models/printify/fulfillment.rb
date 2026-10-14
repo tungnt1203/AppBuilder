@@ -26,17 +26,32 @@ class Printify::Fulfillment
     @order.record "fulfillment_failed", message: error.message
   end
 
-  # Asks Printify about the order: ships it when Printify has a shipment.
+  # Asks Printify about the order (from the hourly check, or when Printify's webhook says it
+  # changed): ships it when Printify has a shipment, marks it delivered when the carrier delivered
+  # it, and tells staff when Printify cancelled it.
   def sync!
-    return unless @order.printify_order_id.present? && @order.in_production? && @store.printify
+    return unless @order.printify_order_id.present? && (@order.in_production? || @order.shipped?) && @store.printify
 
-    shipment = Array(gateway.order(@store.printify_shop_id, @order.printify_order_id)["shipments"]).first
-    @order.ship!(carrier: shipment["carrier"], tracking_number: shipment["number"], tracking_url: shipment["url"]) if shipment
+    printify_order = gateway.order(@store.printify_shop_id, @order.printify_order_id)
+    shipment = Array(printify_order["shipments"]).first
+    if shipment && @order.in_production?
+      @order.ship!(carrier: shipment["carrier"], tracking_number: shipment["number"], tracking_url: shipment["url"])
+    end
+    @order.mark_delivered! if shipment && shipment["delivered_at"].present? && @order.shipped?
+    cancelled_by_printify! if printify_order["status"] == "canceled"
   rescue PrintifyGateway::Error => error
     Rails.logger.warn "Couldn't check order #{@order.number} with Printify: #{error.message}"
   end
 
   private
+    def cancelled_by_printify!
+      return unless @order.in_production? && @order.fulfillment_error.blank?
+
+      message = I18n.t("orders.printify_cancelled")
+      @order.update!(fulfillment_error: message)
+      @order.record "fulfillment_failed", message:
+    end
+
     def gateway
       @gateway ||= @store.printify
     end

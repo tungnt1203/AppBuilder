@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   end
   resource :contact, only: :show
   post "stripe/webhook" => "stripe_webhooks#create", as: :stripe_webhook
+  post "printify/webhook" => "printify_webhooks#create", as: :printify_webhook
 
   resource :registration, only: %i[ new create ]
   resource :session, only: %i[ new create destroy ]

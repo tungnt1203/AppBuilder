@@ -175,12 +175,16 @@ en:
         title: Printify
         intro: Printify prints and ships your products. Connect it to import your products with their mockups, prices and costs, and to send paid orders to be printed; their tracking comes back by itself.
         token: Personal access token
-        token_hint_html: In Printify, %{link} › Generate. Allow shops, products and orders. It works for a year.
+        token_hint_html: In Printify, %{link} › Generate. Allow shops, products, orders and webhooks. It works for a year.
         connect: Connect Printify
         pick_shop: Which Printify shop sells here?
         use_shop: Use this shop
         connected: "Connected: %{shop}"
         how_it_works: Paid orders with Printify products go to Printify. The order moves to In production, and to Shipped with its tracking once Printify ships it; the buyer is emailed.
+        webhooks_on: Printify tells the shop as soon as an order ships or arrives.
+        webhooks_off: Printify can't tell the shop when orders ship yet, so tracking is checked every hour.
+        webhooks_register: Get updates from Printify right away
+        webhooks_later: Tracking is checked every hour. Once the shop is online at its own https address, Printify tells it as soon as an order ships or arrives.
         import: Import products
         disconnect: Disconnect
         confirm_disconnect: Disconnect Printify? Orders stop going there; products stay in the shop.
@@ -255,6 +259,7 @@ en:
         title: Order %{number}
         printify:
           failed: This order didn't reach Printify.
+          stopped: Printify stopped this order.
           retry: Send to Printify again
           sent: Printify is making this order; it ships here with its tracking.
           open: Open in Printify
