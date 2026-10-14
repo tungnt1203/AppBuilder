@@ -20,8 +20,15 @@ class StripeWebhooksControllerTest < ActionDispatch::IntegrationTest
     assert @order.reload.pending?
   end
 
-  test "an expired checkout cancels the order" do
+  test "an expired checkout leaves the order pending for the recovery email" do
     deliver "checkout.session.expired", id: "cs_live_1", payment_status: "unpaid", metadata: {}
+
+    assert_response :ok
+    assert @order.reload.pending?
+  end
+
+  test "a bank payment that failed cancels the order" do
+    deliver "checkout.session.async_payment_failed", id: "cs_live_1", payment_status: "unpaid", metadata: {}
     assert @order.reload.cancelled?
   end
 

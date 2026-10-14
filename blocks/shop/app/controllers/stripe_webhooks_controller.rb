@@ -1,7 +1,9 @@
 # Stripe tells the shop about payments here (registered by Store#connect_stripe! when the shop
 # has a public https address). Most card payments are already confirmed when the buyer comes
 # back to the order page; this catches the rest: buyers who closed the tab, payments that
-# clear later, Checkout sessions that expired, refunds made in the Stripe dashboard.
+# clear later or fail, refunds made in the Stripe dashboard. A Checkout session that expired
+# leaves the order pending: Order::ExpireUnpaidCardJob emails the buyer to finish ("Pay now"
+# opens a new session) and cancels it a day later.
 class StripeWebhooksController < ActionController::Base
   skip_forgery_protection
 
@@ -24,7 +26,7 @@ class StripeWebhooksController < ActionController::Base
         if object.payment_status == "paid" && (order = order_for(object))
           order.confirm_card_payment!(payment_intent: object.payment_intent, tax_cents: StripeGateway.tax_cents(object))
         end
-      when "checkout.session.async_payment_failed", "checkout.session.expired"
+      when "checkout.session.async_payment_failed"
         order = order_for(object)
         order.cancel!(reason: "Payment not completed", notify: false) if order&.pending? && order.stripe_checkout_session_id == object.id
       when "charge.refunded"
