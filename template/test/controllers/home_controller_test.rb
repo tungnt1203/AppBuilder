@@ -17,6 +17,17 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_select "p", "Our first products are on their way. Check back soon."
   end
 
+  test "older phones and in-app browsers get the site" do
+    [ "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 15_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/19H12 [FBAN/FBIOS;FBAV/430.0.0.0;FBSV/15.7]",
+      "Mozilla/5.0 (Linux; Android 12; SM-A125F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36" ].each do |agent|
+      get root_path, headers: { "User-Agent" => agent }
+      assert_response :success, agent
+      get product_path(products(:tee)), headers: { "User-Agent" => agent }
+      assert_response :success, agent
+    end
+  end
+
   test "without customer accounts there's no sign in, and the account pages don't exist" do
     get root_path
     assert_select "a[href=?]", new_session_path, count: 0
