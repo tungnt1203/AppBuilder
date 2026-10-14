@@ -53,7 +53,8 @@ Redis, or external services. Add a gem only when Rails cannot reasonably do the 
 - `bin/rails test:system` — the main flows in headless Chrome (`test/system/`); must pass too
 - `bin/look /path` — look at pages of the running app: screenshots at phone and desktop width (Read
   them) and the problems a visitor would hit. `--as customer` signs in a customer, `--as owner` (or
-  `admin`, `staff`) signs in to `/admin`
+  `admin`, `staff`) signs in to `/admin`. `bin/look https://…` screenshots another site, such as one
+  the owner links to as an example; WebFetch reads its text
 - `bin/rubocop` — style; must be clean
 - `bin/rails db:migrate` — after adding a migration
 - `bin/rails tailwindcss:build` — after changing views, so the preview picks up new classes

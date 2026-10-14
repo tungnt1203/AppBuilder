@@ -115,14 +115,4 @@ class Projects::MessagesControllerTest < ActionDispatch::IntegrationTest
       assert_response :not_found
     end
   end
-
-  private
-    def with_projects_root
-      root = Pathname(Dir.mktmpdir)
-      original, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, root
-      yield
-    ensure
-      Rails.configuration.x.projects_root = original
-      FileUtils.rm_rf(root)
-    end
 end

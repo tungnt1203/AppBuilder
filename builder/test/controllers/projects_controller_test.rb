@@ -86,6 +86,33 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "files sent with a new app's request go to the agent" do
+    with_projects_root do
+      post projects_path, params: { project: { name: "", language: "vi", request: "Shop áo giống trang này",
+        files: [ fixture_file_upload("logo.png", "image/png") ] } }
+
+      project = Project.last
+      message = project.messages.user.first
+      assert_equal "Shop áo giống trang này", message.body
+      assert_equal [ "logo.png" ], message.data["attachments"].map { |attachment| attachment["name"] }
+      assert project.path.join("tmp/attachments/#{message.id}/logo.png").exist?
+      request = enqueued_jobs.last["arguments"][1]
+      assert request.start_with?("Shop áo giống trang này")
+      assert_includes request, "- tmp/attachments/#{message.id}/logo.png (image/png)"
+    end
+  end
+
+  test "files alone start an app" do
+    with_projects_root do
+      post projects_path, params: { project: { name: "", language: "vi", request: "", files: [ fixture_file_upload("logo.png", "image/png") ] } }
+
+      project = Project.last
+      assert_equal "New app", project.name
+      assert project.name_pending?
+      assert_includes enqueued_jobs.last["arguments"][1], "logo.png"
+    end
+  end
+
   test "without a name, the app is called after its request until setup names it" do
     post projects_path, params: { project: { name: "", language: "vi", request: "Lễ tân quản lý bệnh nhân và đặt lịch hẹn" } }
 

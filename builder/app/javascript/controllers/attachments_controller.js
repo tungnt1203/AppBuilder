@@ -11,6 +11,7 @@ export default class extends Controller {
 
   connect() {
     this.files = []
+    this.bodyRequired = this.bodyTarget.required
     this.messages = document.getElementById("messages")
   }
 
@@ -66,7 +67,7 @@ export default class extends Controller {
     const transfer = new DataTransfer()
     this.files.forEach(file => transfer.items.add(file))
     this.inputTarget.files = transfer.files
-    this.bodyTarget.required = this.files.length === 0
+    this.bodyTarget.required = this.bodyRequired && this.files.length === 0
     this.render()
   }
 

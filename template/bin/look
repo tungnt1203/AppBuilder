@@ -10,6 +10,7 @@
 #   bin/look /admin/orders --as owner        signed in to /admin (owner, admin or staff)
 #   bin/look / --phone            only at phone width (or --desktop)
 #   bin/look / --screens 6        more of a long page (default: the first 3 screens)
+#   bin/look https://example.com  another site (one the owner likes, say): only screenshots
 #
 # Each screenshot is one screen as a visitor sees it, top first, so the text stays readable.
 # Screenshots go to tmp/look/. The preview's address is in tmp/preview_url (set by the
@@ -28,14 +29,15 @@ OptionParser.new do |parser|
   parser.on("--screens N", Integer, "Screens to capture per page, from the top (default 3)") { |count| options[:screens] = count.clamp(1, 20) }
 end.parse!
 
-paths = ARGV.empty? ? [ "/" ] : ARGV.map { |path| path.start_with?("/") ? path : "/#{path}" }
+external = ->(path) { path.match?(%r{\Ahttps?://}i) }
+paths = ARGV.empty? ? [ "/" ] : ARGV.map { |path| external.(path) || path.start_with?("/") ? path : "/#{path}" }
 root = File.expand_path("..", __dir__)
 base = File.read(File.join(root, "tmp/preview_url")).strip rescue "http://127.0.0.1:3000"
 out = File.join(root, "tmp/look")
 FileUtils.mkdir_p(out)
 
 begin
-  Net::HTTP.get_response(URI(base + "/up"))
+  Net::HTTP.get_response(URI(base + "/up")) unless paths.all?(external)
 rescue SystemCallError, IOError
   abort "The app isn't running at #{base}. The builder runs the preview; wait for it to come back, never start a server yourself."
 end
@@ -101,71 +103,81 @@ paths.each do |path|
     errors.clear
     browser.resize(width:, height:)
     browser.network.clear(:traffic)
-    browser.go_to(base + path)
     begin
+      browser.go_to(external.(path) ? path : base + path)
       browser.network.wait_for_idle(timeout: 5)
     rescue Ferrum::TimeoutError
+    rescue Ferrum::StatusError => error
+      raise unless external.(path)
+      problems += 1
+      puts "#{path}: couldn't open it (#{error.message})"
+      next
     end
     sleep 0.4
 
     report = []
-    landed = URI(browser.current_url).path
-    document = browser.network.traffic.find { |exchange| exchange.request&.type == "Document" && exchange.response }
-    status = document&.response&.status
     notes = []
-    if landed != URI(base + path).path
-      notes << case landed
-      when "/admin/session/new", "/admin/first_run/new"
-        "needs a staff sign in (sent to #{landed}): look at /admin pages with --as owner"
-      when "/session/new"
-        "needs a customer sign in (sent to /session/new): right for a customer's own pages, wrong for a page visitors use. Look at it with --as customer"
-      else
-        "redirected to #{landed}"
+    if external.(path)
+      title = browser.evaluate("document.title").to_s.strip
+      notes << "another site#{": #{title}" unless title.empty?}; only screenshots, its problems aren't checked"
+    else
+      landed = URI(browser.current_url).path
+      document = browser.network.traffic.find { |exchange| exchange.request&.type == "Document" && exchange.response }
+      status = document&.response&.status
+      if landed != URI(base + path).path
+        notes << case landed
+        when "/admin/session/new", "/admin/first_run/new"
+          "needs a staff sign in (sent to #{landed}): look at /admin pages with --as owner"
+        when "/session/new"
+          "needs a customer sign in (sent to /session/new): right for a customer's own pages, wrong for a page visitors use. Look at it with --as customer"
+        else
+          "redirected to #{landed}"
+        end
       end
-    end
-    if status.to_i >= 400
-      heading = browser.evaluate("document.querySelector('header h1, h1')?.innerText?.trim()").to_s
-      message = browser.evaluate("document.querySelector('.exception-message .message')?.innerText?.trim()").to_s
-      report << "answered #{status}: #{[ heading, message ].reject(&:empty?).join(" — ")}"
-    end
-
-    errors.uniq.each { |error| report << "JavaScript error: #{error}" }
-    browser.network.traffic.each do |exchange|
-      next if exchange.request&.type == "Document"
-      url = exchange.request&.url.to_s
-      next if url.include?("/_preview/") || url.end_with?("/favicon.ico")
-      if exchange.error
-        report << "request failed: #{url} (#{exchange.error.error_text rescue "error"})"
-      elsif exchange.response && exchange.response.status.to_i >= 400
-        report << "request answered #{exchange.response.status}: #{url}"
+      if status.to_i >= 400
+        heading = browser.evaluate("document.querySelector('header h1, h1')?.innerText?.trim()").to_s
+        message = browser.evaluate("document.querySelector('.exception-message .message')?.innerText?.trim()").to_s
+        report << "answered #{status}: #{[ heading, message ].reject(&:empty?).join(" — ")}"
       end
-    end
 
-    broken = browser.evaluate(<<~JS)
-      [...document.images].filter((image) => image.complete && image.naturalWidth === 0 && image.src).map((image) => image.src).slice(0, 5)
-    JS
-    broken.each { |src| report << "image doesn't load: #{src}" }
+      errors.uniq.each { |error| report << "JavaScript error: #{error}" }
+      browser.network.traffic.each do |exchange|
+        next if exchange.request&.type == "Document"
+        url = exchange.request&.url.to_s
+        next if url.include?("/_preview/") || url.end_with?("/favicon.ico")
+        if exchange.error
+          report << "request failed: #{url} (#{exchange.error.error_text rescue "error"})"
+        elsif exchange.response && exchange.response.status.to_i >= 400
+          report << "request answered #{exchange.response.status}: #{url}"
+        end
+      end
 
-    if size == "phone"
-      wide = browser.evaluate(<<~JS)
-        (() => {
-          const width = document.documentElement.clientWidth
-          if (document.documentElement.scrollWidth <= width + 1) return []
-          return [...document.querySelectorAll("body *")].filter((element) => {
-            const box = element.getBoundingClientRect()
-            if (box.right <= width + 1 || box.width === 0) return false
-            for (let parent = element.parentElement; parent; parent = parent.parentElement) {
-              const overflow = getComputedStyle(parent).overflowX
-              if (overflow === "auto" || overflow === "scroll" || overflow === "hidden" || overflow === "clip") return false
-            }
-            return true
-          }).slice(0, 3).map((element) => `<${element.localName}${element.className && typeof element.className === "string" ? ` class="${element.className.slice(0, 80)}"` : ""}> ${Math.round(element.getBoundingClientRect().right)}px`)
-        })()
+      broken = browser.evaluate(<<~JS)
+        [...document.images].filter((image) => image.complete && image.naturalWidth === 0 && image.src).map((image) => image.src).slice(0, 5)
       JS
-      report << "wider than the phone (page scrolls sideways): #{wide.join(", ")}" if wide.any?
+      broken.each { |src| report << "image doesn't load: #{src}" }
+
+      if size == "phone"
+        wide = browser.evaluate(<<~JS)
+          (() => {
+            const width = document.documentElement.clientWidth
+            if (document.documentElement.scrollWidth <= width + 1) return []
+            return [...document.querySelectorAll("body *")].filter((element) => {
+              const box = element.getBoundingClientRect()
+              if (box.right <= width + 1 || box.width === 0) return false
+              for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+                const overflow = getComputedStyle(parent).overflowX
+                if (overflow === "auto" || overflow === "scroll" || overflow === "hidden" || overflow === "clip") return false
+              }
+              return true
+            }).slice(0, 3).map((element) => `<${element.localName}${element.className && typeof element.className === "string" ? ` class="${element.className.slice(0, 80)}"` : ""}> ${Math.round(element.getBoundingClientRect().right)}px`)
+          })()
+        JS
+        report << "wider than the phone (page scrolls sideways): #{wide.join(", ")}" if wide.any?
+      end
     end
 
-    name = "#{path.delete_prefix("/").gsub(/[^\w-]+/, "_").then { |name| name.empty? ? "home" : name }}-#{size}"
+    name = "#{path.sub(%r{\Ahttps?://}i, "").delete_prefix("/").gsub(/[^\w-]+/, "_").then { |name| name.empty? ? "home" : name }}-#{size}"
     FileUtils.rm_f(Dir[File.join(out, "#{name}{,-*}.png")])
     # /admin's layout scrolls inside #main rather than the page; follow whichever scrolls.
     pane = browser.evaluate(<<~JS)
@@ -195,7 +207,7 @@ paths.each do |path|
     puts "  screenshots: #{files.map { |file| file.delete_prefix(root + "/") }.join(", ")}"
     puts "  · the page is #{total} screens long; only the first #{files.size} were taken (--screens #{total} for all)" if files.size < total
 
-    if size == options[:sizes].keys.last
+    if size == options[:sizes].keys.last && !external.(path)
       links = browser.evaluate(<<~JS)
         [...new Set([...document.querySelectorAll("a[href]")].map((link) => link.getAttribute("href"))
           .filter((href) => href.startsWith("/") && !href.startsWith("//") && !href.startsWith("/_")).map((href) => href.split("#")[0]).filter(Boolean))].slice(0, 25)

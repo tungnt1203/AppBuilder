@@ -40,6 +40,16 @@ module ActiveSupport
       Rails.configuration.x.agent_backend = original
     end
 
+    # Apps' folders in a temporary directory, removed afterwards.
+    def with_projects_root
+      root = Pathname(Dir.mktmpdir)
+      original, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, root
+      yield
+    ensure
+      Rails.configuration.x.projects_root = original
+      FileUtils.rm_rf(root)
+    end
+
     def with_sandbox(kind)
       original, Rails.configuration.x.sandbox = Rails.configuration.x.sandbox, kind
       yield

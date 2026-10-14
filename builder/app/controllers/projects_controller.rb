@@ -8,12 +8,13 @@ class ProjectsController < ApplicationController
 
   def create
     request = params.dig(:project, :request).to_s.strip
+    files = Array(params.dig(:project, :files)).compact_blank
     @project = Current.user.projects.new(project_params)
-    @project.name_after(request)
+    @project.name_after(request.presence || ("New app" if files.any?))
 
     if @project.save
-      @project.messages.create!(role: :user, body: request) if request.present?
-      ProjectSetupJob.perform_later(@project, request.presence, params.dig(:project, :plan) == "1" ? "plan" : "build")
+      prompt = @project.record_request(request, files:) if request.present? || files.any?
+      ProjectSetupJob.perform_later(@project, prompt.presence, params.dig(:project, :plan) == "1" ? "plan" : "build")
       redirect_to @project
     else
       set_listing

@@ -447,6 +447,7 @@
   [data-preview-target="pickButton"][aria-pressed="true"] { background: var(--color-jade, #2f8f83); color: white; }
 
   form.dropping .composer { outline: 2px dashed var(--link); outline-offset: 3px; }
+  form.prompt.dropping { outline: 2px dashed var(--link); outline-offset: 3px; }
 
   /* The studio's message box: text on top across the whole width, actions in a row under it.
      It sits in the flow under the chat, so a long message pushes the chat up, never over it. */
@@ -1212,6 +1213,7 @@
   /* Home: one big box to describe the app. */
   .prompt { border-radius: 28px; }
   .prompt:focus-within { border-color: color-mix(in srgb, var(--color-jade) 55%, var(--glass-edge)); }
+  .prompt-attachments { padding: 0 1.4rem 0.25rem; }
 
   .prompt-input {
     display: block;

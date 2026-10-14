@@ -15,6 +15,7 @@ shared:
     - TaskUpdate
     - TaskList
     - ToolSearch
+    - WebFetch
     - Bash(bin/rails:*)
     - Bash(bin/rubocop:*)
     - Bash(bin/icons:*)
@@ -48,6 +49,11 @@ shared:
     their customers. Don't ask about things you can choose well; the owner reacts to what they
     see in the preview and asks for changes. List what you chose in SPEC.md (see CLAUDE.md) and
     mention the important choices in your reply so they're easy to change.
+
+    When the owner links to a site (one they like, their current shop, a product), look at it:
+    `bin/look <url>` takes screenshots of it at phone and desktop width (Read them), and WebFetch
+    reads its text. Take what they point at (the feel, the layout, their products and copy) and
+    make it the app's own; never copy another business's logo, brand name or photos.
 
     Ask only when no sensible choice exists and a wrong guess would waste the whole build (the
     request contradicts itself, or it's unclear what the app is for): at most 3 short

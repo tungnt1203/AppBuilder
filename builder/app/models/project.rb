@@ -342,10 +342,7 @@ class Project < ApplicationRecord
   def ask(request, mode:, files: [], pointed: nil)
     return tell_budget_spent if owner&.over_budget?
 
-    message = messages.create!(role: :user, body: request, data: pointed ? { "pointed" => pointed.data } : {})
-    attachments = Attachment.save(message, files)
-    message.update!(data: message.data.merge("attachments" => attachments.map(&:to_h))) if attachments.any?
-    request = [ request.presence, pointed&.to_prompt, attachments_note(attachments) ].compact.join("\n\n")
+    request = record_request(request, files:, pointed:)
 
     if working?
       agent_commands.create!(kind: :message, payload: { "text" => request })
@@ -353,6 +350,15 @@ class Project < ApplicationRecord
       update!(status: :working)
       AgentTurnJob.perform_later(self, request, mode)
     end
+  end
+
+  # Puts the owner's message in the chat with the files they attached, and returns what the agent
+  # is told: the message, what they pointed at, and where to find the files.
+  def record_request(request, files: [], pointed: nil)
+    message = messages.create!(role: :user, body: request, data: pointed ? { "pointed" => pointed.data } : {})
+    attachments = Attachment.save(message, files)
+    message.update!(data: message.data.merge("attachments" => attachments.map(&:to_h))) if attachments.any?
+    [ request.presence, pointed&.to_prompt, attachments_note(attachments) ].compact.join("\n\n")
   end
 
   # Builds straight away by default; plans first only while a plan is being discussed.

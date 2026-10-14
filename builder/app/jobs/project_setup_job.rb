@@ -3,7 +3,7 @@
 # the chat) to the agent. Safe to run again if the job process restarted halfway.
 class ProjectSetupJob < ApplicationJob
   def perform(project, first_request = nil, mode = "plan")
-    name(project, first_request)
+    name(project)
     copy_template(project)
     configure(project)
     project.sandbox.run("bundle", "install", "--quiet")
@@ -17,8 +17,12 @@ class ProjectSetupJob < ApplicationJob
   end
 
   private
-    def name(project, request)
-      project.adopt_name(AppNamer.new(request).name) if project.name_pending?
+    # From the owner's own words, not the notes about attached files the agent gets with them.
+    def name(project)
+      return unless project.name_pending?
+
+      request = project.messages.user.first&.body
+      project.adopt_name(request.present? ? AppNamer.new(request).name : nil)
     end
 
     # The template's last commit (not unsaved edits) becomes the app's first version. The
