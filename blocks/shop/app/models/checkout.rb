@@ -28,6 +28,8 @@ class Checkout
   validates :shipping_name, :shipping_address1, :shipping_city, :shipping_country, presence: true
   validate :cart_has_items
   validate :ships_to_country
+  validate :address_carriers_need
+  validates :phone, presence: true, if: :phone_required?
   validates :payment_method, inclusion: { in: ->(checkout) { checkout.payment_methods } }
 
   def initialize(cart:, store: Store.current, **attributes)
@@ -38,6 +40,11 @@ class Checkout
 
   def payment_methods
     @store.payment_methods
+  end
+
+  # Printify (and its carriers) won't take an order without the buyer's phone.
+  def phone_required?
+    @store.printify_connected? && items.any? { |item| item.variant.printify_variant_id.present? }
   end
 
   def self.human_attribute_name(attribute, options = {})
@@ -133,6 +140,21 @@ class Checkout
 
     def cart_has_items
       errors.add(:base, :empty_cart) if items.empty?
+    end
+
+    # Where the country has states or provinces (the US, Canada, Australia), carriers need the
+    # region's code and a postal code; a region typed in full becomes its code.
+    def address_carriers_need
+      return unless Region.for(shipping_country)
+
+      if shipping_region.blank?
+        errors.add(:shipping_region, :blank)
+      elsif (code = Region.code_for(shipping_country, shipping_region))
+        self.shipping_region = code
+      else
+        errors.add(:shipping_region, :not_a_region)
+      end
+      errors.add(:shipping_postal_code, :blank) if shipping_postal_code.blank?
     end
 
     def ships_to_country

@@ -148,6 +148,8 @@ en:
               discount_used_up: That discount code was just used up; remove it from your cart
             shipping_country:
               not_shipped_to: isn't a country we ship to
+            shipping_region:
+              not_a_region: isn't one we know; pick it from the list
   order_mailer:
     summary:
       subtotal: Subtotal

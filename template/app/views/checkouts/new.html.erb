@@ -11,22 +11,31 @@
       <fieldset class="space-y-4">
         <legend class="mb-4 text-lg font-semibold"><%= t(".contact") %></legend>
         <%= form.field :email, :email_field, required: true, autocomplete: "email", hint: t(".email_hint") %>
-        <%= form.field :phone, :telephone_field, autocomplete: "tel", hint: t(".phone_hint") %>
+        <%= form.field :phone, :telephone_field, autocomplete: "tel", required: @checkout.phone_required?,
+              hint: t(@checkout.phone_required? ? ".phone_required_hint" : ".phone_hint") %>
       </fieldset>
 
-      <fieldset class="space-y-4">
+      <% regions = Region.for(@checkout.shipping_country) %>
+      <fieldset class="space-y-4" data-controller="region" data-region-names-value="<%= Region::NAMES.to_json %>">
         <legend class="mb-4 text-lg font-semibold"><%= t(".shipping") %></legend>
         <div class="space-y-1.5">
           <%= form.label :shipping_country %>
-          <%= form.select :shipping_country, Store.current.countries_for_checkout, {}, autocomplete: "country" %>
+          <%= form.select :shipping_country, Store.current.countries_for_checkout, {}, autocomplete: "country",
+                data: { region_target: "country", action: "region#update" } %>
         </div>
         <%= form.field :shipping_name, required: true, autocomplete: "name" %>
         <%= form.field :shipping_address1, required: true, autocomplete: "address-line1" %>
         <%= form.field :shipping_address2, autocomplete: "address-line2" %>
         <div class="grid gap-4 sm:grid-cols-3">
           <%= form.field :shipping_city, required: true, autocomplete: "address-level2" %>
-          <%= form.field :shipping_region, autocomplete: "address-level1" %>
-          <%= form.field :shipping_postal_code, autocomplete: "postal-code" %>
+          <div class="space-y-1.5">
+            <%= form.label :shipping_region %>
+            <%= form.select :shipping_region, (regions || {}).map { |code, name| [ name, code ] }, { include_blank: t(".choose_region") },
+                  autocomplete: "address-level1", required: true, hidden: regions.nil?, disabled: regions.nil?, data: { region_target: "select" } %>
+            <%= form.text_field :shipping_region, autocomplete: "address-level1", hidden: regions.present?, disabled: regions.present?,
+                  id: "checkout_shipping_region_text", data: { region_target: "input" } %>
+          </div>
+          <%= form.field :shipping_postal_code, autocomplete: "postal-code", required: regions.present?, data: { region_target: "postalCode" } %>
         </div>
         <%= form.field :note, :text_area, rows: 2 %>
       </fieldset>

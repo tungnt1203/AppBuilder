@@ -54,6 +54,28 @@ class CheckoutTest < ActiveSupport::TestCase
     assert placing.errors.added?(:shipping_country, :not_shipped_to)
   end
 
+  test "in the US, Canada and Australia the region is a code and the postal code is needed" do
+    placing = checkout(shipping_region: "california ")
+    assert placing.valid?
+    assert_equal "CA", placing.shipping_region
+
+    assert checkout(shipping_region: "Cali").tap(&:valid?).errors.added?(:shipping_region, :not_a_region)
+    assert checkout(shipping_region: "").tap(&:valid?).errors.added?(:shipping_region, :blank)
+    assert checkout(shipping_postal_code: "").tap(&:valid?).errors.added?(:shipping_postal_code, :blank)
+
+    assert checkout(shipping_country: "GB", shipping_region: "", shipping_postal_code: "").valid?, "other countries need neither"
+  end
+
+  test "a phone is needed for Printify's products" do
+    assert checkout(phone: "").valid?
+
+    connect_fake_printify
+    variants(:mug).update!(printify_variant_id: 12)
+    placing = checkout(phone: "")
+    assert placing.phone_required?
+    assert placing.tap(&:valid?).errors.added?(:phone, :blank)
+  end
+
   test "an empty cart can't be checked out" do
     placing = Checkout.new(cart: Cart.create!, **details)
 

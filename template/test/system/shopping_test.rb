@@ -20,6 +20,8 @@ class ShoppingTest < ApplicationSystemTestCase
       fill_in Order.human_attribute_name(:shipping_name), with: "Robin Buyer"
       fill_in Order.human_attribute_name(:shipping_address1), with: "5 Elm St"
       fill_in Order.human_attribute_name(:shipping_city), with: "Austin"
+      select "Texas", from: Order.human_attribute_name(:shipping_region)
+      fill_in Order.human_attribute_name(:shipping_postal_code), with: "78701"
       click_on I18n.t("checkouts.new.place_order")
 
       assert_text I18n.t("orders.show.thanks", name: "Robin Buyer")

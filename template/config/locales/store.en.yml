@@ -159,6 +159,8 @@ en:
       contact: Contact
       email_hint: For your order confirmation and shipping updates.
       phone_hint: Optional, for the delivery driver.
+      phone_required_hint: The carrier needs it to deliver your order.
+      choose_region: Choose…
       shipping: Shipping address
       summary: Order summary
       subtotal: Subtotal

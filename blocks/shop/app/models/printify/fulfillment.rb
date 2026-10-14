@@ -101,7 +101,7 @@ class Printify::Fulfillment
         send_shipping_notification: false, # the shop sends its own shipped email
         address_to: {
           first_name:, last_name: last_name.presence || first_name, email: @order.email, phone: @order.phone.to_s,
-          country: @order.shipping_country, region: @order.shipping_region.to_s, address1: @order.shipping_address1,
+          country: @order.shipping_country, region: Region.code_for(@order.shipping_country, @order.shipping_region) || @order.shipping_region.to_s, address1: @order.shipping_address1,
           address2: @order.shipping_address2.to_s, city: @order.shipping_city, zip: @order.shipping_postal_code.to_s
         }
       }

@@ -60,7 +60,7 @@ class DiscountTest < ActiveSupport::TestCase
 
   private
     def details
-      { email: "robin@example.com", shipping_name: "Robin Buyer", shipping_address1: "5 Elm St", shipping_city: "Austin", shipping_country: "US" }
+      { email: "robin@example.com", shipping_name: "Robin Buyer", shipping_address1: "5 Elm St", shipping_city: "Austin", shipping_region: "TX", shipping_postal_code: "78701", shipping_country: "US" }
     end
 
     def place

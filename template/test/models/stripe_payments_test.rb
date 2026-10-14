@@ -65,7 +65,7 @@ class StripePaymentsTest < ActiveSupport::TestCase
     connect_fake_stripe
     cart = Cart.create!.tap { |c| c.add(variants(:mug)) }
     checkout = Checkout.new(cart:, payment_method: "stripe", email: "robin@example.com", shipping_name: "Robin",
-      shipping_address1: "5 Elm St", shipping_city: "Austin", shipping_country: "US")
+      shipping_address1: "5 Elm St", shipping_city: "Austin", shipping_region: "TX", shipping_postal_code: "78701", shipping_country: "US")
 
     assert_no_enqueued_emails { @order = checkout.place }
     assert @order.card? && @order.pending?
