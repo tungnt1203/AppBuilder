@@ -28,6 +28,8 @@ class CheckoutsController < ApplicationController
 
   # The totals again for the address being filled in (Printify's shipping depends on it).
   def shipping
+    return redirect_to(new_checkout_path) unless turbo_frame_request?
+
     checkout = Checkout.new(cart: current_cart, **params.permit(*SHIPPING_FIELDS).to_h.symbolize_keys)
     render partial: "checkouts/totals", locals: { checkout: }
   end

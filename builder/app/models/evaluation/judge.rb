@@ -23,7 +23,8 @@ module Evaluation
       First list what the person explicitly asked for: every concrete thing in their request (a
       screen, a feature, a rule, who may do what, content such as names, prices and hours,
       anything about the look). Only what they said, not what such apps usually have; one item
-      each, short, in the request's language. Decide each one:
+      each, short, in the request's language. Decide each one, with the verdict word in English
+      exactly as written here:
       - "met": the screenshots show it.
       - "missed": the screenshots show it isn't so, or it's absent where it would show.
       - "unclear": screenshots can't show it (a rule checked on save, an email sent).

@@ -11,7 +11,7 @@ module Evaluation
     MAX_PUBLIC_PAGES = 3
     MAX_PAGES = 5
     # The starter app's own screens and Rails' internals; the pages the agent made are the point.
-    SKIP = %r{\A/(rails|up|session|passwords|first_run|invitations|registration|account|_blocks|_preview|cable|assets|recede_historical_location|resume_historical_location|refresh_historical_location|service-worker|manifest|admin/(users|session|passwords|first_run|invitations))(/|\z)}
+    SKIP = %r{\A/(checkout|cart_items|zip_codes|feeds|printify|stripe|rails|up|session|passwords|first_run|invitations|registration|account|_blocks|_preview|cable|assets|recede_historical_location|resume_historical_location|refresh_historical_location|service-worker|manifest|admin/(users|session|passwords|first_run|invitations))(/|\z)}
 
     Shot = Struct.new(:name, :path, :file, :status, :error, :signed_in, keyword_init: true)
 
@@ -75,10 +75,11 @@ module Evaluation
       rescue Ferrum::Error
       end
 
-      # What a customer most likely opens on a phone (a booking form rather than the home
-      # page), and the owner's main screen.
+      # What a customer most likely opens on a phone (a product page, where ads land, or a booking
+      # form rather than the home page), and the owner's main screen.
       def phone_pages(public, private)
-        [ public.find { |path| path != "/" } || public.first, private.first || @project.staff_home_path ].compact.uniq
+        [ public.find { |path| path.start_with?("/products/") } || public.find { |path| path != "/" } || public.first,
+          private.first || @project.staff_home_path ].compact.uniq
       end
 
       # What a visitor who isn't signed in gets: 2xx for a public page, a redirect to sign in for
@@ -112,7 +113,8 @@ module Evaluation
         !browser.current_url.include?("/session")
       end
 
-      # The home page first, then lists, then forms for adding things.
+      # The home page first, then a product page when the app sells some (where ads land), then
+      # lists, then forms for adding things.
       def candidate_pages
         output, = @project.sandbox.capture("bin/rails", "runner", <<~RUBY)
           paths = Rails.application.routes.routes.filter_map do |route|
@@ -120,6 +122,8 @@ module Evaluation
             path = route.path.spec.to_s.sub("(.:format)", "")
             path unless path.include?(":") || path.include?("*") || path.include?("(")
           end
+          product = Product.where(status: "active").first if defined?(Product) && Product.respond_to?(:table_exists?) && Product.table_exists?
+          paths.unshift(Rails.application.routes.url_helpers.product_path(product)) if product rescue nil
           puts JSON.generate(paths.uniq)
         RUBY
         paths = JSON.parse(output.lines.reverse.find { |line| line.start_with?("[") } || "[]")

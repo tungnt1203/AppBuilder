@@ -200,6 +200,10 @@ files build on it:
   for the preview: the section stays hidden until real buyers write some.
 - **Development data**: `db/seeds.rb` adds a sample catalog for the preview. When the owner gives
   their real products, replace the samples there.
+  The sample photos print the samples' own designs ("Good things take time" on the Good Things
+  Tee): when you rename samples to fit the shop (cat tees), give them photos that match from
+  `bin/images`, or keep the samples as they are; a cat tee's title on a slogan tee's photo
+  looks broken to the owner.
 
 ### Selling from ads (keep these when you redesign)
 
@@ -236,6 +240,10 @@ each part working and fill it with the owner's real details:
   data on product pages, with the same ids as the pixels (`Variant#catalog_id`). Keep both.
 - **Unfinished card checkouts**: a buyer who leaves Stripe without paying gets one email to
   finish (`OrderMailer#recovery`); the order is cancelled a day later.
+
+Printed-to-order products can't be returned for the wrong size or a change of mind (the refund
+policy says so): never promise size exchanges or "easy returns" in the site's copy; offer help
+with damaged or misprinted items, and point to the size guide.
 
 Don't add fake urgency or fake social proof (invented stock counts, countdowns that reset,
 made-up reviews or "23 people are viewing this"): ad networks and Stripe ban shops for it.

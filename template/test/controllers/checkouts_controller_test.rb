@@ -74,7 +74,11 @@ class CheckoutsControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#checkout_totals", /Enter your address/
     assert_select "input[type=submit][value=?]", "Continue to payment"
 
-    get shipping_checkout_path(shipping_country: "US", shipping_region: "TX", shipping_postal_code: "78701", payment_method: "stripe")
+    get shipping_checkout_path(shipping_country: "US", shipping_region: "TX", shipping_postal_code: "78701")
+    assert_redirected_to new_checkout_path, "only for the totals' frame"
+
+    get shipping_checkout_path(shipping_country: "US", shipping_region: "TX", shipping_postal_code: "78701", payment_method: "stripe"),
+      headers: { "Turbo-Frame" => "checkout_totals" }
     assert_select "turbo-frame#checkout_totals dd", "$6.50"
     assert_select "input[type=submit][value=?]", "Pay $30.50"
   end
