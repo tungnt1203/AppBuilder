@@ -1,0 +1,26 @@
+<%# A product from Printify comes in as a draft: what to check before it goes on sale. %>
+<% problems = product.launch_problems %>
+<%= card do %>
+  <h2 class="text-sm font-semibold text-ink"><%= t("admin.products.launch_checklist.title") %></h2>
+  <ul class="mt-3 space-y-2 text-sm">
+    <% { no_photos: "#product_images", price_not_above_cost: "#variants", no_size_guide: "#size_guide" }.each do |problem, anchor| %>
+      <% next if problem == :no_size_guide && product.size_option_name.nil? %>
+      <li class="flex items-start gap-2">
+        <% if problems.include?(problem) %>
+          <%= icon "circle-alert", size: 18, class: "mt-px shrink-0 text-red-600" %>
+          <a href="<%= anchor %>" class="<%= link_classes %>"><%= t("admin.products.launch_checklist.#{problem}") %></a>
+        <% else %>
+          <%= icon "circle-check", size: 18, class: "mt-px shrink-0 text-emerald-600" %>
+          <span class="text-muted"><%= t("admin.products.launch_checklist.#{problem}_done") %></span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+  <% if product.draft? %>
+    <div class="mt-4 flex flex-wrap items-center gap-3">
+      <%= button_tag t("admin.products.launch_checklist.publish"), type: "submit", name: "product[status]", value: "active", class: button_classes(problems.empty? ? :primary : :secondary, size: :sm),
+            data: ({ turbo_confirm: t("admin.products.launch_checklist.confirm_publish") } if problems.any?) %>
+      <span class="text-xs text-muted"><%= t("admin.products.launch_checklist.draft_hint") %></span>
+    </div>
+  <% end %>
+<% end %>

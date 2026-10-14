@@ -251,6 +251,8 @@ en:
         title: Import from Printify
         description: Your Printify products. Importing brings their options, prices, costs and mockups; updating again keeps your titles and prices.
         in_shop: In the shop
+        price_and_cost: "From %{price} · costs %{cost}"
+        margin: "%{percent}% margin"
         import: Import
         update: Update
         importing: Importing…
@@ -258,6 +260,7 @@ en:
         empty_description: Make a product in Printify, then import it here.
       create:
         notice: "%{title} is in the shop."
+        imported: "%{title} is in as a draft. Check it below, then put it on sale."
     dashboards:
       show:
         title: Dashboard
@@ -305,6 +308,8 @@ en:
           failed: This order didn't reach Printify.
           stopped: Printify stopped this order.
           still_there: Printify still has this order.
+          fix_field: Fix the %{field} below, save, then send it again.
+          rejected_here: Printify turned the order down for this.
           retry: Send to Printify again
           sent: Printify is making this order; it ships here with its tracking.
           open: Open in Printify
@@ -398,6 +403,17 @@ en:
           notice: Order %{number} is marked as refunded.
           failed: 'Stripe couldn''t refund it: %{error}'
     products:
+      launch_checklist:
+        title: Before it goes on sale
+        no_photos: Add photos
+        no_photos_done: Photos
+        price_not_above_cost: Some prices don't cover Printify's cost; raise them
+        price_not_above_cost_done: Every price covers its cost
+        no_size_guide: Add a size guide; buyers can't exchange a printed size
+        no_size_guide_done: Size guide
+        publish: Put it on sale
+        confirm_publish: Some checks above aren't done. Put it on sale anyway?
+        draft_hint: It's a draft until then; buyers can't see it.
       index:
         title: Products
         new: Add product
@@ -423,7 +439,7 @@ en:
         photos_hint: The first photo is the one shown in lists. Under each photo, pick the color it shows, so buyers see it when they pick that color. Images up to 20 MB.
         remove_photo: Remove photo
         photo_shows: Which %{option} this photo shows
-        size_guide_hint: 'Shown next to the size option. One row per line, cells split by "|", the first row is the header.'
+        size_guide_hint: 'Shown next to the size option. One row per line, cells split by "|", the first row is the header. Copy the measurements from your blank''s page in Printify, e.g. "S | 18 | 28" for chest and length in inches.'
         options: Options
         options_hint: Like Color and Size. Separate the values with commas; a variant is made for each combination.
         option_name: Option %{number}
@@ -439,6 +455,9 @@ en:
         variants: Variants
         pricing: Pricing
         variant: Variant
+        raise_by: Change every price by
+        apply: Apply
+        margin: Margin
         variants_hint: Compare-at price shows the old price crossed out. Untick "For sale" to hide a variant from buyers. Tick "Track stock" for things you keep a count of; leave it off for made-to-order products. Cost is only for your margins.
         status_hint: Only active products are on the site.
         base_price_hint: Every variant starts at this price; change them one by one after saving.

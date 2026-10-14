@@ -12,8 +12,13 @@ class Admin::PrintifyImportsController < Admin::BaseController
   end
 
   def create
+    new_product = !Product.exists?(printify_product_id: params.expect(:printify_product_id))
     product = Printify::Import.new.call(params.expect(:printify_product_id))
-    redirect_to admin_printify_imports_path(page: params[:page]), notice: t(".notice", title: product.title), status: :see_other
+    if new_product
+      redirect_to edit_admin_product_path(product), notice: t(".imported", title: product.title), status: :see_other
+    else
+      redirect_to admin_printify_imports_path(page: params[:page]), notice: t(".notice", title: product.title), status: :see_other
+    end
   rescue PrintifyGateway::Error, ActiveRecord::RecordInvalid => error
     redirect_to admin_printify_imports_path(page: params[:page]), alert: error.message, status: :see_other
   end

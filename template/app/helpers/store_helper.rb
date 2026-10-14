@@ -96,6 +96,16 @@ module StoreHelper
     "delivered" => :green, "cancelled" => :gray, "refunded" => :red
   }.freeze
 
+  # The address field Printify turned an order down for, from its error ("address_to.region:
+  # …"), to open the address editor at it; nil when it wasn't the address.
+  def printify_rejected_field(order)
+    error = order.fulfillment_error.to_s.downcase
+    return if error.empty? || order.printify_order_id.present?
+
+    { /phone/ => :phone, /region|state|province/ => :shipping_region, /zip|postal/ => :shipping_postal_code,
+      /city/ => :shipping_city, /country/ => :shipping_country, /address/ => :shipping_address1 }.find { |pattern, _| error.match?(pattern) }&.last
+  end
+
   def order_status_badge(order)
     badge t(order.status, scope: "orders.statuses"), tone: ORDER_STATUS_TONES.fetch(order.status, :gray)
   end
@@ -107,6 +117,11 @@ module StoreHelper
   end
 
   # The variants of a product for the variant picker: what each costs and whether it can be bought.
+  # How much of the price the shop keeps over the cost, in percent ("54"); nil without both.
+  def margin_percent(price_cents, cost_cents)
+    ((price_cents - cost_cents) * 100.0 / price_cents).round if price_cents.to_i.positive? && cost_cents
+  end
+
   def variants_json(product)
     product.variants.map do |variant|
       image = product.image_for(variant)

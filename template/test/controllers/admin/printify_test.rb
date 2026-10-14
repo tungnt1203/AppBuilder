@@ -53,14 +53,37 @@ class Admin::PrintifyTest < ActionDispatch::IntegrationTest
 
     get admin_printify_imports_path
     assert_select "li", /Sunset Tee/
+    assert_select "li", /From \$25\.00 · costs \$11\.50 · 54% margin/
     assert_select "button", "Import"
 
     assert_difference -> { Product.count } do
       post admin_printify_imports_path, params: { printify_product_id: "pf-tee" }
     end
+    product = Product.find_by!(printify_product_id: "pf-tee")
+    assert product.draft?
+    assert_redirected_to edit_admin_product_path(product)
     follow_redirect!
+    assert_select "h2", "Before it goes on sale"
+    assert_select "a[href='#size_guide']", /Add a size guide/
+    assert_select "th", "Margin"
+    assert_select "th", { text: "Track stock", count: 0 }, "Printify's products aren't counted"
+
+    patch admin_product_path(product), params: { product: { status: "active", size_guide: "Size | Chest\nS | 18" } }
+    assert product.reload.active?
+    assert_empty product.launch_problems
+
+    get admin_printify_imports_path
     assert_select "button", "Update"
-    assert_select "a[href=?]", edit_admin_product_path(Product.find_by!(printify_product_id: "pf-tee"))
+    assert_select "a[href=?]", edit_admin_product_path(product)
+  end
+
+  test "a Printify order turned down for its address opens the editor at the field" do
+    sign_in_as users(:staff)
+    orders(:paid).update!(fulfillment_error: "Printify answered 400: address_to.region: The region field is invalid")
+
+    get admin_order_path(orders(:paid))
+    assert_select "a[href='#order_shipping_region']", /Fix the state/
+    assert_select "details[open] input#order_shipping_region.border-red-400[autofocus]"
   end
 
   test "importing needs Printify connected" do

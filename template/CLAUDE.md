@@ -180,7 +180,8 @@ files build on it:
 - **Fulfillment with Printify** is built in (`Printify::Import`, `Printify::Fulfillment`,
   `PrintifyGateway` in the core): the owner connects their Printify token at
   /admin/settings/printify (never ask for it in chat), imports products with their options,
-  prices, costs and a mockup per color at /admin/printify/products, and paid orders go to Printify
+  prices, costs and a mockup per color at /admin/printify/products (as drafts, with a checklist on
+  the product's page: photos, prices above cost, a size guide, then "Put it on sale"), and paid orders go to Printify
   by themselves, move to In production, and to Shipped with Printify's tracking (the buyer gets the
   shipped email) once every package has, then Delivered. Cancelling or refunding an order cancels it in
   Printify while Printify still allows it. Checkout charges Printify's items the shipping Printify quotes for the buyer's address

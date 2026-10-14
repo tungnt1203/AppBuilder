@@ -71,6 +71,16 @@ class Product < ApplicationRecord
     variants.select(&:sellable?)
   end
 
+  # What to fix before a product goes on sale: :no_photos, :price_not_above_cost (a variant on
+  # sale for no more than it costs), :no_size_guide (sizes without a chart). Empty when ready.
+  def launch_problems
+    problems = []
+    problems << :no_photos unless images.attached?
+    problems << :price_not_above_cost if variants.any? { |variant| variant.available? && variant.cost_cents && variant.price_cents <= variant.cost_cents }
+    problems << :no_size_guide if size_option_name && size_guide.blank?
+    problems
+  end
+
   def available?
     active? && variants.any?(&:sellable?)
   end

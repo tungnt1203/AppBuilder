@@ -2,7 +2,8 @@
 # to date: its options (Color, Size), a variant for each one Printify offers with Printify's price
 # and cost, and its mockups, each tied to the color it shows. Combinations Printify doesn't make
 # stay off sale. On an update the owner's title, description and prices are kept; costs, what's
-# offered and new variants come from Printify.
+# offered and new variants come from Printify. A new product comes in as a draft, for the owner to
+# check before it goes on sale (Product#launch_problems).
 class Printify::Import
   MAX_PHOTOS = 12
   EXTENSIONS = { "image/png" => ".png", "image/webp" => ".webp", "image/jpeg" => ".jpg" }.freeze
@@ -18,8 +19,9 @@ class Printify::Import
     result = @gateway.products(@store.printify_shop_id, page:)
     imported = Product.where(printify_product_id: result["data"].map { |item| item["id"] }).index_by(&:printify_product_id)
     items = result["data"].map do |item|
+      cheapest = Array(item["variants"]).select { |variant| variant["is_enabled"] }.min_by { |variant| variant["price"].to_i }
       { id: item["id"], title: item["title"], image: item["images"]&.find { |image| image["is_default"] }&.dig("src") || item.dig("images", 0, "src"),
-        product: imported[item["id"]] }
+        product: imported[item["id"]], price_cents: cheapest&.dig("price"), cost_cents: cheapest&.dig("cost") }
     end
     [ items, result["last_page"].to_i ]
   end
@@ -37,7 +39,7 @@ class Printify::Import
 
     Product.transaction do
       if new_product
-        product.assign_attributes(title: data["title"], description: plain_text(data["description"]), status: "active",
+        product.assign_attributes(title: data["title"], description: plain_text(data["description"]), status: "draft",
           base_price_cents: offered.map { |variant| variant["price"] }.min)
       end
       options.each_with_index do |(name, values), index|

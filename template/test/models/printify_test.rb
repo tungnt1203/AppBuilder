@@ -21,7 +21,7 @@ class PrintifyTest < ActiveSupport::TestCase
   test "importing makes the product, its variants, prices, costs and a photo per color" do
     product = Printify::Import.new.call("pf-tee")
 
-    assert_equal [ "Sunset Tee", "active", "pf-tee" ], [ product.title, product.status, product.printify_product_id ]
+    assert_equal [ "Sunset Tee", "draft", "pf-tee" ], [ product.title, product.status, product.printify_product_id ]
     assert_equal "Soft cotton.\n\nPrinted to order.", product.description
     assert_equal [ [ "Color", %w[ Black White ] ], [ "Size", %w[ S M ] ] ], product.options.map { |_, name, values| [ name, values ] }
 
