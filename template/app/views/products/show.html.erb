@@ -12,12 +12,18 @@
 <%# A product page made to sell from an ad: photos, price, options, the button, and right under it
     what buyers want to know before they pay (when it arrives, shipping, returns). On a phone the
     button follows the buyer once the main one scrolls away. Restyle it; keep those parts. %>
-<div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy">
+<div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy" data-action="variant-picker:change->sticky-buy#select">
   <div class="min-w-0" data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
     <% images = @product.images.select(&:representable?) %>
     <div class="aspect-4/5 overflow-hidden rounded-xl">
       <% if images.any? %>
-        <%= image_tag images.first.variant(:large), alt: @product.title, class: "size-full bg-surface-muted object-cover", data: { gallery_target: "main" } %>
+        <button type="button" class="block size-full cursor-zoom-in" data-action="gallery#zoom" aria-label="<%= t(".zoom") %>">
+          <%= image_tag images.first.variant(:large), alt: @product.title, class: "size-full bg-surface-muted object-cover", data: { gallery_target: "main" } %>
+        </button>
+        <dialog class="m-auto max-h-[92vh] max-w-[92vw] overflow-hidden rounded-xl bg-canvas p-0 backdrop:bg-black/70" data-gallery-target="zoom" data-action="click->gallery#closeZoom">
+          <img alt="<%= @product.title %>" class="max-h-[92vh] w-auto object-contain" data-gallery-target="zoomImage">
+          <button type="button" class="absolute top-3 right-3 grid size-9 place-items-center rounded-full bg-surface/90 text-ink" aria-label="<%= t(".close") %>"><%= icon "x", size: 18 %></button>
+        </dialog>
       <% else %>
         <%= product_image @product, class: "size-full" %>
       <% end %>
@@ -60,6 +66,10 @@
               <button type="button" class="text-sm <%= link_classes %>" data-controller="dialog-trigger" data-dialog-trigger-id-value="size-guide" data-action="dialog-trigger#open"><%= t(".size_guide") %></button>
             <% end %>
           </div>
+          <% if values.size > 12 %>
+            <input type="search" placeholder="<%= t(".find_option", option: name.downcase) %>" aria-label="<%= t(".find_option", option: name.downcase) %>"
+                   class="<%= field_classes %> mt-2 h-9 text-sm" data-position="<%= position %>" data-action="variant-picker#filter">
+          <% end %>
           <div class="mt-2 flex flex-wrap gap-2">
             <% values.each do |value| %>
               <label class="cursor-pointer" title="<%= value %>">
@@ -75,6 +85,9 @@
               </label>
             <% end %>
           </div>
+          <% if name == @product.size_option_name && @product.printify_product_id.present? %>
+            <p class="mt-2 text-xs text-muted"><%= t(".made_to_order_sizes") %></p>
+          <% end %>
         </fieldset>
       <% end %>
 
@@ -87,15 +100,25 @@
         </div>
         <%= form.submit t(".add_to_cart"), class: "#{button_classes} flex-1 py-3 text-base", disabled: !@variant&.buyable?, data: { variant_picker_target: "submit", sticky_buy_target: "button" } %>
       </div>
-      <p class="text-sm text-muted" data-variant-picker-target="unavailable" <%= "hidden" if @variant&.buyable? %>><%= t(".unavailable") %></p>
+      <p class="text-sm text-muted" data-variant-picker-target="unavailable" data-sold-out="<%= t(".sold_out") %>" data-not-made="<%= t(".unavailable") %>"
+         <%= "hidden" if @variant&.buyable? %>><%= @variant && @variant.available? && !@variant.in_stock? ? t(".sold_out") : t(".unavailable") %></p>
     <% end %>
 
     <% store = Store.current %>
     <ul class="mt-6 space-y-2.5 text-sm text-ink">
-      <li class="flex items-center gap-2.5">
-        <%= icon "truck", size: 18, class: "shrink-0 text-muted" %>
-        <span><%= delivery_estimate(store) || t(".made_to_order") %></span>
-      </li>
+      <% made_to_order = @product.printify_product_id.present? %>
+      <% if made_to_order || delivery_estimate(store).nil? %>
+        <li class="flex items-center gap-2.5">
+          <%= icon "shirt", size: 18, class: "shrink-0 text-muted" %>
+          <span><%= t(".made_to_order") %></span>
+        </li>
+      <% end %>
+      <% if (estimate = delivery_estimate(store)) %>
+        <li class="flex items-center gap-2.5">
+          <%= icon "truck", size: 18, class: "shrink-0 text-muted" %>
+          <span><%= estimate %></span>
+        </li>
+      <% end %>
       <li class="flex items-center gap-2.5">
         <%= icon "package", size: 18, class: "shrink-0 text-muted" %>
         <span>
@@ -111,7 +134,7 @@
       <% if store.policy("refund") %>
         <li class="flex items-center gap-2.5">
           <%= icon "rotate-ccw", size: 18, class: "shrink-0 text-muted" %>
-          <%= link_to t(".returns"), policy_path("refund"), class: "underline decoration-line underline-offset-4 hover:decoration-ink" %>
+          <%= link_to t(made_to_order ? ".returns_made_to_order" : ".returns"), policy_path("refund"), class: "underline decoration-line underline-offset-4 hover:decoration-ink" %>
         </li>
       <% end %>
       <li class="flex items-center gap-2.5">
@@ -148,7 +171,7 @@
     <div class="flex items-center gap-3">
       <div class="min-w-0 flex-1">
         <p class="truncate text-sm font-medium text-ink"><%= @product.title %></p>
-        <p class="text-sm text-muted"><%= price_range(@product) %></p>
+        <p class="truncate text-sm text-muted" data-sticky-buy-target="selection"><%= @variant ? [ @variant.title, money(@variant.price_cents) ].compact.join(" · ") : price_range(@product) %></p>
       </div>
       <button type="submit" form="buy" class="<%= button_classes %> px-6 py-3" data-sticky-buy-target="copy"><%= t(".add_to_cart") %></button>
     </div>

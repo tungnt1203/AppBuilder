@@ -23,6 +23,15 @@ export default class extends Controller {
     this.variantIdTarget.value = variant.id
     this.show(variant)
     if (variant.image) this.dispatch("image", { detail: { url: variant.image } })
+    this.dispatch("change", { detail: { selection: [ ...variant.options, variant.price ].join(" · ") } })
+  }
+
+  // Narrows a long list of values (dozens of colors) to those matching what the buyer types.
+  filter(event) {
+    const query = event.target.value.trim().toLowerCase()
+    this.optionTargets.filter((input) => input.dataset.position === event.target.dataset.position).forEach((input) => {
+      input.closest("label").hidden = query !== "" && !input.value.toLowerCase().includes(query) && !input.checked
+    })
   }
 
   chosenOptions() {
@@ -45,7 +54,10 @@ export default class extends Controller {
       this.savingTarget.hidden = !variant?.saving
     }
     this.submitTarget.disabled = !available
-    if (this.hasUnavailableTarget) this.unavailableTarget.hidden = available
+    if (this.hasUnavailableTarget) {
+      this.unavailableTarget.hidden = available
+      this.unavailableTarget.textContent = variant?.sold_out ? this.unavailableTarget.dataset.soldOut : this.unavailableTarget.dataset.notMade
+    }
   }
 
   // Dims the values that, with the other choices, make a combination that can't be bought.

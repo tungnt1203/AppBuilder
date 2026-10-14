@@ -14,7 +14,7 @@
       <s class="ml-1"><%= money(variant.compare_at_price_cents) %></s>
     <% end %>
     <% unless product.available? %>
-      · <%= t("products.product.sold_out") %>
+      · <%= t(product.variants.any? { |variant| variant.available? && !variant.in_stock? } ? "products.product.sold_out" : "products.product.unavailable") %>
     <% end %>
   </p>
 <% end %>

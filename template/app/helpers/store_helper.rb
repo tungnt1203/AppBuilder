@@ -110,7 +110,7 @@ module StoreHelper
   def variants_json(product)
     product.variants.map do |variant|
       image = product.image_for(variant)
-      { id: variant.id, options: variant.option_values, available: variant.buyable?,
+      { id: variant.id, options: variant.option_values, available: variant.buyable?, sold_out: variant.available? && !variant.in_stock?,
         image: (url_for(image.variant(:large)) if image&.representable?),
         price: money(variant.price_cents), compare_at_price: (money(variant.compare_at_price_cents) if variant.on_sale?),
         saving: (t("products.show.save", percent: sale_percent(variant)) if variant.on_sale?) }

@@ -4,7 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // of the screen keeps it in reach. The bar's button is disabled whenever the main one is (an
 // option that's sold out).
 export default class extends Controller {
-  static targets = [ "button", "bar", "copy" ]
+  static targets = [ "button", "bar", "copy", "selection" ]
 
   connect() {
     this.observer = new IntersectionObserver(([ entry ]) => this.toggle(!entry.isIntersecting && entry.boundingClientRect.top < 0))
@@ -18,6 +18,11 @@ export default class extends Controller {
     this.observer?.disconnect()
     this.mirror?.disconnect()
     document.body.classList.remove("pb-20", "md:pb-0")
+  }
+
+  // What the button adds: the chosen color and size and its price (variant-picker:change).
+  select({ detail: { selection } }) {
+    if (this.hasSelectionTarget) this.selectionTarget.textContent = selection
   }
 
   toggle(show) {

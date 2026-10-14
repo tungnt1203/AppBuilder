@@ -11,6 +11,7 @@ en:
       archived: Archived
     product:
       sold_out: Sold out
+      unavailable: Not available
       sale: Sale
     index:
       title: Shop
@@ -25,7 +26,13 @@ en:
       photo: Photo %{number}
       quantity: Quantity
       add_to_cart: Add to cart
-      unavailable: This option is sold out.
+      unavailable: This color and size isn't available.
+      sold_out: This option is sold out.
+      zoom: See the photo larger
+      close: Close
+      find_option: Find a %{option}
+      made_to_order_sizes: Printed to order, so it can't be exchanged for another size. Check the size guide first.
+      returns_made_to_order: Returns for damaged or wrong items
       save: Save %{percent}%
       size_guide: Size guide
       made_to_order: Printed just for you when you order
