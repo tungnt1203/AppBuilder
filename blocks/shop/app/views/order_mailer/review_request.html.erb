@@ -1,0 +1,11 @@
+<h1><%= t(".heading", name: @order.shipping_name.to_s.split.first) %></h1>
+<p><%= t(".intro") %></p>
+
+<ul>
+  <% @products.each do |product| %>
+    <li><%= product.title %></li>
+  <% end %>
+</ul>
+
+<p><%= link_to t(".review"), new_order_review_url(@order) %></p>
+<p><%= t(".problem") %></p>

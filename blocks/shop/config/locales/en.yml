@@ -10,6 +10,7 @@ en:
       store: Store
       discount: Discount code
       promotion: Sale
+      product_review: Review
     attributes:
       product:
         title: Title
@@ -93,6 +94,10 @@ en:
         starts_at: Starts
         ends_at: Ends
         variant_ids: Products
+      product_review:
+        rating: Rating
+        body: Review
+        author_name: Name shown
     errors:
       models:
         product:
@@ -123,6 +128,12 @@ en:
             base:
               no_items: Choose at least one product
               overlaps: "%{product} is already in another sale at that time"
+        product_review:
+          attributes:
+            product:
+              not_bought: isn't in this order
+            product_id:
+              taken: is already reviewed for this order
   activemodel:
     errors:
       models:
@@ -170,6 +181,12 @@ en:
       intro: You left before paying, so we kept your order for you. It's here whenever you're ready, for the next day.
       finish: Finish your order (%{total})
       questions: Questions? Write to %{email}.
+    review_request:
+      subject: "%{app}: how do you like it?"
+      heading: How do you like it, %{name}?
+      intro: Your order should have arrived by now. Would you take a minute to say what you think? It helps other buyers, and it helps us.
+      review: Write a review
+      problem: Something wrong with your order? Reply to this email and we'll make it right.
     refunded:
       subject: "%{app}: order %{number} is refunded"
       heading: Order %{number} is refunded

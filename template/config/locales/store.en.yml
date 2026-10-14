@@ -39,8 +39,18 @@ en:
       shipping_policy: Shipping policy
       refund_policy: Refund policy
       related: You may also like
+      reviews:
+        one: 1 review
+        other: "%{count} reviews"
+      reviews_title: Reviews
+      reviews_summary:
+        one: "%{average} out of 5, from 1 buyer"
+        other: "%{average} out of 5, from %{count} buyers"
+      verified_buyer: Verified buyer
     delivery:
       arrives: Arrives %{dates}
+    reviews:
+      rated: Rated %{rating} out of 5
   orders:
     statuses:
       pending: Awaiting payment
@@ -77,6 +87,27 @@ en:
       pay_now: Pay %{total}
       discount: Discount (%{code})
       tax: Tax
+      review_prompt: How do you like it?
+      review: Write a review
+    reviews:
+      nothing_to_review: There's nothing to review on this order yet.
+      new:
+        title: Write a review
+        intro: How do you like what you got in order %{number}? Tap the stars for what you'd like to review; the rest is optional.
+        rating_for: Your rating for %{product}
+        stars:
+          one: 1 star
+          other: "%{count} stars"
+        body: What did you think?
+        body_placeholder: The fit, the print, the quality, how it washes…
+        author_name: Name shown with your review
+        author_name_hint: Your email and address stay private.
+        submit: Post review
+      create:
+        pick_stars: Tap the stars to rate at least one product.
+        thanks:
+          one: Thanks for your review!
+          other: Thanks for your reviews!
   home:
     show:
       tagline: Original designs, printed on demand and shipped to your door.
@@ -163,6 +194,7 @@ en:
       discounts: Discounts
       promotions: Sales
       agent_changes: Suggestions
+      reviews: Reviews
   ui:
     pagination:
       label: Pages
@@ -553,6 +585,22 @@ en:
         limit:
           one: 1 use
           other: "%{count} uses"
+    product_reviews:
+      index:
+        title: Reviews
+        description: What buyers say about what they bought. Reviews show on product pages as soon as they're written; hide only spam, offensive reviews or ones not about the product, never bad ones for being bad (it misleads buyers and breaks the FTC's and ad networks' rules).
+        published: Showing
+        hidden: Hidden (%{count})
+        hide: Hide
+        show: Show again
+        confirm_hide: Hide this review from the product page?
+        empty_title: No reviews yet
+        empty_description: A few days after an order arrives, the buyer gets an email asking for a review.
+        empty_hidden_title: No hidden reviews
+        empty_hidden_description: Reviews you hide show up here, to show again.
+      update:
+        hidden: The review is hidden.
+        published: The review shows again.
     promotions:
       index:
         title: Sales

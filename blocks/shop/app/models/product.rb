@@ -8,6 +8,7 @@ class Product < ApplicationRecord
   has_many :variants, -> { order(:position, :id) }, dependent: :destroy, inverse_of: :product
   has_many :collection_products, dependent: :destroy
   has_many :collections, through: :collection_products
+  has_many :product_reviews, dependent: :destroy
   has_many_attached :images do |image|
     image.variant :thumb, resize_to_fill: [ 160, 160 ], format: :webp
     image.variant :card, resize_to_fill: [ 640, 800 ], format: :webp
@@ -87,6 +88,12 @@ class Product < ApplicationRecord
 
   # Other products to show under this one ("You may also like"): from its collections first,
   # then the newest.
+  # Its published reviews' average and count, nil before the first: { average: 4.6, count: 12 }.
+  def rating_summary
+    count, average = product_reviews.published.pick(Arel.sql("COUNT(*)"), Arel.sql("AVG(rating)"))
+    { average: average.to_f.round(1), count: } if count.to_i.positive?
+  end
+
   def related(limit: 4)
     others = Product.visible.where.not(id:).with_attached_images.includes(:variants)
     picked = others.joins(:collection_products).where(collection_products: { collection_id: collection_ids }).distinct.newest_first.limit(limit).to_a

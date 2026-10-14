@@ -10,7 +10,7 @@ module Shop
   #     extend ActiveSupport::Concern
   #
   #     included do
-  #       has_many :reviews, dependent: :destroy
+  #       has_many :wishlist_items, dependent: :destroy
   #     end
   #   end
   #

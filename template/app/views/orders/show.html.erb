@@ -45,6 +45,13 @@
     </div>
   <% end %>
 
+  <% if @order.reviewable_products.any? %>
+    <div class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-6">
+      <p class="flex items-center gap-2 font-semibold"><%= icon "star", size: 18 %> <%= t(".review_prompt") %></p>
+      <%= link_to t(".review"), new_order_review_path(@order), class: button_classes(:secondary) %>
+    </div>
+  <% end %>
+
   <ul class="mt-8 divide-y divide-line border-y border-line">
     <% @order.line_items.each do |item| %>
       <li class="flex justify-between gap-4 py-4 text-sm">

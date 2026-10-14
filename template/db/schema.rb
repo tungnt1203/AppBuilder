@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_140000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -239,6 +239,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_120000) do
     t.datetime "recovery_sent_at"
     t.json "attribution"
     t.datetime "purchase_reported_at"
+    t.datetime "review_requested_at"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["discount_id"], name: "index_orders_on_discount_id"
     t.index ["email"], name: "index_orders_on_email"
@@ -246,6 +247,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_120000) do
     t.index ["status", "created_at"], name: "index_orders_on_status_and_created_at"
     t.index ["stripe_checkout_session_id"], name: "index_orders_on_stripe_checkout_session_id", unique: true
     t.index ["token"], name: "index_orders_on_token", unique: true
+  end
+
+  create_table "product_reviews", force: :cascade do |t|
+    t.integer "product_id", null: false
+    t.integer "order_id", null: false
+    t.integer "rating", null: false
+    t.text "body"
+    t.string "author_name", null: false
+    t.string "status", default: "published", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id", "product_id"], name: "index_product_reviews_on_order_id_and_product_id", unique: true
+    t.index ["order_id"], name: "index_product_reviews_on_order_id"
+    t.index ["product_id", "status", "created_at"], name: "index_product_reviews_on_product_id_and_status_and_created_at"
+    t.index ["product_id"], name: "index_product_reviews_on_product_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -442,6 +458,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_120000) do
   add_foreign_key "order_events", "users", on_delete: :nullify
   add_foreign_key "orders", "customers"
   add_foreign_key "orders", "discounts", on_delete: :nullify
+  add_foreign_key "product_reviews", "orders"
+  add_foreign_key "product_reviews", "products"
   add_foreign_key "promotion_items", "promotions"
   add_foreign_key "promotion_items", "variants", on_delete: :cascade
   add_foreign_key "service_staff_members", "services"

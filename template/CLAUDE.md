@@ -121,7 +121,7 @@ files build on it:
 - **Screens**: the site's and /admin's controllers and views are the app's (`app/`); change them freely.
 - **Adding to a core model** (an association, validation, scope, method, a column from a new
   migration): in `app/models/<model>/extension.rb`, which the core includes:
-  `module Product::Extension; extend ActiveSupport::Concern; included { has_many :reviews, dependent: :destroy }; end`.
+  `module Product::Extension; extend ActiveSupport::Concern; included { has_many :wishlist_items, dependent: :destroy }; end`.
   Never create `app/models/product.rb` (or any file with the same path as one of the core's): it
   would replace the core's class, and the app refuses to start with one.
 - **Order emails and the core's text**: copy a template from `vendor/blocks/shop/app/views/` to the
@@ -185,6 +185,13 @@ files build on it:
   products are fulfilled by staff by hand, as before. Don't write other
   print-on-demand or fulfillment API code; when the owner asks about Printful or Gelato, say
   Printify is the one connected for now. Tests use `connect_fake_printify`.
+- **Reviews** are built in (`ProductReview`, one per product and order): a few days after an
+  order arrives the buyer gets an email (`Order::RequestReviewsJob`) linking to the order's review
+  page (`new_order_review_path(order)`), and reviews show on the product page right away, with
+  stars by the title, a Reviews section and schema.org ratings. Staff hide spam at
+  `/admin/reviews`. Keep the stars and the section when you redesign the product page (restyle
+  them), don't write another review model, and never seed or invent reviews, not even samples
+  for the preview: the section stays hidden until real buyers write some.
 - **Development data**: `db/seeds.rb` adds a sample catalog for the preview. When the owner gives
   their real products, replace the samples there.
 
@@ -228,8 +235,8 @@ Don't add fake urgency or fake social proof (invented stock counts, countdowns t
 made-up reviews or "23 people are viewing this"): ad networks and Stripe ban shops for it.
 
 Change the shop's screens freely to fit the owner (design skill), keep its rules (prices from the
-database, statuses through the methods, guest checkout), and add features around it: reviews,
-gift notes, product pages that look like the owner's brand.
+database, statuses through the methods, guest checkout), and add features around it:
+gift notes, wishlists, product pages that look like the owner's brand.
 
 ## Booking (built in, off by default)
 

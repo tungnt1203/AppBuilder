@@ -12,6 +12,8 @@ class ProductsController < ApplicationController
   def show
     @product = Product.visible.with_attached_images.includes(:variants).find_by!(slug: params[:id])
     @variant = @product.variant_for(Array(params[:options])) || @product.available_variants.first || @product.variants.first
+    @rating = @product.rating_summary
+    @reviews = @product.product_reviews.published.newest_first.limit(20) if @rating
     track :view_content, items: [ tracked_variant(@variant) ] if @variant
   end
 end

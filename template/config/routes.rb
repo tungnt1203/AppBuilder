@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     resource :checkout, only: %i[ new create ]
     resources :orders, only: :show do
       resource :payment, only: :create, module: :orders
+      resource :review, only: %i[ new create ], module: :orders
     end
     get "feeds/products", to: "feeds#products", defaults: { format: :xml }, as: :products_feed
   end
@@ -45,6 +46,7 @@ Rails.application.routes.draw do
       end
       resources :collections
       resources :discounts, except: :show
+      resources :product_reviews, only: %i[ index update ], path: "reviews"
       resources :promotions, only: %i[ index new create ] do
         resource :cancellation, only: :create, module: :promotions
       end

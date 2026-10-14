@@ -46,8 +46,17 @@ module StoreHelper
   end
 
   # schema.org Product data for search engines: one offer per variant, with its price and stock.
+  # Five stars, filled up to rating (rounded to the nearest whole star), read out as "Rated 4.6 out of 5".
+  def rating_stars(rating, size: 16, **options)
+    filled = rating.to_f.round
+    tag.span(role: "img", aria: { label: t("products.reviews.rated", rating: rating) }, **options, class: class_names("inline-flex items-center gap-0.5", options[:class])) do
+      safe_join(1.upto(5).map { |star| icon "star", size:, class: star <= filled ? "fill-current text-amber-500" : "fill-current text-line" })
+    end
+  end
+
   def product_structured_data(product)
     currency = Store.current.currency
+    rating = product.rating_summary
     data = {
       "@context" => "https://schema.org", "@type" => "Product", "name" => product.title,
       "description" => strip_tags(product.description.to_s).squish.presence,
@@ -57,7 +66,12 @@ module StoreHelper
         { "@type" => "Offer", "sku" => variant.catalog_id, "price" => format("%.2f", variant.price_cents / 100.0), "priceCurrency" => currency,
           "availability" => "https://schema.org/#{variant.buyable? ? "InStock" : "OutOfStock"}", "itemCondition" => "https://schema.org/NewCondition",
           "url" => product_url(product, options: variant.option_values.presence) }
-      }
+      },
+      "aggregateRating" => ({ "@type" => "AggregateRating", "ratingValue" => rating[:average], "reviewCount" => rating[:count] } if rating),
+      "review" => (product.product_reviews.published.newest_first.limit(5).map { |review|
+        { "@type" => "Review", "reviewRating" => { "@type" => "Rating", "ratingValue" => review.rating }, "author" => { "@type" => "Person", "name" => review.author_name },
+          "datePublished" => review.created_at.to_date.iso8601, "reviewBody" => review.body }.compact
+      } if rating)
     }.compact
     tag.script(raw(json_escape(data.to_json)), type: "application/ld+json")
   end

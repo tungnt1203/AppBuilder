@@ -19,6 +19,9 @@ production:
   track_printify_shipments:
     class: Order::TrackShipmentsJob
     schedule: every hour at minute 40
+  request_reviews:
+    class: Order::RequestReviewsJob
+    schedule: every day at 10am
   start_and_end_sales:
     class: Promotion::SyncJob
     schedule: every 5 minutes

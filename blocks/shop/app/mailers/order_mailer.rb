@@ -28,6 +28,15 @@ class OrderMailer < ApplicationMailer
       subject: t(".subject", app: Rails.configuration.x.app_name)
   end
 
+  # A few days after the order arrived (Order::RequestReviewsJob): how do they like it? Links to
+  # the order's review page.
+  def review_request(order)
+    @order, @store = order, Store.current
+    @products = order.reviewable_products.with_attached_images
+    mail to: order.email, reply_to: @store.contact_email.presence,
+      subject: t(".subject", app: Rails.configuration.x.app_name)
+  end
+
   def refunded(order)
     @order, @store = order, Store.current
     mail to: order.email, reply_to: @store.contact_email.presence,

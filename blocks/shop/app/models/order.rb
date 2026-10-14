@@ -24,6 +24,7 @@ class Order < ApplicationRecord
   belongs_to :discount, optional: true
   has_many :line_items, -> { order(:id) }, dependent: :destroy
   has_many :events, -> { order(:created_at, :id) }, class_name: "OrderEvent", dependent: :destroy
+  has_many :product_reviews, dependent: :destroy
 
   has_secure_token :token, length: 32
   enum :status, STATUSES.index_by(&:itself), default: "pending"
@@ -112,6 +113,18 @@ class Order < ApplicationRecord
   # card orders once paid, like the pixel's Purchase.
   def report_purchase_later
     Order::ReportPurchaseJob.perform_later(self) if Store.current.meta_conversions?
+  end
+
+  # Buyers review what they bought once it's on its way (see ProductReview).
+  def reviewable?
+    shipped? || delivered?
+  end
+
+  # The order's products still on sale that the buyer hasn't reviewed yet.
+  def reviewable_products
+    return Product.none unless reviewable?
+
+    Product.visible.where(id: line_items.joins(:variant).select("variants.product_id")).where.not(id: product_reviews.select(:product_id))
   end
 
   def printify_url
