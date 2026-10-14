@@ -69,8 +69,8 @@ module Evaluation
       # Content that fades in as it scrolls into view would be blank in a full-page picture.
       def reveal(browser)
         height = browser.evaluate("document.documentElement.scrollHeight").to_i
-        (0..height).step(400).first(40).each { |y| browser.execute("window.scrollTo(0, #{y})"); sleep 0.08 }
-        browser.execute("window.scrollTo(0, 0)")
+        (0..height).step(400).first(40).each { |y| browser.execute("window.scrollTo({ top: #{y}, behavior: 'instant' })"); sleep 0.08 }
+        browser.execute("window.scrollTo({ top: 0, behavior: 'instant' })") # not smooth: a page that scrolls smoothly isn't back at the top yet
         sleep 0.4
       rescue Ferrum::Error
       end

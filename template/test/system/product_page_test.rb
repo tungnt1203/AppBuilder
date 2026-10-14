@@ -18,6 +18,11 @@ class ProductPageTest < ApplicationSystemTestCase
 
       assert_no_selector "[data-sticky-buy-target=bar]", visible: true
       execute_script "window.scrollTo(0, document.body.scrollHeight)"
+      assert_selector "[data-sticky-buy-target=bar]", visible: true
+      assert_text "White · M"
+      execute_script "window.scrollTo({ top: 0, behavior: 'instant' })"
+      assert_no_selector "[data-sticky-buy-target=bar]", visible: true, wait: 2 # a jump back to the top hides it
+      execute_script "window.scrollTo(0, document.body.scrollHeight)"
       within("[data-sticky-buy-target=bar]") { click_on "Add to cart" }
     end
 
