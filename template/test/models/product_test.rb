@@ -47,11 +47,11 @@ class ProductTest < ActiveSupport::TestCase
   end
 
   test "too many combinations are refused" do
-    values = (1..11).map(&:to_s).join(",")
+    values = (1..21).map(&:to_s).join(",")
     product = Product.new(title: "Huge", option1_name: "A", option1_values_text: values, option2_name: "B", option2_values_text: values)
 
     assert_not product.valid?
-    assert product.errors.added?(:base, :too_many_variants)
+    assert product.errors.added?(:base, :too_many_variants, count: Product::MAX_VARIANTS)
   end
 
   test "slugs are unique, readable and stay when the title changes" do
