@@ -19,6 +19,7 @@ en:
     index:
       title: Shop
       search: Search products
+      collections: Shop by collection
       sort: Sort by
       sorts:
         newest: Newest

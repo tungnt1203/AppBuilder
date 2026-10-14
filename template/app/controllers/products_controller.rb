@@ -7,6 +7,7 @@ class ProductsController < ApplicationController
   def index
     @sort = SORTS.key?(params[:sort]) ? params[:sort] : "newest"
     @page = paginate(Product.visible.search(params[:q]).order(SORTS[@sort]).with_attached_images.includes(:variants))
+    @collections = Collection.ordered.joins(:products).merge(Product.visible).distinct
   end
 
   def show

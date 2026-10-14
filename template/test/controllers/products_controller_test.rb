@@ -10,6 +10,11 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", product_path(products(:hoodie)), count: 0
   end
 
+  test "buyers can browse by the shop's collections" do
+    get products_path
+    assert_select "nav[aria-label='Shop by collection'] a[href=?]", collection_path(collections(:cats))
+  end
+
   test "search and sort" do
     get products_path(q: "mug", sort: "title")
     assert_select "a[href=?]", product_path(products(:mug))

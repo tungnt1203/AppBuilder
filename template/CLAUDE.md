@@ -214,7 +214,9 @@ files build on it:
 
 Most buyers arrive from an ad on a phone, look at one product page and decide in seconds. The
 built-in screens carry what turns that visit into an order; restyle them for the brand, but keep
-each part working and fill it with the owner's real details:
+each part working and fill it with the owner's real details. Ads land on the product page and
+/products, not the home page: give those the brand as fully as the home page (type, color,
+shapes, the shop's voice), or the shop looks like a template where buyers decide.
 
 - **Product page** (`products/show`): photos, price with the sale price and "Save 20%", options as
   color swatches (`swatch_color`) and size buttons, the add-to-cart button, and right under it when
