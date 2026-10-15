@@ -1,4 +1,4 @@
-<%# Questions people ask before coming: parking, payment, cancelling, kids, how long it takes.
+<%# Questions buyers ask before they order: when it arrives, sizes, returns, how to pay.
     details/summary opens without JavaScript. Write answers in the owner's voice. Structure after
     HyperUI FAQs (MIT). %>
 <section class="bg-surface py-16 md:py-24">
@@ -6,9 +6,9 @@
     <h2 class="text-3xl font-bold text-ink md:text-4xl">Questions, answered</h2>
 
     <div class="mt-8 divide-y divide-line border-y border-line">
-      <% [ [ "Do I need to book ahead?", "Booking means no wait, especially Friday to Sunday evenings. Walk-ins are welcome whenever a chair is free." ],
-           [ "How can I pay?", "Cards, Apple Pay, Google Pay or cash at the desk." ],
-           [ "Can I move my appointment?", "Text us at least 2 hours before and we'll move it, free of charge." ] ].each do |question, answer| %>
+      <% [ [ "When will my order arrive?", "Each piece is printed when you order, then shipped. Most orders arrive in 5 to 9 business days." ],
+           [ "Which size should I pick?", "Check the size guide on the product page: printed pieces can't be exchanged for another size." ],
+           [ "What if it arrives damaged or misprinted?", "Write to us with a photo within 30 days and we'll send a new one or refund you." ] ].each do |question, answer| %>
         <details class="group py-5 [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex cursor-pointer items-center justify-between gap-4 text-lg font-semibold text-ink">
             <%= question %>

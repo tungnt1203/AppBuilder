@@ -52,14 +52,4 @@ class ShopSwitchTest < ActionDispatch::IntegrationTest
     get admin_users_path
     assert_response :success
   end
-
-  test "a booking app without the shop sends visitors to book" do
-    disable_shop
-    enable_booking
-
-    get root_path
-    assert_select "a[href='#{new_booking_path}']"
-    get new_booking_path
-    assert_response :success
-  end
 end

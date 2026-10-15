@@ -1,8 +1,7 @@
 # The app at a glance: the shop's sales, orders waiting on someone and the latest orders (with
-# the shop on), and today's appointments when the app takes bookings.
+# the shop on).
 class Admin::DashboardsController < Admin::BaseController
   def show
-    @todays_appointments = Appointment.booked.on(Date.current).includes(:staff_member) if booking?
     return unless shop?
 
     sales = Order.counted_in_sales

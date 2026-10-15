@@ -21,11 +21,6 @@ Rails.application.routes.draw do
     get "feeds/products", to: "feeds#products", defaults: { format: :xml }, as: :products_feed
   end
   resources :policies, only: :show
-  # Appointments (config.x.booking): book at /book, the customer's appointment by its token.
-  resource :booking, only: %i[ new create ], path: "book", path_names: { new: "" }
-  resources :appointments, only: :show do
-    resource :cancellation, only: :create, module: :appointments
-  end
   resource :contact, only: :show
   post "stripe/webhook" => "stripe_webhooks#create", as: :stripe_webhook
   post "printify/webhook" => "printify_webhooks#create", as: :printify_webhook
@@ -77,18 +72,7 @@ Rails.application.routes.draw do
       end
       resource :stripe_connection, only: %i[ create update destroy ]
     end
-    resources :appointments, only: %i[ index show new create update ] do
-      scope module: :appointments do
-        resource :completion, only: :create
-        resource :no_show, only: :create
-        resource :cancellation, only: :create
-      end
-    end
-    resources :services
-    resources :staff_members
-    resources :time_offs, only: %i[ index new create destroy ]
     resource :settings, only: %i[ edit update ]
-    resource :booking_settings, only: %i[ edit update ], path: "settings/booking"
     resource :policies, only: %i[ edit update ], path: "settings/policies"
     resources :users
   end

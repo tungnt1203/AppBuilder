@@ -28,7 +28,7 @@ cafés, boarding houses…), in Vietnamese and English. Working name only.
 |-------------|--------------------------------------------------------------------|---------|
 | `builder/`  | The builder: studio web app, agent runner, publishing, eval         | AGPL-3.0 |
 | `template/` | The Rails 8 app every generated app starts from: ONCE-ready, with auth, a UI kit, and `CLAUDE.md` + skills for the agent | MIT |
-| `blocks/`   | The parts every generated app shares, as Rails engines: `shop/` (catalog, cart, checkout, orders, Stripe), `booking/` (appointments) | MIT |
+| `blocks/`   | The parts every generated app shares, as Rails engines: `shop/` (catalog, cart, checkout, orders, Stripe, Printify) | MIT |
 | `integrations/commerce-agents/` | Backends for [anthropics/commerce-agents](https://github.com/anthropics/commerce-agents): a shopping assistant and an owner's assistant over a shop's agent API | MIT |
 
 New apps start from the last commit of `template/`, with a copy of each block it uses in

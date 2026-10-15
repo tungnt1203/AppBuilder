@@ -5,8 +5,6 @@
     <% if shop? %>
       <p class="mt-4 max-w-xl text-lg text-muted"><%= t(".tagline") %></p>
       <%= link_to t(".shop_all"), products_path, class: "#{button_classes} mt-8" %>
-    <% elsif booking? %>
-      <%= link_to t("layouts.site.book"), new_booking_path, class: "#{button_classes} mt-8" %>
     <% end %>
   </div>
 </section>

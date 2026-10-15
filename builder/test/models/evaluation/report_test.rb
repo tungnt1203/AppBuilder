@@ -41,7 +41,7 @@ class Evaluation::ReportTest < ActiveSupport::TestCase
         "tests" => { "passed" => passed, "runs" => 6, "failures" => passed ? 0 : 1, "errors" => 0 },
         "pages" => { "signed_in" => true, "visited" => [
           { "name" => "visitor", "path" => "/", "status" => 200, "file" => "shots/nail/visitor.png" },
-          { "name" => "page-1", "path" => "/bookings", "status" => 200, "file" => "shots/nail/page-1.png" },
+          { "name" => "page-1", "path" => "/products", "status" => 200, "file" => "shots/nail/page-1.png" },
           { "name" => "page-2", "path" => "/reports", "status" => 500, "error" => "NoMethodError", "file" => "shots/nail/page-2.png" } ] },
         "judge" => { "asked" => asked, "look" => 7, "phone" => 6, "notes" => "Good.", "cost_usd" => 0.1 } } ] }
     end

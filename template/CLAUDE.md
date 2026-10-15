@@ -87,10 +87,10 @@ Every app has two halves that share the database and nothing else: their own acc
 layout and look. Decide for every screen which half it belongs to.
 
 - **The customers' site**: everything outside `/admin`. Home, catalog, product pages, cart,
-  checkout, booking, order status, and customer accounts when the app has them. Controllers inherit from
+  checkout, order status, and customer accounts when the app has them. Controllers inherit from
   `ApplicationController`; pages are **public** by default. Designed freely (`design` skill).
 - **/admin**: where the owner and staff run the app. Managing products, orders, customers,
-  schedules, reports, settings. Controllers live in `app/controllers/admin/`, inherit from
+  reports, settings. Controllers live in `app/controllers/admin/`, inherit from
   `Admin::BaseController`, and route under `namespace :admin`. Sign in is required; they use the
   UI kit (`ui-kit` skill). A staff screen never goes outside `/admin`, and a customer's screen
   never goes inside it.
@@ -105,16 +105,16 @@ It never sends visitors to `/admin`, and has no link to it; the owner goes to `/
 Every app starts as a working shop. Build on it; don't write a second cart, checkout or order model.
 
 **An app that sells nothing turns it off**: a club, a lending shed, a festival, a school, a
-portfolio, a booking-only salon. Set `config.x.shop = false` (`config/application.rb`) in the
+portfolio. Set `config.x.shop = false` (`config/application.rb`) in the
 first turn: the shop's pages (`/products`, `/cart`, checkout, orders) then answer 404, the header
 loses the shop link and cart, and /admin hides orders, products, discounts and sales. Never hide
 the shop only by removing links. Views check `shop?`. Tests start with
-the shop on and booking off whatever the app sets, so the built-in tests keep passing; tests of
-the app's pages as they really run call `disable_shop` (and `enable_booking`) in `setup`.
+the shop on whatever the app sets, so the built-in tests keep passing; tests of the app's pages
+as they really run call `disable_shop` in `setup`.
 Policies, contact, staff and settings keep working.
 
 The shop's core (its models, payments, order emails and migrations) is the `shop` gem in
-`vendor/blocks/shop` (and booking's is `vendor/blocks/booking`, see "Booking"). Read it to see how things work; never change, move or copy its files. It's
+`vendor/blocks/shop`. Read it to see how things work; never change, move or copy its files. It's
 the same in every app and gets updated as a whole, so a change there would be lost. The app's own
 files build on it:
 
@@ -260,33 +260,6 @@ made-up reviews or "23 people are viewing this"): ad networks and Stripe ban sho
 Change the shop's screens freely to fit the owner (design skill), keep its rules (prices from the
 database, statuses through the methods, guest checkout), and add features around it:
 gift notes, wishlists, product pages that look like the owner's brand.
-
-## Booking (built in, off by default)
-
-For businesses people book a time with (a salon, a clinic, a spa, a tutor, a studio), apps also
-have appointments: the `booking` core in `vendor/blocks/booking`, read-only like the shop's.
-Turn it on with `config.x.booking = true` (`config/application.rb`) when the owner's customers
-book times, then `bin/rails db:seed` for sample services and staff in the preview. Off, its pages
-answer 404 and /admin hides them. Build on it; don't write a second calendar or booking model.
-
-- **Services** (`Service`: name, length, price) are done by **staff members** (`StaffMember`: a
-  person, or a chair or room) in their weekly `working_hours`, except for `TimeOff` (one person's,
-  or the whole business closed). `BookingSetting.current`: the step between times offered, the
-  notice, how far ahead, until when customers can cancel.
-- **Free times** come from `Availability.new(service, date, staff_member: nil).slots`; never
-  compute them elsewhere. **Booking** (`Booking`, like `Checkout`) checks the time again as it
-  books and makes the `Appointment` (`booked → completed / no_show`, or `cancelled`, only through
-  its methods). Customers book as guests at `/book` and reach their appointment by its token
-  (`appointment_path`), where they can cancel; staff run the calendar at `/admin/appointments`.
-- **Emails**: confirmation, a reminder the day before (`Appointment::ReminderJob`) and
-  cancellation, in the core; restyle them like the order emails.
-- Payment is at the business for now; don't add online payment for appointments.
-- The screens (`bookings/`, `appointments/`, `admin/appointments/`, `admin/services/`,
-  `admin/staff_members/`…) are the app's: redesign the booking pages for the brand (design
-  skill), link to `/book` from the home page and header, and show the team or services on the site
-  when it suits the business. Tests of these screens call `enable_booking` in `setup`.
-- A business that both sells and books (a salon with products) keeps the shop; one that only books
-  turns it off (`config.x.shop = false`, see "The shop").
 
 ## Accounts
 

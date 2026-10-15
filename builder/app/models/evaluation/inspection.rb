@@ -1,7 +1,7 @@
 require "ferrum"
 
 # Opens a built app in headless Chrome like its first visitor and its owner would:
-# the pages anyone can open (the home page, a booking form…), then signed in to /admin, the
+# the pages anyone can open (the home page, a product page…), then signed in to /admin, the
 # app's main pages (its GET routes without parameters), and then both kinds on a phone.
 # Records how each page answered and keeps a full-page screenshot of it.
 module Evaluation
@@ -32,7 +32,7 @@ module Evaluation
       browser = Ferrum::Browser.new(browser_path: Rails.configuration.x.chrome_bin, window_size: [ 1280, 800 ], timeout: 30, process_timeout: 30)
       browser.go_to(@project.preview_gate.entry_url) # past the preview's gate, which keeps a cookie
       stock_shop
-      answers = candidate_pages.index_with { |path| answer(path) }.reject { |_path, code| code == 404 } # switched off, like booking in a shop
+      answers = candidate_pages.index_with { |path| answer(path) }.reject { |_path, code| code == 404 } # switched off, like the shop in an app that sells nothing
       public, private = answers.keys.partition { |path| answers[path].between?(200, 299) }
       public.first(MAX_PUBLIC_PAGES).each_with_index { |path, index| visit browser, path, name: "visitor-#{index + 1}", signed_in: false }
       @signed_in = create_owner && sign_in(browser)
@@ -81,8 +81,8 @@ module Evaluation
       rescue Ferrum::Error
       end
 
-      # What a customer most likely opens on a phone (a product page, where ads land, or a booking
-      # form rather than the home page), and the owner's main screen.
+      # What a customer most likely opens on a phone (a product page, where ads land, rather than the
+      # home page), and the owner's main screen.
       def phone_pages(public, private)
         [ public.find { |path| path.start_with?("/products/") } || public.find { |path| path != "/" } || public.first,
           private.first || @project.staff_home_path ].compact.uniq

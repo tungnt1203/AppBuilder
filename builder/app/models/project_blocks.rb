@@ -3,7 +3,7 @@
 # replaced by the latest one, as a version of its own in the app's history.
 class ProjectBlocks
   # Shown to the owner, by block.
-  TITLES = { "shop" => "shop core", "booking" => "booking core" }.freeze
+  TITLES = { "shop" => "shop core" }.freeze
 
   def initialize(project, source = TemplateSource.new)
     @project, @source = project, source
@@ -26,7 +26,7 @@ class ProjectBlocks
     updates.any?
   end
 
-  # "shop core and booking core"
+  # "shop core", or several joined: "shop core and payments block"
   def titles(names = updates.keys)
     names.map { |name| TITLES.fetch(name, "#{name} block") }.to_sentence
   end

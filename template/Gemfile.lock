@@ -1,10 +1,4 @@
 PATH
-  remote: vendor/blocks/booking
-  specs:
-    booking (0.1.0)
-      rails (>= 8.1)
-
-PATH
   remote: vendor/blocks/shop
   specs:
     shop (0.1.0)
@@ -399,7 +393,6 @@ PLATFORMS
 
 DEPENDENCIES
   bcrypt (~> 3.1.7)
-  booking!
   bootsnap
   brakeman
   bundler-audit

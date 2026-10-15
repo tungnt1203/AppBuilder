@@ -5,7 +5,7 @@
 # a page wider than the phone, and links to pages that fail.
 #
 #   bin/look                      the home page, as a visitor
-#   bin/look / /menu /booking     several pages
+#   bin/look / /products /cart   several pages
 #   bin/look /account --as customer          signed in as a customer on the site
 #   bin/look /admin/orders --as owner        signed in to /admin (owner, admin or staff)
 #   bin/look / --phone            only at phone width (or --desktop)

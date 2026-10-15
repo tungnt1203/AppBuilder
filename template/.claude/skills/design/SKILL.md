@@ -28,12 +28,12 @@ they said it. Replace DESIGN.md with:
 ```markdown
 # Design
 
-**For:** who opens this app, on what device, in what moment (e.g. "regulars booking from their phone between errands").
+**For:** who opens this app, on what device, in what moment (e.g. "buyers tapping an ad on their phone between errands").
 **Feel:** three words (e.g. "warm, unhurried, pretty").
 **Color:** light or dark; canvas, ink, brand and accent and why they fit.
 **Type:** display font + text font from the list below.
 **Shape:** corner radius, borders or shadows or solid color blocks, how images are framed.
-**Signature:** the one thing visitors will remember (a big serif price list, a ticket-stub booking card, a marquee of class times).
+**Signature:** the one thing visitors will remember (a big serif price list, a ticket-stub order card, a marquee of class times).
 **Layout:** which screens are on the customers' site and which are in /admin (CLAUDE.md, "Two halves").
 ```
 
@@ -108,14 +108,11 @@ picker), a collection, the cart, checkout and the buyer's order page, plus the o
 (`order_mailer/`, in the shop core: copy them from `vendor/blocks/shop/app/views/order_mailer/` to
 `app/views/order_mailer/` to restyle them). Restyle them for the brand and rearrange them freely; keep their forms' fields,
 the Stimulus targets (`variant-picker`, `gallery`) and the links between them working.
-With booking on (CLAUDE.md, "Booking"), so are `/book` (`bookings/new`: service, who, day, time,
-details) and the customer's appointment page (`appointments/show`): restyle them the same way and
-keep their links' parameters and the form's fields.
 
 **A look is the whole site.** Choosing or changing the direction (a new app, "make it look like
 this site", a screenshot, "more premium") isn't done until every page a buyer passes through wears
 it: home, all products, a product, a collection, the cart, checkout, the order page, the policies
-and contact pages, header and footer, and with booking on, /book and the appointment page. A buyer who taps a product and lands on the starting look
+and contact pages, header and footer. A buyer who taps a product and lands on the starting look
 sees a template. Check them all (section 6).
 
 **A reference is a layout, not a palette.** When the owner shows a site or a screenshot, take what
@@ -177,7 +174,7 @@ design.
 - **Detail**: hover and focus states on everything clickable, `transition` on color and transform,
   one tasteful entrance or hover motion. Prices with `number_to_currency`, big and clear.
 - **Phones first**: most visitors are on a phone. Design at 390px wide, then widen. Put the main
-  action within thumb reach (a sticky bottom bar on booking or ordering pages works well).
+  action within thumb reach (a sticky bottom bar on product pages works well).
 - Forms on these pages still use `form_with` and `form.field`; style the surroundings, and adjust
   the field look through the theme if needed.
 

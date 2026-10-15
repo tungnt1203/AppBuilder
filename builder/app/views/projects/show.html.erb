@@ -87,7 +87,7 @@
           <%= hidden_field_tag "message[pointed]", "", id: nil, data: { preview_target: "pointed" } %>
           <% can_send = @project.accepts_messages? || @project.accepts_messages_while_working? %>
           <div class="composer glass" data-tour-step="1" data-tour-title="Ask in your own words"
-               data-tour-text="Describe what you want: a new page, other colors, a booking form. The agent builds it while you watch, and you can keep chatting to change anything.">
+               data-tour-text="Describe what you want: a new page, other colors, a size chart. The agent builds it while you watch, and you can keep chatting to change anything.">
             <%= form.text_area :body, rows: 1, disabled: !can_send, required: true, "aria-label": "Ask for a change",
                   placeholder: @project.accepts_messages? ? "Ask for a change" : (can_send ? "Add to the request while it works" : "Wait for the current step to finish"),
                   data: { action: "keydown->composer#submitOnShortcut input->composer#resize paste->attachments#paste", composer_target: "input", attachments_target: "body" },

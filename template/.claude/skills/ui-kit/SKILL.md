@@ -66,7 +66,7 @@ When the sidebar has more than a handful of links, group them:
 `class:` are optional. Find names with `bin/icons <word>`.
 
 ```erb
-<%= link_to new_appointment_path, class: button_classes do %><%= icon "plus", size: 16 %> New appointment<% end %>
+<%= link_to new_admin_discount_path, class: button_classes do %><%= icon "plus", size: 16 %> New discount<% end %>
 ```
 
 ## Page header
@@ -117,7 +117,7 @@ Destructive actions always confirm. `form.submit` is already primary. `link_clas
   </ul>
 <% end %>
 
-<%= empty_state "No customers yet", "They'll appear here after their first booking." do %>
+<%= empty_state "No customers yet", "They'll appear here after their first order." do %>
   <%= link_to "Add a customer", new_customer_path, class: button_classes %>
 <% end %>
 ```
@@ -131,7 +131,7 @@ Alert tones: `:info` (default), `:success`, `:warning`, `:danger`. Flash (`notic
 already renders; `alert` is for guidance that is part of the page.
 
 ```erb
-<%= badge appointment.status.humanize, tone: { "confirmed" => :green, "cancelled" => :red }.fetch(appointment.status, :gray) %>
+<%= badge order.status.humanize, tone: { "paid" => :green, "cancelled" => :red }.fetch(order.status, :gray) %>
 <%= alert "This week is fully booked.", tone: :warning %>
 ```
 
@@ -141,8 +141,8 @@ Tabs are links, so each tab is a real page.
 
 ```erb
 <%= tabs do %>
-  <%= tab_to "Upcoming", appointments_path %>
-  <%= tab_to "Past", past_appointments_path %>
+  <%= tab_to "Open", admin_orders_path(status: "open") %>
+  <%= tab_to "Closed", admin_orders_path(status: "closed") %>
 <% end %>
 
 <%= card do %>
@@ -183,7 +183,7 @@ Every `form_with` uses `UiFormBuilder`. Inputs are styled. Pass `class:` only fo
 <%= form_with model: customer, class: "space-y-4" do |form| %>
   <%= form.errors %>
   <%= form.field :name, required: true, autofocus: true %>
-  <%= form.field :email, :email_field, hint: "For booking confirmations." %>
+  <%= form.field :email, :email_field, hint: "For order confirmations." %>
   <%= form.field :phone, :telephone_field %>
   <%= form.field :notes, :text_area, rows: 4 %>
 
