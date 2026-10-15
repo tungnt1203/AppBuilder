@@ -15,7 +15,7 @@ class Admin::DashboardsControllerTest < ActionDispatch::IntegrationTest
     get admin_root_path
     assert_select "h1", "Orders"
     assert_select "li", /Sales\s*\$54.00/
-    assert_select "li", /Need you\s*2/
+    assert_select "li", /Need you\s*1/ # the order with a Printify problem is the one that needs action, counted once
     assert_select "a[href=?]", project_path(shop), /#1002 · Robin Buyer/
     assert_select "p", "Address is invalid"
     assert_select "aside[aria-label=Admin] a", "Accounts" # an administrator of the builder

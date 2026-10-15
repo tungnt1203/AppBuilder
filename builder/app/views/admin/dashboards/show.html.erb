@@ -17,7 +17,7 @@
     <ul class="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Last 30 days<%= " in #{currency}" if @totals.many? %>">
       <% [ [ "Sales", shop_money(totals["sales_cents"], currency) ], [ "Orders", totals["orders"] ],
            [ "You keep", (shop_money(totals["margin_cents"], currency) if totals["margin_cents"].nonzero?) || "—" ],
-           [ "Need you", totals["needs_action"] + totals["problems"] ] ].each do |label, value| %>
+           [ "Need you", totals["needs_action"] ] ].each do |label, value| %><%# Printify's problems are among them %>
         <li class="admin-card admin-stat">
           <span class="faint text-[0.8125rem]"><%= label %></span>
           <span class="admin-stat-value"><%= value %></span>
