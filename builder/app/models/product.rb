@@ -45,7 +45,7 @@ class Product < ApplicationRecord
   scope :visible, -> { active }
   scope :ordered, -> { order(created_at: :desc, id: :desc) }
   scope :newest_first, -> { order(published_at: :desc, id: :desc) }
-  scope :search, ->(query) { where("products.title LIKE ?", "%#{sanitize_sql_like(query.to_s.strip)}%") if query.present? }
+  scope :search, ->(query) { where("products.title ILIKE ?", "%#{sanitize_sql_like(query.to_s.strip)}%") if query.present? }
 
   # Option names in use, in slot order: ["Color", "Size"].
   def option_names

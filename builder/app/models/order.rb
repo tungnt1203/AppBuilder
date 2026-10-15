@@ -66,7 +66,7 @@ class Order < ApplicationRecord
       where(number: query.to_i)
     elsif query.present?
       like = "%#{sanitize_sql_like(query)}%"
-      where("orders.email LIKE :like OR orders.shipping_name LIKE :like", like:)
+      where("orders.email ILIKE :like OR orders.shipping_name ILIKE :like", like:)
     end
   }
 
