@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
   resource :tour, only: :create
-  resource :business, only: %i[ show update ]
+  get "business", to: redirect("/admin/settings")
   resources :passwords, param: :token
   root "projects#index"
   get "s/:token", to: "shares#show", as: :shared_preview
@@ -25,7 +25,11 @@ Rails.application.routes.draw do
     get "messages/:message_id/attachments/:name", to: "projects/attachments#show", as: :attachment, constraints: { name: %r{[^/]+} }
   end
 
+  # The owner's admin over all their shops; accounts (users) are for administrators only.
   namespace :admin do
+    root "dashboards#show"
+    resource :settings, only: %i[ show update ]
+    resource :orders_refresh, only: :create
     resources :users, only: %i[ index update destroy ]
   end
 

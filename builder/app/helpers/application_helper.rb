@@ -42,6 +42,12 @@ module ApplicationHelper
     logout: [ "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", "M16 17l5-5-5-5", "M21 12H9" ]
   }
 
+  # A shop's amount in hundredths, as its owner reads it: "$1,234.50", or "1,234.50 EUR".
+  def shop_money(cents, currency)
+    amount = number_with_precision(cents.to_i / 100.0, precision: 2, delimiter: ",")
+    currency.to_s.upcase == "USD" || currency.blank? ? "$#{amount}" : "#{amount} #{currency.upcase}"
+  end
+
   def icon(name, size: 16)
     tag.svg(width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": 2,
             "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": true, class: "shrink-0 #{name == :chevron ? "chevron" : ""}") do

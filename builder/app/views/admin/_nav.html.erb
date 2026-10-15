@@ -1,0 +1,13 @@
+<%# The owner's admin over all their shops: its pages, and the way back to the apps. %>
+<nav class="flex flex-wrap items-center gap-2" aria-label="Admin">
+  <%= link_to root_path, class: "on-glass inline-flex items-center gap-1 text-sm font-medium opacity-80 hover:opacity-100" do %>
+    <%= icon :back, size: 15 %> Apps
+  <% end %>
+  <span class="page-switch glass capsule ml-auto">
+    <%= link_to "Orders", admin_root_path, "aria-current": (current_page?(admin_root_path) ? "page" : nil) %>
+    <%= link_to "Settings", admin_settings_path, "aria-current": (current_page?(admin_settings_path) ? "page" : nil) %>
+    <% if Current.user.administrator? %>
+      <%= link_to "Accounts", admin_users_path, "aria-current": (current_page?(admin_users_path) ? "page" : nil) %>
+    <% end %>
+  </span>
+</nav>

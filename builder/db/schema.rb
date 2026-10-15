@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_100000) do
   create_table "agent_commands", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "kind", null: false
@@ -90,6 +90,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_090000) do
     t.string "template_sha"
     t.datetime "business_synced_at"
     t.json "business_sync_result"
+    t.json "orders_summary"
+    t.datetime "orders_summary_at"
+    t.string "orders_summary_source"
     t.index ["eval_run"], name: "index_projects_on_eval_run"
     t.index ["owner_id"], name: "index_projects_on_owner_id"
     t.index ["port"], name: "index_projects_on_port", unique: true

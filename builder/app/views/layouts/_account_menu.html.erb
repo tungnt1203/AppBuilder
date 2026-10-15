@@ -9,7 +9,7 @@
       <p class="truncate text-sm font-semibold"><%= user.name %></p>
       <p class="faint truncate text-[0.8125rem]"><%= user.email_address %></p>
     </div>
-    <%= link_to business_path, class: "menu-item", role: "menuitem" do %><%= icon :store %> Business settings<% end %>
+    <%= link_to admin_root_path, class: "menu-item", role: "menuitem" do %><%= icon :store %> Admin: orders and settings<% end %>
     <% if user.administrator? %>
       <%= link_to admin_users_path, class: "menu-item", role: "menuitem" do %><%= icon :users %> Accounts<% end %>
     <% end %>

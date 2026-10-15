@@ -1,4 +1,4 @@
-<% content_for :title, "Business settings" %>
+<% content_for :title, "Settings" %>
 
 <div class="fixed top-4 right-4 z-30 flex items-center gap-2">
   <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon on-glass glass capsule" %>
@@ -7,16 +7,14 @@
 
 <main class="mx-auto flex min-h-full max-w-2xl flex-col gap-6 px-4 pt-[10vh] pb-16 sm:px-6">
   <div class="flex flex-col gap-2">
-    <%= link_to root_path, class: "on-glass inline-flex w-fit items-center gap-1 text-sm font-medium opacity-80 hover:opacity-100" do %>
-      <%= icon :back, size: 15 %> Apps
-    <% end %>
-    <h1 class="on-glass text-[2rem] leading-tight font-semibold tracking-[-0.025em]">Business settings</h1>
+    <%= render "admin/nav" %>
+    <h1 class="on-glass text-[2rem] leading-tight font-semibold tracking-[-0.025em]">Settings</h1>
     <p class="text-[0.9375rem] text-white/75">Set your payments, Printify and ad accounts once. Every shop you build gets them, now and when you make or publish a new one.</p>
   </div>
 
   <% if notice = flash[:notice] %><p class="flash w-fit" role="status"><%= notice %></p><% end %>
 
-  <%= form_with model: @setting, url: business_path, method: :patch, class: "surface sheet flex flex-col gap-6 p-5 sm:p-6" do |form| %>
+  <%= form_with model: @setting, url: admin_settings_path, method: :patch, class: "surface sheet flex flex-col gap-6 p-5 sm:p-6" do |form| %>
     <% if @setting.errors.any? %>
       <p class="alert"><%= @setting.errors.full_messages.to_sentence %></p>
     <% end %>

@@ -1,6 +1,6 @@
-# The owner's business settings, set once for all their shops (BusinessSetting): Stripe,
-# Printify and their ad pixels, applied to every app of theirs that sells (BusinessSync).
-class BusinessesController < ApplicationController
+# The owner's admin over all their shops (/admin), its settings: Stripe, Printify and their ad
+# pixels, set once (BusinessSetting) and applied to every app of theirs that sells (BusinessSync).
+class Admin::SettingsController < ApplicationController
   SECRETS = %w[ stripe_secret_key printify_token meta_access_token ].freeze
 
   def show
@@ -15,7 +15,7 @@ class BusinessesController < ApplicationController
 
     if @setting.errors.none? && @setting.save
       projects.each { |project| BusinessSyncJob.perform_later(project) }
-      redirect_to business_path, notice: "Saved. Your apps are getting the new settings."
+      redirect_to admin_settings_path, notice: "Saved. Your apps are getting the new settings."
     else
       load_page
       render :show, status: :unprocessable_entity

@@ -1,6 +1,6 @@
 # What an owner sets once in the builder for all their shops (Stripe, Printify, ad pixels),
 # applied to this shop by `bin/rails shop:business_settings` with the settings as JSON in the
-# BUSINESS_SETTINGS variable (never in a command's arguments). Each key given changes that part
+# TASK_INPUT variable (never in a command's arguments). Each key given changes that part
 # the way /admin's settings would, and only when it differs from what the shop has; a blank value
 # disconnects or clears it. Returns what happened, for the builder to show.
 #

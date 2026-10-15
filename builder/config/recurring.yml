@@ -13,6 +13,9 @@ shared: &shared
   rescue_stranded_turns:
     class: RescueStrandedTurnsJob
     schedule: every minute
+  refresh_shop_orders:
+    class: OrdersRefreshJob
+    schedule: every 15 minutes
 
 development:
   <<: *shared

@@ -23,7 +23,7 @@ class BusinessSyncTest < ActiveSupport::TestCase
 
     command, env = calls.sole
     assert_equal [ "bin/rails", "shop:business_settings" ], command
-    assert_equal "sk_test_abc", JSON.parse(env["BUSINESS_SETTINGS"])["stripe_secret_key"]
+    assert_equal "sk_test_abc", JSON.parse(env["TASK_INPUT"])["stripe_secret_key"]
     assert_equal({ "preview" => { "stripe" => "Acme (test mode)", "errors" => [] } }, @project.reload.business_sync_result)
     assert @project.business_synced_at
   end
@@ -31,6 +31,14 @@ class BusinessSyncTest < ActiveSupport::TestCase
   test "an app whose core can't take them yet is told to update" do
     with_project_files(@project) do
       answer_with(@project, "rails aborted!\nDon't know how to build task 'shop:business_settings'", false)
+      BusinessSync.new(@project).call
+    end
+    assert_match "Update the app first", @project.reload.business_sync_result.dig("preview", "errors", 0)
+  end
+
+  test "Rails 8's unknown command is an app to update too" do
+    with_project_files(@project) do
+      answer_with(@project, "Unrecognized command \"shop:business_settings\" (Rails::Command::UnrecognizedCommandError)", false)
       BusinessSync.new(@project).call
     end
     assert_match "Update the app first", @project.reload.business_sync_result.dig("preview", "errors", 0)
