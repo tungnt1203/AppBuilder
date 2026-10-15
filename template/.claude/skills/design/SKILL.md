@@ -33,7 +33,7 @@ they said it. Replace DESIGN.md with:
 **Color:** light or dark; canvas, ink, brand and accent and why they fit.
 **Type:** display font + text font from the list below.
 **Shape:** corner radius, borders or shadows or solid color blocks, how images are framed.
-**Signature:** the one thing visitors will remember (a big serif price list, a ticket-stub order card, a marquee of class times).
+**Signature:** the one thing visitors will remember (a huge serif product name, a ticket-stub order card, a marquee of the shop's jokes).
 **Layout:** which screens are on the customers' site and which are in /admin (CLAUDE.md, "Two halves").
 ```
 
@@ -128,13 +128,13 @@ would break the shop (the add-to-cart form below the fold on phones, prices hidd
 close as works and say why.
 
 **Start from the page blocks** in `app/views/blocks/`: hero (split, full-bleed photo), features,
-price list or menu, gallery, timetable, testimonials, stats, FAQ, find-us (address, hours, call,
-map), closing call to action, and a bottom action bar for phones. They use only the theme's
+gallery, stats, FAQ, closing call to action, and a bottom action bar for phones. Buyers' words
+come from the shop's real reviews, never a block of quotes. They use only the theme's
 names, so they wear the app's look, and they already work at 390px. See them all in this app's theme
-at `/_blocks` on the preview (development only; `?only=price_list` for one). To use one, **copy its
+at `/_blocks` on the preview (development only; `?only=faq` for one). To use one, **copy its
 markup into the page's own view and make it this app's**: real content and records instead of the
 samples, the app's wording, its photos, and changes to layout and detail that the owner and the direction ask for
-(a serif price list, a ticket-stub card, square corners). Don't `render "blocks/…"` from pages, and
+(a serif product grid, a ticket-stub card, square corners). Don't `render "blocks/…"` from pages, and
 don't edit the blocks themselves: they are the starting point for every page. Pick the few blocks
 this business needs, in the order a visitor wants them; a page with every block is a template, not a
 design.

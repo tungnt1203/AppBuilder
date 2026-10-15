@@ -9,7 +9,7 @@ class ShopOrders
   end
 
   def applicable?
-    (@project.ready? || @project.working?) && BusinessSync.sells?(@project)
+    (@project.ready? || @project.working?) && @project.path.join("config/application.rb").exist?
   end
 
   def refresh

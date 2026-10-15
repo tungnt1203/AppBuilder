@@ -1,6 +1,6 @@
 require "open3"
 
-# The requests bin/eval builds: many different owners, written by a model once and kept in
+# The requests bin/eval builds: many different print-on-demand sellers, written once and kept in
 # eval/prompts.yml, so runs stay comparable. Each run builds a random sample of them (the
 # same sample for the same seed), which says more about all the people using the builder
 # than a few hand-picked cases would.
@@ -12,24 +12,23 @@ module Evaluation
     TIMEOUT = 900 # seconds
 
     PROMPT = <<~TEXT
-      Write %{count} requests that different people would type into an AI app builder, as their
-      first message. The builder makes a small web app (Rails, with sign in, a database, email)
-      that the person hosts for their business or group. Make them as varied as real users:
+      Write %{count} requests that different people would type into an AI shop builder, as their
+      first message. The builder makes a print-on-demand shop (products made in Printify: tees,
+      hoodies, mugs, posters, totes…) that sells to buyers who come from Facebook or TikTok ads,
+      mostly on phones. Make them as varied as real sellers:
 
-      - Who: shops, food and drink, beauty and health, trades and repairs, teaching, clubs and
-        communities, nonprofits, events, rentals, freelancers, small offices and their internal
-        tools, hobbies and families. No two the same kind; avoid the obvious examples.
+      - What they sell: a niche each (a hobby, a job, a pet, a city, a fandom-free joke, a cause,
+        a family event), never two the same; avoid the obvious examples.
       - How much they say: about a third one sentence, a third a short paragraph, a third
-        detailed, with specifics (names, prices, opening hours, sections, rules, who may do what).
-        Some detailed ones ask for a look that is unusual for their kind of business.
-      - What they need: pages for their customers or the public, tools for themselves and staff,
-        or both.
-      - Language: about three quarters Vietnamese, written the way Vietnamese owners type
+        detailed, with specifics (the shop's name, products, prices, colors, free shipping, sizes,
+        collections, the look they want). Some ask for a look that is unusual for their niche.
+      - Language: about three quarters Vietnamese, written the way Vietnamese sellers type
         (sometimes casual, short, with abbreviations or missing diacritics); the rest English.
-      - Only what such an app can do on its own: no payments, no native mobile apps, no paid
-        outside services.
+        Their buyers are in the US or Europe, so the shop is in English either way.
+      - Only what the builder's shop can do: no marketplaces, no native mobile apps, no paid
+        outside services beyond Stripe, Printify and their ad pixels.
 
-      Each: {"name": "the app's name, as the owner would say it", "language": "vi" or "en",
+      Each: {"name": "the shop's name, as the owner would say it", "language": "vi" or "en",
       "request": "the message"}. Reply with only the JSON array.
     TEXT
 

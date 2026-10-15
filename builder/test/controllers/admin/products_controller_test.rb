@@ -9,7 +9,7 @@ class Admin::ProductsControllerTest < ActionDispatch::IntegrationTest
     @root = Pathname(Dir.mktmpdir)
     @original_root, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, @root
     @shop.path.join("config").mkpath
-    @shop.path.join("config/application.rb").write("config.x.shop = true\n")
+    @shop.path.join("config/application.rb").write("# the app\n")
     @shop.update!(status: :ready)
     products = [ { "id" => "pf-1", "title" => "Cat Tee", "image" => "https://images.example/cat.jpg", "price_cents" => 2500, "cost_cents" => 1150 } ]
     PrintifyAccount.singleton_class.alias_method(:original_products, :products)

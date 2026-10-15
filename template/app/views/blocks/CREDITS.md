@@ -1,9 +1,8 @@
 # Page blocks
 
-The hero, features, testimonials, stats, FAQ and call-to-action blocks follow the structure of
-components from HyperUI (https://www.hyperui.dev, https://github.com/markmead/hyperui), rewritten
-for this app's theme, ERB and Vietnamese businesses. The price list, gallery, timetable, find-us
-and action bar blocks are this template's own.
+The hero, features, stats, FAQ and call-to-action blocks follow the structure of components from
+HyperUI (https://www.hyperui.dev, https://github.com/markmead/hyperui), rewritten for this app's
+theme and ERB. The gallery and action bar blocks are this template's own.
 
 HyperUI's license:
 

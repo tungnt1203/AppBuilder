@@ -100,18 +100,10 @@ It never sends visitors to `/admin`, and has no link to it; the owner goes to `/
 (a new install starts the owner's first-run setup there). Test site pages with no users
 (`User.delete_all`).
 
-## The shop (built in, on by default)
+## The shop
 
-Every app starts as a working shop. Build on it; don't write a second cart, checkout or order model.
-
-**An app that sells nothing turns it off**: a club, a lending shed, a festival, a school, a
-portfolio. Set `config.x.shop = false` (`config/application.rb`) in the
-first turn: the shop's pages (`/products`, `/cart`, checkout, orders) then answer 404, the header
-loses the shop link and cart, and /admin hides orders, products, discounts and sales. Never hide
-the shop only by removing links. Views check `shop?`. Tests start with
-the shop on whatever the app sets, so the built-in tests keep passing; tests of the app's pages
-as they really run call `disable_shop` in `setup`.
-Policies, contact, staff and settings keep working.
+Every app is a print-on-demand shop. Build on its shop; don't write a second cart, checkout or
+order model.
 
 The shop's core (its models, payments, order emails and migrations) is the `shop` gem in
 `vendor/blocks/shop`. Read it to see how things work; never change, move or copy its files. It's

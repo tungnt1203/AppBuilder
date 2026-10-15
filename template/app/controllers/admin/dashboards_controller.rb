@@ -1,9 +1,6 @@
-# The app at a glance: the shop's sales, orders waiting on someone and the latest orders (with
-# the shop on).
+# The shop at a glance: its sales, orders waiting on someone and the latest orders.
 class Admin::DashboardsController < Admin::BaseController
   def show
-    return unless shop?
-
     sales = Order.counted_in_sales
     @sales_30_days = sales.placed_since(30.days.ago).sum(:total_cents)
     placed = Order.where.not(status: "cancelled").where.not(id: Order.unpaid_card)

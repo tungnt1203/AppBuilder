@@ -24,10 +24,4 @@ class FeedsControllerTest < ActionDispatch::IntegrationTest
     get product_path(products(:tee), options: %w[ White M ])
     assert_select "input[name=variant_id][value=?]", variants(:tee_white_m).id.to_s
   end
-
-  test "there's no feed without the shop" do
-    disable_shop
-    get products_feed_path
-    assert_response :not_found
-  end
 end

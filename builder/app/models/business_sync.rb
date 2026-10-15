@@ -11,7 +11,7 @@ class BusinessSync
   end
 
   def applicable?
-    @settings&.configured? && (@project.ready? || @project.working?) && @project.path.join("config/application.rb").exist? && !shop_off?
+    @settings&.configured? && (@project.ready? || @project.working?) && @project.path.join("config/application.rb").exist?
   end
 
   def call
@@ -24,15 +24,4 @@ class BusinessSync
     @project.update!(business_synced_at: Time.current, business_sync_result: result)
     result
   end
-
-  # The app's own setting, when it sells nothing (config.x.shop = false).
-  def self.sells?(project)
-    application = project.path.join("config/application.rb")
-    application.exist? && !application.read.match?(/^\s*config\.x\.shop\s*=\s*false/)
-  end
-
-  private
-    def shop_off?
-      !self.class.sells?(@project)
-    end
 end

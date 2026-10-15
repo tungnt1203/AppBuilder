@@ -44,12 +44,6 @@ class BusinessSyncTest < ActiveSupport::TestCase
     assert_match "Update the app first", @project.reload.business_sync_result.dig("preview", "errors", 0)
   end
 
-  test "apps that sell nothing are left alone" do
-    with_project_files(@project, application: "config.x.shop = false\n") do
-      assert_not BusinessSync.new(@project).applicable?
-    end
-  end
-
   private
     # The app's sandbox answering what's given, recording each command it's asked to run.
     def answer_with(project, output, succeeded, &record)
@@ -61,7 +55,7 @@ class BusinessSyncTest < ActiveSupport::TestCase
       project.define_singleton_method(:sandbox) { sandbox }
     end
 
-    def with_project_files(project, application: "config.x.shop = true\n")
+    def with_project_files(project, application: "# the app\n")
       root = Pathname(Dir.mktmpdir)
       original, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, root
       project.path.join("config").mkpath

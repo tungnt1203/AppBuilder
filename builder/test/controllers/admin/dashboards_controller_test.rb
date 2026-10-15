@@ -49,7 +49,7 @@ class Admin::DashboardsControllerTest < ActionDispatch::IntegrationTest
       root = Pathname(Dir.mktmpdir)
       original, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, root
       project.path.join("config").mkpath
-      project.path.join("config/application.rb").write("config.x.shop = true\n")
+      project.path.join("config/application.rb").write("# the app\n")
       project.update!(status: :ready)
       yield
     ensure

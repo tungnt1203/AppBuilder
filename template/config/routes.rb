@@ -2,24 +2,22 @@ Rails.application.routes.draw do
   # The customers' site: the shop, and customers' own accounts (when config.x.customer_accounts).
   root "home#show"
 
-  # The shop (config.x.shop): off, these routes don't match and answer 404.
-  constraints ShopSwitch::ON do
-    resources :products, only: %i[ index show ]
-    resources :collections, only: :show
-    resource :cart, only: :show do
-      resource :discount, only: %i[ create destroy ], module: :carts
-    end
-    resources :cart_items, only: %i[ create update destroy ]
-    resource :checkout, only: %i[ new create ] do
-      get :shipping
-    end
-    resources :zip_codes, only: :show
-    resources :orders, only: :show do
-      resource :payment, only: :create, module: :orders
-      resource :review, only: %i[ new create ], module: :orders
-    end
-    get "feeds/products", to: "feeds#products", defaults: { format: :xml }, as: :products_feed
+  # The shop: catalog, cart, checkout, the buyer's order page, the ad catalogs' feed.
+  resources :products, only: %i[ index show ]
+  resources :collections, only: :show
+  resource :cart, only: :show do
+    resource :discount, only: %i[ create destroy ], module: :carts
   end
+  resources :cart_items, only: %i[ create update destroy ]
+  resource :checkout, only: %i[ new create ] do
+    get :shipping
+  end
+  resources :zip_codes, only: :show
+  resources :orders, only: :show do
+    resource :payment, only: :create, module: :orders
+    resource :review, only: %i[ new create ], module: :orders
+  end
+  get "feeds/products", to: "feeds#products", defaults: { format: :xml }, as: :products_feed
   resources :policies, only: :show
   resource :contact, only: :show
   post "stripe/webhook" => "stripe_webhooks#create", as: :stripe_webhook
@@ -38,40 +36,38 @@ Rails.application.routes.draw do
     resources :passwords, only: %i[ new create edit update ], param: :token
     resource :first_run, only: %i[ new create ]
     resources :invitations, only: %i[ show update ], param: :token
-    constraints ShopSwitch::ON do
-      resources :products do
-        resources :images, only: :destroy, module: :products
-      end
-      resource :demo_products, only: %i[ create destroy ]
-      resources :collections
-      resources :discounts, except: :show
-      resources :product_reviews, only: %i[ index update ], path: "reviews"
-      resources :promotions, only: %i[ index new create ] do
-        resource :cancellation, only: :create, module: :promotions
-      end
-      resources :orders, only: %i[ index show update ] do
-        scope module: :orders do
-          resource :payment, only: :create
-          resource :production, only: :create
-          resource :shipment, only: :create
-          resource :delivery, only: :create
-          resource :cancellation, only: :create
-          resource :refund, only: :create
-          resource :restock, only: :create
-          resource :fulfillment, only: :create
-        end
-      end
-      resource :printify_connection, only: %i[ show create update destroy ], path: "settings/printify"
-      resources :printify_imports, only: %i[ index create ], path: "printify/products"
-      resource :agents, only: %i[ show create destroy ], path: "settings/agents"
-      resources :agent_changes, only: :index do
-        scope module: :agent_changes do
-          resource :application, only: :create
-          resource :discard, only: :create
-        end
-      end
-      resource :stripe_connection, only: %i[ create update destroy ]
+    resources :products do
+      resources :images, only: :destroy, module: :products
     end
+    resource :demo_products, only: %i[ create destroy ]
+    resources :collections
+    resources :discounts, except: :show
+    resources :product_reviews, only: %i[ index update ], path: "reviews"
+    resources :promotions, only: %i[ index new create ] do
+      resource :cancellation, only: :create, module: :promotions
+    end
+    resources :orders, only: %i[ index show update ] do
+      scope module: :orders do
+        resource :payment, only: :create
+        resource :production, only: :create
+        resource :shipment, only: :create
+        resource :delivery, only: :create
+        resource :cancellation, only: :create
+        resource :refund, only: :create
+        resource :restock, only: :create
+        resource :fulfillment, only: :create
+      end
+    end
+    resource :printify_connection, only: %i[ show create update destroy ], path: "settings/printify"
+    resources :printify_imports, only: %i[ index create ], path: "printify/products"
+    resource :agents, only: %i[ show create destroy ], path: "settings/agents"
+    resources :agent_changes, only: :index do
+      scope module: :agent_changes do
+        resource :application, only: :create
+        resource :discard, only: :create
+      end
+    end
+    resource :stripe_connection, only: %i[ create update destroy ]
     resource :settings, only: %i[ edit update ]
     resource :policies, only: %i[ edit update ], path: "settings/policies"
     resources :users
