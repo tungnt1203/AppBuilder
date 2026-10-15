@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_110000) do
   create_table "agent_commands", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "kind", null: false
@@ -93,6 +93,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_100000) do
     t.json "orders_summary"
     t.datetime "orders_summary_at"
     t.string "orders_summary_source"
+    t.json "printify_import_result"
+    t.datetime "printify_imported_at"
     t.index ["eval_run"], name: "index_projects_on_eval_run"
     t.index ["owner_id"], name: "index_projects_on_owner_id"
     t.index ["port"], name: "index_projects_on_port", unique: true

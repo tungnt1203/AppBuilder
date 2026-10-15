@@ -29,6 +29,7 @@ Rails.application.routes.draw do
   namespace :admin do
     root "dashboards#show"
     resource :settings, only: %i[ show update ]
+    resources :products, only: %i[ index create ]
     resource :orders_refresh, only: :create
     resources :users, only: %i[ index update destroy ]
   end

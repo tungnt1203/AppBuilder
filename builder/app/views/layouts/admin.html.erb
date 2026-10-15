@@ -21,7 +21,7 @@
     <div class="admin-shell">
       <aside class="admin-side" aria-label="Admin">
         <div class="admin-brand"><%= icon :store, size: 18 %> Admin</div>
-        <% [ [ "Orders", admin_root_path, :history ], [ "Settings", admin_settings_path, :sliders ],
+        <% [ [ "Orders", admin_root_path, :history ], [ "Products", admin_products_path, :store ], [ "Settings", admin_settings_path, :sliders ],
              ([ "Accounts", admin_users_path, :users ] if Current.user.administrator?) ].compact.each do |label, path, icon_name| %>
           <%= link_to path, class: "admin-link", "aria-current": (current_page?(path) ? "page" : nil) do %><%= icon icon_name, size: 17 %> <%= label %><% end %>
         <% end %>
@@ -34,6 +34,7 @@
       </aside>
       <main class="admin-main">
         <% if notice = flash[:notice] %><p class="admin-flash mb-4 w-fit" role="status"><%= notice %></p><% end %>
+        <% if alert = flash[:alert] %><p class="admin-alert mb-4 w-fit" role="alert"><%= alert %></p><% end %>
         <%= yield %>
       </main>
     </div>

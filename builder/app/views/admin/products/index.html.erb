@@ -1,0 +1,85 @@
+<% content_for :title, "Products" %>
+
+<div class="admin-header">
+  <div>
+    <h1 class="admin-title">Products</h1>
+    <p class="muted text-sm">Your Printify products. Pick the ones a shop should sell and import them; they come in as drafts with their options, prices, costs and mockups.</p>
+  </div>
+</div>
+
+<% if @setting&.printify_token.blank? || @setting.printify_shop_id.blank? %>
+  <p class="admin-card p-6 text-sm">Connect Printify in <%= link_to "Settings", admin_settings_path, class: "underline" %> first, and pick its shop.</p>
+<% elsif @shops.empty? %>
+  <p class="admin-card p-6 text-sm">You have no shops to import into yet. Build one from the <%= link_to "Apps", root_path, class: "underline" %> page.</p>
+<% elsif @error %>
+  <p class="admin-alert"><%= @error %></p>
+<% else %>
+  <%= form_with url: admin_products_path, method: :post, class: "flex flex-col gap-4" do |form| %>
+    <%= hidden_field_tag :page, @page %>
+    <div class="admin-card flex flex-wrap items-center gap-3 p-4">
+      <label for="project_id" class="text-sm font-medium">Import into</label>
+      <%= select_tag :project_id, options_from_collection_for_select(@shops, :id, :name), class: "admin-field w-auto min-w-48" %>
+      <%= form.button "Import the ones picked", class: "admin-button" %>
+    </div>
+
+    <% if @products.any? %>
+      <ul class="admin-card admin-list overflow-hidden">
+        <% @products.each do |product| %>
+          <li>
+            <label class="admin-row cursor-pointer">
+              <%= check_box_tag "product_ids[]", product["id"], false, id: "product_#{product["id"]}", class: "size-4" %>
+              <% if product["image"] %>
+                <img src="<%= product["image"] %>" alt="" loading="lazy" class="size-12 shrink-0 rounded-lg object-cover">
+              <% end %>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-semibold"><%= product["title"] %></span>
+                <% if product["price_cents"] %>
+                  <span class="faint block text-[0.8125rem]">
+                    From <%= shop_money(product["price_cents"], "USD") %> · costs <%= shop_money(product["cost_cents"], "USD") %>
+                    <% if product["price_cents"].to_i.positive? && product["cost_cents"] %>
+                      <% margin = ((product["price_cents"] - product["cost_cents"]) * 100.0 / product["price_cents"]).round %>
+                      · <span class="<%= margin <= 0 ? "text-[var(--danger)]" : "" %>"><%= margin %>% margin</span>
+                    <% end %>
+                  </span>
+                <% end %>
+              </span>
+            </label>
+          </li>
+        <% end %>
+      </ul>
+      <% if @last_page > 1 %>
+        <div class="flex justify-between text-sm">
+          <%= link_to "Previous", admin_products_path(page: @page - 1), class: "underline" if @page > 1 %>
+          <span class="faint">Page <%= @page %> of <%= @last_page %></span>
+          <%= link_to "Next", admin_products_path(page: @page + 1), class: "underline" if @page < @last_page %>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="admin-card p-6 text-sm muted">No products in this Printify shop yet. Make one in Printify, then come back.</p>
+    <% end %>
+  <% end %>
+
+  <% imported = @shops.select(&:printify_imported_at) %>
+  <% if imported.any? %>
+    <section class="mt-8" aria-labelledby="imports_heading">
+      <h2 id="imports_heading" class="admin-section-title">Last imports</h2>
+      <ul class="admin-card admin-list overflow-hidden">
+        <% imported.each do |project| %>
+          <% result = project.printify_import_result || {} %>
+          <li class="flex flex-col gap-1 px-4 py-3">
+            <p class="text-sm"><span class="font-semibold"><%= project.name %></span>
+              <span class="faint">· <%= time_ago_in_words(project.printify_imported_at) %> ago<%= " · preview" if result["copy"] == "preview" %></span></p>
+            <% Array(result["imported"]).each do |product| %>
+              <p class="muted text-[0.8125rem]">
+                <%= product["title"] %>: <%= product["status"] %><%= " · to check: #{product["to_check"].map(&:humanize).join(", ")}" if product["to_check"].present? %>
+              </p>
+            <% end %>
+            <% Array(result["errors"]).each do |error| %>
+              <p class="text-[0.8125rem] text-[var(--danger)]"><%= error %></p>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+<% end %>
