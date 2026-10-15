@@ -10,6 +10,9 @@ default: &default
   username: <%= ENV.fetch("DATABASE_USERNAME", "platform") %>
   password: <%= ENV.fetch("DATABASE_PASSWORD", "platform") %>
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # libpq's GSSAPI check crashes processes forked on macOS (Solid Queue's workers); no
+  # Kerberos here anyway.
+  gssencmode: disable
 
 # Jobs run in their own process (bin/jobs) and reach the browser through Solid Cable,
 # so a restart of the web server doesn't interrupt the agent.
