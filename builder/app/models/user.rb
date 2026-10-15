@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :projects, foreign_key: :owner_id, inverse_of: :owner, dependent: :restrict_with_error
+  has_one :business_setting, dependent: :destroy
   has_many :usages, dependent: :delete_all
 
   # Less than this left and a turn can't do much, so none starts.

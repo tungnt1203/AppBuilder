@@ -22,8 +22,9 @@ class ProjectShell
   end
 
   # Like #run, but a failing command isn't an error: returns its output and whether it succeeded.
-  def capture(*command, env: {})
-    output, status = Bundler.with_unbundled_env { Open3.capture2e(environment(env), *command, chdir: @path.to_s) }
+  # stdin: text for the command to read, e.g. a secret that mustn't be in its arguments.
+  def capture(*command, env: {}, stdin: nil)
+    output, status = Bundler.with_unbundled_env { Open3.capture2e(environment(env), *command, chdir: @path.to_s, stdin_data: stdin.to_s) }
     [ output, status.success? ]
   rescue SystemCallError => error
     [ error.message, false ]

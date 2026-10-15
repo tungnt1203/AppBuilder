@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_090000) do
   create_table "agent_commands", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "kind", null: false
@@ -19,6 +19,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_180000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["project_id"], name: "index_agent_commands_on_project_id"
+  end
+
+  create_table "business_settings", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.text "stripe_secret_key"
+    t.text "printify_token"
+    t.string "printify_shop_id"
+    t.string "printify_shop_title"
+    t.string "meta_pixel_id"
+    t.text "meta_access_token"
+    t.string "tiktok_pixel_id"
+    t.string "google_tag_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_business_settings_on_user_id", unique: true
   end
 
   create_table "deployments", force: :cascade do |t|
@@ -73,6 +88,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_180000) do
     t.decimal "session_cost_usd", precision: 10, scale: 4, default: "0.0", null: false
     t.text "instructions"
     t.string "template_sha"
+    t.datetime "business_synced_at"
+    t.json "business_sync_result"
     t.index ["eval_run"], name: "index_projects_on_eval_run"
     t.index ["owner_id"], name: "index_projects_on_owner_id"
     t.index ["port"], name: "index_projects_on_port", unique: true
@@ -113,6 +130,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_180000) do
   end
 
   add_foreign_key "agent_commands", "projects"
+  add_foreign_key "business_settings", "users"
   add_foreign_key "deployments", "projects"
   add_foreign_key "messages", "projects"
   add_foreign_key "projects", "users", column: "owner_id"

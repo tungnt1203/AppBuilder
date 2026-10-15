@@ -13,6 +13,7 @@ class Publisher
     @deployment.deploying!
     run_steps(deploy_steps)
     @deployment.live!
+    BusinessSyncJob.perform_later(@project) if @project.owner&.business_setting&.configured?
     announce_first_publish if first
   rescue ProjectShell::Error => error
     @deployment.append_log(error.message)

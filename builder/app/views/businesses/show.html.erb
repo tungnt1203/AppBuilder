@@ -1,0 +1,101 @@
+<% content_for :title, "Business settings" %>
+
+<div class="fixed top-4 right-4 z-30 flex items-center gap-2">
+  <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon on-glass glass capsule" %>
+  <%= render "layouts/account_menu" %>
+</div>
+
+<main class="mx-auto flex min-h-full max-w-2xl flex-col gap-6 px-4 pt-[10vh] pb-16 sm:px-6">
+  <div class="flex flex-col gap-2">
+    <%= link_to root_path, class: "on-glass inline-flex w-fit items-center gap-1 text-sm font-medium opacity-80 hover:opacity-100" do %>
+      <%= icon :back, size: 15 %> Apps
+    <% end %>
+    <h1 class="on-glass text-[2rem] leading-tight font-semibold tracking-[-0.025em]">Business settings</h1>
+    <p class="text-[0.9375rem] text-white/75">Set your payments, Printify and ad accounts once. Every shop you build gets them, now and when you make or publish a new one.</p>
+  </div>
+
+  <% if notice = flash[:notice] %><p class="flash w-fit" role="status"><%= notice %></p><% end %>
+
+  <%= form_with model: @setting, url: business_path, method: :patch, class: "surface sheet flex flex-col gap-6 p-5 sm:p-6" do |form| %>
+    <% if @setting.errors.any? %>
+      <p class="alert"><%= @setting.errors.full_messages.to_sentence %></p>
+    <% end %>
+
+    <section class="flex flex-col gap-2">
+      <h2 class="font-semibold">Card payments: Stripe</h2>
+      <p class="muted text-sm">Your Stripe secret key (Developers → API keys). A test key (sk_test_…) lets you try buying with card 4242 4242 4242 4242.</p>
+      <% if @setting.stripe_secret_key.present? %>
+        <p class="text-sm">Connected: <span class="font-mono"><%= BusinessSetting.masked(@setting.stripe_secret_key) %></span><%= " · test mode" if @setting.stripe_test_mode? %></p>
+      <% end %>
+      <%= form.password_field :stripe_secret_key, value: nil, autocomplete: "off", class: "field",
+            placeholder: @setting.stripe_secret_key.present? ? "Paste a new key to replace it" : "sk_live_… or sk_test_…", "aria-label": "Stripe secret key" %>
+      <% if @setting.stripe_secret_key.present? %>
+        <label class="muted flex items-center gap-2 text-sm"><%= form.check_box :clear_stripe_secret_key %> Disconnect Stripe from all my shops</label>
+      <% end %>
+    </section>
+
+    <section class="flex flex-col gap-2">
+      <h2 class="font-semibold">Printing: Printify</h2>
+      <p class="muted text-sm">A personal access token from Printify (Account → Connections), and the Printify shop your products are in. Each shop of yours imports its products from there.</p>
+      <% if @setting.printify_token.present? %>
+        <p class="text-sm">Connected<%= ": #{@setting.printify_shop_title}" if @setting.printify_shop_title %></p>
+      <% end %>
+      <%= form.password_field :printify_token, value: nil, autocomplete: "off", class: "field",
+            placeholder: @setting.printify_token.present? ? "Paste a new token to replace it" : "Printify personal access token", "aria-label": "Printify token" %>
+      <% if @shops.present? && @shops.many? %>
+        <%= form.select :printify_shop_id, @shops.map { |shop| [ shop["title"], shop["id"] ] }, { include_blank: "Pick the Printify shop" },
+              class: "field", "aria-label": "Printify shop" %>
+      <% end %>
+      <% if @setting.printify_token.present? %>
+        <label class="muted flex items-center gap-2 text-sm"><%= form.check_box :clear_printify_token %> Disconnect Printify from all my shops</label>
+      <% end %>
+    </section>
+
+    <section class="flex flex-col gap-2">
+      <h2 class="font-semibold">Ads</h2>
+      <p class="muted text-sm">Your shops send page views, add to cart and purchases to the accounts you fill in.</p>
+      <div class="grid gap-2 sm:grid-cols-2">
+        <%= form.text_field :meta_pixel_id, class: "field", placeholder: "Meta Pixel ID", "aria-label": "Meta Pixel ID", inputmode: "numeric" %>
+        <%= form.password_field :meta_access_token, value: nil, autocomplete: "off", class: "field",
+              placeholder: @setting.meta_access_token.present? ? "Conversions API token: saved" : "Conversions API token (optional)", "aria-label": "Meta Conversions API token" %>
+        <%= form.text_field :tiktok_pixel_id, class: "field", placeholder: "TikTok Pixel ID", "aria-label": "TikTok Pixel ID" %>
+        <%= form.text_field :google_tag_id, class: "field", placeholder: "Google tag (G-… or AW-…)", "aria-label": "Google tag ID" %>
+      </div>
+      <% if @setting.meta_access_token.present? %>
+        <label class="muted flex items-center gap-2 text-sm"><%= form.check_box :clear_meta_access_token %> Remove the Conversions API token</label>
+      <% end %>
+    </section>
+
+    <div class="flex items-center gap-3">
+      <%= form.button "Save and apply to my shops", class: "btn btn-primary h-10 px-5" %>
+      <p class="faint text-[0.8125rem]">Keys are stored encrypted.</p>
+    </div>
+  <% end %>
+
+  <% if @projects.any? %>
+    <section class="flex flex-col gap-3" aria-labelledby="shops_heading">
+      <h2 id="shops_heading" class="on-glass text-lg font-semibold">Your shops</h2>
+      <ul class="surface sheet divide-y divide-[var(--line)] overflow-hidden">
+        <% @projects.each do |project| %>
+          <% result = project.business_sync_result || {} %>
+          <li class="flex flex-col gap-1 px-5 py-3.5">
+            <div class="flex items-center justify-between gap-3">
+              <%= link_to project.name, project_path(project), class: "truncate font-semibold" %>
+              <span class="faint shrink-0 text-[0.8125rem]">
+                <%= project.business_synced_at ? "Applied #{time_ago_in_words(project.business_synced_at)} ago" : "Not applied yet" %>
+              </span>
+            </div>
+            <% result.each do |copy, answer| %>
+              <% errors = Array(answer["errors"]) %>
+              <p class="text-[0.8125rem] <%= errors.any? ? "text-[var(--danger)]" : "muted" %>">
+                <%= copy == "live" ? "Published shop" : "Preview" %>:
+                <%= [ ("Stripe: #{answer["stripe"]}" if answer["stripe"]), ("Printify: #{answer["printify"]}" if answer["printify"]),
+                      ("Ads: #{answer["pixels"]}" if answer["pixels"]), *errors ].compact.join(" · ") %>
+              </p>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+</main>

@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
   resource :tour, only: :create
+  resource :business, only: %i[ show update ]
   resources :passwords, param: :token
   root "projects#index"
   get "s/:token", to: "shares#show", as: :shared_preview
