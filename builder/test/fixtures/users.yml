@@ -11,3 +11,15 @@ member:
   email_address: member@example.com
   password_digest: <%= password_digest %>
   role: member
+
+cats_admin:
+  name: Adam Admin
+  email_address: linh@example.com
+  password_digest: <%= password_digest %>
+  role: member
+
+cats_staff:
+  name: Sam Staff
+  email_address: sam@example.com
+  password_digest: <%= password_digest %>
+  role: member

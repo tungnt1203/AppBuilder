@@ -1,0 +1,14 @@
+<%= page_header t(".title"), t(".description"), breadcrumbs: [ [ t("shop_admin.memberships.index.title"), shop_admin_memberships_path ], [ t(".title"), nil ] ] %>
+
+<%= card class: "max-w-xl" do %>
+  <%= form_with url: shop_admin_memberships_path, scope: :membership, class: "space-y-4" do |form| %>
+    <%= render "ui/form_errors", model: @membership if @membership.errors.any? %>
+    <%= form.field :email_address, :email_field, required: true, autofocus: true, value: params.dig(:membership, :email_address), label: t(".email_address") %>
+    <%= form.field :name, value: params.dig(:membership, :name), label: t(".name"), hint: t(".name_hint") %>
+    <div class="space-y-1.5">
+      <%= form.label :role, t(".role") %>
+      <%= form.select :role, ShopMembership::ROLES.map { |role| [ t("shop_admin.memberships.roles.#{role}"), role ] }, selected: @membership.role %>
+    </div>
+    <%= form.submit t(".submit") %>
+  <% end %>
+<% end %>

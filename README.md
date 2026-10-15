@@ -43,6 +43,7 @@ blocks are MIT so that the apps made with them belong to their owners; the templ
 You need macOS or Linux with:
 
 - Ruby 3.3.10 (see `builder/.ruby-version`), and PostgreSQL for the builder (Docker is enough)
+- libvips, for product photos in the shops' admin (`brew install vips` on macOS)
 - [Claude Code](https://claude.com/claude-code), signed in (`claude` on your `PATH`): the agent
   uses your Claude account. Or a token from `claude setup-token`, see `builder/README.md`.
 - Google Chrome, for app thumbnails and `bin/eval` (`CHROME_BIN` if it's not in the default place)

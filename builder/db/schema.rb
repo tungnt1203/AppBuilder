@@ -330,13 +330,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
     t.decimal "session_cost_usd", precision: 10, scale: 4, default: "0.0", null: false
     t.text "instructions"
     t.string "template_sha"
-    t.datetime "business_synced_at"
-    t.json "business_sync_result"
-    t.json "orders_summary"
-    t.datetime "orders_summary_at"
-    t.string "orders_summary_source"
-    t.json "printify_import_result"
-    t.datetime "printify_imported_at"
     t.bigint "shop_id"
     t.index ["eval_run"], name: "index_projects_on_eval_run"
     t.index ["owner_id"], name: "index_projects_on_owner_id"
@@ -414,6 +407,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
     t.string "status", default: "draft", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "business_synced_at"
+    t.jsonb "business_sync_result"
+    t.datetime "printify_imported_at"
+    t.jsonb "printify_import_result"
     t.index ["subdomain"], name: "index_shops_on_subdomain", unique: true
     t.index ["uid"], name: "index_shops_on_uid", unique: true
   end

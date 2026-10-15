@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   resource :tour, only: :create
   get "business", to: redirect("/admin/settings")
   resources :passwords, param: :token
+  resources :invitations, only: %i[ show update ], param: :token
   root "projects#index"
   get "s/:token", to: "shares#show", as: :shared_preview
 
@@ -30,8 +31,42 @@ Rails.application.routes.draw do
     root "dashboards#show"
     resource :settings, only: %i[ show update ]
     resources :products, only: %i[ index create ]
-    resource :orders_refresh, only: :create
     resources :users, only: %i[ index update destroy ]
+    resources :shops, only: %i[ index new create ]
+  end
+
+  # One shop's admin, for its members (ShopAdmin::BaseController).
+  scope "admin/shops/:shop_id", module: :shop_admin, as: :shop_admin do
+    root "dashboards#show"
+
+    resources :products do
+      resources :images, only: :destroy, module: :products
+    end
+    resource :demo_products, only: %i[ create destroy ]
+    resources :collections
+    resources :discounts, except: :show
+    resources :product_reviews, only: %i[ index update ], path: "reviews"
+    resources :promotions, only: %i[ index new create ] do
+      resource :cancellation, only: :create, module: :promotions
+    end
+    resources :orders, only: %i[ index show update ] do
+      scope module: :orders do
+        resource :payment, only: :create
+        resource :production, only: :create
+        resource :shipment, only: :create
+        resource :delivery, only: :create
+        resource :cancellation, only: :create
+        resource :refund, only: :create
+        resource :restock, only: :create
+        resource :fulfillment, only: :create
+      end
+    end
+    resource :printify_connection, only: %i[ show create update destroy ], path: "settings/printify"
+    resources :printify_imports, only: %i[ index create ], path: "printify/products"
+    resource :stripe_connection, only: %i[ create update destroy ]
+    resource :settings, only: %i[ edit update ]
+    resource :policies, only: %i[ edit update ], path: "settings/policies"
+    resources :memberships, only: %i[ index new create update destroy ], path: "people"
   end
 
   get "up" => "rails/health#show", as: :rails_health_check

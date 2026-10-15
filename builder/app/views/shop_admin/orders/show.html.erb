@@ -1,0 +1,183 @@
+<%= page_header t(".title", number: @order.name), l(@order.created_at, format: :long),
+      breadcrumbs: [ [ t("shop_admin.orders.index.title"), shop_admin_orders_path ], [ @order.name, nil ] ] do %>
+  <%= order_status_badge @order %>
+  <% if @order.can_mark_paid? %>
+    <%= button_to t(".mark_paid"), shop_admin_order_payment_path(@order), class: button_classes %>
+  <% end %>
+  <% if @order.can_start_production? %>
+    <%= button_to t(".start_production"), shop_admin_order_production_path(@order), class: button_classes(:secondary) %>
+  <% end %>
+  <% if @order.can_mark_delivered? %>
+    <%= button_to t(".mark_delivered"), shop_admin_order_delivery_path(@order), class: button_classes(:secondary) %>
+  <% end %>
+  <% if @order.can_cancel? || @order.can_refund? || @order.can_return_to_stock? %>
+    <%= menu t(".more") do %>
+      <% if @order.can_cancel? && @order.card_payment_taken? %>
+        <%= menu_button_to t(".cancel_and_refund"), shop_admin_order_cancellation_path(@order),
+              form: { data: { turbo_confirm: t(".confirm_cancel_and_refund", number: @order.name, total: money(@order.total_cents, @order.currency)) } } %>
+      <% elsif @order.can_cancel? %>
+        <%= menu_button_to t(".cancel"), shop_admin_order_cancellation_path(@order), form: { data: { turbo_confirm: t(".confirm_cancel", number: @order.name) } } %>
+      <% end %>
+      <% if @order.can_return_to_stock? %>
+        <%= menu_button_to t(".return_to_stock"), shop_admin_order_restock_path(@order), form: { data: { turbo_confirm: t(".confirm_return_to_stock", number: @order.name) } } %>
+      <% end %>
+      <% if @order.can_refund? %>
+        <%= menu_button_to t(@order.card? ? ".refund_card" : ".refund"), shop_admin_order_refund_path(@order),
+              form: { data: { turbo_confirm: t(@order.card? ? ".confirm_refund_card" : ".confirm_refund", number: @order.name, total: money(@order.total_cents, @order.currency)) } } %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<div class="grid gap-6 lg:grid-cols-[1fr_20rem]">
+  <div class="space-y-6">
+    <% if @order.fulfillment_error.present? %>
+      <%= alert tone: :danger do %>
+        <p class="font-medium"><%= @order.printify_order_id.blank? ? t(".printify.failed") : t(@order.cancelled? || @order.refunded? ? ".printify.still_there" : ".printify.stopped") %></p>
+        <p class="mt-1"><%= @order.fulfillment_error %></p>
+        <% if (rejected = printify_rejected_field(@order)) %>
+          <p class="mt-2"><a href="#order_<%= rejected %>" class="font-medium underline"><%= t(".printify.fix_field", field: Order.human_attribute_name(rejected).downcase) %></a></p>
+        <% end %>
+        <% if @order.paid? %>
+          <%= button_to t(".printify.retry"), shop_admin_order_fulfillment_path(@order), class: "mt-3 #{button_classes(:secondary, size: :sm)}" %>
+        <% end %>
+      <% end %>
+    <% elsif @order.can_ship? && (part = @order.events.find { |event| event.action == "printify_shipped" }) %>
+      <%= alert t(".printify.part_shipped", tracking: part.message), tone: :warning %>
+    <% elsif @order.printify_order_id.present? %>
+      <%= alert tone: :info do %>
+        <p><%= t(".printify.sent") %> <%= link_to t(".printify.open"), @order.printify_url, class: link_classes, target: "_blank", rel: "noopener" %></p>
+      <% end %>
+    <% end %>
+    <%= card padded: false do %>
+      <ul class="divide-y divide-line">
+        <% @order.line_items.each do |item| %>
+          <li class="flex items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6">
+            <% if item.product %>
+              <%= link_to edit_shop_admin_product_path(item.product), class: "shrink-0" do %>
+                <%= product_image item.product, image: item.product.image_for(item.variant), size: :thumb, class: "size-12 rounded-lg" %>
+              <% end %>
+            <% else %>
+              <div class="grid size-12 shrink-0 place-items-center rounded-lg bg-surface-muted text-muted"><%= icon "package", size: 18 %></div>
+            <% end %>
+            <div class="min-w-0 flex-1 text-sm">
+              <p class="font-medium text-ink"><%= item.product_title %></p>
+              <p class="text-muted"><%= [ item.variant_title, (t(".sku", sku: item.sku) if item.sku) ].compact.join(" · ") %></p>
+              <p class="text-muted sm:hidden"><%= money(item.unit_price_cents, @order.currency) %> × <%= item.quantity %></p>
+            </div>
+            <p class="hidden text-sm text-muted whitespace-nowrap sm:block"><%= money(item.unit_price_cents, @order.currency) %> × <%= item.quantity %></p>
+            <p class="text-right text-sm font-medium whitespace-nowrap sm:w-20"><%= money(item.total_cents, @order.currency) %></p>
+          </li>
+        <% end %>
+      </ul>
+      <dl class="space-y-2 border-t border-line px-6 py-4 text-sm">
+        <div class="flex justify-between"><dt class="text-muted"><%= t(".subtotal") %></dt><dd><%= money(@order.subtotal_cents, @order.currency) %></dd></div>
+        <% if @order.discount_cents.positive? %><div class="flex justify-between"><dt class="text-muted"><%= t("orders.show.discount", code: @order.discount_code) %></dt><dd>-<%= money(@order.discount_cents, @order.currency) %></dd></div><% end %>
+        <div class="flex justify-between"><dt class="text-muted"><%= t(".shipping") %></dt><dd><%= money(@order.shipping_cents, @order.currency) %></dd></div>
+        <% if @order.tax_cents.positive? %><div class="flex justify-between"><dt class="text-muted"><%= t("orders.show.tax") %></dt><dd><%= money(@order.tax_cents, @order.currency) %></dd></div><% end %>
+        <div class="flex justify-between font-semibold"><dt><%= t(".total") %></dt><dd><%= money(@order.total_cents, @order.currency) %></dd></div>
+        <% if (margin = @order.margin_cents) %>
+          <div class="flex justify-between border-t border-line pt-2 text-muted"><dt><%= t(".printify_cost") %></dt><dd>-<%= money(@order.fulfillment_cost_cents, @order.currency) %></dd></div>
+          <div class="flex justify-between font-medium <%= margin.negative? ? "text-red-600" : "text-ink" %>"><dt title="<%= t(".margin_hint") %>"><%= t(".margin") %></dt><dd><%= money(margin, @order.currency) %></dd></div>
+        <% end %>
+        <% if @order.refunded_cents.positive? %><div class="flex justify-between text-muted"><dt><%= t(".refunded") %></dt><dd>-<%= money(@order.refunded_cents, @order.currency) %></dd></div><% end %>
+      </dl>
+    <% end %>
+
+    <% if @order.can_ship? %>
+      <%= card do %>
+        <h2 class="flex items-center gap-2 text-sm font-semibold text-ink"><%= icon "truck", size: 18 %> <%= t(".ship.title") %></h2>
+        <p class="mt-1 text-sm text-muted"><%= t(".ship.description") %></p>
+        <%= form_with url: shop_admin_order_shipment_path(@order), class: "mt-4 grid gap-4 sm:grid-cols-2" do |form| %>
+          <div class="space-y-1.5">
+            <%= form.label :carrier, t(".ship.carrier") %>
+            <%= form.text_field :carrier, placeholder: "USPS", list: "carriers" %>
+            <datalist id="carriers"><% %w[ USPS UPS FedEx DHL YunExpress ].each do |carrier| %><option value="<%= carrier %>"><% end %></datalist>
+          </div>
+          <div class="space-y-1.5">
+            <%= form.label :tracking_number, t(".ship.tracking_number") %>
+            <%= form.text_field :tracking_number %>
+          </div>
+          <div class="space-y-1.5 sm:col-span-2">
+            <%= form.label :tracking_url, t(".ship.tracking_url") %>
+            <%= form.url_field :tracking_url, placeholder: "https://" %>
+          </div>
+          <div class="sm:col-span-2"><%= form.submit t(".ship.submit") %></div>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= card do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".timeline") %></h2>
+      <ol class="mt-4 space-y-4">
+        <% @order.events.reverse_each do |event| %>
+          <li class="flex gap-3 text-sm">
+            <span class="mt-1.5 size-2 shrink-0 rounded-full bg-brand-500"></span>
+            <div>
+              <p class="text-ink"><%= t(".events.#{event.action}", default: event.action.humanize) %><%= ": #{event.message}" if event.message %></p>
+              <p class="text-xs text-muted"><%= l(event.created_at, format: :short) %> · <%= event.user&.name || t(".by_buyer") %></p>
+            </div>
+          </li>
+        <% end %>
+      </ol>
+    <% end %>
+  </div>
+
+  <div class="space-y-6">
+    <%= card do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".customer") %></h2>
+      <p class="mt-2 text-sm"><%= mail_to @order.email, class: link_classes %></p>
+      <% if @order.phone.present? %><p class="text-sm text-muted"><%= @order.phone %></p><% end %>
+      <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".ship_to") %></h2>
+      <p class="mt-2 text-sm text-muted"><%= safe_join(@order.shipping_address_lines, tag.br) %></p>
+      <% if @order.note.present? %>
+        <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".buyer_note") %></h2>
+        <p class="mt-2 text-sm text-muted"><%= @order.note %></p>
+      <% end %>
+      <% if @order.tracking_number.present? %>
+        <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".tracking") %></h2>
+        <p class="mt-2 text-sm text-muted">
+          <%= [ @order.carrier, @order.tracking_number ].compact_blank.join(" · ") %>
+          <% if @order.tracking_url.present? %><br><%= link_to t(".track"), @order.tracking_url, class: link_classes, target: "_blank", rel: "noopener" %><% end %>
+        </p>
+      <% end %>
+      <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".payment") %></h2>
+      <p class="mt-2 text-sm text-muted">
+        <%= t(".payment_methods.#{@order.payment_method}") %>
+        <% if (url = @order.stripe_dashboard_url(test_mode: Store.current.stripe_test_mode?)) %>
+          <br><%= link_to t(".view_in_stripe"), url, class: link_classes, target: "_blank", rel: "noopener" %>
+        <% elsif @order.card? && @order.pending? %>
+          <br><%= t(".unpaid_card") %>
+        <% end %>
+      </p>
+      <p class="mt-6 text-sm"><%= link_to t(".buyer_page"), storefront_url("/orders/#{@order.token}"), class: link_classes, target: "_blank" %></p>
+    <% end %>
+
+    <%= card do %>
+      <%= form_with model: @order, url: shop_admin_order_path(@order), class: "space-y-4" do |form| %>
+        <%= form.errors %>
+        <%= form.field :staff_note, :text_area, rows: 3, hint: t(".staff_note_hint") %>
+        <% rejected = printify_rejected_field(@order) %>
+        <% flag = ->(field) { rejected == field ? { class: "border-red-400", autofocus: true, hint: t(".printify.rejected_here") } : {} } %>
+        <details class="group" <%= "open" if @order.errors.any? || rejected %>>
+          <summary class="cursor-pointer text-sm font-medium text-ink"><%= t(".edit_contact") %></summary>
+          <div class="mt-4 space-y-4">
+            <%= form.field :email, :email_field, required: true %>
+            <%= form.field :phone, :telephone_field, **flag.(:phone) %>
+            <%= form.field :shipping_name, required: true %>
+            <%= form.field :shipping_address1, required: true, **flag.(:shipping_address1) %>
+            <%= form.field :shipping_address2 %>
+            <%= form.field :shipping_city, required: true, **flag.(:shipping_city) %>
+            <%= form.field :shipping_region, **flag.(:shipping_region), placeholder: ("CA, NY, ON…" if Region.for(@order.shipping_country)) %>
+            <%= form.field :shipping_postal_code, **flag.(:shipping_postal_code) %>
+            <div class="space-y-1.5">
+              <%= form.label :shipping_country %>
+              <%= form.select :shipping_country, Country.options, {}, class: ("border-red-400" if rejected == :shipping_country) %>
+            </div>
+          </div>
+        </details>
+        <%= form.submit t(".save") %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

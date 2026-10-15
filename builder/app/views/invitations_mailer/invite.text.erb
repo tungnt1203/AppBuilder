@@ -1,0 +1,6 @@
+Hi <%= @user.name %>,
+
+You've been added to <%= @shop.name %>. Choose a password to sign in:
+<%= invitation_url(@user.generate_token_for(:invitation)) %>
+
+The link works for 7 days.

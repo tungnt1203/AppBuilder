@@ -1,0 +1,38 @@
+<%= page_header t(".title"), t(".description") %>
+
+<%= tabs do %>
+  <%= tab_to t(".published"), shop_admin_product_reviews_path %>
+  <%= tab_to t(".hidden", count: @hidden_count), shop_admin_product_reviews_path(status: "hidden") %>
+<% end %>
+
+<% if @page.records.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @page.records.each do |review| %>
+        <li class="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-start">
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <%= rating_stars review.rating %>
+              <%= link_to review.product.title, edit_shop_admin_product_path(review.product), class: "text-sm font-medium text-ink hover:underline" %>
+            </div>
+            <% if review.body %>
+              <p class="mt-2 text-sm text-ink/90"><%= review.body %></p>
+            <% end %>
+            <p class="mt-2 text-xs text-muted">
+              <%= review.author_name %> · <%= link_to review.order.name, shop_admin_order_path(review.order), class: link_classes %> · <%= l(review.created_at, format: :short) %>
+            </p>
+          </div>
+          <% if review.published? %>
+            <%= button_to t(".hide"), shop_admin_product_review_path(review, status: "hidden"), method: :patch, class: button_classes(:ghost, size: :sm),
+                  form: { data: { turbo_confirm: t(".confirm_hide") } } %>
+          <% else %>
+            <%= button_to t(".show"), shop_admin_product_review_path(review, status: "published"), method: :patch, class: button_classes(:secondary, size: :sm) %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+  <%= render "ui/pagination", page: @page %>
+<% else %>
+  <%= empty_state t(@hidden ? ".empty_hidden_title" : ".empty_title"), t(@hidden ? ".empty_hidden_description" : ".empty_description") %>
+<% end %>

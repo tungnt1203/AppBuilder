@@ -1,13 +1,12 @@
 # What an owner sets once for all their shops: Stripe, Printify (the account and which of its
-# shops) and their ad pixels. The builder applies it to every app of theirs that sells
-# (BusinessSync), when it's saved, when an app is made, and when one is published. Secrets are
-# encrypted, and reach the apps only through a variable, never a command's arguments.
+# shops) and their ad pixels. It's applied to every shop they own or administer (BusinessSync)
+# when it's saved and when they open a new one. Secrets are encrypted.
 class BusinessSetting < ApplicationRecord
   KEYS = %w[ stripe_secret_key printify_token printify_shop_id meta_pixel_id meta_access_token tiktok_pixel_id google_tag_id ].freeze
 
   belongs_to :user
 
-  # The form's "Disconnect" boxes (BusinessesController reads them).
+  # The form's "Disconnect" boxes (Admin::SettingsController reads them).
   attr_accessor :clear_stripe_secret_key, :clear_printify_token, :clear_meta_access_token
 
   encrypts :stripe_secret_key, :printify_token, :meta_access_token
@@ -20,7 +19,7 @@ class BusinessSetting < ApplicationRecord
   validates :tiktok_pixel_id, format: { with: /\A[A-Z0-9]{8,32}\z/ }, allow_nil: true
   validates :google_tag_id, format: { with: /\A(G|AW)-[A-Z0-9]{4,20}\z/, message: "looks like G-XXXX or AW-XXXX" }, allow_nil: true
 
-  # What each app is told: every key, blank for what isn't set (which disconnects it there).
+  # What each shop is given: every key, blank for what isn't set (which disconnects it there).
   def payload
     KEYS.index_with { |key| public_send(key).to_s }
   end

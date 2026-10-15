@@ -15,11 +15,11 @@ class Admin::SettingsControllerTest < ActionDispatch::IntegrationTest
     PrintifyAccount.singleton_class.alias_method(:shops, :original_shops)
   end
 
-  test "saves the settings once, picks the only Printify shop, and applies them to every app" do
+  test "saves the settings once, picks the only Printify shop, and applies them to every shop" do
     get admin_settings_path
     assert_select "h1", "Settings"
 
-    assert_enqueued_jobs users(:member).projects.listed.count, only: BusinessSyncJob do
+    assert_enqueued_jobs 2, only: BusinessSyncJob do
       patch admin_settings_path, params: { business_setting: { stripe_secret_key: "sk_test_abc", printify_token: "pf-token", meta_pixel_id: "123456789012" } }
     end
     assert_redirected_to admin_settings_path
@@ -29,6 +29,20 @@ class Admin::SettingsControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "span.font-mono", "sk_test_…_abc"
     assert_no_match "sk_test_abc", response.body, "the key isn't shown again"
+  end
+
+  test "goes to the shops they own or administer, and shows what each got" do
+    sign_in_as users(:cats_staff)
+    patch admin_settings_path, params: { business_setting: { meta_pixel_id: "123456789012" } }
+    assert_no_enqueued_jobs only: BusinessSyncJob
+
+    sign_in_as users(:cats_admin)
+    shops(:cats).update!(business_synced_at: 1.minute.ago, business_sync_result: { "stripe" => "Acme (test mode)", "errors" => [ "Printify: no such shop" ] })
+    assert_enqueued_with(job: BusinessSyncJob, args: [ shops(:cats), users(:cats_admin) ]) do
+      patch admin_settings_path, params: { business_setting: { meta_pixel_id: "123456789012" } }
+    end
+    follow_redirect!
+    assert_select "li", /Chubby Cat Tees.*Applied 1 minute ago.*Stripe: Acme \(test mode\) · Printify: no such shop/m
   end
 
   test "a blank secret keeps the saved one, Disconnect clears it" do

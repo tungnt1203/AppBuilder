@@ -1,0 +1,27 @@
+<% content_for :title, "Shops" %>
+
+<div class="admin-header">
+  <div>
+    <h1 class="admin-title">Shops</h1>
+    <p class="muted text-sm">The shops you run, and what you can do in each.</p>
+  </div>
+  <%= link_to "New shop", new_admin_shop_path, class: "admin-button" %>
+</div>
+
+<% if @memberships.any? %>
+  <ul class="admin-card admin-list max-w-3xl overflow-hidden">
+    <% @memberships.each do |membership| %>
+      <li>
+        <%= link_to shop_admin_root_path(membership.shop), class: "admin-row" do %>
+          <span class="min-w-0 flex-1">
+            <span class="block truncate font-semibold"><%= membership.shop.name %></span>
+            <span class="faint block truncate text-[0.8125rem]"><%= membership.shop.storefront_url.delete_prefix("https://").delete_prefix("http://").chomp("/") %></span>
+          </span>
+          <span class="muted text-[0.8125rem]"><%= membership.role.humanize %></span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="admin-card max-w-3xl p-6 text-sm">You don't run a shop yet. <%= link_to "Open one", new_admin_shop_path, class: "underline" %>.</p>
+<% end %>

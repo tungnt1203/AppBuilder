@@ -5,13 +5,10 @@
     <h1 class="admin-title">Orders</h1>
     <p class="muted text-sm">All your shops, the last 30 days.</p>
   </div>
-  <%= button_to admin_orders_refresh_path, class: "admin-button admin-button-secondary", form: { class: "contents" } do %>
-    <%= icon :reload, size: 15 %> Refresh
-  <% end %>
 </div>
 
-<% if @projects.empty? %>
-  <p class="admin-card p-6 text-sm">You have no shops yet. Build one from the <%= link_to "Apps", root_path, class: "underline" %> page.</p>
+<% if @shops.empty? %>
+  <p class="admin-card p-6 text-sm">You don't run a shop yet. <%= link_to "Open one", new_admin_shop_path, class: "underline" %>.</p>
 <% else %>
   <% @totals.each do |currency, totals| %>
     <ul class="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Last 30 days<%= " in #{currency}" if @totals.many? %>">
@@ -32,14 +29,13 @@
       <% if @orders.any? %>
         <ul class="admin-card admin-list overflow-hidden">
           <% @orders.each do |order| %>
-            <% project = order["project"] %>
-            <% url = ShopOrders.order_url(project, order["token"]) || project_path(project) %>
+            <% shop = order["shop"] %>
             <li>
-              <%= link_to url, class: "admin-row", target: (url.start_with?("http") ? "_blank" : nil) do %>
+              <%= link_to shop_admin_order_path(shop, order["token"]), class: "admin-row" do %>
                 <div class="min-w-0 flex-1">
                   <p class="truncate text-sm font-semibold">#<%= order["number"] %> · <%= order["name"] %></p>
                   <p class="faint truncate text-[0.8125rem]">
-                    <%= project.name %><%= " (preview)" if project.orders_summary_source == "preview" %> ·
+                    <%= shop.name %> ·
                     <%= time_ago_in_words(Time.iso8601(order["placed_at"])) %> ago
                   </p>
                   <% if order["problem"] %><p class="truncate text-[0.8125rem] text-[var(--danger)]"><%= order["problem"] %></p><% end %>
@@ -58,24 +54,14 @@
     <section aria-labelledby="shops_heading">
       <h2 id="shops_heading" class="admin-section-title">Your shops</h2>
       <ul class="admin-card admin-list overflow-hidden">
-        <% @projects.each do |project| %>
-          <% summary = project.orders_summary || {} %>
+        <% @summaries.each do |shop, summary| %>
           <li class="admin-row">
             <div class="min-w-0 flex-1">
-              <%= link_to project.name, project_path(project), class: "block truncate text-sm font-semibold" %>
+              <%= link_to shop.name, shop_admin_root_path(shop), class: "block truncate text-sm font-semibold" %>
               <p class="faint truncate text-[0.8125rem]">
-                <% if summary["errors"].present? %>
-                  <span class="text-[var(--danger)]"><%= summary["errors"].first %></span>
-                <% elsif project.orders_summary_at %>
-                  <%= pluralize(summary["orders"].to_i, "order") %> · <%= shop_money(summary["sales_cents"].to_i, summary["currency"]) %>
-                  <%= "· #{summary["needs_action"]} to handle" if summary["needs_action"].to_i.positive? %>
-                  <%= "· #{pluralize(summary["problems"], "Printify problem")}" if summary["problems"].to_i.positive? %>
-                <% else %>
-                  Not checked yet
-                <% end %>
-              </p>
-              <p class="faint text-[0.75rem]">
-                <%= project.orders_summary_source == "live" ? "Published" : "Preview" %><%= " · #{time_ago_in_words(project.orders_summary_at)} ago" if project.orders_summary_at %>
+                <%= pluralize(summary["orders"], "order") %> · <%= shop_money(summary["sales_cents"], summary["currency"]) %>
+                <%= "· #{summary["needs_action"]} to handle" if summary["needs_action"].positive? %>
+                <%= "· #{pluralize(summary["problems"], "Printify problem")}" if summary["problems"].positive? %>
               </p>
             </div>
           </li>

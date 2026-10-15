@@ -1,0 +1,16 @@
+<%# Which shop the admin is about: all of the account's shops, or one of them. %>
+<% shops = Current.user.shops.order(:name).to_a %>
+<details class="admin-switcher">
+  <summary class="admin-link">
+    <span class="min-w-0 flex-1 truncate"><%= shop&.name || t("shop_admin.layout.all_shops") %></span>
+    <%= icon "chevrons-up-down", size: 15 %>
+    <span class="sr-only"><%= t("shop_admin.layout.switch") %></span>
+  </summary>
+  <div class="admin-switcher-menu">
+    <%= link_to t("shop_admin.layout.all_shops"), admin_root_path(shop_id: nil), class: "admin-link", "aria-current": (shop ? nil : "true") %>
+    <% shops.each do |each_shop| %>
+      <%= link_to each_shop.name, shop_admin_root_path(each_shop), class: "admin-link", "aria-current": (each_shop == shop ? "true" : nil) %>
+    <% end %>
+    <%= link_to new_admin_shop_path(shop_id: nil), class: "admin-link" do %><%= icon "plus", size: 15 %> <%= t("shop_admin.layout.new_shop") %><% end %>
+  </div>
+</details>

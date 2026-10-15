@@ -1,0 +1,72 @@
+<%= page_header t(".title") do %>
+  <% if Store.current.printify_connected? %>
+    <%= link_to t(".import_printify"), shop_admin_printify_imports_path, class: button_classes(:secondary) %>
+  <% end %>
+  <%= link_to t(".new"), new_shop_admin_product_path, class: button_classes %>
+<% end %>
+
+<% if DemoCatalog.present? %>
+  <%= alert tone: :warning, class: "mb-6" do %>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <p><%= t(".demo.present") %></p>
+      <% if shop_administrator? %>
+        <%= button_to t(".demo.remove"), shop_admin_demo_products_path, method: :delete, class: button_classes(:secondary, size: :sm),
+              form: { data: { turbo_confirm: t(".demo.confirm_remove") } } %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+
+<%= tabs do %>
+  <%= tab_to t(".all"), shop_admin_products_path(q: params[:q].presence) %>
+  <% Product.statuses.each_key do |status| %>
+    <%= tab_to t(status, scope: "products.statuses"), shop_admin_products_path(status:, q: params[:q].presence) %>
+  <% end %>
+<% end %>
+
+<%= toolbar do %>
+  <%= form_with url: shop_admin_products_path, method: :get, class: "flex w-full max-w-sm gap-2" do |form| %>
+    <%= form.hidden_field :status, value: @status if @status %>
+    <%= form.search_field :q, value: params[:q], placeholder: t(".search"), aria: { label: t(".search") } %>
+    <%= form.button t(".search_button"), type: "submit", name: nil, class: button_classes(:secondary) %>
+  <% end %>
+<% end %>
+
+<% if @page.records.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @page.records.each do |product| %>
+        <li>
+          <%= link_to edit_shop_admin_product_path(product), class: "flex items-center gap-4 px-6 py-3 hover:bg-surface-muted" do %>
+            <%= product_image product, size: :thumb, class: "size-12 shrink-0 rounded-lg" %>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-medium text-ink"><%= product.title %></span>
+              <span class="block truncate text-xs text-muted"><%= t(".variants", count: product.variants.size) %></span>
+            </span>
+            <span class="hidden text-sm text-ink sm:block"><%= price_range(product) %></span>
+            <% if product.demo? %><%= badge t(".demo.badge"), tone: :yellow %><% end %>
+            <span class="w-20 text-right"><%= product_status_badge product %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+  <%= render "ui/pagination", page: @page %>
+<% elsif params[:q].present? || @status %>
+  <%= empty_state t(".no_results") %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") do %>
+    <div class="flex flex-wrap justify-center gap-2">
+      <% if Store.current.printify_connected? %>
+        <%= link_to t(".import_printify"), shop_admin_printify_imports_path, class: button_classes %>
+      <% end %>
+      <%= link_to t(".new"), new_shop_admin_product_path, class: button_classes(Store.current.printify_connected? ? :secondary : :primary) %>
+      <% if shop_administrator? %>
+        <%= button_to t(".demo.add"), shop_admin_demo_products_path, class: button_classes(:secondary) %>
+      <% end %>
+    </div>
+    <% if shop_administrator? %>
+      <p class="mt-3 text-xs text-muted"><%= t(".demo.add_hint") %></p>
+    <% end %>
+  <% end %>
+<% end %>

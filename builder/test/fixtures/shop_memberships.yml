@@ -7,3 +7,13 @@ dogs_owner:
   shop: dogs
   user: member
   role: owner
+
+cats_admin:
+  shop: cats
+  user: cats_admin
+  role: admin
+
+cats_staff:
+  shop: cats
+  user: cats_staff
+  role: staff

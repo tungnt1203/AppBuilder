@@ -1,0 +1,35 @@
+<%= page_header t(".title"), t(".description") do %>
+  <%= link_to t(".add"), new_shop_admin_membership_path, class: button_classes %>
+<% end %>
+
+<%= card padded: false, class: "max-w-3xl overflow-hidden" do %>
+  <ul class="divide-y divide-line">
+    <% @memberships.each do |membership| %>
+      <li class="flex flex-wrap items-center gap-4 px-6 py-4" id="<%= dom_id(membership) %>">
+        <%= avatar membership.user.name %>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-medium text-ink">
+            <%= membership.user.name %>
+            <% if membership.user == Current.user %><span class="text-muted">(<%= t(".you") %>)</span><% end %>
+          </p>
+          <p class="truncate text-sm text-muted"><%= membership.user.email_address %></p>
+        </div>
+        <%= form_with model: membership, url: shop_admin_membership_path(membership), method: :patch, class: "flex items-center gap-2" do |form| %>
+          <%= form.select :role, ShopMembership::ROLES.map { |role| [ t("shop_admin.memberships.roles.#{role}"), role ] }, {},
+                class: "w-auto", "aria-label": t(".role_of", name: membership.user.name), onchange: "this.form.requestSubmit()" %>
+          <noscript><%= form.submit t(".save"), class: button_classes(:secondary, size: :sm) %></noscript>
+        <% end %>
+        <% unless membership.user == Current.user %>
+          <%= button_to t(".remove"), shop_admin_membership_path(membership), method: :delete, class: button_classes(:ghost, size: :sm),
+                form: { data: { turbo_confirm: t(".confirm_remove", name: membership.user.name) } } %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<dl class="mt-6 max-w-3xl space-y-1 text-sm text-muted">
+  <% ShopMembership::ROLES.each do |role| %>
+    <div><dt class="inline font-medium text-ink"><%= t("shop_admin.memberships.roles.#{role}") %>:</dt> <dd class="inline"><%= t("shop_admin.memberships.role_hints.#{role}") %></dd></div>
+  <% end %>
+</dl>

@@ -9,7 +9,6 @@ class ProjectSetupJob < ApplicationJob
     project.sandbox.run("bundle", "install", "--quiet")
     project.restart_preview(restart: false)
     project.update!(status: :ready)
-    BusinessSyncJob.perform_later(project) if project.owner&.business_setting&.configured?
 
     AgentTurnJob.perform_later(project, first_request, mode) if first_request.present?
   rescue ProjectShell::Error => error

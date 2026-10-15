@@ -48,12 +48,25 @@ module ApplicationHelper
     currency.to_s.upcase == "USD" || currency.blank? ? "$#{amount}" : "#{amount} #{currency.upcase}"
   end
 
-  def icon(name, size: 16)
+  # The studio's icons by symbol (icon :store), or a Lucide icon by name (icon "truck") from the
+  # few in vendor/icons/lucide.json the shop admin's screens use.
+  def icon(name, size: 16, stroke: 2, **options)
+    return lucide_icon(name, size:, stroke:, **options) if name.is_a?(String)
+
     tag.svg(width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": 2,
             "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": true, class: "shrink-0 #{name == :chevron ? "chevron" : ""}") do
       safe_join(ICONS.fetch(name).map { |d| tag.path(d: d) })
     end
   end
+
+  def lucide_icon(name, size:, stroke:, **options)
+    paths = LUCIDE_ICONS.fetch(name) { raise ArgumentError, "No icon named #{name.inspect} in vendor/icons/lucide.json" }
+    options[:class] = class_names("shrink-0", options[:class])
+    tag.svg(paths.html_safe, xmlns: "http://www.w3.org/2000/svg", width: size, height: size, viewBox: "0 0 24 24", fill: "none",
+      stroke: "currentColor", "stroke-width": stroke, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": true, **options)
+  end
+
+  LUCIDE_ICONS = JSON.parse(Rails.root.join("vendor/icons/lucide.json").read).freeze
 
   # Asks the agent to fix what the preview check found.
   def fix_request(project)

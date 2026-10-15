@@ -9,5 +9,6 @@ class ShopMembership < ApplicationRecord
   validates :role, inclusion: { in: ROLES }
   validates :user_id, uniqueness: { scope: :shop_id }
 
+  def owner? = role == "owner"
   def administrator? = role.in?(%w[ owner admin ])
 end

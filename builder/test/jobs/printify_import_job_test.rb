@@ -1,22 +1,22 @@
 require "test_helper"
 
 class PrintifyImportJobTest < ActiveJob::TestCase
-  test "imports into the app's preview when it isn't published, and keeps what came in" do
-    project = projects(:clinic)
-    calls = []
-    sandbox = Object.new
-    sandbox.define_singleton_method(:capture) do |*command, env: {}|
-      calls << [ command, env ]
-      [ "PRINTIFY_IMPORT_RESULT {\"imported\":[{\"id\":\"pf-1\",\"title\":\"Cat Tee\",\"status\":\"draft\",\"to_check\":[\"no_size_guide\"]}],\"errors\":[]}", true ]
-    end
-    project.define_singleton_method(:sandbox) { sandbox }
+  test "imports into the shop as drafts and keeps what came in" do
+    in_shop(shops(:cats))
+    connect_fake_printify
+    ActsAsTenant.current_tenant = nil
 
-    PrintifyImportJob.perform_now(project, [ "pf-1" ])
+    PrintifyImportJob.perform_now(shops(:cats), [ "pf-tee" ])
 
-    command, env = calls.sole
-    assert_equal [ "bin/rails", "shop:printify_import" ], command
-    assert_equal({ "ids" => [ "pf-1" ] }, JSON.parse(env["TASK_INPUT"]))
-    assert_equal [ "preview", "Cat Tee" ], [ project.reload.printify_import_result["copy"], project.printify_import_result.dig("imported", 0, "title") ]
-    assert_enqueued_with(job: OrdersRefreshJob, args: [ project ])
+    result = shops(:cats).reload.printify_import_result
+    assert_equal [ "Sunset Tee", "draft" ], result.dig("imported", 0).values_at("title", "status")
+    assert_empty result["errors"]
+    in_shop(shops(:cats))
+    assert Product.exists?(printify_product_id: "pf-tee")
+  end
+
+  test "a shop without Printify is told to connect it" do
+    PrintifyImportJob.perform_now(shops(:dogs), [ "pf-tee" ])
+    assert_match "isn't connected", shops(:dogs).reload.printify_import_result["errors"].sole
   end
 end

@@ -10,15 +10,15 @@
 <% if @setting&.printify_token.blank? || @setting.printify_shop_id.blank? %>
   <p class="admin-card p-6 text-sm">Connect Printify in <%= link_to "Settings", admin_settings_path, class: "underline" %> first, and pick its shop.</p>
 <% elsif @shops.empty? %>
-  <p class="admin-card p-6 text-sm">You have no shops to import into yet. Build one from the <%= link_to "Apps", root_path, class: "underline" %> page.</p>
+  <p class="admin-card p-6 text-sm">You don't run a shop to import into yet. <%= link_to "Open one", new_admin_shop_path, class: "underline" %>.</p>
 <% elsif @error %>
   <p class="admin-alert"><%= @error %></p>
 <% else %>
   <%= form_with url: admin_products_path, method: :post, class: "flex flex-col gap-4" do |form| %>
     <%= hidden_field_tag :page, @page %>
     <div class="admin-card flex flex-wrap items-center gap-3 p-4">
-      <label for="project_id" class="text-sm font-medium">Import into</label>
-      <%= select_tag :project_id, options_from_collection_for_select(@shops, :id, :name), class: "admin-field w-auto min-w-48" %>
+      <label for="shop_id" class="text-sm font-medium">Import into</label>
+      <%= select_tag :shop_id, options_from_collection_for_select(@shops, :subdomain, :name), class: "admin-field w-auto min-w-48" %>
       <%= form.button "Import the ones picked", class: "admin-button" %>
     </div>
 
@@ -64,11 +64,11 @@
     <section class="mt-8" aria-labelledby="imports_heading">
       <h2 id="imports_heading" class="admin-section-title">Last imports</h2>
       <ul class="admin-card admin-list overflow-hidden">
-        <% imported.each do |project| %>
-          <% result = project.printify_import_result || {} %>
+        <% imported.each do |shop| %>
+          <% result = shop.printify_import_result || {} %>
           <li class="flex flex-col gap-1 px-4 py-3">
-            <p class="text-sm"><span class="font-semibold"><%= project.name %></span>
-              <span class="faint">· <%= time_ago_in_words(project.printify_imported_at) %> ago<%= " · preview" if result["copy"] == "preview" %></span></p>
+            <p class="text-sm"><%= link_to shop.name, shop_admin_products_path(shop), class: "font-semibold" %>
+              <span class="faint">· <%= time_ago_in_words(shop.printify_imported_at) %> ago</span></p>
             <% Array(result["imported"]).each do |product| %>
               <p class="muted text-[0.8125rem]">
                 <%= product["title"] %>: <%= product["status"] %><%= " · to check: #{product["to_check"].map(&:humanize).join(", ")}" if product["to_check"].present? %>

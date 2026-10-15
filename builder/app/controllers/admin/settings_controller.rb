@@ -1,5 +1,6 @@
 # The owner's admin over all their shops (/admin), its settings: Stripe, Printify and their ad
-# pixels, set once (BusinessSetting) and applied to every app of theirs that sells (BusinessSync).
+# pixels, set once (BusinessSetting) and applied to every shop they own or administer
+# (BusinessSync), where each can still be changed in that shop's own settings.
 class Admin::SettingsController < Admin::BaseController
   SECRETS = %w[ stripe_secret_key printify_token meta_access_token ].freeze
 
@@ -14,8 +15,8 @@ class Admin::SettingsController < Admin::BaseController
     pick_printify_shop
 
     if @setting.errors.none? && @setting.save
-      projects.each { |project| BusinessSyncJob.perform_later(project) }
-      redirect_to admin_settings_path, notice: "Saved. Your apps are getting the new settings."
+      shops.each { |shop| BusinessSyncJob.perform_later(shop, Current.user) }
+      redirect_to admin_settings_path, notice: "Saved. Your shops are getting the new settings."
     else
       load_page
       render :show, status: :unprocessable_entity
@@ -43,9 +44,9 @@ class Admin::SettingsController < Admin::BaseController
       return @setting.assign_attributes(printify_shop_id: nil, printify_shop_title: nil) if @setting.printify_token.blank?
       return unless @setting.printify_token_changed? || @setting.printify_shop_id_changed? || @setting.printify_shop_id.blank?
 
-      @shops = PrintifyAccount.shops(@setting.printify_token)
-      @setting.printify_shop_id = @shops.first["id"].to_s if @shops.one?
-      shop = @shops.find { |each| each["id"].to_s == @setting.printify_shop_id.to_s }
+      @printify_shops = PrintifyAccount.shops(@setting.printify_token)
+      @setting.printify_shop_id = @printify_shops.first["id"].to_s if @printify_shops.one?
+      shop = @printify_shops.find { |each| each["id"].to_s == @setting.printify_shop_id.to_s }
       @setting.printify_shop_title = shop&.dig("title")
       @setting.printify_shop_id = nil unless shop
     rescue PrintifyAccount::Error => error
@@ -53,11 +54,12 @@ class Admin::SettingsController < Admin::BaseController
     end
 
     def load_page
-      @projects = projects
-      @shops ||= (PrintifyAccount.shops(@setting.printify_token) rescue []) if @setting.printify_token.present? && @setting.printify_shop_id.blank?
+      @shops = shops
+      @printify_shops ||= (PrintifyAccount.shops(@setting.printify_token) rescue []) if @setting.printify_token.present? && @setting.printify_shop_id.blank?
     end
 
-    def projects
-      Current.user.projects.listed.ordered
+    # The shops whose settings are theirs to change.
+    def shops
+      Current.user.shops.where(shop_memberships: { role: %w[ owner admin ] }).order(:name)
     end
 end

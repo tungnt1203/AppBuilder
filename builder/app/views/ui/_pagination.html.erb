@@ -1,0 +1,16 @@
+<%# Previous / next for a list from paginate (Pagination concern). Keeps the other query params. %>
+<% if page.many? %>
+  <nav class="mt-8 flex items-center justify-between gap-4 text-sm" aria-label="<%= t("ui.pagination.label") %>">
+    <% if page.previous %>
+      <%= link_to t("ui.pagination.previous"), url_for(request.query_parameters.merge(page: page.previous)), class: button_classes(:secondary), rel: "prev" %>
+    <% else %>
+      <span></span>
+    <% end %>
+    <span class="text-muted"><%= t("ui.pagination.page", number: page.number, pages: page.pages) %></span>
+    <% if page.next %>
+      <%= link_to t("ui.pagination.next"), url_for(request.query_parameters.merge(page: page.next)), class: button_classes(:secondary), rel: "next" %>
+    <% else %>
+      <span></span>
+    <% end %>
+  </nav>
+<% end %>

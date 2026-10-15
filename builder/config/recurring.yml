@@ -13,9 +13,6 @@ shared: &shared
   rescue_stranded_turns:
     class: RescueStrandedTurnsJob
     schedule: every minute
-  refresh_shop_orders:
-    class: OrdersRefreshJob
-    schedule: every 15 minutes
   # Every shop's (each runs shop by shop).
   start_and_end_sales:
     class: Promotion::SyncJob

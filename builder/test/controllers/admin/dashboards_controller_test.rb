@@ -1,59 +1,34 @@
 require "test_helper"
 
 class Admin::DashboardsControllerTest < ActionDispatch::IntegrationTest
-  include ActiveJob::TestHelper
+  setup { sign_in_as users(:member) }
 
-  setup { sign_in_as users(:owner) }
-
-  test "shows the last 30 days and the latest orders of all the owner's shops" do
-    shop = users(:owner).projects.listed.first
-    shop.update!(orders_summary_source: "preview", orders_summary_at: 5.minutes.ago, orders_summary: {
-      "currency" => "USD", "sales_cents" => 5400, "orders" => 2, "needs_action" => 1, "problems" => 1, "margin_cents" => 1900,
-      "recent" => [ { "number" => 1002, "token" => "tok2", "name" => "Robin Buyer", "status" => "paid", "total_cents" => 2900,
-        "currency" => "USD", "margin_cents" => 1200, "problem" => "Address is invalid", "placed_at" => 1.hour.ago.iso8601 } ] })
+  test "shows the last 30 days and the latest orders of all the shops someone runs" do
+    in_shop(shops(:cats))
+    paid = orders(:paid)
+    ActsAsTenant.current_tenant = nil
 
     get admin_root_path
     assert_select "h1", "Orders"
-    assert_select "li", /Sales\s*\$54.00/
-    assert_select "li", /Need you\s*1/ # the order with a Printify problem is the one that needs action, counted once
-    assert_select "a[href=?]", project_path(shop), /#1002 · Robin Buyer/
-    assert_select "p", "Address is invalid"
-    assert_select "aside[aria-label=Admin] a", "Accounts" # an administrator of the builder
+    assert_select "li", /Orders\s*\d+/
+    assert_select "a[href=?]", shop_admin_order_path(shops(:cats), paid.token), /#1002 · #{paid.shipping_name}/
+    assert_select "a[href=?]", shop_admin_root_path(shops(:cats)), "Chubby Cat Tees"
+    assert_select "a[href=?]", shop_admin_root_path(shops(:dogs)), "Good Boy Hoodies"
+    assert_select "aside[aria-label=Admin] a", text: "Accounts", count: 0 # not an administrator of the builder
   end
 
-  test "a member's admin has their orders and settings, not the accounts" do
-    sign_in_as users(:member)
+  test "staff see their shops only" do
+    sign_in_as users(:cats_staff)
     get admin_root_path
-    assert_select "aside[aria-label=Admin] a", text: "Accounts", count: 0
+    assert_select "a[href=?]", shop_admin_root_path(shops(:dogs)), count: 0
+  end
+
+  test "someone who doesn't run a shop yet is asked to open one" do
+    sign_in_as users(:owner)
+    get admin_root_path
+    assert_select "a[href=?]", new_admin_shop_path, "Open one"
+    assert_select "aside[aria-label=Admin] a", "Accounts"
     get admin_users_path
-    assert_response :not_found
+    assert_response :success
   end
-
-  test "Refresh asks each selling shop again" do
-    with_selling(users(:owner).projects.listed.first) do
-      assert_enqueued_jobs 1, only: OrdersRefreshJob do
-        post admin_orders_refresh_path
-      end
-    end
-    assert_redirected_to admin_root_path
-  end
-
-  test "a published shop's orders open in its own admin" do
-    project = projects(:clinic)
-    project.update!(orders_summary_source: "live")
-    assert_equal "#{project.publish_url}/admin/orders/tok", ShopOrders.order_url(project, "tok")
-  end
-
-  private
-    def with_selling(project)
-      root = Pathname(Dir.mktmpdir)
-      original, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, root
-      project.path.join("config").mkpath
-      project.path.join("config/application.rb").write("# the app\n")
-      project.update!(status: :ready)
-      yield
-    ensure
-      Rails.configuration.x.projects_root = original
-      FileUtils.rm_rf(root)
-    end
 end

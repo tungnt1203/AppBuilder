@@ -7,6 +7,11 @@ class User < ApplicationRecord
   has_many :shops, through: :shop_memberships
   has_many :usages, dependent: :delete_all
 
+  # The link someone added to a shop gets to choose their password; it stops working once they have.
+  generates_token_for :invitation, expires_in: 7.days do
+    password_salt.last(10)
+  end
+
   # Less than this left and a turn can't do much, so none starts.
   MIN_TURN_USD = 0.25
 
@@ -28,6 +33,11 @@ class User < ApplicationRecord
   before_destroy :prevent_owner_removal
 
   scope :ordered, -> { order(:name) }
+
+  # An account for someone a shop's owner adds, who chooses their password from the invitation.
+  def self.invite(name:, email_address:)
+    create(name:, email_address:, password: SecureRandom.base58(24))
+  end
 
   def administrator?
     admin? || owner?

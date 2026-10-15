@@ -1,0 +1,43 @@
+<%= page_header t(".title"), t(".description"), breadcrumbs: [ [ t("shop_admin.products.index.title"), shop_admin_products_path ], [ t(".title"), nil ] ] %>
+
+<% if @items.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @items.each do |item| %>
+        <li class="flex items-center gap-4 px-4 py-3 sm:px-6">
+          <% if item[:image] %>
+            <img src="<%= item[:image] %>" alt="" loading="lazy" class="size-14 shrink-0 rounded-lg bg-surface-muted object-cover">
+          <% else %>
+            <div class="grid size-14 shrink-0 place-items-center rounded-lg bg-surface-muted text-muted"><%= icon "shirt", size: 20 %></div>
+          <% end %>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-medium text-ink"><%= item[:title] %></p>
+            <% if item[:price_cents] %>
+              <p class="text-xs text-muted">
+                <%= t(".price_and_cost", price: money(item[:price_cents]), cost: money(item[:cost_cents])) %>
+                <% if (margin = margin_percent(item[:price_cents], item[:cost_cents])) %>
+                  · <span class="<%= margin <= 0 ? "font-medium text-red-600" : "text-ink" %>"><%= t(".margin", percent: margin) %></span>
+                <% end %>
+              </p>
+            <% end %>
+            <% if item[:product] %>
+              <%= link_to t(".in_shop"), edit_shop_admin_product_path(item[:product]), class: "text-xs #{link_classes}" %>
+            <% end %>
+          </div>
+          <%= button_to t(item[:product] ? ".update" : ".import"), shop_admin_printify_imports_path(printify_product_id: item[:id], page: @page),
+                class: button_classes(item[:product] ? :secondary : :primary, size: :sm), form: { data: { turbo_submits_with: t(".importing") } } %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% if @last_page > 1 %>
+    <div class="mt-4 flex justify-between text-sm">
+      <%= link_to t("ui.pagination.previous"), shop_admin_printify_imports_path(page: @page - 1), class: link_classes if @page > 1 %>
+      <span class="text-muted"><%= t("ui.pagination.page", number: @page, pages: @last_page) %></span>
+      <%= link_to t("ui.pagination.next"), shop_admin_printify_imports_path(page: @page + 1), class: link_classes if @page < @last_page %>
+    </div>
+  <% end %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") %>
+<% end %>

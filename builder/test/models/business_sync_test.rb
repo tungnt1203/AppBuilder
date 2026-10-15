@@ -2,11 +2,11 @@ require "test_helper"
 
 class BusinessSyncTest < ActiveSupport::TestCase
   setup do
-    @project = projects(:clinic)
-    @setting = @project.owner.create_business_setting!(stripe_secret_key: "sk_test_abc", meta_pixel_id: "123456789012")
+    @shop = shops(:cats)
+    @setting = users(:member).create_business_setting!(stripe_secret_key: "sk_test_abc", meta_pixel_id: "123456789012")
   end
 
-  test "secrets are encrypted, shown masked, and every key goes to the app, blank when unset" do
+  test "secrets are encrypted, shown masked, and every key goes to the shops, blank when unset" do
     raw = BusinessSetting.connection.select_value("SELECT stripe_secret_key FROM business_settings WHERE id = #{@setting.id}")
     assert_not_includes raw, "sk_test_abc"
     assert_equal "sk_test_…_abc", BusinessSetting.masked("sk_test_abc")
@@ -14,56 +14,34 @@ class BusinessSyncTest < ActiveSupport::TestCase
       "meta_access_token" => "", "tiktok_pixel_id" => "", "google_tag_id" => "" }, @setting.payload)
   end
 
-  test "applies the settings to the app's preview through a variable and keeps what it answered" do
-    calls = []
-    with_project_files(@project) do
-      answer_with(@project, "Loading...\nBUSINESS_SETTINGS_RESULT {\"stripe\":\"Acme (test mode)\",\"errors\":[]}\n", true) { |call| calls << call }
-      BusinessSync.new(@project).call
-    end
+  test "applies the settings to the shop and keeps what happened" do
+    StripeGateway.define_singleton_method(:build) { |_key| FakeStripeGateway.new }
+    result = BusinessSync.new(@shop, @setting).call
 
-    command, env = calls.sole
-    assert_equal [ "bin/rails", "shop:business_settings" ], command
-    assert_equal "sk_test_abc", JSON.parse(env["TASK_INPUT"])["stripe_secret_key"]
-    assert_equal({ "preview" => { "stripe" => "Acme (test mode)", "errors" => [] } }, @project.reload.business_sync_result)
-    assert @project.business_synced_at
+    assert_equal({ "errors" => [], "stripe" => "Fake Shop LLC (test mode)", "printify" => "not connected", "pixels" => "meta pixel" }, result)
+    assert_equal result, @shop.reload.business_sync_result
+    assert @shop.business_synced_at
+    in_shop(@shop)
+    assert_equal [ true, "123456789012" ], [ Store.current.stripe_connected?, Store.current.meta_pixel_id ]
+    in_shop(shops(:dogs))
+    assert_not Store.current.stripe_connected?, "only the shop it was applied to"
   end
 
-  test "an app whose core can't take them yet is told to update" do
-    with_project_files(@project) do
-      answer_with(@project, "rails aborted!\nDon't know how to build task 'shop:business_settings'", false)
-      BusinessSync.new(@project).call
-    end
-    assert_match "Update the app first", @project.reload.business_sync_result.dig("preview", "errors", 0)
+  test "what Stripe or Printify refuse is kept with the rest" do
+    gateway = FakeStripeGateway.new.tap { |fake| fake.error = "Invalid API Key provided" }
+    StripeGateway.define_singleton_method(:build) { |_key| gateway }
+    result = BusinessSync.new(@shop, @setting).call
+    assert_equal [ "Stripe: Invalid API Key provided" ], result["errors"]
+    assert_equal "meta pixel", result["pixels"]
   end
 
-  test "Rails 8's unknown command is an app to update too" do
-    with_project_files(@project) do
-      answer_with(@project, "Unrecognized command \"shop:business_settings\" (Rails::Command::UnrecognizedCommandError)", false)
-      BusinessSync.new(@project).call
-    end
-    assert_match "Update the app first", @project.reload.business_sync_result.dig("preview", "errors", 0)
+  test "a blank key disconnects the shop" do
+    in_shop(@shop)
+    connect_fake_stripe
+    ActsAsTenant.current_tenant = nil
+    @setting.update!(stripe_secret_key: nil)
+    BusinessSync.new(@shop, @setting).call
+    in_shop(@shop)
+    assert_not Store.current.stripe_connected?
   end
-
-  private
-    # The app's sandbox answering what's given, recording each command it's asked to run.
-    def answer_with(project, output, succeeded, &record)
-      sandbox = Object.new
-      sandbox.define_singleton_method(:capture) do |*command, env: {}|
-        record&.call([ command, env ])
-        [ output, succeeded ]
-      end
-      project.define_singleton_method(:sandbox) { sandbox }
-    end
-
-    def with_project_files(project, application: "# the app\n")
-      root = Pathname(Dir.mktmpdir)
-      original, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, root
-      project.path.join("config").mkpath
-      project.path.join("config/application.rb").write(application)
-      project.update!(status: :ready)
-      yield
-    ensure
-      Rails.configuration.x.projects_root = original
-      FileUtils.rm_rf(root)
-    end
 end

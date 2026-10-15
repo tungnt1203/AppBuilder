@@ -45,6 +45,9 @@ class Shop < ApplicationRecord
     "#{scheme}://#{subdomain}.#{domain}#{path}"
   end
 
+  # /admin/shops/<subdomain>/…
+  def to_param = subdomain_was.presence || subdomain
+
   def role_of(user)
     memberships.find_by(user:)&.role
   end

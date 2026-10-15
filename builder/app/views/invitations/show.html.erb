@@ -1,0 +1,17 @@
+<% content_for :title, "Choose your password" %>
+
+<h1 class="text-xl font-semibold tracking-tight">Welcome, <%= @user.name %></h1>
+<p class="text-sm text-[var(--text-muted)]">Choose a password to sign in as <%= @user.email_address %>.</p>
+
+<%= form_with model: @user, url: invitation_path(params[:token]), method: :put, class: "flex flex-col gap-4" do |form| %>
+  <% if @user.errors.any? %>
+    <p class="text-sm text-[var(--danger-text)]" role="alert"><%= @user.errors.full_messages.to_sentence %></p>
+  <% end %>
+
+  <div class="field-group">
+    <%= form.label :password %>
+    <%= form.password_field :password, required: true, autofocus: true, autocomplete: "new-password", minlength: 8, maxlength: 72, class: "field" %>
+  </div>
+
+  <%= form.submit "Save and sign in", class: "btn btn-primary mt-1 h-10 w-full" %>
+<% end %>

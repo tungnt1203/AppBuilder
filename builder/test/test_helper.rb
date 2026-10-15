@@ -68,3 +68,12 @@ module ActiveSupport
     end
   end
 end
+
+class ActionDispatch::IntegrationTest
+  # A shop's admin (ShopAdmin::*): its data in the test and its paths without naming it each time,
+  # shop_admin_order_path(order).
+  def in_shop_admin(shop = shops(:cats))
+    in_shop(shop)
+    self.default_url_options = default_url_options.merge(shop_id: shop)
+  end
+end

@@ -34,8 +34,8 @@
       <% end %>
       <%= form.password_field :printify_token, value: nil, autocomplete: "off", class: "admin-field",
             placeholder: @setting.printify_token.present? ? "Paste a new token to replace it" : "Printify personal access token", "aria-label": "Printify token" %>
-      <% if @shops.present? && @shops.many? %>
-        <%= form.select :printify_shop_id, @shops.map { |shop| [ shop["title"], shop["id"] ] }, { include_blank: "Pick the Printify shop" },
+      <% if @printify_shops.present? && @printify_shops.many? %>
+        <%= form.select :printify_shop_id, @printify_shops.map { |shop| [ shop["title"], shop["id"] ] }, { include_blank: "Pick the Printify shop" },
               class: "admin-field", "aria-label": "Printify shop" %>
       <% end %>
       <% if @setting.printify_token.present? %>
@@ -64,25 +64,24 @@
     </div>
   <% end %>
 
-  <% if @projects.any? %>
+  <% if @shops.any? %>
     <section aria-labelledby="shops_heading">
       <h2 id="shops_heading" class="admin-section-title">Your shops</h2>
       <ul class="admin-card admin-list overflow-hidden">
-        <% @projects.each do |project| %>
-          <% result = project.business_sync_result || {} %>
+        <% @shops.each do |shop| %>
+          <% result = shop.business_sync_result || {} %>
+          <% errors = Array(result["errors"]) %>
           <li class="flex flex-col gap-1 px-4 py-3">
             <div class="flex items-center justify-between gap-3">
-              <%= link_to project.name, project_path(project), class: "truncate text-sm font-semibold" %>
+              <%= link_to shop.name, edit_shop_admin_settings_path(shop), class: "truncate text-sm font-semibold" %>
               <span class="faint shrink-0 text-[0.8125rem]">
-                <%= project.business_synced_at ? "Applied #{time_ago_in_words(project.business_synced_at)} ago" : "Not applied yet" %>
+                <%= shop.business_synced_at ? "Applied #{time_ago_in_words(shop.business_synced_at)} ago" : "Not applied yet" %>
               </span>
             </div>
-            <% result.each do |copy, answer| %>
-              <% errors = Array(answer["errors"]) %>
+            <% if shop.business_synced_at %>
               <p class="text-[0.8125rem] <%= errors.any? ? "text-[var(--danger)]" : "muted" %>">
-                <%= copy == "live" ? "Published shop" : "Preview" %>:
-                <%= [ ("Stripe: #{answer["stripe"]}" if answer["stripe"]), ("Printify: #{answer["printify"]}" if answer["printify"]),
-                      ("Ads: #{answer["pixels"]}" if answer["pixels"]), *errors ].compact.join(" · ") %>
+                <%= [ ("Stripe: #{result["stripe"]}" if result["stripe"]), ("Printify: #{result["printify"]}" if result["printify"]),
+                      ("Ads: #{result["pixels"]}" if result["pixels"]), *errors ].compact.join(" · ") %>
               </p>
             <% end %>
           </li>
