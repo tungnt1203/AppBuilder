@@ -16,6 +16,22 @@ shared: &shared
   refresh_shop_orders:
     class: OrdersRefreshJob
     schedule: every 15 minutes
+  # Every shop's (each runs shop by shop).
+  start_and_end_sales:
+    class: Promotion::SyncJob
+    schedule: every 5 minutes
+  expire_unpaid_card_orders:
+    class: Order::ExpireUnpaidCardJob
+    schedule: every hour at minute 25
+  track_printify_shipments:
+    class: Order::TrackShipmentsJob
+    schedule: every hour at minute 40
+  request_reviews:
+    class: Order::RequestReviewsJob
+    schedule: every day at 10am
+  clear_abandoned_carts:
+    class: Cart::CleanupJob
+    schedule: every day at 4am
 
 development:
   <<: *shared
