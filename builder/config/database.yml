@@ -1,55 +1,48 @@
-# SQLite. Versions 3.8.0 and up are supported.
-#   gem install sqlite3
-#
-#   Ensure the SQLite 3 gem is defined in your Gemfile
-#   gem "sqlite3"
-#
+# PostgreSQL: the platform keeps every shop's data, and the builder's, in one database
+# (docs/platform-v1.md). Solid Queue, Cache and Cable have databases of their own on the same
+# server. In development it's the platform-postgres container (see README); DATABASE_HOST,
+# DATABASE_USERNAME and DATABASE_PASSWORD point elsewhere.
 default: &default
-  adapter: sqlite3
+  adapter: postgresql
+  encoding: unicode
+  host: <%= ENV.fetch("DATABASE_HOST", "127.0.0.1") %>
+  port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
+  username: <%= ENV.fetch("DATABASE_USERNAME", "platform") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "platform") %>
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  timeout: 5000
 
 # Jobs run in their own process (bin/jobs) and reach the browser through Solid Cable,
 # so a restart of the web server doesn't interrupt the agent.
 development:
   primary:
     <<: *default
-    database: storage/development.sqlite3
+    database: platform_development
   queue:
     <<: *default
-    database: storage/development_queue.sqlite3
+    database: platform_development_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *default
-    database: storage/development_cable.sqlite3
+    database: platform_development_cable
     migrations_paths: db/cable_migrate
 
-# Warning: The database defined as "test" will be erased and
-# re-generated from your development database when you run "rake".
-# Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: storage/test.sqlite3
+  database: platform_test
 
-# SQLite3 write its data on the local filesystem, as such it requires
-# persistent disks. If you are deploying to a managed service, you should
-# make sure it provides disk persistence, as many don't.
-#
-# Similarly, if you deploy your application as a Docker container, you must
-# ensure the database is located in a persisted volume.
 production:
-  primary:
+  primary: &primary_production
     <<: *default
-    # database: path/to/persistent/storage/production.sqlite3
+    database: platform_production
   cache:
-    <<: *default
-    # database: path/to/persistent/storage/production_cache.sqlite3
+    <<: *primary_production
+    database: platform_production_cache
     migrations_paths: db/cache_migrate
   queue:
-    <<: *default
-    # database: path/to/persistent/storage/production_queue.sqlite3
+    <<: *primary_production
+    database: platform_production_queue
     migrations_paths: db/queue_migrate
   cable:
-    <<: *default
-    # database: path/to/persistent/storage/production_cable.sqlite3
+    <<: *primary_production
+    database: platform_production_cable
     migrations_paths: db/cable_migrate

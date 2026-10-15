@@ -42,7 +42,7 @@ blocks are MIT so that the apps made with them belong to their owners; the templ
 
 You need macOS or Linux with:
 
-- Ruby 3.3.10 (see `builder/.ruby-version`) and SQLite
+- Ruby 3.3.10 (see `builder/.ruby-version`), and PostgreSQL for the builder (Docker is enough)
 - [Claude Code](https://claude.com/claude-code), signed in (`claude` on your `PATH`): the agent
   uses your Claude account. Or a token from `claude setup-token`, see `builder/README.md`.
 - Google Chrome, for app thumbnails and `bin/eval` (`CHROME_BIN` if it's not in the default place)
@@ -52,6 +52,9 @@ You need macOS or Linux with:
 ```sh
 git clone https://github.com/tungnt1203/AppBuilder.git
 cd AppBuilder/builder
+# PostgreSQL for the builder (the platform's one database, docs/platform-v1.md)
+docker run -d --name platform-postgres --restart unless-stopped -e POSTGRES_USER=platform \
+  -e POSTGRES_PASSWORD=platform -p 127.0.0.1:5432:5432 -v platform-postgres:/var/lib/postgresql/data postgres:17
 bin/setup --skip-server
 bin/dev
 ```
