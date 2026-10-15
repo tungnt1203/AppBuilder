@@ -1,25 +1,34 @@
 # Stripe without the network: `gateway = connect_fake_stripe` connects the shop to a
-# FakeStripeGateway that records what the app asked Stripe to do.
+# FakeStripeGateway that records what the app asked Stripe to do. Its PaymentIntents are
+# "requires_payment_method" until a test sets status = "succeeded" (or "processing").
 class FakeStripeGateway
-  attr_reader :checkouts, :refunds, :webhooks, :deleted_webhooks
-  attr_accessor :paid, :status, :error, :tax_cents
+  attr_reader :intents, :refunds, :webhooks, :deleted_webhooks, :tax_records
+  attr_accessor :status, :error, :tax_cents
 
   def initialize
-    @checkouts, @refunds, @webhooks, @deleted_webhooks = [], [], [], []
-    @paid, @status, @tax_cents = false, "open", 0
+    @intents, @refunds, @webhooks, @deleted_webhooks, @tax_records = [], [], [], [], []
+    @status, @tax_cents = "requires_payment_method", 0
   end
 
   def test_mode? = true
   def account_name = fail_or("Fake Shop LLC")
 
-  def create_checkout(order, success_url:, cancel_url:, tax: false)
+  def create_payment_intent(order, tax_calculation: nil)
     fail_or(nil)
-    @checkouts << { order:, success_url:, cancel_url:, tax: }
-    [ "cs_test_#{@checkouts.size}", "https://checkout.stripe.com/c/pay/cs_test_#{@checkouts.size}" ]
+    @intents << { order:, amount_cents: order.total_cents, tax_calculation: }
+    { id: "pi_test_#{@intents.size}", client_secret: "pi_test_#{@intents.size}_secret_abc" }
   end
 
-  def checkout(id)
-    fail_or({ paid:, payment_intent: ("pi_test_1" if paid), status:, tax_cents: (paid ? tax_cents : 0) })
+  def payment_intent(id)
+    fail_or({ paid: status == "succeeded", status:, client_secret: "#{id}_secret_abc" })
+  end
+
+  def tax_calculation(_order)
+    fail_or({ id: "taxcalc_test_1", tax_cents: })
+  end
+
+  def record_tax(calculation_id, reference)
+    @tax_records << [ calculation_id, reference ]
   end
 
   def refund(payment_intent)
@@ -45,7 +54,7 @@ end
 module StripeTestHelper
   def connect_fake_stripe(gateway = FakeStripeGateway.new, manual: true)
     StripeGateway.define_singleton_method(:build) { |_key| gateway }
-    Store.current.update!(stripe_secret_key: "sk_test_fake", stripe_account_name: "Fake Shop LLC", manual_payments: manual)
+    Store.current.update!(stripe_secret_key: "sk_test_fake", stripe_publishable_key: "pk_test_fake", stripe_account_name: "Fake Shop LLC", manual_payments: manual)
     gateway
   end
 

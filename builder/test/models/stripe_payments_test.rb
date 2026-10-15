@@ -7,10 +7,13 @@ class StripePaymentsTest < ActiveSupport::TestCase
 
   setup { @store = Store.current }
 
-  test "buyers pay manually until Stripe is connected, then by card first" do
+  test "buyers pay manually until Stripe is connected with both keys, then by card first" do
     assert_equal %w[ manual ], @store.payment_methods
 
     connect_fake_stripe
+    Store.current.update!(stripe_publishable_key: nil)
+    assert_equal %w[ manual ], Store.current.payment_methods, "the Payment Element needs the publishable key"
+    Store.current.update!(stripe_publishable_key: "pk_test_fake")
     assert_equal %w[ stripe manual ], Store.current.payment_methods
 
     Store.current.update!(manual_payments: false)
@@ -42,8 +45,10 @@ class StripePaymentsTest < ActiveSupport::TestCase
     assert_not @store.stripe_connected?
   end
 
-  test "keys that aren't Stripe secret keys or that Stripe refuses aren't saved" do
+  test "keys that aren't Stripe's, in two modes, or that Stripe refuses aren't saved" do
     assert_raises(StripeGateway::Error) { @store.connect_stripe!("pk_live_abc") }
+    assert_raises(StripeGateway::Error) { @store.connect_stripe!("sk_live_abc", publishable_key: "pk_test_abc") }
+    assert_not @store.update(stripe_secret_key: "sk_live_abc", stripe_publishable_key: "pk_test_abc")
 
     gateway = FakeStripeGateway.new.tap { |fake| fake.error = "Invalid API Key provided" }
     StripeGateway.define_singleton_method(:build) { |_key| gateway }
@@ -126,14 +131,37 @@ class StripePaymentsTest < ActiveSupport::TestCase
     assert order.reload.paid?
   end
 
-  test "a buyer who left Stripe gets one reminder, and the order is cancelled after a day" do
+  test "a card order is paid through one PaymentIntent, with Stripe Tax's tax when it's on" do
     gateway = connect_fake_stripe
-    order = orders(:pending).tap { |o| o.update!(payment_method: "stripe", stripe_checkout_session_id: "cs_old", created_at: 2.hours.ago) }
+    Store.current.update!(stripe_tax: true)
+    gateway.tax_cents = 160
+    order = orders(:pending).tap { |o| o.update!(payment_method: "stripe") }
 
-    gateway.status = "open"
+    intent = order.card_payment!
+    assert_equal [ "pi_test_1", "pi_test_1_secret_abc" ], intent.values_at(:id, :client_secret)
+    assert_equal [ 160, 3060, "taxcalc_test_1" ], [ order.tax_cents, order.total_cents, order.stripe_tax_calculation_id ]
+    assert_equal 3060, gateway.intents.sole[:amount_cents]
+    assert_equal "pi_test_1", order.card_payment![:id], "asking again gets the same one"
+    assert_equal 1, gateway.intents.size
+
+    assert_nil order.sync_card_payment![:paid].presence
+    assert order.reload.pending?
+    gateway.status = "succeeded"
+    order.sync_card_payment!
+    assert order.reload.paid?
+    assert_equal [ 3060, "pi_test_1" ], [ order.total_cents, order.payment_reference ]
+    assert_equal [ [ "taxcalc_test_1", order.name ] ], gateway.tax_records
+    assert_raises(Order::InvalidTransition) { order.card_payment! }
+  end
+
+  test "a buyer who didn't pay gets one reminder, and the order is cancelled after a day" do
+    gateway = connect_fake_stripe
+    order = orders(:pending).tap { |o| o.update!(payment_method: "stripe", stripe_payment_intent_id: "pi_old", created_at: 2.hours.ago) }
+
+    gateway.status = "processing"
     assert_no_enqueued_emails { Order::ExpireUnpaidCardJob.perform_now }
 
-    gateway.status = "expired"
+    gateway.status = "requires_payment_method"
     assert_enqueued_email_with OrderMailer, :recovery, args: [ order ] do
       Order::ExpireUnpaidCardJob.perform_now
     end
@@ -156,16 +184,16 @@ class StripePaymentsTest < ActiveSupport::TestCase
 
   test "unpaid card orders are cancelled after a day, unless Stripe says they were paid" do
     gateway = connect_fake_stripe
-    stale = orders(:pending).tap { |o| o.update!(payment_method: "stripe", stripe_checkout_session_id: "cs_old", created_at: 2.days.ago) }
-    fresh = Order.create!(stale.attributes.except("id", "number", "token", "stripe_checkout_session_id", "created_at"))
+    stale = orders(:pending).tap { |o| o.update!(payment_method: "stripe", stripe_payment_intent_id: "pi_old", created_at: 2.days.ago) }
+    fresh = Order.create!(stale.attributes.except("id", "number", "token", "stripe_payment_intent_id", "created_at"))
 
-    gateway.status = "expired"
+    gateway.status = "requires_payment_method"
     Order::ExpireUnpaidCardJob.perform_now
     assert stale.reload.cancelled?
     assert fresh.reload.pending?
 
-    fresh.update!(created_at: 2.days.ago, stripe_checkout_session_id: "cs_late")
-    gateway.paid, gateway.status = true, "complete"
+    fresh.update!(created_at: 2.days.ago, stripe_payment_intent_id: "pi_late")
+    gateway.status = "succeeded"
     Order::ExpireUnpaidCardJob.perform_now
     assert fresh.reload.paid?
   end

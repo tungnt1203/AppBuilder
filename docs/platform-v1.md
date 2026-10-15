@@ -92,7 +92,7 @@ Mọi bảng dữ liệu của shop có `shop_id` (not null, có index), mọi i
 
 ## 6. Storefront API v1
 
-Header `Authorization: Bearer <shop key>`. JSON; tiền là `cents` + `currency`; lỗi dạng
+Chi tiết từng endpoint: [storefront-api.md](storefront-api.md). Header `Authorization: Bearer <shop key>`. JSON; tiền là `cents` + `currency`; lỗi dạng
 `{ "error": { "code", "message", "fields" } }`; có ETag; POST quan trọng nhận `Idempotency-Key`.
 
 | Nhóm | Endpoint |
@@ -102,7 +102,7 @@ Header `Authorization: Bearer <shop key>`. JSON; tiền là `cents` + `currency`
 | Nội dung | `GET /v1/pages/:slug` · `GET /v1/menus/:key` · `GET /v1/policies/:id` |
 | Review | `GET /v1/products/:slug/reviews` · `POST /v1/orders/:token/reviews` |
 | Giỏ | `POST /v1/carts` · `GET /v1/carts/:token` · `POST/PATCH/DELETE /v1/carts/:token/items` · `POST/DELETE /v1/carts/:token/discount` |
-| Checkout | `POST /v1/checkouts` (địa chỉ, email) → tổng tiền gồm phí ship Printify thật và thuế · `POST /v1/checkouts/:id/payment` → `client_secret` cho Payment Element |
+| Checkout | `POST /v1/checkouts/quote` (địa chỉ, email) → tổng tiền gồm phí ship Printify thật · `POST /v1/checkouts` → đặt đơn · `POST /v1/orders/:token/payment` → thuế (Stripe Tax) và `client_secret` cho Payment Element |
 | Đơn | `GET /v1/orders/:token` (trạng thái, tracking) |
 | Form | `POST /v1/forms/:key/submissions` |
 | Tiện ích | `GET /v1/zip_codes/:zip` |

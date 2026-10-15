@@ -1,0 +1,46 @@
+<%= page_header t("shop_admin.settings.edit.title"), t("shop_admin.settings.edit.description") %>
+
+<%= render "shop_admin/settings/tabs" %>
+
+<div class="max-w-2xl space-y-6">
+  <p class="text-sm text-muted"><%= t(".intro") %></p>
+
+  <% if @new_key %>
+    <%= alert tone: :warning do %>
+      <p class="font-medium"><%= t(".copy_now") %></p>
+      <input type="text" readonly value="<%= @new_key %>" class="<%= field_classes %> mt-2 font-mono text-xs" aria-label="<%= t(".new_key") %>" onclick="this.select()">
+    <% end %>
+  <% end %>
+
+  <%= card padded: false, class: "overflow-hidden" do %>
+    <% if @api_keys.any? %>
+      <ul class="divide-y divide-line">
+        <% @api_keys.each do |api_key| %>
+          <li class="flex flex-wrap items-center gap-4 px-6 py-4" id="<%= dom_id(api_key) %>">
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-ink">
+                <%= t(".kinds.#{api_key.kind}") %> <span class="font-mono text-muted">…<%= api_key.token_hint %></span>
+              </p>
+              <p class="text-xs text-muted">
+                <%= t(".made", ago: time_ago_in_words(api_key.created_at)) %> ·
+                <%= api_key.last_used_at ? t(".used", ago: time_ago_in_words(api_key.last_used_at)) : t(".never_used") %>
+              </p>
+            </div>
+            <%= button_to t(".revoke"), shop_admin_api_key_path(api_key), method: :delete, class: button_classes(:ghost, size: :sm),
+                  form: { data: { turbo_confirm: t(".confirm_revoke") } } %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="px-6 py-5 text-sm text-muted"><%= t(".none") %></p>
+    <% end %>
+  <% end %>
+
+  <%= form_with url: shop_admin_api_keys_path, scope: :api_key, class: "flex flex-wrap items-end gap-3" do |form| %>
+    <div class="space-y-1.5">
+      <%= form.label :kind, t(".kind") %>
+      <%= form.select :kind, ShopApiKey::KINDS.map { |kind| [ t(".kinds.#{kind}"), kind ] }, {}, class: "w-auto" %>
+    </div>
+    <%= form.submit t(".create") %>
+  <% end %>
+</div>

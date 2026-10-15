@@ -22,4 +22,12 @@ class ShopAdmin::ScreensTest < ActionDispatch::IntegrationTest
       assert_select "aside summary", /Chubby Cat Tees/
     end
   end
+
+  test "a preview's test orders say so" do
+    in_shop(shops(:cats))
+    orders(:paid).update!(test: true)
+    ActsAsTenant.current_tenant = nil
+    get shop_admin_orders_path(shops(:cats))
+    assert_select "li", /#1002.*Test/m
+  end
 end

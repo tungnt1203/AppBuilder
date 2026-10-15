@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,6 +52,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
     t.index ["project_id"], name: "index_agent_commands_on_project_id"
   end
 
+  create_table "api_idempotency_keys", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "key", null: false
+    t.string "fingerprint", null: false
+    t.integer "response_status"
+    t.jsonb "response_body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_api_idempotency_keys_on_created_at"
+    t.index ["shop_id", "key"], name: "index_api_idempotency_keys_on_shop_id_and_key", unique: true
+  end
+
   create_table "business_settings", force: :cascade do |t|
     t.integer "user_id", null: false
     t.text "stripe_secret_key"
@@ -64,6 +76,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
     t.string "google_tag_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stripe_publishable_key"
     t.index ["user_id"], name: "index_business_settings_on_user_id", unique: true
   end
 
@@ -227,7 +240,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
     t.integer "refunded_cents", default: 0, null: false
     t.string "payment_method", default: "manual", null: false
     t.string "payment_reference"
-    t.string "stripe_checkout_session_id"
     t.string "carrier"
     t.string "tracking_number"
     t.string "tracking_url"
@@ -246,6 +258,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
     t.datetime "review_requested_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "test", default: false, null: false
+    t.string "stripe_payment_intent_id"
+    t.string "stripe_tax_calculation_id"
     t.index ["cart_id"], name: "index_orders_on_cart_id"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["discount_id"], name: "index_orders_on_discount_id"
@@ -254,7 +269,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
     t.index ["shop_id", "printify_order_id"], name: "index_orders_on_shop_id_and_printify_order_id"
     t.index ["shop_id", "status", "created_at"], name: "index_orders_on_shop_id_and_status_and_created_at"
     t.index ["shop_id"], name: "index_orders_on_shop_id"
-    t.index ["stripe_checkout_session_id"], name: "index_orders_on_stripe_checkout_session_id", unique: true
+    t.index ["stripe_payment_intent_id"], name: "index_orders_on_stripe_payment_intent_id", unique: true
     t.index ["token"], name: "index_orders_on_token", unique: true
   end
 
@@ -456,6 +471,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
     t.string "google_tag_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stripe_publishable_key"
     t.index ["shop_id"], name: "index_stores_on_shop_id", unique: true
   end
 
@@ -507,6 +523,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agent_commands", "projects"
+  add_foreign_key "api_idempotency_keys", "shops"
   add_foreign_key "business_settings", "users"
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "shops"

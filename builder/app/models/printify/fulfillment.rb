@@ -14,8 +14,9 @@ class Printify::Fulfillment
   end
 
   # Whether this order has anything for Printify to make.
+  # A preview's test orders are never printed.
   def applies?
-    @store.printify_connected? && printify_items.any?
+    @store.printify_connected? && !@order.test? && printify_items.any?
   end
 
   # Sends the order to Printify once; a failure is kept on the order (fulfillment_error) for

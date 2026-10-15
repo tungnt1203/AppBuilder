@@ -4,5 +4,6 @@
   <%= tab_to t("shop_admin.policies.edit.title"), edit_shop_admin_policies_path %>
   <% if shop_administrator? %>
     <%= tab_to t("shop_admin.printify_connections.show.title"), shop_admin_printify_connection_path %>
+    <%= tab_to t("shop_admin.api_keys.index.title"), shop_admin_api_keys_path %>
   <% end %>
 <% end %>

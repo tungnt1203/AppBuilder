@@ -12,7 +12,8 @@
 # a part of the total when refunded partly in Stripe's dashboard.
 #
 # Payment is "manual" (the buyer follows the shop's payment instructions and staff mark the order
-# paid) or "stripe" (the buyer pays by card on Stripe Checkout; see #confirm_card_payment!). A card
+# paid) or "stripe" (the buyer pays by card in the storefront: #card_payment!, then
+# #confirm_card_payment!). A card
 # order stays pending until Stripe says it's paid; until then it's a checkout the buyer hasn't
 # finished, kept out of the orders that need action and cancelled after a day.
 class Order < ApplicationRecord
@@ -55,7 +56,9 @@ class Order < ApplicationRecord
 
   scope :newest_first, -> { order(created_at: :desc, id: :desc) }
   scope :placed_since, ->(time) { where(created_at: time..) }
-  scope :counted_in_sales, -> { where(status: %w[ paid in_production shipped delivered ]) }
+  scope :counted_in_sales, -> { real.where(status: %w[ paid in_production shipped delivered ]) }
+  # Orders placed in a storefront's preview are tests: never printed, reported or counted.
+  scope :real, -> { where(test: false) }
   scope :needs_action, -> { where(status: %w[ paid in_production ]).or(awaiting_payment) }
   # Pending orders someone has to act on: manual payments the shop is waiting for.
   scope :awaiting_payment, -> { where(status: "pending", payment_method: "manual") }
@@ -123,13 +126,13 @@ class Order < ApplicationRecord
 
   # Paid orders with products from Printify go there to be printed (Printify::Fulfillment).
   def fulfill_later
-    Order::FulfillJob.perform_later(self) if Store.current.printify_connected?
+    Order::FulfillJob.perform_later(self) if Store.current.printify_connected? && !test?
   end
 
   # A placed order goes to Meta's Conversions API too (Meta::Purchase): manual orders when placed,
   # card orders once paid, like the pixel's Purchase.
   def report_purchase_later
-    Order::ReportPurchaseJob.perform_later(self) if Store.current.meta_conversions?
+    Order::ReportPurchaseJob.perform_later(self) if Store.current.meta_conversions? && !test?
   end
 
   # Buyers review what they bought once it's on its way (see ProductReview).
@@ -219,19 +222,40 @@ class Order < ApplicationRecord
     end
   end
 
-  # Called when Stripe says the order's Checkout Session is paid (the buyer coming back to the
-  # order page, or the webhook; whichever is first). Marks it paid, empties the cart it came from
-  # and sends the emails that a manual order sends when it's placed. Safe to call again.
-  # tax_cents: what Stripe Tax added on top, when the store has it on.
-  def confirm_card_payment!(payment_intent:, tax_cents: 0)
+  # The card payment the buyer confirms in the storefront (Stripe's Payment Element): the order's
+  # PaymentIntent, made the first time with Stripe Tax's tax added when the store has it on, the
+  # same one after. Returns { id:, client_secret: }. Raises InvalidTransition unless the order
+  # waits for a card payment, StripeGateway::Error when Stripe refuses.
+  def card_payment!(gateway = Store.current.stripe)
+    raise InvalidTransition, "#{name} doesn't wait for a card payment" unless card? && pending?
+    raise StripeGateway::Error, I18n.t("orders.stripe_not_connected") unless gateway
+
+    with_lock do
+      next gateway.payment_intent(stripe_payment_intent_id).merge(id: stripe_payment_intent_id) if stripe_payment_intent_id
+
+      if Store.current.stripe_tax?
+        tax = gateway.tax_calculation(self)
+        update!(stripe_tax_calculation_id: tax[:id], tax_cents: tax[:tax_cents], total_cents: total_cents - tax_cents + tax[:tax_cents])
+      end
+      gateway.create_payment_intent(self, tax_calculation: stripe_tax_calculation_id).tap do |intent|
+        update!(stripe_payment_intent_id: intent[:id])
+      end
+    end
+  end
+
+  # Called when Stripe says the order's PaymentIntent succeeded (the buyer coming back to the
+  # order page, or the webhook; whichever is first). Marks it paid, empties the cart it came from,
+  # records its tax with Stripe Tax and sends the emails that a manual order sends when it's
+  # placed. Safe to call again.
+  def confirm_card_payment!(payment_intent: stripe_payment_intent_id, gateway: Store.current.stripe)
     return false unless card? && pending?
 
-    transition! :paid, from: :pending?, by: nil, paid_at: Time.current, payment_reference: payment_intent, message: "Stripe",
-      tax_cents: tax_cents.to_i, total_cents: total_cents - self.tax_cents + tax_cents.to_i
+    transition! :paid, from: :pending?, by: nil, paid_at: Time.current, payment_reference: payment_intent, message: "Stripe"
     if cart_id
       CartItem.where(cart_id:).delete_all
       Cart.where(id: cart_id).update_all(discount_code: nil)
     end
+    record_tax(gateway)
     OrderMailer.confirmation(self).deliver_later
     Admin::OrderMailer.placed(self).deliver_later
     report_purchase_later
@@ -244,10 +268,10 @@ class Order < ApplicationRecord
   # Asks Stripe whether the buyer paid this card order (they may just have, and the webhook
   # can't reach a shop without a public address, like its preview) and confirms it if so.
   def sync_card_payment!(gateway = Store.current.stripe)
-    return unless card? && pending? && stripe_checkout_session_id && gateway
+    return unless card? && pending? && stripe_payment_intent_id && gateway
 
-    result = gateway.checkout(stripe_checkout_session_id)
-    confirm_card_payment!(payment_intent: result[:payment_intent], tax_cents: result[:tax_cents]) if result[:paid]
+    result = gateway.payment_intent(stripe_payment_intent_id)
+    confirm_card_payment!(gateway:) if result[:paid]
     result
   end
 
@@ -270,6 +294,12 @@ class Order < ApplicationRecord
         update!(status:, **attributes)
         record status, by:, message:
       end
+    end
+
+    def record_tax(gateway)
+      gateway&.record_tax(stripe_tax_calculation_id, name) if stripe_tax_calculation_id
+    rescue StripeGateway::Error => error
+      Rails.logger.warn "Couldn't record #{name}'s tax with Stripe Tax: #{error.message}"
     end
 
     def refund_in_stripe

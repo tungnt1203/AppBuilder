@@ -2,7 +2,7 @@
 # shops) and their ad pixels. It's applied to every shop they own or administer (BusinessSync)
 # when it's saved and when they open a new one. Secrets are encrypted.
 class BusinessSetting < ApplicationRecord
-  KEYS = %w[ stripe_secret_key printify_token printify_shop_id meta_pixel_id meta_access_token tiktok_pixel_id google_tag_id ].freeze
+  KEYS = %w[ stripe_secret_key stripe_publishable_key printify_token printify_shop_id meta_pixel_id meta_access_token tiktok_pixel_id google_tag_id ].freeze
 
   belongs_to :user
 
@@ -11,10 +11,11 @@ class BusinessSetting < ApplicationRecord
 
   encrypts :stripe_secret_key, :printify_token, :meta_access_token
 
-  normalizes :stripe_secret_key, :printify_token, :printify_shop_id, :meta_pixel_id, :meta_access_token,
+  normalizes :stripe_secret_key, :stripe_publishable_key, :printify_token, :printify_shop_id, :meta_pixel_id, :meta_access_token,
     :tiktok_pixel_id, :google_tag_id, with: ->(value) { value.strip.presence }
 
   validates :stripe_secret_key, format: { with: /\A(sk|rk)_(test|live)_\w+\z/, message: "should start with sk_live_ or sk_test_" }, allow_nil: true
+  validates :stripe_publishable_key, format: { with: /\Apk_(test|live)_\w+\z/, message: "should start with pk_live_ or pk_test_" }, allow_nil: true
   validates :meta_pixel_id, format: { with: /\A\d{8,20}\z/, message: "is the pixel's number" }, allow_nil: true
   validates :tiktok_pixel_id, format: { with: /\A[A-Z0-9]{8,32}\z/ }, allow_nil: true
   validates :google_tag_id, format: { with: /\A(G|AW)-[A-Z0-9]{4,20}\z/, message: "looks like G-XXXX or AW-XXXX" }, allow_nil: true

@@ -33,6 +33,8 @@ class Store < ApplicationRecord
   validates :refund_policy, :shipping_policy, :privacy_policy, :terms_of_service, length: { maximum: 50_000 }
   validates :printify_shipping_method, inclusion: { in: PrintifyGateway::SHIPPING_METHODS.keys }
   validates :announcement, length: { maximum: 160 }
+  validates :stripe_publishable_key, format: { with: /\Apk_(test|live)_\w+\z/, message: :not_a_publishable_key }, allow_blank: true
+  validate :stripe_keys_in_the_same_mode
   validates :meta_pixel_id, format: { with: /\A\d{8,20}\z/ }, allow_blank: true
   validates :tiktok_pixel_id, format: { with: /\A[A-Z0-9]{8,32}\z/ }, allow_blank: true
   validates :google_tag_id, format: { with: /\A(G|AW)-[A-Z0-9]{4,20}\z/ }, allow_blank: true
@@ -43,7 +45,7 @@ class Store < ApplicationRecord
   validate :delivery_days_in_order
 
   normalizes :meta_pixel_id, :tiktok_pixel_id, :google_tag_id, with: ->(id) { id.strip.upcase.presence }
-  normalizes :meta_access_token, :meta_test_event_code, with: ->(value) { value.strip.presence }
+  normalizes :meta_access_token, :meta_test_event_code, :stripe_publishable_key, with: ->(value) { value.strip.presence }
   normalizes :ship_to_countries, with: ->(codes) { Array(codes).map { |code| code.to_s.strip.upcase }.compact_blank.uniq.sort }
 
   before_save -> { self.meta_error = nil }, if: :meta_access_token_changed?
@@ -117,18 +119,24 @@ class Store < ApplicationRecord
     CURRENCIES.fetch(currency)
   end
 
-  # How buyers can pay at checkout, the first one picked by default: "stripe" (card, on Stripe
-  # Checkout) once the owner connected Stripe, "manual" (the payment instructions, the owner
-  # marks the order paid) unless they turned it off. Never empty.
+  # How buyers can pay at checkout, the first one picked by default: "stripe" (card, with
+  # Stripe's Payment Element in the storefront) once the owner connected Stripe with both its
+  # keys, "manual" (the payment instructions, the owner marks the order paid) unless they turned
+  # it off. Never empty.
   def payment_methods
     methods = []
-    methods << "stripe" if stripe_connected?
+    methods << "stripe" if card_payments?
     methods << "manual" if manual_payments? || methods.empty?
     methods
   end
 
   def stripe_connected?
     stripe_key.present?
+  end
+
+  # The storefront's Payment Element needs the account's publishable key as well.
+  def card_payments?
+    stripe_connected? && stripe_publishable_key.present?
   end
 
   def stripe
@@ -195,17 +203,21 @@ class Store < ApplicationRecord
     nil
   end
 
-  # Checks the key with Stripe, saves it, and registers the webhook when the shop has a public
-  # https address (webhook_url nil otherwise: payments are still confirmed when buyers come back
-  # from Stripe). Raises StripeGateway::Error when Stripe refuses the key.
-  def connect_stripe!(secret_key, webhook_url: nil)
-    secret_key = secret_key.to_s.strip
+  # Checks the secret key with Stripe, saves it with the publishable key (for the storefront's
+  # Payment Element), and registers the webhook when the platform has a public https address
+  # (webhook_url nil otherwise: payments are still confirmed when buyers come back to their
+  # order). Raises StripeGateway::Error when a key is wrong or Stripe refuses it.
+  def connect_stripe!(secret_key, publishable_key: nil, webhook_url: nil)
+    secret_key, publishable_key = secret_key.to_s.strip, publishable_key.to_s.strip.presence
     raise StripeGateway::Error, I18n.t("admin.stripe_connections.wrong_key") unless secret_key.match?(/\A(sk|rk)_(test|live)_\w+\z/)
+    if publishable_key && !(publishable_key.match?(/\Apk_(test|live)_\w+\z/) && publishable_key.start_with?("pk_test_") == secret_key.match?(/\A(sk|rk)_test_/))
+      raise StripeGateway::Error, I18n.t("admin.stripe_connections.wrong_publishable_key")
+    end
 
     gateway = StripeGateway.build(secret_key)
     name = gateway.account_name
     disconnect_stripe!
-    update!(stripe_secret_key: secret_key, stripe_account_name: name)
+    update!(stripe_secret_key: secret_key, stripe_publishable_key: publishable_key, stripe_account_name: name)
     register_stripe_webhook!(webhook_url)
   end
 
@@ -220,7 +232,7 @@ class Store < ApplicationRecord
 
   def disconnect_stripe!
     stripe.delete_webhook(stripe_webhook_id) if stripe_connected? && stripe_webhook_id
-    update!(stripe_secret_key: nil, stripe_account_name: nil, stripe_webhook_id: nil, stripe_webhook_url: nil, stripe_webhook_secret: nil)
+    update!(stripe_secret_key: nil, stripe_publishable_key: nil, stripe_account_name: nil, stripe_webhook_id: nil, stripe_webhook_url: nil, stripe_webhook_secret: nil)
   end
 
   def stripe_test_mode?
@@ -251,6 +263,13 @@ class Store < ApplicationRecord
   end
 
   private
+    # A test publishable key with a live secret key (or the other way round) can't take payments.
+    def stripe_keys_in_the_same_mode
+      return if stripe_publishable_key.blank? || !stripe_connected?
+
+      errors.add(:stripe_publishable_key, :other_mode) if stripe_publishable_key.start_with?("pk_test_") != stripe_key.to_s.match?(/\A(sk|rk)_test_/)
+    end
+
     def business_days_after(date, days)
       days.times { date = date.next_day; date = date.next_day while date.on_weekend? }
       date

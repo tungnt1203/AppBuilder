@@ -15,12 +15,14 @@
 
     <section class="flex flex-col gap-2">
       <h2 class="font-semibold">Card payments: Stripe</h2>
-      <p class="muted text-sm">Your Stripe secret key (Developers → API keys). A test key (sk_test_…) lets you try buying with card 4242 4242 4242 4242.</p>
+      <p class="muted text-sm">Your Stripe secret and publishable keys (Developers → API keys). Test keys (sk_test_…, pk_test_…) let you try buying with card 4242 4242 4242 4242.</p>
       <% if @setting.stripe_secret_key.present? %>
         <p class="text-sm">Connected: <span class="font-mono"><%= BusinessSetting.masked(@setting.stripe_secret_key) %></span><%= " · test mode" if @setting.stripe_test_mode? %></p>
       <% end %>
       <%= form.password_field :stripe_secret_key, value: nil, autocomplete: "off", class: "admin-field",
             placeholder: @setting.stripe_secret_key.present? ? "Paste a new key to replace it" : "sk_live_… or sk_test_…", "aria-label": "Stripe secret key" %>
+      <%= form.text_field :stripe_publishable_key, autocomplete: "off", spellcheck: false, class: "admin-field",
+            placeholder: "Publishable key: pk_live_… or pk_test_…", "aria-label": "Stripe publishable key" %>
       <% if @setting.stripe_secret_key.present? %>
         <label class="muted flex items-center gap-2 text-sm"><%= form.check_box :clear_stripe_secret_key %> Disconnect Stripe from all my shops</label>
       <% end %>

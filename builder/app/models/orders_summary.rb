@@ -9,15 +9,15 @@ class OrdersSummary
   end
 
   def to_h
-    month = Order.placed_since(30.days.ago(@now))
+    month = Order.real.placed_since(30.days.ago(@now))
     {
       "currency" => Store.current.currency,
       "sales_cents" => month.counted_in_sales.sum(:total_cents) - month.counted_in_sales.sum(:refunded_cents),
       "orders" => month.where.not(status: "cancelled").where.not(status: "pending", payment_method: "stripe").count,
-      "needs_action" => Order.needs_action.count,
-      "problems" => Order.where.not(fulfillment_error: [ nil, "" ]).where(status: %w[ paid in_production ]).count,
+      "needs_action" => Order.real.needs_action.count,
+      "problems" => Order.real.where.not(fulfillment_error: [ nil, "" ]).where(status: %w[ paid in_production ]).count,
       "margin_cents" => month.counted_in_sales.where.not(fulfillment_cost_cents: nil).sum(&:margin_cents),
-      "recent" => Order.where.not(status: "pending", payment_method: "stripe").newest_first.limit(RECENT).map { |order| recent(order) }
+      "recent" => Order.real.where.not(status: "pending", payment_method: "stripe").newest_first.limit(RECENT).map { |order| recent(order) }
     }
   end
 

@@ -219,6 +219,7 @@ en:
         create:
           notice: Order %{number} is marked as refunded.
           failed: 'Stripe couldn''t refund it: %{error}'
+      test: Test
     products:
       launch_checklist:
         title: Before it goes on sale
@@ -410,6 +411,13 @@ en:
           disconnect: Disconnect Stripe
           confirm_disconnect: Disconnect Stripe? Buyers won't be able to pay by card
             until you connect again.
+          publishable_key: Publishable key
+          publishable_key_hint: Next to the secret key in the same place (pk_live_…
+            or pk_test_…). The storefront shows the card form with it.
+          publishable_key_missing: Add the account's publishable key (pk_live_… or
+            pk_test_…, next to the secret key in Stripe) so buyers can pay by card
+            in the storefront.
+          save_publishable_key: Save
         manual:
           title: Manual payment
           accept: Also accept manual payment
@@ -427,6 +435,7 @@ en:
       update:
         notice: Stripe now sends payment updates to this address.
         failed: 'Stripe refused: %{error}'
+        publishable_key_saved: 'Publishable key saved: buyers can pay by card.'
       destroy:
         notice: Stripe is disconnected.
     policies:
@@ -601,6 +610,31 @@ en:
         last_owner: 'A shop needs an owner: make someone else its owner first.'
       destroy:
         notice: "%{name} no longer runs this shop."
+    api_keys:
+      index:
+        title: Storefront keys
+        intro: 'A storefront shows this shop''s products and takes its orders through
+          the Storefront API, with one of these keys. A preview key is for trying
+          the storefront: its card payments use Stripe''s test mode and its orders
+          never go to Printify.'
+        copy_now: 'Copy the new key now: it isn''t shown again.'
+        new_key: New key
+        made: Made %{ago} ago
+        used: used %{ago} ago
+        never_used: not used yet
+        revoke: Revoke
+        confirm_revoke: Revoke this key? A storefront using it stops working until
+          it gets a new one.
+        none: No keys yet.
+        kind: For
+        create: Make a key
+        kinds:
+          storefront: Published storefront
+          preview: Preview
+      create:
+        notice: Key made.
+      destroy:
+        notice: Key revoked.
   ui:
     menu: Menu
     close: Close

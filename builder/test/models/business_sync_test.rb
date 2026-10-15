@@ -10,7 +10,7 @@ class BusinessSyncTest < ActiveSupport::TestCase
     raw = BusinessSetting.connection.select_value("SELECT stripe_secret_key FROM business_settings WHERE id = #{@setting.id}")
     assert_not_includes raw, "sk_test_abc"
     assert_equal "sk_test_…_abc", BusinessSetting.masked("sk_test_abc")
-    assert_equal({ "stripe_secret_key" => "sk_test_abc", "printify_token" => "", "printify_shop_id" => "", "meta_pixel_id" => "123456789012",
+    assert_equal({ "stripe_secret_key" => "sk_test_abc", "stripe_publishable_key" => "", "printify_token" => "", "printify_shop_id" => "", "meta_pixel_id" => "123456789012",
       "meta_access_token" => "", "tiktok_pixel_id" => "", "google_tag_id" => "" }, @setting.payload)
   end
 

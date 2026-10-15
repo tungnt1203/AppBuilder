@@ -1,4 +1,5 @@
-# Clears every shop's carts nobody has touched for 30 days (config/recurring.yml runs it daily).
+# Clears every shop's carts nobody has touched for 30 days, and the API's idempotency keys older than
+# a day (config/recurring.yml runs it daily).
 class Cart::CleanupJob < ApplicationJob
   def perform
     Shop.each_in_turn do
@@ -6,6 +7,7 @@ class Cart::CleanupJob < ApplicationJob
         CartItem.where(cart_id: carts.select(:id)).delete_all
         carts.delete_all
       end
+      ApiIdempotencyKey.expired.delete_all
     end
   end
 end

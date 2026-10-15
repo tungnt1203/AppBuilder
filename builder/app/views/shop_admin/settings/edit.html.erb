@@ -17,6 +17,17 @@
         <%= alert t(".stripe.test_mode_hint"), tone: :warning %>
       <% end %>
 
+      <% unless @store.stripe_publishable_key %>
+        <%= alert tone: :warning do %>
+          <p><%= t(".stripe.publishable_key_missing") %></p>
+          <%= form_with url: shop_admin_stripe_connection_path, method: :patch, class: "mt-2 flex flex-wrap gap-2" do |form| %>
+            <%= form.text_field :publishable_key, required: true, autocomplete: "off", spellcheck: false, placeholder: @store.stripe_test_mode? ? "pk_test_…" : "pk_live_…",
+                  class: "#{field_classes} flex-1", "aria-label": t(".stripe.publishable_key") %>
+            <%= form.button t(".stripe.save_publishable_key"), class: button_classes(:secondary, size: :sm) %>
+          <% end %>
+        <% end %>
+      <% end %>
+
       <% if @store.stripe_webhook_url.present? && @store.stripe_webhook_url == stripe_webhook_url %>
         <p class="flex items-center gap-2 text-sm text-muted"><%= icon "circle-check", size: 16, class: "text-green-600" %> <%= t(".stripe.webhook_on") %></p>
       <% elsif Store.public_url?(stripe_webhook_url) %>
@@ -37,6 +48,11 @@
           <%= form.label :secret_key, t(".stripe.secret_key"), class: "block text-sm font-medium text-ink" %>
           <%= form.password_field :secret_key, required: true, autocomplete: "off", spellcheck: false, placeholder: "sk_live_… or rk_live_…", class: field_classes %>
           <p class="text-xs text-muted"><%= t(".stripe.secret_key_hint_html", link: link_to("dashboard.stripe.com/apikeys", "https://dashboard.stripe.com/apikeys", target: "_blank", rel: "noopener", class: link_classes)) %></p>
+        </div>
+        <div class="space-y-1.5">
+          <%= form.label :publishable_key, t(".stripe.publishable_key"), class: "block text-sm font-medium text-ink" %>
+          <%= form.text_field :publishable_key, required: true, autocomplete: "off", spellcheck: false, placeholder: "pk_live_… or pk_test_…", class: field_classes %>
+          <p class="text-xs text-muted"><%= t(".stripe.publishable_key_hint") %></p>
         </div>
         <%= form.button t(".stripe.connect"), class: button_classes %>
       <% end %>

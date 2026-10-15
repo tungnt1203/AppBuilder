@@ -23,6 +23,8 @@ class Checkout
   attr_reader :cart, :order
   # The buyer's browser, for Meta (see Order#attribution): { "fbp", "fbc", "ip", "user_agent", "url" }.
   attr_accessor :customer, :attribution
+  # Placed in a storefront's preview: a test order (Order.real leaves it out).
+  attr_accessor :test
 
   validates :email, presence: true, format: { with: ApplicationRecord::EMAIL_FORMAT }
   validates :shipping_name, :shipping_address1, :shipping_city, :shipping_country, presence: true
@@ -152,7 +154,7 @@ class Checkout
     def order_attributes
       attributes.symbolize_keys.merge(customer:, currency: @store.currency,
         subtotal_cents:, discount_cents:, shipping_cents:, total_cents:, cart_id: cart.id,
-        discount:, discount_code: discount&.code, attribution: attribution.presence)
+        discount:, discount_code: discount&.code, attribution: attribution.presence, test: test.present?)
     end
 
     def cart_has_items

@@ -77,3 +77,17 @@ class ActionDispatch::IntegrationTest
     self.default_url_options = default_url_options.merge(shop_id: shop)
   end
 end
+
+# The Storefront API (StorefrontApi::V1): calls with a key of the shop's, as its storefront would.
+module StorefrontApiTestHelper
+  def api_key_for(shop = shops(:cats), kind: "storefront")
+    ActsAsTenant.with_tenant(shop) { ShopApiKey.create!(kind:) }.token
+  end
+
+  def api(method, path, key: @api_key, params: nil, headers: {})
+    public_send(method, path, params: params&.to_json, headers: { "Authorization" => "Bearer #{key}", "Content-Type" => "application/json" }.merge(headers))
+    response.parsed_body
+  end
+end
+
+ActiveSupport.on_load(:action_dispatch_integration_test) { include StorefrontApiTestHelper }

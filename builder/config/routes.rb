@@ -66,7 +66,34 @@ Rails.application.routes.draw do
     resource :stripe_connection, only: %i[ create update destroy ]
     resource :settings, only: %i[ edit update ]
     resource :policies, only: %i[ edit update ], path: "settings/policies"
+    resources :api_keys, only: %i[ index create destroy ], path: "settings/keys"
     resources :memberships, only: %i[ index new create update destroy ], path: "people"
+  end
+
+  # The Storefront API, for the shops' storefronts (StorefrontApi::V1::BaseController).
+  scope "v1", module: "storefront_api/v1", as: "storefront_api", defaults: { format: :json } do
+    resource :shop, only: :show
+    resources :products, only: %i[ index show ] do
+      resources :reviews, only: :index
+    end
+    resources :collections, only: %i[ index show ]
+    resources :policies, only: :show
+    resources :zip_codes, only: :show
+    resources :carts, only: %i[ create show ] do
+      scope module: :carts do
+        resources :items, only: %i[ create update destroy ]
+        resource :discount, only: %i[ create destroy ]
+      end
+    end
+    resources :checkouts, only: :create do
+      post :quote, on: :collection
+    end
+    resources :orders, only: :show do
+      scope module: :orders do
+        resources :reviews, only: :create
+        resource :payment, only: :create
+      end
+    end
   end
 
   get "up" => "rails/health#show", as: :rails_health_check

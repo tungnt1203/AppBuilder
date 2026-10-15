@@ -115,6 +115,9 @@ en:
           attributes:
             ship_to_countries:
               unknown: 'has codes we don''t know: %{codes}'
+            stripe_publishable_key:
+              not_a_publishable_key: should start with pk_live_ or pk_test_
+              other_mode: is for the other mode than the secret key (one is a test key, the other live)
         discount:
           attributes:
             code:
@@ -213,6 +216,7 @@ en:
         open: Open the order
     stripe_connections:
       wrong_key: That doesn't look like a Stripe secret key. It starts with sk_live_, sk_test_, rk_live_ or rk_test_.
+      wrong_publishable_key: "The publishable key should start with pk_live_ or pk_test_, in the same mode as the secret key"
   discounts:
     problems:
       unknown: That code doesn't exist

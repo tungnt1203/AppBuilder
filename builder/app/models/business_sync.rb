@@ -21,7 +21,7 @@ class BusinessSync
     def apply!(settings)
       @store = Store.current
       result = { "errors" => [] }
-      attempt(result, "stripe") { stripe(settings["stripe_secret_key"]) }
+      attempt(result, "stripe") { stripe(settings["stripe_secret_key"], settings["stripe_publishable_key"]) }
       attempt(result, "printify") { printify(settings["printify_token"], settings["printify_shop_id"]) }
       attempt(result, "pixels") { pixels(settings) }
       result
@@ -33,13 +33,17 @@ class BusinessSync
       result["errors"] << "#{part.capitalize}: #{error.message}"
     end
 
-    def stripe(key)
-      key = key.to_s.strip
+    def stripe(key, publishable_key)
+      key, publishable_key = key.to_s.strip, publishable_key.to_s.strip.presence
       if key.empty?
         @store.disconnect_stripe! if @store.stripe_connected?
         return "not connected"
       end
-      @store.connect_stripe!(key) unless @store.send(:stripe_key) == key
+      if @store.send(:stripe_key) != key
+        @store.connect_stripe!(key, publishable_key:)
+      elsif @store.stripe_publishable_key != publishable_key
+        @store.update!(stripe_publishable_key: publishable_key)
+      end
       "#{@store.stripe_account_name}#{" (test mode)" if @store.stripe_test_mode?}"
     end
 

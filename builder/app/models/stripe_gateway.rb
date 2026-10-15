@@ -1,23 +1,20 @@
 # Every call to Stripe goes through here, with the shop's own secret key (Store#stripe). Buyers
-# pay on Stripe Checkout; the shop never sees card numbers. Don't change this file for a
-# feature: payments are part of the template, tested as they are.
+# pay in the storefront with Stripe's Payment Element, confirming a PaymentIntent made here for
+# their order; card numbers never reach the platform or the storefront.
 #
 # Tests replace StripeGateway.build with a fake (see test/test_helpers/stripe_test_helper.rb).
 class StripeGateway
   Error = Class.new(StandardError)
 
-  # Events the shop's webhook listens to (see StripeWebhooksController).
-  EVENTS = %w[
-    checkout.session.completed checkout.session.async_payment_succeeded
-    checkout.session.async_payment_failed checkout.session.expired charge.refunded
-  ].freeze
+  # Events the shop's webhook listens to.
+  EVENTS = %w[ payment_intent.succeeded payment_intent.payment_failed charge.refunded ].freeze
 
   # Stripe amounts are in the currency's smallest unit; these have none below the whole unit,
   # while the shop keeps every amount in hundredths.
   ZERO_DECIMAL = %w[ VND JPY KRW ].freeze
 
-  # How long a buyer has to pay on Stripe (Stripe's shortest is 30 minutes). Until then the
-  # order holds its stock; Order::ExpireUnpaidCardJob gives it back after.
+  # How long a buyer has to pay before they're reminded (Order::ExpireUnpaidCardJob); the order
+  # holds its stock until it's cancelled a day after it was placed.
   CHECKOUT_EXPIRY = 1.hour
 
   def self.build(secret_key)
@@ -47,45 +44,48 @@ class StripeGateway
     account.settings&.dashboard&.display_name.presence || account.business_profile&.name.presence || account.email.presence || account.id
   end
 
-  # A Checkout Session for the order's items, discount and shipping, as they were when it was
-  # placed, open for CHECKOUT_EXPIRY. With tax: true, Stripe Tax works out the tax on top (the
-  # owner sets it up in their Stripe account). Returns [session id, url to send the buyer to].
-  def create_checkout(order, success_url:, cancel_url:, tax: false)
-    currency = order.currency.downcase
-    session = call do
-      Stripe::Checkout::Session.create({
-        mode: "payment",
-        expires_at: CHECKOUT_EXPIRY.from_now.to_i,
-        automatic_tax: { enabled: tax },
-        discounts: discounts_for(order),
-        customer_email: order.email,
-        client_reference_id: order.id.to_s,
-        metadata: { order_id: order.id, order_number: order.number, shop: Store.current.uid },
-        payment_intent_data: { description: "#{Rails.configuration.x.app_name} order #{order.name}",
-          metadata: { order_id: order.id, order_number: order.number, shop: Store.current.uid } },
-        line_items: order.line_items.map { |item|
-          { quantity: item.quantity,
-            price_data: { currency:, unit_amount: self.class.amount(item.unit_price_cents, order.currency),
-              product_data: { name: [ item.product_title, item.variant_title ].compact_blank.join(" – ").truncate(250) } } }
+  # The order's PaymentIntent, for its total as placed (with the tax worked out, when Stripe Tax
+  # is on). Made once per order: asking again gets the same one. Returns { id:, client_secret: }.
+  def create_payment_intent(order, tax_calculation: nil)
+    intent = call do
+      Stripe::PaymentIntent.create({
+        amount: self.class.amount(order.total_cents, order.currency), currency: order.currency.downcase,
+        automatic_payment_methods: { enabled: true },
+        receipt_email: order.email,
+        description: "#{order.shop.name} order #{order.name}",
+        metadata: { order_id: order.id, order_number: order.number, shop: order.shop.uid, tax_calculation: }.compact,
+        shipping: { name: order.shipping_name, phone: order.phone.presence, address: address(order) }.compact
+      }, options.merge(idempotency_key: "order-#{order.shop.uid}-#{order.id}"))
+    end
+    { id: intent.id, client_secret: intent.client_secret }
+  end
+
+  # { paid:, status:, client_secret: } for a PaymentIntent.
+  def payment_intent(id)
+    intent = call { Stripe::PaymentIntent.retrieve(id, options) }
+    { paid: intent.status == "succeeded", status: intent.status, client_secret: intent.client_secret }
+  end
+
+  # The tax Stripe Tax works out for the order's items and shipping at its address, on top of
+  # its prices (the owner sets Stripe Tax up in their Stripe account). Returns { id:, tax_cents: }.
+  def tax_calculation(order)
+    shares = discounted_line_amounts(order)
+    calculation = call do
+      Stripe::Tax::Calculation.create({
+        currency: order.currency.downcase,
+        customer_details: { address: address(order), address_source: "shipping" },
+        line_items: order.line_items.zip(shares).map { |item, cents|
+          { amount: self.class.amount(cents, order.currency), quantity: item.quantity, reference: "line-#{item.id}", tax_behavior: "exclusive" }
         },
-        shipping_options: [ { shipping_rate_data: { type: "fixed_amount", display_name: order.shipping_cents.zero? ? "Free shipping" : "Shipping",
-          fixed_amount: { amount: self.class.amount(order.shipping_cents, order.currency), currency: } } } ],
-        success_url:, cancel_url:
+        shipping_cost: { amount: self.class.amount(order.shipping_cents, order.currency), tax_behavior: "exclusive" }
       }, options)
     end
-    [ session.id, session.url ]
+    { id: calculation.id, tax_cents: self.class.cents(calculation.tax_amount_exclusive, order.currency) }
   end
 
-  # { paid:, payment_intent:, status:, tax_cents: } for a Checkout Session.
-  def checkout(session_id)
-    session = call { Stripe::Checkout::Session.retrieve(session_id, options) }
-    { paid: session.payment_status.in?(%w[ paid no_payment_required ]), payment_intent: payment_intent_id(session.payment_intent),
-      status: session.status, tax_cents: self.class.tax_cents(session) }
-  end
-
-  # The tax Stripe added to a Checkout Session, in the shop's hundredths.
-  def self.tax_cents(session)
-    cents(session.total_details&.amount_tax.to_i, session.currency)
+  # Records a paid order's tax with Stripe Tax, for the owner's tax reports.
+  def record_tax(calculation_id, reference)
+    call { Stripe::Tax::Transaction.create_from_calculation({ calculation: calculation_id, reference: }, options) }
   end
 
   def refund(payment_intent)
@@ -114,15 +114,19 @@ class StripeGateway
   end
 
   private
-    # The order's discount as a one-off Stripe coupon for exactly the amount it took off.
-    def discounts_for(order)
-      return [] unless order.discount_cents.positive?
+    def address(order)
+      { line1: order.shipping_address1, line2: order.shipping_address2.presence, city: order.shipping_city,
+        state: order.shipping_region.presence, postal_code: order.shipping_postal_code.presence, country: order.shipping_country }.compact
+    end
 
-      coupon = call do
-        Stripe::Coupon.create({ amount_off: self.class.amount(order.discount_cents, order.currency), currency: order.currency.downcase,
-          duration: "once", max_redemptions: 1, name: order.discount_code.presence || "Discount" }, options)
-      end
-      [ { coupon: coupon.id } ]
+    # Each line's price after its share of the order's discount, the last line taking what's left
+    # over from rounding, so they add up to what the buyer pays for the items.
+    def discounted_line_amounts(order)
+      totals = order.line_items.map { |item| item.unit_price_cents * item.quantity }
+      subtotal = totals.sum
+      shares = totals.map { |total| subtotal.zero? ? 0 : (order.discount_cents * total / subtotal.to_f).floor }
+      shares[-1] += order.discount_cents - shares.sum if shares.any?
+      totals.zip(shares).map { |total, share| total - share }
     end
 
     def options
@@ -133,9 +137,5 @@ class StripeGateway
       yield
     rescue Stripe::StripeError => error
       raise Error, error.message.presence || error.class.name.demodulize
-    end
-
-    def payment_intent_id(value)
-      value.is_a?(String) ? value : value&.id
     end
 end

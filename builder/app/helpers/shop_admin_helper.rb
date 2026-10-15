@@ -62,8 +62,10 @@ module ShopAdminHelper
       /city/ => :shipping_city, /country/ => :shipping_country, /address/ => :shipping_address1 }.find { |pattern, _| error.match?(pattern) }&.last
   end
 
+  # Its status, and "Test" for an order placed in a storefront's preview.
   def order_status_badge(order)
-    badge t(order.status, scope: "orders.statuses"), tone: ORDER_STATUS_TONES.fetch(order.status, :gray)
+    status = badge t(order.status, scope: "orders.statuses"), tone: ORDER_STATUS_TONES.fetch(order.status, :gray)
+    order.test? ? safe_join([ badge(t("shop_admin.orders.test"), tone: :yellow), status ], " ") : status
   end
 
   PRODUCT_STATUS_TONES = { "active" => :green, "draft" => :yellow, "archived" => :gray }.freeze
