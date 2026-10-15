@@ -23,7 +23,7 @@ Bản thiết kế để duyệt trước khi làm. Trạng thái: **đề xuấ
 | Booking | Bỏ khỏi sản phẩm |
 | Hạ tầng | Platform chạy trên server riêng, tách khỏi máy chạy các storefront |
 | Dữ liệu cũ | Không chuyển dữ liệu: các app thử (kể cả project 34) đã xoá, Platform bắt đầu từ đầu |
-| Tài khoản khách | Cần xác nhận: riêng từng shop (đề xuất) hay dùng chung giữa các shop của một chủ |
+| Tài khoản khách | Riêng từng shop (khách của shop A không đăng nhập được ở shop B). Khách luôn mua được mà không cần tài khoản; tài khoản chỉ là tuỳ chọn để xem lại đơn |
 
 ## 3. Kiến trúc
 
@@ -79,7 +79,7 @@ Mọi bảng dữ liệu của shop có `shop_id` (not null, có index), mọi i
 **Bán hàng**
 - `carts`, `cart_items` (+ `properties` JSONB cho thông tin khách nhập), `orders`, `line_items`
   (+ `properties`), `order_events`; logic giữ nguyên (Checkout, Order, Printify::Fulfillment…).
-- `customers` theo shop (tuỳ chọn), đơn vẫn mua không cần tài khoản.
+- `customers` theo shop (unique theo `shop_id` + email), tuỳ chọn; checkout không bao giờ đòi đăng nhập.
 
 **Nội dung**
 - `pages` (slug, tiêu đề, các khối nội dung), `faqs` (hoặc khối FAQ trong page), `menus`, chính sách.
