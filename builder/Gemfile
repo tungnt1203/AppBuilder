@@ -6,6 +6,8 @@ gem "rails", "~> 8.1.4"
 gem "propshaft"
 # PostgreSQL: one database for the platform's shops, their orders and the builder (docs/platform-v1.md)
 gem "pg", "~> 1.6"
+# Every shop's data is scoped to its shop (shop_id, ActsAsTenant.current_tenant)
+gem "acts_as_tenant", "~> 1.0"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]

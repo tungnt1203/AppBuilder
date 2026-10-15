@@ -5,6 +5,7 @@ class Project < ApplicationRecord
 
   # Optional only for apps made before there were accounts (see AddOwnerToProjects).
   belongs_to :owner, class_name: "User", optional: true
+  belongs_to :shop, optional: true # the shop this storefront's code is for
   has_many :messages, -> { order(:id) }, dependent: :destroy
   has_many :deployments, dependent: :destroy
   has_many :agent_commands, dependent: :delete_all

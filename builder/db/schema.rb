@@ -10,7 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_130000) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "agent_commands", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "kind", null: false
@@ -95,10 +98,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_110000) do
     t.string "orders_summary_source"
     t.json "printify_import_result"
     t.datetime "printify_imported_at"
+    t.bigint "shop_id"
     t.index ["eval_run"], name: "index_projects_on_eval_run"
     t.index ["owner_id"], name: "index_projects_on_owner_id"
     t.index ["port"], name: "index_projects_on_port", unique: true
     t.index ["share_token"], name: "index_projects_on_share_token", unique: true
+    t.index ["shop_id"], name: "index_projects_on_shop_id"
     t.index ["slug"], name: "index_projects_on_slug", unique: true
     t.index ["subdomain"], name: "index_projects_on_subdomain", unique: true
   end
@@ -110,6 +115,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_110000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "shop_api_keys", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "kind", default: "storefront", null: false
+    t.string "token_digest", null: false
+    t.string "token_hint", null: false
+    t.datetime "last_used_at"
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id"], name: "index_shop_api_keys_on_shop_id"
+    t.index ["token_digest"], name: "index_shop_api_keys_on_token_digest", unique: true
+  end
+
+  create_table "shop_memberships", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "user_id", null: false
+    t.string "role", default: "staff", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "user_id"], name: "index_shop_memberships_on_shop_id_and_user_id", unique: true
+    t.index ["shop_id"], name: "index_shop_memberships_on_shop_id"
+    t.index ["user_id"], name: "index_shop_memberships_on_user_id"
+  end
+
+  create_table "shops", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "subdomain", null: false
+    t.string "uid", null: false
+    t.string "currency", default: "USD", null: false
+    t.string "time_zone", default: "UTC", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["subdomain"], name: "index_shops_on_subdomain", unique: true
+    t.index ["uid"], name: "index_shops_on_uid", unique: true
   end
 
   create_table "usages", force: :cascade do |t|
@@ -138,8 +180,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_110000) do
   add_foreign_key "business_settings", "users"
   add_foreign_key "deployments", "projects"
   add_foreign_key "messages", "projects"
+  add_foreign_key "projects", "shops"
   add_foreign_key "projects", "users", column: "owner_id"
   add_foreign_key "sessions", "users"
+  add_foreign_key "shop_api_keys", "shops"
+  add_foreign_key "shop_memberships", "shops"
+  add_foreign_key "shop_memberships", "users"
   add_foreign_key "usages", "projects", on_delete: :nullify
   add_foreign_key "usages", "users"
 end
