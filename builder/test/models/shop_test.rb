@@ -2,9 +2,9 @@ require "test_helper"
 
 class ShopTest < ActiveSupport::TestCase
   test "opens with its owner, a code of its own and a valid address" do
-    shop = Shop.open!(owner: users(:member), name: "Chubby Cat Tees", subdomain: " Chubby-Cats ")
+    shop = Shop.open!(owner: users(:member), name: "Tabby Tees", subdomain: " Tabby-Tees ")
 
-    assert_equal "chubby-cats", shop.subdomain
+    assert_equal "tabby-tees", shop.subdomain
     assert_match(/\A[a-z0-9]{6}\z/, shop.uid)
     assert_equal "owner", shop.role_of(users(:member))
     assert_includes users(:member).shops, shop
@@ -15,7 +15,7 @@ class ShopTest < ActiveSupport::TestCase
   end
 
   test "a storefront key is shown once, kept as a digest, and finds its shop" do
-    shop = Shop.open!(owner: users(:member), name: "Cats", subdomain: "cats")
+    shop = Shop.open!(owner: users(:member), name: "Cats", subdomain: "more-cats")
     key = ActsAsTenant.with_tenant(shop) { shop.api_keys.create! }
 
     assert key.token.start_with?("sk_shop_")
@@ -29,8 +29,8 @@ class ShopTest < ActiveSupport::TestCase
   end
 
   test "a shop's data is only read inside that shop" do
-    cats = Shop.open!(owner: users(:member), name: "Cats", subdomain: "cats")
-    dogs = Shop.open!(owner: users(:member), name: "Dogs", subdomain: "dogs")
+    cats = Shop.open!(owner: users(:member), name: "Cats", subdomain: "more-cats")
+    dogs = Shop.open!(owner: users(:member), name: "Dogs", subdomain: "more-dogs")
     cats_key = ActsAsTenant.with_tenant(cats) { cats.api_keys.create! }
     ActsAsTenant.with_tenant(dogs) { dogs.api_keys.create!(kind: "preview") }
 

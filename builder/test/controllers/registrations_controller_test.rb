@@ -17,6 +17,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   test "the first account runs the studio and takes over the apps made before accounts" do
     Session.delete_all
     Project.update_all(owner_id: nil)
+    ShopMembership.delete_all
     User.delete_all
 
     get root_path

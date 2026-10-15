@@ -11,6 +11,13 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
+    # A shop's data is read inside that shop (acts_as_tenant): tests of it pick the shop first.
+    def in_shop(shop = shops(:cats))
+      ActsAsTenant.current_tenant = shop
+    end
+
+    teardown { ActsAsTenant.current_tenant = nil }
+
     # Whether apps count as built, without a version history on disk.
     def with_built_apps(built = true)
       original = Project.instance_method(:built?)

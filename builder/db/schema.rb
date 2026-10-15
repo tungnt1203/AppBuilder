@@ -10,9 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
 
   create_table "agent_commands", force: :cascade do |t|
     t.integer "project_id", null: false
@@ -39,6 +67,56 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_130000) do
     t.index ["user_id"], name: "index_business_settings_on_user_id", unique: true
   end
 
+  create_table "cart_items", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "cart_id", null: false
+    t.bigint "variant_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cart_id", "variant_id"], name: "index_cart_items_on_cart_id_and_variant_id", unique: true
+    t.index ["cart_id"], name: "index_cart_items_on_cart_id"
+    t.index ["shop_id"], name: "index_cart_items_on_shop_id"
+    t.index ["variant_id"], name: "index_cart_items_on_variant_id"
+  end
+
+  create_table "carts", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "token", null: false
+    t.string "discount_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "updated_at"], name: "index_carts_on_shop_id_and_updated_at"
+    t.index ["shop_id"], name: "index_carts_on_shop_id"
+    t.index ["token"], name: "index_carts_on_token", unique: true
+  end
+
+  create_table "collection_products", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "collection_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["collection_id", "product_id"], name: "index_collection_products_on_collection_id_and_product_id", unique: true
+    t.index ["collection_id"], name: "index_collection_products_on_collection_id"
+    t.index ["product_id"], name: "index_collection_products_on_product_id"
+    t.index ["shop_id"], name: "index_collection_products_on_shop_id"
+  end
+
+  create_table "collections", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "title", null: false
+    t.string "slug", null: false
+    t.text "description"
+    t.integer "position", default: 0, null: false
+    t.boolean "demo", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "slug"], name: "index_collections_on_shop_id_and_slug", unique: true
+    t.index ["shop_id"], name: "index_collections_on_shop_id"
+  end
+
   create_table "deployments", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "version", null: false
@@ -52,6 +130,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_130000) do
     t.index ["project_id"], name: "index_deployments_on_project_id"
   end
 
+  create_table "discounts", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "code", null: false
+    t.string "kind", default: "percentage", null: false
+    t.integer "percent_off"
+    t.integer "amount_off_cents"
+    t.integer "minimum_subtotal_cents"
+    t.datetime "starts_at"
+    t.datetime "ends_at"
+    t.integer "usage_limit"
+    t.integer "times_used", default: 0, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "shop_id, lower((code)::text)", name: "index_discounts_on_shop_id_and_code", unique: true
+    t.index ["shop_id"], name: "index_discounts_on_shop_id"
+  end
+
   create_table "messages", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "role", null: false
@@ -60,6 +156,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_130000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["project_id"], name: "index_messages_on_project_id"
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "title", null: false
+    t.string "slug", null: false
+    t.text "description"
+    t.string "status", default: "draft", null: false
+    t.string "option1_name"
+    t.string "option2_name"
+    t.string "option3_name"
+    t.jsonb "option1_values", default: [], null: false
+    t.jsonb "option2_values", default: [], null: false
+    t.jsonb "option3_values", default: [], null: false
+    t.jsonb "option_images", default: {}, null: false
+    t.jsonb "option_colors", default: {}, null: false
+    t.text "size_guide"
+    t.string "printify_product_id"
+    t.boolean "demo", default: false, null: false
+    t.datetime "published_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "printify_product_id"], name: "index_products_on_shop_id_and_printify_product_id", unique: true, where: "(printify_product_id IS NOT NULL)"
+    t.index ["shop_id", "slug"], name: "index_products_on_shop_id_and_slug", unique: true
+    t.index ["shop_id", "status", "published_at"], name: "index_products_on_shop_id_and_status_and_published_at"
+    t.index ["shop_id"], name: "index_products_on_shop_id"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -108,6 +230,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_130000) do
     t.index ["subdomain"], name: "index_projects_on_subdomain", unique: true
   end
 
+  create_table "promotion_items", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "promotion_id", null: false
+    t.bigint "variant_id", null: false
+    t.integer "original_price_cents"
+    t.integer "original_compare_at_price_cents"
+    t.index ["promotion_id", "variant_id"], name: "index_promotion_items_on_promotion_id_and_variant_id", unique: true
+    t.index ["promotion_id"], name: "index_promotion_items_on_promotion_id"
+    t.index ["shop_id"], name: "index_promotion_items_on_shop_id"
+    t.index ["variant_id"], name: "index_promotion_items_on_variant_id"
+  end
+
+  create_table "promotions", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "name", null: false
+    t.integer "percent_off", null: false
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.string "status", default: "scheduled", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id"], name: "index_promotions_on_shop_id"
+    t.index ["status", "starts_at"], name: "index_promotions_on_status_and_starts_at"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -154,6 +301,50 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_130000) do
     t.index ["uid"], name: "index_shops_on_uid", unique: true
   end
 
+  create_table "stores", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "contact_email"
+    t.string "contact_phone"
+    t.text "business_address"
+    t.integer "shipping_first_item_cents", default: 0, null: false
+    t.integer "shipping_additional_item_cents", default: 0, null: false
+    t.integer "free_shipping_threshold_cents"
+    t.jsonb "ship_to_countries", default: [], null: false
+    t.boolean "manual_payments", default: true, null: false
+    t.text "payment_instructions"
+    t.text "refund_policy"
+    t.text "shipping_policy"
+    t.text "privacy_policy"
+    t.text "terms_of_service"
+    t.integer "low_stock_threshold", default: 5, null: false
+    t.string "announcement"
+    t.integer "delivery_days_min"
+    t.integer "delivery_days_max"
+    t.text "stripe_secret_key"
+    t.string "stripe_account_name"
+    t.string "stripe_webhook_id"
+    t.string "stripe_webhook_url"
+    t.text "stripe_webhook_secret"
+    t.boolean "stripe_tax", default: false, null: false
+    t.text "printify_token"
+    t.string "printify_shop_id"
+    t.string "printify_shop_title"
+    t.boolean "printify_send_to_production", default: true, null: false
+    t.integer "printify_shipping_method", default: 1, null: false
+    t.string "printify_webhook_url"
+    t.text "printify_webhook_secret"
+    t.jsonb "printify_webhook_ids", default: [], null: false
+    t.string "meta_pixel_id"
+    t.text "meta_access_token"
+    t.string "meta_test_event_code"
+    t.string "meta_error"
+    t.string "tiktok_pixel_id"
+    t.string "google_tag_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id"], name: "index_stores_on_shop_id", unique: true
+  end
+
   create_table "usages", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "project_id"
@@ -176,16 +367,58 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_130000) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  create_table "variants", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "product_id", null: false
+    t.string "option1"
+    t.string "option2"
+    t.string "option3"
+    t.string "sku"
+    t.integer "price_cents", default: 0, null: false
+    t.integer "compare_at_price_cents"
+    t.integer "cost_cents"
+    t.boolean "available", default: true, null: false
+    t.boolean "track_inventory", default: false, null: false
+    t.integer "inventory_quantity", default: 0, null: false
+    t.integer "printify_variant_id"
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id", "option1", "option2", "option3"], name: "index_variants_on_product_and_options", unique: true
+    t.index ["product_id", "position"], name: "index_variants_on_product_id_and_position"
+    t.index ["product_id"], name: "index_variants_on_product_id"
+    t.index ["shop_id"], name: "index_variants_on_shop_id"
+  end
+
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agent_commands", "projects"
   add_foreign_key "business_settings", "users"
+  add_foreign_key "cart_items", "carts"
+  add_foreign_key "cart_items", "shops"
+  add_foreign_key "cart_items", "variants"
+  add_foreign_key "carts", "shops"
+  add_foreign_key "collection_products", "collections"
+  add_foreign_key "collection_products", "products"
+  add_foreign_key "collection_products", "shops"
+  add_foreign_key "collections", "shops"
   add_foreign_key "deployments", "projects"
+  add_foreign_key "discounts", "shops"
   add_foreign_key "messages", "projects"
+  add_foreign_key "products", "shops"
   add_foreign_key "projects", "shops"
   add_foreign_key "projects", "users", column: "owner_id"
+  add_foreign_key "promotion_items", "promotions"
+  add_foreign_key "promotion_items", "shops"
+  add_foreign_key "promotion_items", "variants", on_delete: :cascade
+  add_foreign_key "promotions", "shops"
   add_foreign_key "sessions", "users"
   add_foreign_key "shop_api_keys", "shops"
   add_foreign_key "shop_memberships", "shops"
   add_foreign_key "shop_memberships", "users"
+  add_foreign_key "stores", "shops"
   add_foreign_key "usages", "projects", on_delete: :nullify
   add_foreign_key "usages", "users"
+  add_foreign_key "variants", "products"
+  add_foreign_key "variants", "shops"
 end

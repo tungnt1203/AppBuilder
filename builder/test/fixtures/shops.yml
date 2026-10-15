@@ -1,0 +1,11 @@
+cats:
+  name: Chubby Cat Tees
+  subdomain: chubby-cats
+  uid: cats01
+  currency: USD
+
+dogs:
+  name: Good Boy Hoodies
+  subdomain: good-boy
+  uid: dogs01
+  currency: USD

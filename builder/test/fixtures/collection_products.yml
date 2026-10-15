@@ -1,0 +1,11 @@
+cats_tee:
+  shop: cats
+  collection: cats
+  product: tee
+  position: 0
+
+cats_hoodie:
+  shop: cats
+  collection: cats
+  product: hoodie
+  position: 1

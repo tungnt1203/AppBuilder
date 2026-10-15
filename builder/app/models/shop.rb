@@ -11,6 +11,7 @@ class Shop < ApplicationRecord
   has_many :users, through: :memberships
   has_many :api_keys, class_name: "ShopApiKey", dependent: :destroy
   has_one :project, dependent: :nullify
+  has_one :store, dependent: :destroy
 
   normalizes :subdomain, with: ->(subdomain) { subdomain.strip.downcase }
   normalizes :name, with: ->(name) { name.squish }
@@ -18,11 +19,16 @@ class Shop < ApplicationRecord
   validates :name, presence: true, length: { maximum: 100 }
   validates :subdomain, presence: true, uniqueness: true, length: { maximum: 63 },
     format: { with: /\A[a-z0-9]([a-z0-9-]*[a-z0-9])?\z/ }, exclusion: { in: RESERVED_SUBDOMAINS }
-  validates :currency, inclusion: { in: %w[ USD EUR GBP CAD AUD VND JPY ] }
+  validates :currency, inclusion: { in: Store::CURRENCIES.keys }
   validates :status, inclusion: { in: STATUSES }
   validate :time_zone_exists
 
   before_validation :assign_uid, on: :create
+
+  # Runs the block inside each shop in turn, for work every shop needs (recurring jobs).
+  def self.each_in_turn(&block)
+    ActsAsTenant.without_tenant { Shop.order(:id).to_a }.each { |shop| ActsAsTenant.with_tenant(shop, &block) }
+  end
 
   # A new shop with its first owner.
   def self.open!(owner:, **attributes)

@@ -1,0 +1,9 @@
+cats_owner:
+  shop: cats
+  user: member
+  role: owner
+
+dogs_owner:
+  shop: dogs
+  user: member
+  role: owner

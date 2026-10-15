@@ -1,0 +1,17 @@
+welcome:
+  shop: cats
+  code: WELCOME10
+  kind: percentage
+  percent_off: 10
+
+five_off:
+  shop: cats
+  code: FIVEOFF
+  kind: fixed_amount
+  amount_off_cents: 500
+  minimum_subtotal_cents: 3000
+
+ship_free:
+  shop: cats
+  code: SHIPFREE
+  kind: free_shipping
