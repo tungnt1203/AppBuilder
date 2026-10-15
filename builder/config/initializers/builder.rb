@@ -1,6 +1,9 @@
 Rails.application.configure do
   # Where new projects are created, and the app every project starts from.
-  config.x.projects_root = Pathname(ENV.fetch("PROJECTS_ROOT", Rails.root.join("../projects")))
+  # Tests keep their apps' folders to themselves, outside the repository and never next to the
+  # real ones (still named projects/, which transcripts shorten paths by).
+  test_root = Pathname(Dir.tmpdir).join("appbuilder-test", "projects") if Rails.env.test?
+  config.x.projects_root = Pathname(ENV.fetch("PROJECTS_ROOT", test_root || Rails.root.join("../projects")))
   config.x.template_path = Pathname(ENV.fetch("TEMPLATE_PATH", Rails.root.join("../template")))
 
   # Claude credentials for the agent, from `claude setup-token`: the environment wins, then
