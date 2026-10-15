@@ -21,7 +21,9 @@ Bản thiết kế để duyệt trước khi làm. Trạng thái: **đề xuấ
 | Yêu cầu ngoài khả năng | Agent ghi "yêu cầu cho Platform", báo chủ shop; đội lõi ưu tiên theo số lần lặp |
 | Dữ liệu cho preview | Catalog thật của shop (chỉ đọc) + catalog demo khi shop chưa có hàng; checkout trong preview luôn ở chế độ test |
 | Booking | Bỏ khỏi sản phẩm |
-| Mặc định (cần xác nhận) | Platform chạy server riêng; tài khoản khách riêng từng shop (vẫn mua không cần tài khoản); chỉ chuyển dữ liệu project 34 để thử, các app thử khác bỏ |
+| Hạ tầng | Platform chạy trên server riêng, tách khỏi máy chạy các storefront |
+| Dữ liệu cũ | Không chuyển dữ liệu: các app thử (kể cả project 34) đã xoá, Platform bắt đầu từ đầu |
+| Tài khoản khách | Cần xác nhận: riêng từng shop (đề xuất) hay dùng chung giữa các shop của một chủ |
 
 ## 3. Kiến trúc
 
@@ -158,7 +160,7 @@ admin. API trả về giá trị đã gộp với mặc định. Agent dùng `th
    agent rules mới, luồng `platform_requests`.
 7. **Webhook tập trung** (Stripe, Printify) + `webhook_events`.
 8. **Triển khai**: Platform trên server riêng, Postgres backup, R2/CDN, giám sát.
-9. **Chuyển dữ liệu** project 34 từ SQLite; eval POD trên kiến trúc mới.
+9. **Eval POD trên kiến trúc mới** (p061–p068): không chuyển dữ liệu cũ, shop mới tạo từ đầu.
 10. **Gỡ bỏ** database riêng từng shop, `AppTask`/`shop:*`, block booking.
 
 ## 11. Rủi ro
