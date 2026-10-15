@@ -73,6 +73,8 @@ class Printify::Fulfillment
     gateway.cancel_order(@store.printify_shop_id, @order.printify_order_id)
     @order.record "printify_cancelled", message: "Printify #{@order.printify_order_id}"
   rescue PrintifyGateway::Error => error
+    return @order.record("printify_cancelled", message: "Printify #{@order.printify_order_id}") if cancelled_at_printify?
+
     message = I18n.t("orders.printify_not_cancelled", error: error.message)
     @order.update!(fulfillment_error: message)
     @order.record "fulfillment_failed", message:
@@ -130,6 +132,13 @@ class Printify::Fulfillment
 
       cost = parts.sum(&:to_i)
       @order.update!(fulfillment_cost_cents: cost) unless @order.fulfillment_cost_cents == cost
+    end
+
+    # Printify refuses to cancel an order it already cancelled (the owner did it there first).
+    def cancelled_at_printify?
+      gateway.order(@store.printify_shop_id, @order.printify_order_id)["status"] == "canceled"
+    rescue PrintifyGateway::Error
+      false
     end
 
     def stuck!(status)

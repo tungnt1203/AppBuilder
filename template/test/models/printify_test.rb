@@ -213,6 +213,18 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_match "cancel it in Printify", printing.fulfillment_error
   end
 
+  test "an order already cancelled in Printify isn't reported as one Printify refused to cancel" do
+    product = Printify::Import.new.call("pf-tee")
+    order = place_order(product.variant_for(%w[ Black S ]))
+    order.update!(printify_order_id: "pf-6")
+    @printify.define_singleton_method(:cancel_order) { |*| raise PrintifyGateway::Error, "Order status does not allow cancellation" }
+    @printify.status = "canceled"
+
+    order.cancel!
+    assert_nil order.reload.fulfillment_error
+    assert_equal "printify_cancelled", order.events.last.action
+  end
+
   test "an order Printify splits ships once every package has, with all the tracking" do
     product = Printify::Import.new.call("pf-tee")
     order = place_order(product.variant_for(%w[ Black S ]), status: "in_production")
