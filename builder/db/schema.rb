@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -117,6 +117,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_150000) do
     t.index ["shop_id"], name: "index_collections_on_shop_id"
   end
 
+  create_table "customers", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "name", null: false
+    t.string "email_address", null: false
+    t.string "password_digest", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "email_address"], name: "index_customers_on_shop_id_and_email_address", unique: true
+    t.index ["shop_id"], name: "index_customers_on_shop_id"
+  end
+
   create_table "deployments", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "version", null: false
@@ -148,6 +159,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_150000) do
     t.index ["shop_id"], name: "index_discounts_on_shop_id"
   end
 
+  create_table "line_items", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "variant_id"
+    t.string "product_title", null: false
+    t.string "variant_title"
+    t.string "sku"
+    t.integer "unit_price_cents", null: false
+    t.integer "quantity", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_line_items_on_order_id"
+    t.index ["shop_id"], name: "index_line_items_on_shop_id"
+    t.index ["variant_id"], name: "index_line_items_on_variant_id"
+  end
+
   create_table "messages", force: :cascade do |t|
     t.integer "project_id", null: false
     t.string "role", null: false
@@ -156,6 +183,96 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_150000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["project_id"], name: "index_messages_on_project_id"
+  end
+
+  create_table "order_events", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "user_id"
+    t.string "action", null: false
+    t.text "message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_order_events_on_order_id"
+    t.index ["shop_id"], name: "index_order_events_on_shop_id"
+    t.index ["user_id"], name: "index_order_events_on_user_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.integer "number", null: false
+    t.string "token", null: false
+    t.string "status", default: "pending", null: false
+    t.bigint "customer_id"
+    t.bigint "cart_id"
+    t.bigint "discount_id"
+    t.string "email", null: false
+    t.string "phone"
+    t.string "shipping_name", null: false
+    t.string "shipping_address1", null: false
+    t.string "shipping_address2"
+    t.string "shipping_city", null: false
+    t.string "shipping_region"
+    t.string "shipping_postal_code"
+    t.string "shipping_country", null: false
+    t.text "note"
+    t.text "staff_note"
+    t.string "currency", null: false
+    t.integer "subtotal_cents", default: 0, null: false
+    t.integer "discount_cents", default: 0, null: false
+    t.string "discount_code"
+    t.integer "shipping_cents", default: 0, null: false
+    t.integer "tax_cents", default: 0, null: false
+    t.integer "total_cents", default: 0, null: false
+    t.integer "refunded_cents", default: 0, null: false
+    t.string "payment_method", default: "manual", null: false
+    t.string "payment_reference"
+    t.string "stripe_checkout_session_id"
+    t.string "carrier"
+    t.string "tracking_number"
+    t.string "tracking_url"
+    t.string "printify_order_id"
+    t.text "fulfillment_error"
+    t.integer "fulfillment_cost_cents"
+    t.jsonb "attribution"
+    t.datetime "paid_at"
+    t.datetime "shipped_at"
+    t.datetime "delivered_at"
+    t.datetime "cancelled_at"
+    t.datetime "refunded_at"
+    t.datetime "restocked_at"
+    t.datetime "recovery_sent_at"
+    t.datetime "purchase_reported_at"
+    t.datetime "review_requested_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cart_id"], name: "index_orders_on_cart_id"
+    t.index ["customer_id"], name: "index_orders_on_customer_id"
+    t.index ["discount_id"], name: "index_orders_on_discount_id"
+    t.index ["shop_id", "email"], name: "index_orders_on_shop_id_and_email"
+    t.index ["shop_id", "number"], name: "index_orders_on_shop_id_and_number", unique: true
+    t.index ["shop_id", "printify_order_id"], name: "index_orders_on_shop_id_and_printify_order_id"
+    t.index ["shop_id", "status", "created_at"], name: "index_orders_on_shop_id_and_status_and_created_at"
+    t.index ["shop_id"], name: "index_orders_on_shop_id"
+    t.index ["stripe_checkout_session_id"], name: "index_orders_on_stripe_checkout_session_id", unique: true
+    t.index ["token"], name: "index_orders_on_token", unique: true
+  end
+
+  create_table "product_reviews", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "product_id", null: false
+    t.bigint "order_id", null: false
+    t.integer "rating", null: false
+    t.text "body"
+    t.string "author_name", null: false
+    t.string "status", default: "published", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id", "product_id"], name: "index_product_reviews_on_order_id_and_product_id", unique: true
+    t.index ["order_id"], name: "index_product_reviews_on_order_id"
+    t.index ["product_id", "status", "created_at"], name: "index_product_reviews_on_product_id_and_status_and_created_at"
+    t.index ["product_id"], name: "index_product_reviews_on_product_id"
+    t.index ["shop_id"], name: "index_product_reviews_on_shop_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -402,9 +519,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_150000) do
   add_foreign_key "collection_products", "products"
   add_foreign_key "collection_products", "shops"
   add_foreign_key "collections", "shops"
+  add_foreign_key "customers", "shops"
   add_foreign_key "deployments", "projects"
   add_foreign_key "discounts", "shops"
+  add_foreign_key "line_items", "orders"
+  add_foreign_key "line_items", "shops"
+  add_foreign_key "line_items", "variants", on_delete: :nullify
   add_foreign_key "messages", "projects"
+  add_foreign_key "order_events", "orders"
+  add_foreign_key "order_events", "shops"
+  add_foreign_key "order_events", "users", on_delete: :nullify
+  add_foreign_key "orders", "carts", on_delete: :nullify
+  add_foreign_key "orders", "customers", on_delete: :nullify
+  add_foreign_key "orders", "discounts", on_delete: :nullify
+  add_foreign_key "orders", "shops"
+  add_foreign_key "product_reviews", "orders"
+  add_foreign_key "product_reviews", "products"
+  add_foreign_key "product_reviews", "shops"
   add_foreign_key "products", "shops"
   add_foreign_key "projects", "shops"
   add_foreign_key "projects", "users", column: "owner_id"

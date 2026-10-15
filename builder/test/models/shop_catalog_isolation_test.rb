@@ -33,4 +33,22 @@ class ShopCatalogIsolationTest < ActiveSupport::TestCase
     in_shop shops(:cats)
     assert_equal [ "USD", "cats01" ], [ Store.current.currency, Store.current.uid ]
   end
+
+  test "each shop numbers its own orders from 1001, and never sees another shop's" do
+    in_shop shops(:dogs)
+    hoodie = Product.create!(title: "Good Boy Hoodie", base_price: "40", status: "active")
+    cart = Cart.create!.tap { |each| each.add(hoodie.variants.first) }
+    order = Checkout.new(cart:, email: "pat@example.com", shipping_name: "Pat", shipping_address1: "1 Main St",
+      shipping_city: "Austin", shipping_region: "TX", shipping_postal_code: "78701", shipping_country: "US").place
+
+    assert_equal 1001, order.number
+    assert_equal [ order ], Order.all.to_a
+    assert_equal [ shops(:dogs) ], order.line_items.map(&:shop).uniq
+    assert_match "good-boy.", order.storefront_url
+
+    in_shop shops(:cats)
+    assert_not_includes Order.all, order
+    assert Order.where(number: 1001).exists?, "the cats shop has its own 1001"
+    assert_nil Order.find_by(token: order.token)
+  end
 end

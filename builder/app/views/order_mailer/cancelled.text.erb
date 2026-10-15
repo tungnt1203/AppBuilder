@@ -1,0 +1,9 @@
+<%= t(".heading", number: @order.name) %>
+
+<%= t(@order.refunded_cents.positive? ? ".intro_refunded" : ".intro", total: money(@order.refunded_cents.positive? ? @order.refunded_cents : @order.total_cents, @order.currency)) %>
+<% if @store.contact_email.present? %>
+
+<%= t(".questions", email: @store.contact_email) %>
+<% end %>
+
+<%= t(".view") %>: <%= @order.storefront_url %>

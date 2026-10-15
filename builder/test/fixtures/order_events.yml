@@ -1,0 +1,15 @@
+pending_placed:
+  shop: cats
+  order: pending
+  action: placed
+
+paid_placed:
+  shop: cats
+  order: paid
+  action: placed
+
+paid_paid:
+  shop: cats
+  order: paid
+  action: paid
+  user: owner

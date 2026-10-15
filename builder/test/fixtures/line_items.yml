@@ -1,0 +1,26 @@
+pending_tee:
+  shop: cats
+  order: pending
+  variant: tee_black_s
+  product_title: Cat Mom Tee
+  variant_title: Black / S
+  sku: TEE-BLK-S
+  unit_price_cents: 2400
+  quantity: 1
+
+paid_mug:
+  shop: cats
+  order: paid
+  variant: mug
+  product_title: Morning Mug
+  unit_price_cents: 1500
+  quantity: 1
+
+shipped_tees:
+  shop: cats
+  order: shipped
+  variant: tee_black_m
+  product_title: Cat Mom Tee
+  variant_title: Black / M
+  unit_price_cents: 2400
+  quantity: 2

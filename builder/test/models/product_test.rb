@@ -20,7 +20,6 @@ class ProductTest < ActiveSupport::TestCase
   end
 
   test "changing option values adds and removes variants and keeps the others' prices" do
-    skip "needs LineItem, moved into the platform with orders (#10, step 3b)"
     product = products(:tee)
     removed = variants(:tee_black_s).id
     product.update!(option2_values_text: "M, L")
@@ -29,6 +28,14 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal 2600, product.variants.find { |variant| variant.option_values == %w[ White M ] }.price_cents
     assert_not Variant.exists?(removed)
     assert_equal 2400, product.variants.find { |variant| variant.option_values == %w[ Black L ] }.price_cents
+  end
+
+  test "orders keep their lines when a variant goes away" do
+    products(:tee).update!(option2_values_text: "M")
+
+    line = line_items(:pending_tee).reload
+    assert_nil line.variant
+    assert_equal "Black / S", line.variant_title
   end
 
   test "options must be filled in order and have values" do

@@ -12,6 +12,7 @@ class Shop < ApplicationRecord
   has_many :api_keys, class_name: "ShopApiKey", dependent: :destroy
   has_one :project, dependent: :nullify
   has_one :store, dependent: :destroy
+  has_many :orders, dependent: :restrict_with_error
 
   normalizes :subdomain, with: ->(subdomain) { subdomain.strip.downcase }
   normalizes :name, with: ->(name) { name.squish }
@@ -35,6 +36,13 @@ class Shop < ApplicationRecord
     transaction do
       create!(**attributes).tap { |shop| shop.memberships.create!(user: owner, role: "owner") }
     end
+  end
+
+  # An address on the shop's storefront, where it's published at its subdomain.
+  def storefront_url(path = "/")
+    domain = Rails.configuration.x.publish_domain
+    scheme = domain == "localhost" ? "http" : "https"
+    "#{scheme}://#{subdomain}.#{domain}#{path}"
   end
 
   def role_of(user)

@@ -1,0 +1,10 @@
+# A line in an order's timeline: placed, paid, shipped, a note… and who did it (nil: the buyer
+# or the app itself).
+class OrderEvent < ApplicationRecord
+  acts_as_tenant :shop
+
+  belongs_to :order
+  belongs_to :user, optional: true
+
+  validates :action, presence: true
+end
