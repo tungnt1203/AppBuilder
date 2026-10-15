@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<%# /admin: the owner's admin over all their shops (orders, settings) and, for the builder's
+    administrators, the accounts. A sidebar layout of its own, in the studio's colors. %>
+<html lang="en" <%= tag.attributes(data: { theme: chosen_theme }) %>>
+  <head>
+    <title><%= [ content_for(:title), "Admin" ].compact.join(" – ") %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#0e3b43">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= turbo_refresh_method_tag :morph %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="admin-body">
+    <div class="admin-shell">
+      <aside class="admin-side" aria-label="Admin">
+        <div class="admin-brand"><%= icon :store, size: 18 %> Admin</div>
+        <% [ [ "Orders", admin_root_path, :history ], [ "Settings", admin_settings_path, :sliders ],
+             ([ "Accounts", admin_users_path, :users ] if Current.user.administrator?) ].compact.each do |label, path, icon_name| %>
+          <%= link_to path, class: "admin-link", "aria-current": (current_page?(path) ? "page" : nil) do %><%= icon icon_name, size: 17 %> <%= label %><% end %>
+        <% end %>
+        <div class="admin-side-foot">
+          <%= link_to root_path, class: "admin-link" do %><%= icon :back, size: 17 %> Apps<% end %>
+          <%= button_to session_path, method: :delete, class: "admin-link w-full", form: { class: "contents" } do %>
+            <%= icon :logout, size: 17 %> <span class="truncate">Sign out <%= Current.user.name %></span>
+          <% end %>
+        </div>
+      </aside>
+      <main class="admin-main">
+        <% if notice = flash[:notice] %><p class="admin-flash mb-4 w-fit" role="status"><%= notice %></p><% end %>
+        <%= yield %>
+      </main>
+    </div>
+  </body>
+</html>

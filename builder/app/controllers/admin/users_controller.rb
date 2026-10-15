@@ -1,6 +1,6 @@
 # Accounts, for administrators: who has one, how many apps they made, and who else
 # may manage accounts and open every app.
-class Admin::UsersController < ApplicationController
+class Admin::UsersController < Admin::BaseController
   before_action :require_administrator
   before_action :set_user, only: %i[ update destroy ]
 

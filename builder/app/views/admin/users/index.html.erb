@@ -1,20 +1,14 @@
 <% content_for :title, "Accounts" %>
 
-<div class="fixed top-4 right-4 z-30 flex items-center gap-2">
-  <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon on-glass glass capsule" %>
-  <%= render "layouts/account_menu" %>
+<div class="admin-header">
+  <div>
+    <h1 class="admin-title">Accounts</h1>
+    <p class="muted text-sm">Anyone can sign up and build their own apps. Admins can also open everyone's apps and manage accounts.</p>
+  </div>
 </div>
 
-<main class="mx-auto flex min-h-full max-w-2xl flex-col gap-6 px-4 pt-[10vh] pb-16 sm:px-6">
-  <div class="flex flex-col gap-2">
-    <%= render "admin/nav" %>
-    <h1 class="on-glass text-[2rem] leading-tight font-semibold tracking-[-0.025em]">Accounts</h1>
-    <p class="text-[0.9375rem] text-white/75">Anyone can sign up and build their own apps. Admins can also open everyone's apps and manage accounts.</p>
-  </div>
-
-  <% if notice = flash[:notice] %><p class="flash w-fit" role="status"><%= notice %></p><% end %>
-
-  <ul class="surface sheet overflow-hidden">
+<div class="max-w-3xl">
+  <ul class="admin-card admin-list overflow-hidden">
     <% @users.each do |user| %>
       <li class="account-row" id="<%= dom_id(user) %>">
         <span class="avatar" aria-hidden="true"><%= user.name.first.upcase %></span>
@@ -49,4 +43,4 @@
       </li>
     <% end %>
   </ul>
-</main>
+</div>

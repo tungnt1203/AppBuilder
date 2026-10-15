@@ -1,7 +1,7 @@
 # The owner's admin over all their shops (/admin): the last 30 days across them, what needs
 # action, and the latest orders, from each app's own summary (ShopOrders, refreshed every
 # quarter hour and with "Refresh").
-class Admin::DashboardsController < ApplicationController
+class Admin::DashboardsController < Admin::BaseController
   def show
     @projects = Current.user.projects.listed.ordered.select { |project| ShopOrders.new(project).applicable? || project.orders_summary }
     summaries = @projects.filter_map { |project| [ project, project.orders_summary ] if project.orders_summary && project.orders_summary["errors"].blank? }

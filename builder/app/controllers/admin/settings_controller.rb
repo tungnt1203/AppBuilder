@@ -1,6 +1,6 @@
 # The owner's admin over all their shops (/admin), its settings: Stripe, Printify and their ad
 # pixels, set once (BusinessSetting) and applied to every app of theirs that sells (BusinessSync).
-class Admin::SettingsController < ApplicationController
+class Admin::SettingsController < Admin::BaseController
   SECRETS = %w[ stripe_secret_key printify_token meta_access_token ].freeze
 
   def show

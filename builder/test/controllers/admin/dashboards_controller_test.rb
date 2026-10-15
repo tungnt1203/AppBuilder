@@ -18,13 +18,13 @@ class Admin::DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", /Need you\s*2/
     assert_select "a[href=?]", project_path(shop), /#1002 · Robin Buyer/
     assert_select "p", "Address is invalid"
-    assert_select "nav[aria-label=Admin] a", "Accounts" # an administrator of the builder
+    assert_select "aside[aria-label=Admin] a", "Accounts" # an administrator of the builder
   end
 
   test "a member's admin has their orders and settings, not the accounts" do
     sign_in_as users(:member)
     get admin_root_path
-    assert_select "nav[aria-label=Admin] a", text: "Accounts", count: 0
+    assert_select "aside[aria-label=Admin] a", text: "Accounts", count: 0
     get admin_users_path
     assert_response :not_found
   end

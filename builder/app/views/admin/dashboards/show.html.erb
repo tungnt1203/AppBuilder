@@ -1,51 +1,41 @@
 <% content_for :title, "Orders" %>
 
-<div class="fixed top-4 right-4 z-30 flex items-center gap-2">
-  <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon on-glass glass capsule" %>
-  <%= render "layouts/account_menu" %>
+<div class="admin-header">
+  <div>
+    <h1 class="admin-title">Orders</h1>
+    <p class="muted text-sm">All your shops, the last 30 days.</p>
+  </div>
+  <%= button_to admin_orders_refresh_path, class: "admin-button admin-button-secondary", form: { class: "contents" } do %>
+    <%= icon :reload, size: 15 %> Refresh
+  <% end %>
 </div>
 
-<main class="mx-auto flex min-h-full max-w-4xl flex-col gap-6 px-4 pt-[10vh] pb-16 sm:px-6">
-  <div class="flex flex-col gap-2">
-    <%= render "admin/nav" %>
-    <div class="flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 class="on-glass text-[2rem] leading-tight font-semibold tracking-[-0.025em]">Orders</h1>
-        <p class="text-[0.9375rem] text-white/75">All your shops, the last 30 days.</p>
-      </div>
-      <%= button_to admin_orders_refresh_path, class: "btn btn-ghost on-glass glass capsule h-9 px-4", form: { class: "contents" } do %>
-        <%= icon :reload, size: 15 %> Refresh
+<% if @projects.empty? %>
+  <p class="admin-card p-6 text-sm">You have no shops yet. Build one from the <%= link_to "Apps", root_path, class: "underline" %> page.</p>
+<% else %>
+  <% @totals.each do |currency, totals| %>
+    <ul class="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Last 30 days<%= " in #{currency}" if @totals.many? %>">
+      <% [ [ "Sales", shop_money(totals["sales_cents"], currency) ], [ "Orders", totals["orders"] ],
+           [ "You keep", (shop_money(totals["margin_cents"], currency) if totals["margin_cents"].nonzero?) || "—" ],
+           [ "Need you", totals["needs_action"] + totals["problems"] ] ].each do |label, value| %>
+        <li class="admin-card admin-stat">
+          <span class="faint text-[0.8125rem]"><%= label %></span>
+          <span class="admin-stat-value"><%= value %></span>
+        </li>
       <% end %>
-    </div>
-  </div>
+    </ul>
+  <% end %>
 
-  <% if notice = flash[:notice] %><p class="flash w-fit" role="status"><%= notice %></p><% end %>
-
-  <% if @projects.empty? %>
-    <p class="surface sheet p-6 text-sm">You have no shops yet. Build one from the <%= link_to "Apps", root_path, class: "underline" %> page.</p>
-  <% else %>
-    <% @totals.each do |currency, totals| %>
-      <ul class="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Last 30 days<%= " in #{currency}" if @totals.many? %>">
-        <% [ [ "Sales", shop_money(totals["sales_cents"], currency) ], [ "Orders", totals["orders"] ],
-             [ "You keep", (shop_money(totals["margin_cents"], currency) if totals["margin_cents"].nonzero?) || "—" ],
-             [ "Need you", totals["needs_action"] + totals["problems"] ] ].each do |label, value| %>
-          <li class="surface sheet flex flex-col gap-1 p-4">
-            <span class="faint text-[0.8125rem]"><%= label %></span>
-            <span class="text-xl font-semibold"><%= value %></span>
-          </li>
-        <% end %>
-      </ul>
-    <% end %>
-
-    <section class="flex flex-col gap-3" aria-labelledby="latest_heading">
-      <h2 id="latest_heading" class="on-glass text-lg font-semibold">Latest orders</h2>
+  <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
+    <section aria-labelledby="latest_heading">
+      <h2 id="latest_heading" class="admin-section-title">Latest orders</h2>
       <% if @orders.any? %>
-        <ul class="surface sheet divide-y divide-[var(--line)] overflow-hidden">
+        <ul class="admin-card admin-list overflow-hidden">
           <% @orders.each do |order| %>
             <% project = order["project"] %>
             <% url = ShopOrders.order_url(project, order["token"]) || project_path(project) %>
             <li>
-              <%= link_to url, class: "flex items-center gap-3 px-5 py-3 hover:bg-[var(--well)]", target: (url.start_with?("http") ? "_blank" : nil) do %>
+              <%= link_to url, class: "admin-row", target: (url.start_with?("http") ? "_blank" : nil) do %>
                 <div class="min-w-0 flex-1">
                   <p class="truncate text-sm font-semibold">#<%= order["number"] %> · <%= order["name"] %></p>
                   <p class="faint truncate text-[0.8125rem]">
@@ -55,24 +45,24 @@
                   <% if order["problem"] %><p class="truncate text-[0.8125rem] text-[var(--danger)]"><%= order["problem"] %></p><% end %>
                 </div>
                 <span class="faint hidden text-[0.8125rem] sm:block"><%= order["status"].humanize %></span>
-                <span class="w-24 text-right text-sm font-medium"><%= shop_money(order["total_cents"], order["currency"]) %></span>
+                <span class="w-24 text-right text-sm font-medium tabular-nums"><%= shop_money(order["total_cents"], order["currency"]) %></span>
               <% end %>
             </li>
           <% end %>
         </ul>
       <% else %>
-        <p class="surface sheet p-6 text-sm">No orders yet. They show here as soon as someone buys from one of your shops.</p>
+        <p class="admin-card p-6 text-sm muted">No orders yet. They show here as soon as someone buys from one of your shops.</p>
       <% end %>
     </section>
 
-    <section class="flex flex-col gap-3" aria-labelledby="shops_heading">
-      <h2 id="shops_heading" class="on-glass text-lg font-semibold">Your shops</h2>
-      <ul class="surface sheet divide-y divide-[var(--line)] overflow-hidden">
+    <section aria-labelledby="shops_heading">
+      <h2 id="shops_heading" class="admin-section-title">Your shops</h2>
+      <ul class="admin-card admin-list overflow-hidden">
         <% @projects.each do |project| %>
           <% summary = project.orders_summary || {} %>
-          <li class="flex items-center justify-between gap-3 px-5 py-3">
-            <div class="min-w-0">
-              <%= link_to project.name, project_path(project), class: "truncate font-semibold" %>
+          <li class="admin-row">
+            <div class="min-w-0 flex-1">
+              <%= link_to project.name, project_path(project), class: "block truncate text-sm font-semibold" %>
               <p class="faint truncate text-[0.8125rem]">
                 <% if summary["errors"].present? %>
                   <span class="text-[var(--danger)]"><%= summary["errors"].first %></span>
@@ -84,13 +74,13 @@
                   Not checked yet
                 <% end %>
               </p>
+              <p class="faint text-[0.75rem]">
+                <%= project.orders_summary_source == "live" ? "Published" : "Preview" %><%= " · #{time_ago_in_words(project.orders_summary_at)} ago" if project.orders_summary_at %>
+              </p>
             </div>
-            <span class="faint shrink-0 text-[0.8125rem]">
-              <%= project.orders_summary_source == "live" ? "Published" : "Preview" %><%= " · #{time_ago_in_words(project.orders_summary_at)} ago" if project.orders_summary_at %>
-            </span>
           </li>
         <% end %>
       </ul>
     </section>
-  <% end %>
-</main>
+  </div>
+<% end %>

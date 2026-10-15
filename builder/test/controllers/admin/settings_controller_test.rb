@@ -55,6 +55,6 @@ class Admin::SettingsControllerTest < ActionDispatch::IntegrationTest
   test "a wrong key is refused" do
     patch admin_settings_path, params: { business_setting: { stripe_secret_key: "pk_live_nope" } }
     assert_response :unprocessable_entity
-    assert_select ".alert", /should start with sk_live_ or sk_test_/
+    assert_select ".admin-alert", /should start with sk_live_ or sk_test_/
   end
 end
