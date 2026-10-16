@@ -13,6 +13,7 @@ class Publisher
     @deployment.deploying!
     run_steps(deploy_steps)
     @deployment.live!
+    apply_theme_settings
     announce_first_publish if first
   rescue ProjectShell::Error => error
     @deployment.append_log(error.message)
@@ -34,6 +35,18 @@ class Publisher
   end
 
   private
+    # The live version's config/theme_settings.yml becomes its shop's theme settings schema. A
+    # broken file is logged and leaves the shop's settings as they were; the app is live either way.
+    def apply_theme_settings
+      file = @project.path.join("config/theme_settings.yml")
+      return unless @project.shop && file.exist?
+
+      definitions = YAML.safe_load(file.read) || []
+      ActsAsTenant.with_tenant(@project.shop) { ThemeSetting.apply_schema!(definitions, version: @deployment.commit_sha) }
+    rescue Psych::Exception, ActiveRecord::ActiveRecordError => error
+      @deployment.append_log("Theme settings not applied: #{error.message}\n")
+    end
+
     # The published app starts with no accounts; tell the owner where to create theirs.
     def announce_first_publish
       @project.messages.create!(role: :notice, body: "Published at #{@project.publish_url}. " \

@@ -10,12 +10,16 @@ class Cart < ApplicationRecord
 
   scope :abandoned, -> { where(updated_at: ...30.days.ago) }
 
-  # Adds up to what's in stock: a line never asks for more than the variant has. The same variant
-  # with different text the buyer typed (properties) is its own line.
+  # Adds up to what's in stock: the cart never asks for more of a variant than it has, across
+  # all its lines. The same variant with different text the buyer typed (properties) is its own line.
   def add(variant, quantity = 1, properties: {})
     properties = properties.to_h.stringify_keys.sort.to_h
-    item = items.find_or_initialize_by(variant:, properties:)
-    item.quantity = ((item.new_record? ? 0 : item.quantity) + quantity.to_i).clamp(1, [ MAX_QUANTITY, variant.purchasable_quantity ].min)
+    item = items.find_by(variant:, properties:)
+    limit = quantity_limit(item, variant)
+    return item if limit < 1 # an unsaved line here would be saved with the cart later
+
+    item ||= items.build(variant:, properties:, quantity: 0)
+    item.quantity = (item.quantity + quantity.to_i).clamp(1, limit)
     item.save!
     touch
     item
@@ -28,7 +32,7 @@ class Cart < ApplicationRecord
 
   # Sets a line's quantity, within what's in stock; zero removes it.
   def update_quantity(item, quantity)
-    quantity = quantity.to_i.clamp(0, [ MAX_QUANTITY, item.variant.purchasable_quantity ].min)
+    quantity = quantity.to_i.clamp(0, [ quantity_limit(item, item.variant), 0 ].max)
     quantity.positive? ? item.update!(quantity:) : item.destroy!
     touch
   end
@@ -62,4 +66,11 @@ class Cart < ApplicationRecord
   def empty?
     buyable_items.empty?
   end
+
+  private
+    # The most this line can hold: what's in stock less what the variant's other lines take.
+    def quantity_limit(item, variant)
+      others = items.where(variant:).where.not(id: item&.id).sum(:quantity)
+      [ MAX_QUANTITY, variant.purchasable_quantity - others ].min
+    end
 end

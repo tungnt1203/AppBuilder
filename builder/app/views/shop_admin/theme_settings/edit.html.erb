@@ -5,7 +5,7 @@
 <% if @theme_setting.schema.blank? %>
   <%= empty_state t(".empty_title"), t(".empty_description") %>
 <% else %>
-  <%= form_with url: shop_admin_theme_setting_path, method: :patch, scope: :theme_setting, class: "max-w-2xl space-y-6" do |form| %>
+  <%= form_with url: shop_admin_theme_setting_path, method: :patch, scope: :theme_setting, multipart: true, class: "max-w-2xl space-y-6" do |form| %>
     <%= @theme_setting.errors.full_messages.to_sentence if @theme_setting.errors.any? %>
     <%= card class: "space-y-4" do %>
       <% @theme_setting.schema.each do |field| %>

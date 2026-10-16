@@ -36,4 +36,26 @@ class PublisherTest < ActiveSupport::TestCase
     assert deployment.reload.live?
     assert_match "http://nha-khoa.localhost/session/new", @project.messages.last.body
   end
+
+  test "a live publish applies the storefront's theme settings to its shop" do
+    with_projects_root do
+      project = projects(:shop)
+      project.update!(shop: shops(:cats))
+      project.path.join("config").mkpath
+      project.path.join("config/theme_settings.yml").write("- key: hero_title\n  type: text\n  default: Cats\n")
+      deployment = project.deployments.create!
+      publisher = Publisher.new(deployment, once: "once")
+      def publisher.run_steps(*) = nil
+
+      shell = Object.new
+      def shell.run(*) = "abc1234\n"
+      project.define_singleton_method(:shell) { shell }
+
+      publisher.publish
+
+      setting = ActsAsTenant.with_tenant(shops(:cats)) { ThemeSetting.current }
+      assert_equal "Cats", setting.resolved["hero_title"]
+      assert_equal "abc1234", setting.schema_version
+    end
+  end
 end

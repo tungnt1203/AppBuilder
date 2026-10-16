@@ -68,7 +68,7 @@ Rails.application.routes.draw do
     resource :policies, only: %i[ edit update ], path: "settings/policies"
     resource :theme_setting, only: %i[ edit update ], path: "settings/theme"
     resource :custom_fields, only: %i[ edit update ], path: "settings/fields"
-    resources :pages
+    resources :pages, except: :show
     resources :menus, except: :show
     resources :forms, except: :show do
       resources :submissions, only: :show, module: :forms

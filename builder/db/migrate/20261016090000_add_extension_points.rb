@@ -64,7 +64,7 @@ class AddExtensionPoints < ActiveRecord::Migration[8.1]
     end
 
     add_column :cart_items, :properties, :jsonb, null: false, default: {}
-    remove_index :cart_items, name: "index_cart_items_on_cart_id_and_variant_id"
+    remove_index :cart_items, [ :cart_id, :variant_id ], unique: true, name: "index_cart_items_on_cart_id_and_variant_id"
     add_index :cart_items, [ :cart_id, :variant_id, :properties ], unique: true, name: "index_cart_items_on_cart_id_and_variant_id_and_properties"
 
     add_column :line_items, :properties, :jsonb, null: false, default: {}
