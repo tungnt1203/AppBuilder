@@ -1,0 +1,26 @@
+<%= form_with model: [ :shop_admin, page ], class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <%= form.field :title, required: true, autofocus: page.new_record? %>
+    <%= form.field :body, :text_area, rows: 8 %>
+    <%= form.field :slug, hint: (t(".slug_hint") if page.new_record?) %>
+    <label class="flex items-center gap-2 text-sm">
+      <%= form.check_box :published %>
+      <%= t(".published") %>
+    </label>
+  <% end %>
+
+  <%= card class: "space-y-4" do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".questions") %></h2>
+    <p class="text-sm text-muted"><%= t(".questions_hint") %></p>
+    <% rows = page.faqs + Array.new([ 3, 8 - page.faqs.size ].min.clamp(0, 3)) { {} } %>
+    <% rows.each do |row| %>
+      <div class="grid gap-3">
+        <%= text_field_tag "page[faqs][][question]", row["question"], placeholder: t(".question"), aria: { label: t(".question") }, class: field_classes %>
+        <%= text_area_tag "page[faqs][][answer]", row["answer"], rows: 2, placeholder: t(".answer"), aria: { label: t(".answer") }, class: field_classes %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= form.submit page.new_record? ? t(".create") : t(".save") %>
+<% end %>

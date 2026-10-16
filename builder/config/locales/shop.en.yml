@@ -94,6 +94,16 @@ en:
         starts_at: Starts
         ends_at: Ends
         variant_ids: Products
+      page:
+        title: Title
+        body: Text
+        slug: Web address
+      menu:
+        title: Title
+        key: Key
+      form:
+        title: Title
+        key: Key
       product_review:
         rating: Rating
         body: Review
@@ -105,8 +115,24 @@ en:
             base:
               options_in_order: Fill in the options in order, starting with option 1
               too_many_variants: These options make more than %{count} variants; use fewer values
+              custom_field_number: "%{label} must be a whole number"
+              custom_field_long: "%{label} is too long"
             images:
               not_an_image: "%{name} isn't an image"
+        page:
+          attributes:
+            base:
+              empty: Add some text or a question
+        menu:
+          attributes:
+            base:
+              empty: Add a link
+              blank_item: Each link needs a label and an address
+              bad_url: "%{url} needs to be a path like /pages/about or a full https address"
+        form:
+          attributes:
+            base:
+              empty: Add a field
         variant:
           attributes:
             base:
@@ -149,6 +175,7 @@ en:
                 other: Only %{count} of %{product} are left; change the quantity in your cart
                 zero: "%{product} just sold out; remove it from your cart"
               discount_used_up: That discount code was just used up; remove it from your cart
+              buyer_inputs: Check what you typed for %{product}
             shipping_country:
               not_shipped_to: isn't a country we ship to
             shipping_region:
@@ -214,6 +241,10 @@ en:
         subject: New order %{number} (%{total})
         intro: New order %{number} from %{name} (%{email}).
         open: Open the order
+    form_mailer:
+      submission:
+        subject: New message — %{title}
+        intro: Someone sent a message through %{title}.
     stripe_connections:
       wrong_key: That doesn't look like a Stripe secret key. It starts with sk_live_, sk_test_, rk_live_ or rk_test_.
       wrong_publishable_key: "The publishable key should start with pk_live_ or pk_test_, in the same mode as the secret key"

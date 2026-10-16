@@ -1,0 +1,21 @@
+<%= form_with model: [ :shop_admin, menu ], class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <%= form.field :title, required: true, autofocus: menu.new_record? %>
+    <%= form.field :key, hint: t(".key_hint") %>
+  <% end %>
+
+  <%= card class: "space-y-4" do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".links") %></h2>
+    <p class="text-sm text-muted"><%= t(".links_hint") %></p>
+    <% rows = menu.items + Array.new([ 3, 12 - menu.items.size ].min.clamp(0, 3)) { {} } %>
+    <% rows.each do |row| %>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <%= text_field_tag "menu[items][][label]", row["label"], placeholder: t(".label"), aria: { label: t(".label") }, class: field_classes %>
+        <%= text_field_tag "menu[items][][url]", row["url"], placeholder: "/pages/about", aria: { label: t(".url") }, class: field_classes %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= form.submit menu.new_record? ? t(".create") : t(".save") %>
+<% end %>

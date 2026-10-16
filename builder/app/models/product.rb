@@ -39,6 +39,8 @@ class Product < ApplicationRecord
     normalizes :"option#{slot}_values", with: ->(values) { Array(values).map { |value| value.to_s.squish }.compact_blank.uniq }
   end
 
+  before_validation :clean_buyer_inputs
+  before_validation :coerce_custom_fields
   before_save :stamp_published_at
   after_save :sync_variants
 
@@ -141,6 +143,20 @@ class Product < ApplicationRecord
     option_names.find { |name| name.match?(/\bsize\b/i) }
   end
 
+  # What the buyer typed, checked against this product's buyer inputs.
+  # [properties, nil] or [nil, { "print_name" => "can't be blank" }].
+  def buyer_properties(raw)
+    BuyerInputs.accept(buyer_inputs, raw)
+  end
+
+  def custom_field_entries
+    CustomFieldDefinition.ordered.filter_map do |definition|
+      next unless custom_fields.key?(definition.key)
+
+      { key: definition.key, label: definition.label, type: definition.field_type, value: custom_fields[definition.key] }
+    end
+  end
+
   private
     # The variant's color as file-name words ("Forest Green" => ["forest", "green"]), when the
     # product has a color option.
@@ -151,6 +167,26 @@ class Product < ApplicationRecord
 
     def stamp_published_at
       self.published_at ||= Time.current if active?
+    end
+
+    def clean_buyer_inputs
+      self.buyer_inputs = BuyerInputs.definitions(buyer_inputs)
+    end
+
+    def coerce_custom_fields
+      definitions = CustomFieldDefinition.all.index_by(&:key)
+      coerced = {}
+      custom_fields.each do |key, value|
+        definition = definitions[key] or next
+        cast = definition.cast(value)
+        if definition.field_type == "number" && value.present? && !cast.is_a?(Integer)
+          errors.add(:base, :custom_field_number, label: definition.label)
+        elsif definition.field_type == "text" && value.to_s.length > 500
+          errors.add(:base, :custom_field_long, label: definition.label)
+        end
+        coerced[key] = cast unless cast.nil?
+      end
+      self.custom_fields = coerced
     end
 
     def options_are_consistent

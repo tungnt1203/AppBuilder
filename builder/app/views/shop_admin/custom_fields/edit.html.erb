@@ -1,0 +1,19 @@
+<%= page_header t(".title"), t(".description") %>
+
+<%= render "shop_admin/settings/tabs" %>
+
+<%= form_with url: shop_admin_custom_fields_path, method: :patch, scope: :custom_fields, class: "max-w-3xl space-y-6" do %>
+  <%= card class: "space-y-4" do %>
+    <p class="text-sm text-muted"><%= t(".hint") %></p>
+    <% rows = @definitions.map { |definition| { "id" => definition.id, "key" => definition.key, "label" => definition.label, "field_type" => definition.field_type } } %>
+    <% (rows + Array.new(3) { {} }).each_with_index do |row, index| %>
+      <div class="grid gap-3 sm:grid-cols-[1fr_10rem_8rem]">
+        <%= hidden_field_tag "custom_fields[definitions][][id]", row["id"] %>
+        <%= text_field_tag "custom_fields[definitions][][label]", row["label"], placeholder: t(".label"), aria: { label: t(".label") }, class: field_classes %>
+        <%= text_field_tag "custom_fields[definitions][][key]", row["key"], placeholder: t(".key"), aria: { label: t(".key") }, class: field_classes %>
+        <%= select_tag "custom_fields[definitions][][field_type]", options_for_select(CustomFieldDefinition::TYPES.map { |type| [ t(".types.#{type}"), type ] }, row["field_type"].presence || "text"), aria: { label: t(".type") }, class: field_classes %>
+      </div>
+    <% end %>
+  <% end %>
+  <%= submit_tag t(".save"), class: button_classes %>
+<% end %>

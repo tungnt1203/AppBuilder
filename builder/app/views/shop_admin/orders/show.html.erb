@@ -63,6 +63,9 @@
             <div class="min-w-0 flex-1 text-sm">
               <p class="font-medium text-ink"><%= item.product_title %></p>
               <p class="text-muted"><%= [ item.variant_title, (t(".sku", sku: item.sku) if item.sku) ].compact.join(" · ") %></p>
+              <% item.property_lines.each do |line| %>
+                <p class="text-ink"><%= line %></p>
+              <% end %>
               <p class="text-muted sm:hidden"><%= money(item.unit_price_cents, @order.currency) %> × <%= item.quantity %></p>
             </div>
             <p class="hidden text-sm text-muted whitespace-nowrap sm:block"><%= money(item.unit_price_cents, @order.currency) %> × <%= item.quantity %></p>

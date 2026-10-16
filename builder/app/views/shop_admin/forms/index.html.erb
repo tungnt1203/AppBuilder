@@ -1,0 +1,25 @@
+<%= page_header t(".title"), t(".description") do %>
+  <%= link_to t(".new"), new_shop_admin_form_path, class: button_classes %>
+<% end %>
+
+<% if @forms.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @forms.each do |shop_form| %>
+        <li>
+          <%= link_to edit_shop_admin_form_path(shop_form), class: "flex items-center justify-between gap-4 px-6 py-3 hover:bg-surface-muted" do %>
+            <span class="min-w-0">
+              <span class="block truncate text-sm font-medium text-ink"><%= shop_form.title %></span>
+              <span class="block font-mono text-xs text-muted"><%= shop_form.key %></span>
+            </span>
+            <span class="text-sm text-muted"><%= t(".messages", count: shop_form.submissions_count.to_i) %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") do %>
+    <%= link_to t(".new"), new_shop_admin_form_path, class: button_classes %>
+  <% end %>
+<% end %>

@@ -19,7 +19,8 @@ class StorefrontApi::Json
       payment_instructions: @store.payment_instructions.presence,
       pixels: { meta: @store.meta_pixel_id, tiktok: @store.tiktok_pixel_id, google: @store.google_tag_id },
       policies: @store.published_policies.map { |id| { id:, title: I18n.t("policies.titles.#{id}") } },
-      contact: { email: @store.contact_email.presence, phone: @store.contact_phone.presence, address: @store.business_address.presence }
+      contact: { email: @store.contact_email.presence, phone: @store.contact_phone.presence, address: @store.business_address.presence },
+      theme_settings: theme_settings
     }
   end
 
@@ -45,7 +46,9 @@ class StorefrontApi::Json
       },
       variants: product.variants.map { |variant| variant(variant, product) },
       images: product.images.select(&:representable?).map { |photo| image(photo, alt: product.title).merge(option_value: product.photo_option(photo)) },
-      collections: product.collections.map { |collection| { slug: collection.slug, title: collection.title } }
+      collections: product.collections.map { |collection| { slug: collection.slug, title: collection.title } },
+      custom_fields: product.custom_field_entries,
+      buyer_inputs: product.buyer_inputs
     )
   end
 
@@ -78,7 +81,7 @@ class StorefrontApi::Json
     product = item.product
     { id: item.id, quantity: item.quantity, line_total_cents: item.total_cents,
       product: { slug: product.slug, title: product.title, image: image(product.image_for(item.variant), alt: product.title) },
-      variant: variant(item.variant, product) }
+      variant: variant(item.variant, product) }.tap { |line| line[:properties] = property_entries(item) if item.properties.present? }
   end
 
   # What a checkout comes to before it's placed: shipping is only known once the address is
@@ -100,9 +103,11 @@ class StorefrontApi::Json
       delivered_at: order.delivered_at&.iso8601, cancelled_at: order.cancelled_at&.iso8601, refunded_at: order.refunded_at&.iso8601,
       email: order.email, currency: order.currency,
       items: order.line_items.map { |item|
-        { title: item.product_title, variant_title: item.variant_title, quantity: item.quantity,
+        line = { title: item.product_title, variant_title: item.variant_title, quantity: item.quantity,
           unit_price_cents: item.unit_price_cents, line_total_cents: item.unit_price_cents * item.quantity,
           product_slug: item.variant&.product&.slug, image: (image(item.variant.product.image_for(item.variant), alt: item.product_title) if item.variant) }
+        line[:properties] = property_entries(item) if item.properties.present?
+        line
       },
       subtotal_cents: order.subtotal_cents, discount_cents: order.discount_cents, discount_code: order.discount_code,
       shipping_cents: order.shipping_cents, tax_cents: order.tax_cents, total_cents: order.total_cents, refunded_cents: order.refunded_cents,
@@ -127,7 +132,28 @@ class StorefrontApi::Json
     { id:, title: I18n.t("policies.titles.#{id}"), body: @store.policy(id) }
   end
 
+  def page(page)
+    { slug: page.slug, title: page.title, blocks: page.blocks }
+  end
+
+  def menu(menu)
+    { key: menu.key, title: menu.title, items: menu.items.map { |item| { label: item["label"], url: item["url"] } } }
+  end
+
   private
+    def theme_settings
+      setting = ThemeSetting.first
+      return {} unless setting
+
+      setting.resolved(image_url: ->(attachment) { url_helpers.rails_blob_url(attachment, **@url_options) })
+    end
+
+    def property_entries(record)
+      return if record.properties.blank?
+
+      labels = record.product&.buyer_inputs.to_a.to_h { |field| [ field["key"], field["label"] ] }
+      record.properties.map { |key, value| { key:, label: labels[key] || key, value: } }
+    end
     # { id, alt, thumb, card, large } for a photo, nil without one.
     def image(attachment, alt:)
       return unless attachment&.representable?

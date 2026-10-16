@@ -1,0 +1,4 @@
+<p><%= t(".intro", title: @submission.form.title) %></p>
+<% @submission.lines.each do |line| %>
+  <p><%= line %></p>
+<% end %>

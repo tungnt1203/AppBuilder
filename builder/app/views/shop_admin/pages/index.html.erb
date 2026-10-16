@@ -1,0 +1,22 @@
+<%= page_header t(".title"), t(".description") do %>
+  <%= link_to t(".new"), new_shop_admin_page_path, class: button_classes %>
+<% end %>
+
+<% if @pages.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @pages.each do |page| %>
+        <li>
+          <%= link_to edit_shop_admin_page_path(page), class: "flex items-center gap-4 px-6 py-3 hover:bg-surface-muted" do %>
+            <span class="min-w-0 flex-1 truncate text-sm font-medium text-ink"><%= page.title %></span>
+            <%= page.published? ? badge(t(".published"), tone: :green) : badge(t(".draft")) %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") do %>
+    <%= link_to t(".new"), new_shop_admin_page_path, class: button_classes %>
+  <% end %>
+<% end %>

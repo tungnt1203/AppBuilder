@@ -40,17 +40,19 @@ What a shop's storefront calls to show the shop and take its orders. It runs on 
 
 | Method and path | What it does |
 |---|---|
-| `GET /v1/shop` | The shop: name, currency, announcement, shipping, payment methods, pixels, policies, contact |
+| `GET /v1/shop` | The shop: name, currency, announcement, shipping, payment methods, pixels, policies, contact, theme settings |
 | `GET /v1/products` | Products on sale. Query: `q`, `collection` (slug), `sort` (`newest`, `title`, `price_asc`, `price_desc`), `page`, `per_page` (max 100) |
-| `GET /v1/products/:slug` | One product: options (with colors), variants, photos, size guide, collections, rating |
+| `GET /v1/products/:slug` | One product: options (with colors), variants, photos, size guide, collections, rating, custom fields, buyer inputs |
 | `GET /v1/products/:slug/reviews` | Its published reviews, newest first, 10 a page |
 | `GET /v1/collections` | Collections in the shop's order, with how many products on sale each has |
 | `GET /v1/collections/:slug` | One collection. Its products: `/v1/products?collection=:slug` |
 | `GET /v1/policies/:id` | `refund`, `shipping`, `privacy` or `terms`, when the shop wrote it |
+| `GET /v1/pages/:slug` | A published page: text and questions |
+| `GET /v1/menus/:key` | A menu, such as `header`: its links |
 | `GET /v1/zip_codes/:zip` | A US ZIP code's city and state, to fill in checkout |
 | `POST /v1/carts` | A new cart. Keep its `token` in the buyer's session |
 | `GET /v1/carts/:token` | The cart |
-| `POST /v1/carts/:token/items` | Add `{ variant_id, quantity }` |
+| `POST /v1/carts/:token/items` | Add `{ variant_id, quantity, properties }`. `properties` is what the buyer typed for the product's buyer inputs (`{ "print_name": "Ada" }`). The same variant with different properties is its own line |
 | `PATCH /v1/carts/:token/items/:id` | Set a line's `{ quantity }` (0 takes it out) |
 | `DELETE /v1/carts/:token/items/:id` | Take a line out |
 | `POST /v1/carts/:token/discount` | Apply `{ code }` |
@@ -60,11 +62,9 @@ What a shop's storefront calls to show the shop and take its orders. It runs on 
 | `GET /v1/orders/:token` | The buyer's order. A card order not paid yet is checked with Stripe first |
 | `POST /v1/orders/:token/payment` | The card payment for the Payment Element (Idempotency-Key) |
 | `POST /v1/orders/:token/reviews` | Review what was bought, once it's on its way |
+| `POST /v1/forms/:key/submissions` | Send a form (`{ answers }`). Idempotency-Key, same as placing an order. The shop is emailed |
 
 Every change to a cart answers with the whole cart.
-
-Coming with Platform v1 (4/10): theme settings in `/v1/shop`, product custom fields and buyer
-inputs, `GET /v1/pages/:slug`, `GET /v1/menus/:key`, `POST /v1/forms/:key/submissions`.
 
 ## Shapes
 
@@ -89,6 +89,18 @@ inputs, `GET /v1/pages/:slug`, `GET /v1/menus/:key`, `POST /v1/forms/:key/submis
   - `image_id` is the photo that shows that variant.
 - `images`: photos, each with `option_value`, the option value it shows.
 - `collections`: `[{ "slug", "title" }]`.
+- `custom_fields`: `[{ "key", "label", "type": "text"|"number"|"boolean", "value" }]`, only the ones this product has a value for.
+- `buyer_inputs`: `[{ "key", "label", "required", "max_length" }]`. Send what the buyer typed as `properties` when adding the line.
+
+**Cart line** and **order line** include `properties` when the buyer typed something: `[{ "key", "label", "value" }]`. That text is sent to Printify with the line.
+
+**Shop** includes `theme_settings`: the storefront's declared settings, each merged with its default. An image setting is an absolute URL, or null until the owner uploads one.
+
+**Page**: `{ "slug", "title", "blocks" }`. A block is `{ "type": "text", "body" }` or `{ "type": "faq", "items": [{ "question", "answer" }] }`.
+
+**Menu**: `{ "key", "title", "items": [{ "label", "url" }] }`. `url` is a path on the storefront (`/pages/about`) or a full https address.
+
+**Form submission**: `POST /v1/forms/contact/submissions` with `{ "answers": { "email": "a@b.co", "message": "Hi" } }`. Answers `201 { "submission": { "id": 1 } }`. A field that doesn't fit is `422` with `fields`.
 
 **Cart**: `{ token, currency, items: [{ id, quantity, line_total_cents, product: { slug, title, image }, variant }], item_count, subtotal_cents, discount: { code, kind, amount_cents }, free_shipping_remaining_cents }`.
 Only lines that can still be bought are there.

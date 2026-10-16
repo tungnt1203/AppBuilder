@@ -1,0 +1,45 @@
+<%= page_header t(".title"), t(".description") %>
+
+<%= render "shop_admin/settings/tabs" %>
+
+<% if @theme_setting.schema.blank? %>
+  <%= empty_state t(".empty_title"), t(".empty_description") %>
+<% else %>
+  <%= form_with url: shop_admin_theme_setting_path, method: :patch, scope: :theme_setting, class: "max-w-2xl space-y-6" do |form| %>
+    <%= @theme_setting.errors.full_messages.to_sentence if @theme_setting.errors.any? %>
+    <%= card class: "space-y-4" do %>
+      <% @theme_setting.schema.each do |field| %>
+        <% key = field["key"] %>
+        <div class="space-y-1.5">
+          <% if field["type"] == "boolean" %>
+            <label class="flex items-center gap-2 text-sm">
+              <%= hidden_field_tag "theme_setting[values][#{key}]", "0" %>
+              <%= check_box_tag "theme_setting[values][#{key}]", "1", @theme_setting.resolved[key] == true, class: "size-4 rounded border-line accent-brand-600" %>
+              <%= field["label"] %>
+            </label>
+          <% elsif field["type"] == "image" %>
+            <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
+            <% if (attachment = @theme_setting.image_attachment(key)) %>
+              <p class="text-sm text-muted"><%= attachment.filename %></p>
+              <label class="flex items-center gap-2 text-sm text-muted">
+                <%= check_box_tag "theme_setting[remove_images][]", key, false, class: "size-4 rounded border-line accent-brand-600" %>
+                <%= t(".remove_image") %>
+              </label>
+            <% end %>
+            <%= file_field_tag "theme_setting[images][#{key}]", accept: "image/*", class: field_classes %>
+          <% elsif field["type"] == "select" %>
+            <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
+            <%= select_tag "theme_setting[values][#{key}]", options_for_select(field["options"], @theme_setting.resolved[key]), class: field_classes %>
+          <% elsif field["type"].in?(%w[ richtext ]) %>
+            <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
+            <%= text_area_tag "theme_setting[values][#{key}]", @theme_setting.resolved[key], rows: 4, class: field_classes %>
+          <% else %>
+            <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
+            <%= text_field_tag "theme_setting[values][#{key}]", @theme_setting.resolved[key], class: field_classes %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+    <%= form.submit t(".save") %>
+  <% end %>
+<% end %>

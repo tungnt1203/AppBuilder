@@ -1,0 +1,5 @@
+<%= t(".intro", title: @submission.form.title) %>
+
+<% @submission.lines.each do |line| -%>
+<%= line %>
+<% end -%>

@@ -2,6 +2,8 @@
 <%= tabs do %>
   <%= tab_to t("shop_admin.settings.edit.general"), edit_shop_admin_settings_path %>
   <%= tab_to t("shop_admin.policies.edit.title"), edit_shop_admin_policies_path %>
+  <%= tab_to t("shop_admin.theme_settings.edit.title"), edit_shop_admin_theme_setting_path %>
+  <%= tab_to t("shop_admin.custom_fields.edit.title"), edit_shop_admin_custom_fields_path %>
   <% if shop_administrator? %>
     <%= tab_to t("shop_admin.printify_connections.show.title"), shop_admin_printify_connection_path %>
     <%= tab_to t("shop_admin.api_keys.index.title"), shop_admin_api_keys_path %>

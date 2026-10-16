@@ -16,4 +16,12 @@ class LineItem < ApplicationRecord
   def product
     variant&.product
   end
+
+  # "Name on the shirt: Ada", using the product's labels while it still has them.
+  def property_lines
+    return [] if properties.blank?
+
+    labels = product&.buyer_inputs.to_a.to_h { |field| [ field["key"], field["label"] ] }
+    properties.map { |key, value| "#{labels[key] || key}: #{value}" }
+  end
 end

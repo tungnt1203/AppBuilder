@@ -1,0 +1,8 @@
+<%= page_header t(".title", title: @shop_form.title), l(@submission.created_at, format: :long),
+      breadcrumbs: [ [ t("shop_admin.forms.index.title"), shop_admin_forms_path ], [ @shop_form.title, edit_shop_admin_form_path(@shop_form) ] ] %>
+
+<%= card class: "max-w-2xl" do %>
+  <% @submission.lines.each do |line| %>
+    <p class="text-sm text-ink"><%= line %></p>
+  <% end %>
+<% end %>

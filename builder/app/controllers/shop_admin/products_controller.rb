@@ -55,7 +55,8 @@ class ShopAdmin::ProductsController < ShopAdmin::BaseController
       params.expect(product: [
         :title, :slug, :description, :size_guide, :status, :base_price,
         :option1_name, :option1_values_text, :option2_name, :option2_values_text, :option3_name, :option3_values_text,
-        collection_ids: [], photo_options: {},
+        collection_ids: [], photo_options: {}, custom_fields: {},
+        buyer_inputs: [ [ :key, :label, :max_length, :required ] ],
         variants_attributes: [ [ :id, :price, :compare_at_price, :sku, :available, :cost, :track_inventory, :inventory_quantity ] ]
       ])
     end

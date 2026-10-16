@@ -15,7 +15,10 @@ class ShopAdmin::ScreensTest < ActionDispatch::IntegrationTest
       shop_admin_collections_path(shop), new_shop_admin_collection_path(shop), edit_shop_admin_collection_path(shop, collection),
       shop_admin_discounts_path(shop), new_shop_admin_discount_path(shop), edit_shop_admin_discount_path(shop, discount),
       shop_admin_promotions_path(shop), new_shop_admin_promotion_path(shop), shop_admin_product_reviews_path(shop),
-      edit_shop_admin_settings_path(shop), edit_shop_admin_policies_path(shop), shop_admin_printify_connection_path(shop),
+      edit_shop_admin_settings_path(shop), edit_shop_admin_policies_path(shop), edit_shop_admin_theme_setting_path(shop),
+      edit_shop_admin_custom_fields_path(shop), shop_admin_pages_path(shop), new_shop_admin_page_path(shop),
+      shop_admin_menus_path(shop), new_shop_admin_menu_path(shop), shop_admin_forms_path(shop), new_shop_admin_form_path(shop),
+      shop_admin_printify_connection_path(shop),
       shop_admin_memberships_path(shop), new_shop_admin_membership_path(shop) ].each do |path|
       get path
       assert_response :success, path

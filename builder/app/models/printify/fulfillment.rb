@@ -184,7 +184,12 @@ class Printify::Fulfillment
         external_id:,
         label: @order.name,
         line_items: printify_items.map { |item|
-          { product_id: item.variant.product.printify_product_id, variant_id: item.variant.printify_variant_id, quantity: item.quantity }
+          # Printify's order for a product already in the shop has no personalization field. The
+          # line's external id is what Printify shows the printer, so the text the buyer typed rides along.
+          line = { product_id: item.variant.product.printify_product_id, variant_id: item.variant.printify_variant_id, quantity: item.quantity }
+          note = item.property_lines.join("; ")
+          line[:external_id] = note.truncate(200) if note.present?
+          line
         },
         shipping_method: @store.printify_shipping_method,
         send_shipping_notification: false, # the shop sends its own shipped email

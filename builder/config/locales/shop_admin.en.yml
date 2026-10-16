@@ -295,6 +295,14 @@ en:
           sale" to hide a variant from buyers. Tick "Track stock" for things you keep
           a count of; leave it off for made-to-order products. Cost is only for your
           margins.
+        custom_fields: Extra details
+        buyer_inputs: What the buyer types
+        buyer_inputs_hint: A line of text on the product, such as a name to print.
+          It is saved on the order and sent to Printify. Leave a row blank to skip it.
+        buyer_label: Label
+        buyer_key: Key
+        buyer_max: Max characters
+        buyer_required: Required
         status_hint: Only active products are on the site.
         base_price_hint: Every variant starts at this price; change them one by one
           after saving.
@@ -557,6 +565,128 @@ en:
       cancellations:
         create:
           notice: "%{name} has ended; prices are back."
+    theme_settings:
+      edit:
+        title: Theme
+        description: Words, colors and pictures the storefront asks you to set.
+        empty_title: No theme settings yet
+        empty_description: They show up here when the storefront is published. It declares them in config/theme_settings.yml.
+        save: Save
+        remove_image: Remove this picture
+      update:
+        notice: Theme settings saved.
+        not_declared: The storefront hasn't declared any theme settings yet.
+    custom_fields:
+      edit:
+        title: Fields
+        description: Extra details on your products, such as material or care.
+        hint: A blank row is skipped. The key is what the storefront reads; leave it empty to make one from the label. Removing a field removes its values.
+        label: Label
+        key: Key
+        type: Type
+        save: Save
+        types:
+          text: Text
+          number: Number
+          boolean: Yes or no
+      update:
+        notice: Fields saved.
+        duplicate: Two fields use the same key.
+    pages:
+      index:
+        title: Pages
+        description: About, questions, a story — pages the storefront can show.
+        new: Add page
+        published: Published
+        draft: Draft
+        empty_title: No pages yet
+        empty_description: Write a page, then the storefront can link to it.
+      new:
+        title: New page
+      edit:
+        delete: Delete
+        confirm_delete: Delete %{title}?
+      form:
+        slug_hint: Leave it empty to make one from the title.
+        published: Published, so the storefront can show it
+        questions: Questions
+        questions_hint: Optional. Each one needs a question and an answer.
+        question: Question
+        answer: Answer
+        create: Add page
+        save: Save
+      create:
+        notice: "%{title} is saved."
+      update:
+        notice: "%{title} is saved."
+      destroy:
+        notice: "%{title} is deleted."
+    menus:
+      index:
+        title: Menus
+        description: The links a storefront shows, such as a header or a footer.
+        new: Add menu
+        empty_title: No menus yet
+        empty_description: Add one, with a key the storefront asks for (header, footer).
+      new:
+        title: New menu
+      edit:
+        delete: Delete
+        confirm_delete: Delete %{title}?
+      form:
+        key_hint: header or footer. The storefront asks for this.
+        links: Links
+        links_hint: A path on the storefront (/pages/about) or a full https address.
+        label: Label
+        url: Address
+        create: Add menu
+        save: Save
+      create:
+        notice: "%{title} is saved."
+      update:
+        notice: "%{title} is saved."
+      destroy:
+        notice: "%{title} is deleted."
+    forms:
+      index:
+        title: Forms
+        description: Messages people send from the storefront, such as a contact form.
+        new: Add form
+        messages:
+          one: 1 message
+          other: "%{count} messages"
+        empty_title: No forms yet
+        empty_description: Add the fields a page will post, or they'll be filled in when the storefront is published.
+      new:
+        title: New form
+      edit:
+        delete: Delete
+        confirm_delete: Delete %{title} and its messages?
+      form:
+        key_hint: contact. The storefront posts to this.
+        fields: Fields
+        fields_hint: A blank row is skipped. The key is what the storefront sends.
+        label: Label
+        key: Key
+        type: Type
+        required: Required
+        create: Add form
+        save: Save
+        messages: Messages
+        types:
+          text: Text
+          email: Email
+          textarea: Long text
+          boolean: Yes or no
+      create:
+        notice: "%{title} is saved."
+      update:
+        notice: "%{title} is saved."
+      destroy:
+        notice: "%{title} is deleted."
+      submissions:
+        show:
+          title: "%{title}"
     base:
       only_admins: Only admins can do that.
     layout:
@@ -570,6 +700,9 @@ en:
       discounts: Discounts
       promotions: Sales
       reviews: Reviews
+      pages: Pages
+      menus: Menus
+      forms: Forms
       settings: Settings
       people: People
       view_site: View site

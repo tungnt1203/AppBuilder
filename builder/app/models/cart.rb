@@ -10,9 +10,11 @@ class Cart < ApplicationRecord
 
   scope :abandoned, -> { where(updated_at: ...30.days.ago) }
 
-  # Adds up to what's in stock: a line never asks for more than the variant has.
-  def add(variant, quantity = 1)
-    item = items.find_or_initialize_by(variant:)
+  # Adds up to what's in stock: a line never asks for more than the variant has. The same variant
+  # with different text the buyer typed (properties) is its own line.
+  def add(variant, quantity = 1, properties: {})
+    properties = properties.to_h.stringify_keys.sort.to_h
+    item = items.find_or_initialize_by(variant:, properties:)
     item.quantity = ((item.new_record? ? 0 : item.quantity) + quantity.to_i).clamp(1, [ MAX_QUANTITY, variant.purchasable_quantity ].min)
     item.save!
     touch

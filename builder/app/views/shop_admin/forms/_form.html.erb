@@ -1,0 +1,42 @@
+<%= form_with model: [ :shop_admin, shop_form ], class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-4" do %>
+    <%= form.errors %>
+    <%= form.field :title, required: true, autofocus: shop_form.new_record? %>
+    <%= form.field :key, hint: t(".key_hint") %>
+  <% end %>
+
+  <%= card class: "space-y-4" do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".fields") %></h2>
+    <p class="text-sm text-muted"><%= t(".fields_hint") %></p>
+    <% rows = shop_form.fields + Array.new([ 3, 8 - shop_form.fields.size ].min.clamp(0, 3)) { {} } %>
+    <% rows.each do |row| %>
+      <div class="grid gap-3 sm:grid-cols-[1fr_8rem_8rem_auto] sm:items-center">
+        <%= text_field_tag "form[fields][][label]", row["label"], placeholder: t(".label"), aria: { label: t(".label") }, class: field_classes %>
+        <%= text_field_tag "form[fields][][key]", row["key"], placeholder: t(".key"), aria: { label: t(".key") }, class: field_classes %>
+        <%= select_tag "form[fields][][type]", options_for_select(Form::FIELD_TYPES.map { |type| [ t(".types.#{type}"), type ] }, row["type"].presence || "text"), aria: { label: t(".type") }, class: field_classes %>
+        <label class="flex items-center gap-2 text-sm">
+          <%= check_box_tag "form[fields][][required]", "1", row["required"] == true, class: "size-4 rounded border-line accent-brand-600" %>
+          <%= t(".required") %>
+        </label>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= form.submit shop_form.new_record? ? t(".create") : t(".save") %>
+<% end %>
+
+<% if submissions.any? %>
+  <%= card padded: false, class: "mt-6 max-w-2xl" do %>
+    <h2 class="px-6 pt-6 text-sm font-semibold text-ink"><%= t(".messages") %></h2>
+    <ul class="mt-2 divide-y divide-line">
+      <% submissions.each do |submission| %>
+        <li>
+          <%= link_to shop_admin_form_submission_path(shop_form, submission), class: "block px-6 py-3 hover:bg-surface-muted" do %>
+            <span class="block text-sm text-ink"><%= submission.lines.first %></span>
+            <span class="block text-xs text-muted"><%= l(submission.created_at, format: :long) %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

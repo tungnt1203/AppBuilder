@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -87,7 +87,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
     t.integer "quantity", default: 1, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["cart_id", "variant_id"], name: "index_cart_items_on_cart_id_and_variant_id", unique: true
+    t.jsonb "properties", default: {}, null: false
+    t.index ["cart_id", "variant_id", "properties"], name: "index_cart_items_on_cart_id_and_variant_id_and_properties", unique: true
     t.index ["cart_id"], name: "index_cart_items_on_cart_id"
     t.index ["shop_id"], name: "index_cart_items_on_shop_id"
     t.index ["variant_id"], name: "index_cart_items_on_variant_id"
@@ -128,6 +129,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
     t.datetime "updated_at", null: false
     t.index ["shop_id", "slug"], name: "index_collections_on_shop_id_and_slug", unique: true
     t.index ["shop_id"], name: "index_collections_on_shop_id"
+  end
+
+  create_table "custom_field_definitions", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "key", null: false
+    t.string "label", null: false
+    t.string "field_type", default: "text", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "key"], name: "index_custom_field_definitions_on_shop_id_and_key", unique: true
+    t.index ["shop_id"], name: "index_custom_field_definitions_on_shop_id"
   end
 
   create_table "customers", force: :cascade do |t|
@@ -172,6 +185,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
     t.index ["shop_id"], name: "index_discounts_on_shop_id"
   end
 
+  create_table "form_submissions", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "form_id", null: false
+    t.jsonb "answers", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["form_id", "created_at"], name: "index_form_submissions_on_form_id_and_created_at"
+    t.index ["form_id"], name: "index_form_submissions_on_form_id"
+    t.index ["shop_id"], name: "index_form_submissions_on_shop_id"
+  end
+
+  create_table "forms", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "key", null: false
+    t.string "title", null: false
+    t.jsonb "fields", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "key"], name: "index_forms_on_shop_id_and_key", unique: true
+    t.index ["shop_id"], name: "index_forms_on_shop_id"
+  end
+
   create_table "line_items", force: :cascade do |t|
     t.bigint "shop_id", null: false
     t.bigint "order_id", null: false
@@ -183,9 +218,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
     t.integer "quantity", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "properties", default: {}, null: false
     t.index ["order_id"], name: "index_line_items_on_order_id"
     t.index ["shop_id"], name: "index_line_items_on_shop_id"
     t.index ["variant_id"], name: "index_line_items_on_variant_id"
+  end
+
+  create_table "menus", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "key", null: false
+    t.string "title", null: false
+    t.jsonb "items", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "key"], name: "index_menus_on_shop_id_and_key", unique: true
+    t.index ["shop_id"], name: "index_menus_on_shop_id"
   end
 
   create_table "messages", force: :cascade do |t|
@@ -273,6 +320,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
     t.index ["token"], name: "index_orders_on_token", unique: true
   end
 
+  create_table "pages", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "title", null: false
+    t.string "slug", null: false
+    t.text "body"
+    t.jsonb "faqs", default: [], null: false
+    t.boolean "published", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "slug"], name: "index_pages_on_shop_id_and_slug", unique: true
+    t.index ["shop_id"], name: "index_pages_on_shop_id"
+  end
+
   create_table "product_reviews", force: :cascade do |t|
     t.bigint "shop_id", null: false
     t.bigint "product_id", null: false
@@ -310,6 +370,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
     t.datetime "published_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "custom_fields", default: {}, null: false
+    t.jsonb "buyer_inputs", default: [], null: false
     t.index ["shop_id", "printify_product_id"], name: "index_products_on_shop_id_and_printify_product_id", unique: true, where: "(printify_product_id IS NOT NULL)"
     t.index ["shop_id", "slug"], name: "index_products_on_shop_id_and_slug", unique: true
     t.index ["shop_id", "status", "published_at"], name: "index_products_on_shop_id_and_status_and_published_at"
@@ -475,6 +537,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
     t.index ["shop_id"], name: "index_stores_on_shop_id", unique: true
   end
 
+  create_table "theme_settings", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.jsonb "schema", default: [], null: false
+    t.string "schema_version"
+    t.jsonb "values", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id"], name: "index_theme_settings_on_shop_id", unique: true
+  end
+
   create_table "usages", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "project_id"
@@ -533,12 +605,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
   add_foreign_key "collection_products", "products"
   add_foreign_key "collection_products", "shops"
   add_foreign_key "collections", "shops"
+  add_foreign_key "custom_field_definitions", "shops"
   add_foreign_key "customers", "shops"
   add_foreign_key "deployments", "projects"
   add_foreign_key "discounts", "shops"
+  add_foreign_key "form_submissions", "forms"
+  add_foreign_key "form_submissions", "shops"
+  add_foreign_key "forms", "shops"
   add_foreign_key "line_items", "orders"
   add_foreign_key "line_items", "shops"
   add_foreign_key "line_items", "variants", on_delete: :nullify
+  add_foreign_key "menus", "shops"
   add_foreign_key "messages", "projects"
   add_foreign_key "order_events", "orders"
   add_foreign_key "order_events", "shops"
@@ -547,6 +624,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
   add_foreign_key "orders", "customers", on_delete: :nullify
   add_foreign_key "orders", "discounts", on_delete: :nullify
   add_foreign_key "orders", "shops"
+  add_foreign_key "pages", "shops"
   add_foreign_key "product_reviews", "orders"
   add_foreign_key "product_reviews", "products"
   add_foreign_key "product_reviews", "shops"
@@ -562,6 +640,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_15_190000) do
   add_foreign_key "shop_memberships", "shops"
   add_foreign_key "shop_memberships", "users"
   add_foreign_key "stores", "shops"
+  add_foreign_key "theme_settings", "shops"
   add_foreign_key "usages", "projects", on_delete: :nullify
   add_foreign_key "usages", "users"
   add_foreign_key "variants", "products"

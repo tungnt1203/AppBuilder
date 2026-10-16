@@ -2,6 +2,9 @@
 
 <% @order.line_items.each do |item| -%>
 <%= item.quantity %> × <%= item.product_title %><%= " (#{item.variant_title})" if item.variant_title %>: <%= money(item.total_cents, @order.currency) %>
+<% item.property_lines.each do |line| -%>
+  <%= line %>
+<% end -%>
 <% end -%>
 <%= t("order_mailer.summary.total") %>: <%= money(@order.total_cents, @order.currency) %>
 

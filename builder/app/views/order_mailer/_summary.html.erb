@@ -1,7 +1,7 @@
 <table cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 560px;">
   <% order.line_items.each do |item| %>
     <tr>
-      <td><%= item.quantity %> × <%= item.product_title %><% if item.variant_title %><br><small><%= item.variant_title %></small><% end %></td>
+      <td><%= item.quantity %> × <%= item.product_title %><% if item.variant_title %><br><small><%= item.variant_title %></small><% end %><% item.property_lines.each do |line| %><br><small><%= line %></small><% end %></td>
       <td align="right"><%= money(item.total_cents, order.currency) %></td>
     </tr>
   <% end %>

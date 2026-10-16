@@ -66,6 +66,13 @@ Rails.application.routes.draw do
     resource :stripe_connection, only: %i[ create update destroy ]
     resource :settings, only: %i[ edit update ]
     resource :policies, only: %i[ edit update ], path: "settings/policies"
+    resource :theme_setting, only: %i[ edit update ], path: "settings/theme"
+    resource :custom_fields, only: %i[ edit update ], path: "settings/fields"
+    resources :pages
+    resources :menus, except: :show
+    resources :forms, except: :show do
+      resources :submissions, only: :show, module: :forms
+    end
     resources :api_keys, only: %i[ index create destroy ], path: "settings/keys"
     resources :memberships, only: %i[ index new create update destroy ], path: "people"
   end
@@ -78,6 +85,11 @@ Rails.application.routes.draw do
     end
     resources :collections, only: %i[ index show ]
     resources :policies, only: :show
+    resources :pages, only: :show
+    resources :menus, only: :show
+    resources :forms, only: [], param: :key do
+      resources :submissions, only: :create, module: :forms
+    end
     resources :zip_codes, only: :show
     resources :carts, only: %i[ create show ] do
       scope module: :carts do

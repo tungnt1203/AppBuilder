@@ -29,6 +29,7 @@ class Checkout
   validates :email, presence: true, format: { with: ApplicationRecord::EMAIL_FORMAT }
   validates :shipping_name, :shipping_address1, :shipping_city, :shipping_country, presence: true
   validate :cart_has_items
+  validate :properties_still_accepted
   validate :ships_to_country
   validate :address_carriers_need
   validates :phone, presence: true, if: :phone_required?
@@ -102,9 +103,10 @@ class Checkout
 
     @order = Order.new(order_attributes)
     items.each do |item|
+      properties, = item.product.buyer_properties(item.properties)
       @order.line_items.build(variant: item.variant, product_title: item.product.title,
         variant_title: item.variant.title, sku: item.variant.sku,
-        unit_price_cents: item.variant.price_cents, quantity: item.quantity)
+        unit_price_cents: item.variant.price_cents, quantity: item.quantity, properties: properties || {})
     end
 
     with_number_retry do
@@ -159,6 +161,14 @@ class Checkout
 
     def cart_has_items
       errors.add(:base, :empty_cart) if items.empty?
+    end
+
+    # The product's questions can change while a cart sits. What was typed has to still fit.
+    def properties_still_accepted
+      items.each do |item|
+        _properties, problems = item.product.buyer_properties(item.properties)
+        errors.add(:base, :buyer_inputs, product: item.product.title) if problems
+      end
     end
 
     # Where the country has states or provinces (the US, Canada, Australia), carriers need the

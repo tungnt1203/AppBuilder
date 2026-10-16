@@ -274,6 +274,17 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_equal 1, order.events.where(action: "fulfillment_failed").count
   end
 
+  test "what the buyer typed goes on the Printify line" do
+    product = Printify::Import.new.call("pf-tee")
+    product.update!(buyer_inputs: [ { "key" => "print_name", "label" => "Name on the shirt", "required" => true, "max_length" => 20 } ])
+    order = place_order(product.variant_for(%w[ White S ]), status: "pending")
+    order.line_items.sole.update!(properties: { "print_name" => "Ada" })
+
+    perform_enqueued_jobs(only: Order::FulfillJob) { order.mark_paid! }
+
+    assert_equal "Name on the shirt: Ada", @printify.orders.sole[:line_items].sole[:external_id]
+  end
+
   private
     def place_order(variant, quantity: 1, status: "paid")
       Order.create!(email: "robin@example.com", shipping_name: "Robin Buyer", shipping_address1: "5 Elm St", shipping_city: "Austin",
