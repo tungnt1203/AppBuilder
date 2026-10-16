@@ -14,9 +14,15 @@ class ShopAdmin::CustomFieldsController < ShopAdmin::BaseController
       return render :edit, status: :unprocessable_entity
     end
 
+    # Removed rows go first and renamed ones pass through a free key, so a key can move to
+    # another row (or two rows swap keys) in the same save.
     CustomFieldDefinition.transaction do
-      kept = rows.each_with_index.map { |row, position| save_definition(row, position) }
-      CustomFieldDefinition.where.not(id: kept.map(&:id)).destroy_all
+      keys = rows.select { |row| row[:id].present? }.to_h { |row| [ row[:id].to_i, row[:key] ] }
+      CustomFieldDefinition.where.not(id: keys.keys).destroy_all
+      CustomFieldDefinition.where(id: keys.keys).each do |record|
+        record.update!(key: "renaming_#{record.id}") if keys[record.id] != record.key
+      end
+      rows.each_with_index { |row, position| save_definition(row, position) }
     end
     redirect_to edit_shop_admin_custom_fields_path, notice: t(".notice")
   rescue ActiveRecord::RecordInvalid => error

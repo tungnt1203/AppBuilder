@@ -25,7 +25,7 @@ What a shop's storefront calls to show the shop and take its orders. It runs on 
   | 404 | `not_found` |
   | 409 | `unavailable` (can't be bought now), `in_progress` (same Idempotency-Key still running) |
   | 422 | `invalid`, `unknown`, `expired`, `not_started`, `used_up`, `below_minimum`, `idempotency_key_reused`, `payment_not_needed`, `card_payments_unavailable`, `test_mode_unavailable`, `nothing_to_review` |
-  | 429 | `rate_limited` (600 requests a minute per key) |
+  | 429 | `rate_limited` (600 requests a minute per key; 10 messages a minute per form) |
   | 502 | `payment_failed` (Stripe refused) |
 
 - **ETags**: every GET answers with an `ETag`. Send it back as `If-None-Match` to get a
@@ -100,7 +100,7 @@ Every change to a cart answers with the whole cart.
 
 **Menu**: `{ "key", "title", "items": [{ "label", "url" }] }`. `url` is a path on the storefront (`/pages/about`) or a full https address.
 
-**Form submission**: `POST /v1/forms/contact/submissions` with `{ "answers": { "email": "a@b.co", "message": "Hi" } }`. Answers `201 { "submission": { "id": 1 } }`. A field that doesn't fit is `422` with `fields`.
+**Form submission**: `POST /v1/forms/contact/submissions` with `{ "answers": { "email": "a@b.co", "message": "Hi" } }`. Answers `201 { "submission": { "id": 1 } }`. A field that doesn't fit is `422` with `fields`. Each form takes 10 messages a minute per key, then `429 rate_limited`. The storefront declares its forms in `config/forms.yml`, applied on publish ([platform-v1.md](platform-v1.md) §7).
 
 **Cart**: `{ token, currency, items: [{ id, quantity, line_total_cents, product: { slug, title, image }, variant }], item_count, subtotal_cents, discount: { code, kind, amount_cents }, free_shipping_remaining_cents }`.
 Only lines that can still be bought are there.

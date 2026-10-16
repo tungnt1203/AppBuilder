@@ -127,6 +127,21 @@ Storefront khai báo `config/theme_settings.yml`:
 Khi publish, Platform đọc schema của phiên bản đó, giữ giá trị cũ còn hợp lệ, sinh form trong
 admin. API trả về giá trị đã gộp với mặc định. Agent dùng `theme_setting(:hero_title)` trong view.
 
+Form của storefront khai báo trong `config/forms.yml`:
+
+```yaml
+- key: contact
+  title: Contact us
+  fields:               # type: text | email | textarea | boolean
+    - { key: email, label: Email, type: email, required: true }
+    - { key: message, label: Message, type: textarea }
+```
+
+Khi publish (bản đã live), Platform tạo hoặc cập nhật từng form theo `key`. Form không còn trong file
+thì vẫn giữ, cùng các tin đã nhận. File lỗi thì bỏ qua cả file, ghi vào log deploy, dữ liệu của shop
+giữ nguyên; app vẫn live. Chủ shop cũng có thể tạo hoặc sửa form trong admin, nhưng lần publish sau
+sẽ ghi đè form có trong file.
+
 ## 8. Storefront (template mới)
 
 - Không có model dữ liệu; gem `storefront_kit`: client API, cache, helper (`products`, `cart`,

@@ -63,4 +63,18 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
     api :get, storefront_api_page_path("questions")
     assert_response :not_found
   end
+
+  test "a form takes a few messages a minute" do
+    ActsAsTenant.with_tenant(shops(:cats)) { Form.declare!("contact", title: "Contact", fields: [ { "key" => "email", "label" => "Email", "type" => "email" } ]) }
+    original = Rails.cache.method(:increment)
+    Rails.cache.define_singleton_method(:increment) { |name, *rest, **options| name.include?(":form:") ? 11 : original.call(name, *rest, **options) }
+
+    assert_no_enqueued_emails do
+      api :post, storefront_api_form_submissions_path("contact"), params: { answers: { email: "a@b.co" } }
+    end
+    assert_response :too_many_requests
+    assert_equal "rate_limited", response.parsed_body.dig("error", "code")
+  ensure
+    Rails.cache.define_singleton_method(:increment, original)
+  end
 end

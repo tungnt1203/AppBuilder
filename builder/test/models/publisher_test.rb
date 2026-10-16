@@ -37,12 +37,18 @@ class PublisherTest < ActiveSupport::TestCase
     assert_match "http://nha-khoa.localhost/session/new", @project.messages.last.body
   end
 
-  test "a live publish applies the storefront's theme settings to its shop" do
+  test "a live publish applies the storefront's theme settings and forms to its shop" do
     with_projects_root do
       project = projects(:shop)
       project.update!(shop: shops(:cats))
       project.path.join("config").mkpath
       project.path.join("config/theme_settings.yml").write("- key: hero_title\n  type: text\n  default: Cats\n")
+      project.path.join("config/forms.yml").write(<<~YAML)
+        - key: contact
+          title: Contact us
+          fields:
+            - { key: email, label: Email, type: email, required: true }
+      YAML
       deployment = project.deployments.create!
       publisher = Publisher.new(deployment, once: "once")
       def publisher.run_steps(*) = nil
@@ -56,6 +62,18 @@ class PublisherTest < ActiveSupport::TestCase
       setting = ActsAsTenant.with_tenant(shops(:cats)) { ThemeSetting.current }
       assert_equal "Cats", setting.resolved["hero_title"]
       assert_equal "abc1234", setting.schema_version
+      form = ActsAsTenant.with_tenant(shops(:cats)) { Form.find_by!(key: "contact") }
+      assert_equal [ [ "email", true ] ], form.fields.map { |field| field.values_at("key", "required") }
+
+      project.path.join("config/forms.yml").write("- key: newsletter\n  title: News\n  fields: [ { key: email, label: Email } ]\n- key: broken\n")
+      later = project.deployments.create!
+      later_publisher = Publisher.new(later, once: "once")
+      def later_publisher.run_steps(*) = nil
+      later_publisher.publish
+
+      assert later.reload.live?
+      assert_match "config/forms.yml not applied", later.log
+      assert_equal [ "contact" ], ActsAsTenant.with_tenant(shops(:cats)) { Form.pluck(:key) }
     end
   end
 end

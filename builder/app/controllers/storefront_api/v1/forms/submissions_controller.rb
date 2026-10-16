@@ -1,7 +1,11 @@
 # A message sent through one of the shop's forms. Idempotent with an Idempotency-Key, so a
-# double tap doesn't send it twice. The shop is emailed.
+# double tap doesn't send it twice. The shop is emailed, so each form takes a few messages a
+# minute: a storefront's form spammed through can't flood the owner's inbox.
 class StorefrontApi::V1::Forms::SubmissionsController < StorefrontApi::V1::BaseController
   include StorefrontApi::Idempotent
+
+  rate_limit to: 10, within: 1.minute, name: "form", by: -> { "#{@api_key.id}:#{params[:form_key]}" },
+    with: -> { error :rate_limited, "Too many messages: try again in a minute", status: :too_many_requests }
 
   def create
     form = Form.find_by!(key: params[:form_key])

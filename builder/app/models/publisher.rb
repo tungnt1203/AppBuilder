@@ -13,7 +13,7 @@ class Publisher
     @deployment.deploying!
     run_steps(deploy_steps)
     @deployment.live!
-    apply_theme_settings
+    apply_theme_files
     announce_first_publish if first
   rescue ProjectShell::Error => error
     @deployment.append_log(error.message)
@@ -35,16 +35,25 @@ class Publisher
   end
 
   private
-    # The live version's config/theme_settings.yml becomes its shop's theme settings schema. A
-    # broken file is logged and leaves the shop's settings as they were; the app is live either way.
-    def apply_theme_settings
-      file = @project.path.join("config/theme_settings.yml")
-      return unless @project.shop && file.exist?
+    # What the live version's theme declares becomes its shop's: config/theme_settings.yml the
+    # theme settings schema, config/forms.yml its forms (a form left out keeps its messages). A
+    # broken file is logged and leaves the shop's as they were; the app is live either way.
+    def apply_theme_files
+      return unless @project.shop
 
-      definitions = YAML.safe_load(file.read) || []
-      ActsAsTenant.with_tenant(@project.shop) { ThemeSetting.apply_schema!(definitions, version: @deployment.commit_sha) }
-    rescue Psych::Exception, ActiveRecord::ActiveRecordError => error
-      @deployment.append_log("Theme settings not applied: #{error.message}\n")
+      ActsAsTenant.with_tenant(@project.shop) do
+        theme_file("theme_settings.yml") { |definitions| ThemeSetting.apply_schema!(definitions, version: @deployment.commit_sha) }
+        theme_file("forms.yml") do |forms|
+          Form.transaction { Array(forms).each { |form| Form.declare!(form["key"], title: form["title"], fields: form["fields"]) } }
+        end
+      end
+    end
+
+    def theme_file(name)
+      file = @project.path.join("config", name)
+      yield YAML.safe_load(file.read) || [] if file.exist?
+    rescue Psych::Exception, ActiveRecord::ActiveRecordError, TypeError, NoMethodError => error
+      @deployment.append_log("config/#{name} not applied: #{error.message}\n")
     end
 
     # The published app starts with no accounts; tell the owner where to create theirs.

@@ -54,4 +54,24 @@ class ShopAdmin::ExtensionsTest < ActionDispatch::IntegrationTest
     assert_equal "Cotton", product.custom_fields["material"]
     assert_equal "print_name", product.buyer_inputs.sole["key"]
   end
+
+  test "custom fields can take a removed field's key, or swap keys, in one save" do
+    material, care = ActsAsTenant.with_tenant(shops(:cats)) do
+      definitions = [ CustomFieldDefinition.create!(key: "material", label: "Material"), CustomFieldDefinition.create!(key: "care", label: "Care") ]
+      products(:tee).update!(custom_fields: { "material" => "Cotton", "care" => "Cold wash" })
+      definitions
+    end
+
+    patch shop_admin_custom_fields_path, params: { custom_fields: { definitions: [
+      { id: material.id, label: "Care", key: "care" }, { id: care.id, label: "Material", key: "material" } ] } }
+    assert_redirected_to edit_shop_admin_custom_fields_path
+    assert_equal({ "material" => "Cold wash", "care" => "Cotton" }, ActsAsTenant.with_tenant(shops(:cats)) { products(:tee).reload.custom_fields })
+
+    patch shop_admin_custom_fields_path, params: { custom_fields: { definitions: [ { id: material.id, label: "Material", key: "material" } ] } }
+    assert_redirected_to edit_shop_admin_custom_fields_path
+    ActsAsTenant.with_tenant(shops(:cats)) do
+      assert_equal [ [ material.id, "material" ] ], CustomFieldDefinition.pluck(:id, :key)
+      assert_equal({ "material" => "Cotton" }, products(:tee).reload.custom_fields)
+    end
+  end
 end
