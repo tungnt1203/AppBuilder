@@ -110,4 +110,24 @@ class ShopAdmin::PrintifyTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "a[href=?]", order.printify_url
   end
+
+  test "staff link an order with text the buyer typed to the one they made in Printify" do
+    printify = connect_fake_printify
+    product = Printify::Import.new.call("pf-tee")
+    order = orders(:paid)
+    order.line_items.first.update!(variant: product.variant_for(%w[ Black S ]), properties: { "print_name" => "Ada" })
+    order.line_items.where.not(id: order.line_items.first.id).delete_all
+    sign_in_as users(:cats_staff)
+
+    get shop_admin_order_path(order)
+    assert_select "p", "Make this order in Printify yourself."
+    assert_select "input[name=printify_order]"
+
+    post shop_admin_order_printify_order_path(order), params: { printify_order: "5a96f649b2439217d070f507" }
+    assert_redirected_to shop_admin_order_path(order)
+    assert_equal "5a96f649b2439217d070f507", order.reload.printify_order_id
+    assert_empty printify.orders
+    follow_redirect!
+    assert_select "a[href=?]", order.printify_url
+  end
 end

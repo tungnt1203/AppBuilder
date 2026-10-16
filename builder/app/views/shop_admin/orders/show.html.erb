@@ -44,6 +44,20 @@
       <% end %>
     <% elsif @order.can_ship? && (part = @order.events.find { |event| event.action == "printify_shipped" }) %>
       <%= alert t(".printify.part_shipped", tracking: part.message), tone: :warning %>
+    <% elsif @order.paid? && @order.printify_order_id.blank? && (fulfillment = Printify::Fulfillment.new(@order)).applies? && fulfillment.needs_personalizing? %>
+      <%= alert tone: :warning do %>
+        <p class="font-medium"><%= t(".printify.personalize.title") %></p>
+        <p class="mt-1"><%= t(".printify.personalize.description") %></p>
+        <%= form_with url: shop_admin_order_printify_order_path(@order), class: "mt-3 flex flex-wrap items-end gap-2" do |form| %>
+          <div class="min-w-0 flex-1 space-y-1.5">
+            <%= form.label :printify_order, t(".printify.personalize.order") %>
+            <%= form.text_field :printify_order, required: true, placeholder: "https://printify.com/app/order/…" %>
+          </div>
+          <%= form.submit t(".printify.personalize.link"), class: button_classes(:primary, size: :sm) %>
+        <% end %>
+        <%= button_to t(".printify.personalize.send_as_is"), shop_admin_order_fulfillment_path(@order), class: "mt-3 #{button_classes(:secondary, size: :sm)}",
+              form: { data: { turbo_confirm: t(".printify.personalize.confirm_send_as_is") } } %>
+      <% end %>
     <% elsif @order.printify_order_id.present? %>
       <%= alert tone: :info do %>
         <p><%= t(".printify.sent") %> <%= link_to t(".printify.open"), @order.printify_url, class: link_classes, target: "_blank", rel: "noopener" %></p>

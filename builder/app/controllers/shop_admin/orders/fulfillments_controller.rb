@@ -1,9 +1,10 @@
-# Sends a paid order to Printify again, after it failed (a wrong address, Printify down).
+# Sends a paid order to Printify: again, after it failed (a wrong address, Printify down), or as
+# it is when the text the buyer typed needn't be printed.
 class ShopAdmin::Orders::FulfillmentsController < ShopAdmin::BaseController
   include ShopAdmin::OrderTransition
 
   def create
-    Printify::Fulfillment.new(@order).submit!
+    Printify::Fulfillment.new(@order).submit!(personalized: false)
     if @order.reload.fulfillment_error
       redirect_to shop_admin_order_path(@order), alert: t(".failed", error: @order.fulfillment_error), status: :see_other
     else

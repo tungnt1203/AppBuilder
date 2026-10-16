@@ -92,7 +92,7 @@ Every change to a cart answers with the whole cart.
 - `custom_fields`: `[{ "key", "label", "type": "text"|"number"|"boolean", "value" }]`, only the ones this product has a value for.
 - `buyer_inputs`: `[{ "key", "label", "required", "max_length" }]`. Send what the buyer typed as `properties` when adding the line.
 
-**Cart line** and **order line** include `properties` when the buyer typed something: `[{ "key", "label", "value" }]`. That text is sent to Printify with the line.
+**Cart line** and **order line** include `properties` when the buyer typed something: `[{ "key", "label", "value" }]`. Printify can't get that text from the Platform, so an order with it isn't sent automatically: the shop's staff make it in Printify and link it in the admin (or send it without the text, for a gift note). Tracking and status then come back as for any order.
 
 **Shop** includes `theme_settings`: the storefront's declared settings, each merged with its default. An image setting is an absolute URL, or null until the owner uploads one.
 

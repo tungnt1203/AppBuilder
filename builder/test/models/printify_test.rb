@@ -274,15 +274,38 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_equal 1, order.events.where(action: "fulfillment_failed").count
   end
 
-  test "what the buyer typed goes on the Printify line" do
+  test "an order with text the buyer typed waits for staff, who link the order they made in Printify" do
     product = Printify::Import.new.call("pf-tee")
     product.update!(buyer_inputs: [ { "key" => "print_name", "label" => "Name on the shirt", "required" => true, "max_length" => 20 } ])
     order = place_order(product.variant_for(%w[ White S ]), status: "pending")
     order.line_items.sole.update!(properties: { "print_name" => "Ada" })
 
     perform_enqueued_jobs(only: Order::FulfillJob) { order.mark_paid! }
+    assert_empty @printify.orders
+    assert Printify::Fulfillment.new(order).needs_personalizing?
 
-    assert_equal "Name on the shirt: Ada", @printify.orders.sole[:line_items].sole[:external_id]
+    @printify.error = "Printify answered 404"
+    assert_nil Printify::Fulfillment.new(order).link!("nope")
+    assert_nil order.reload.printify_order_id
+
+    @printify.error = nil
+    assert_equal "5a96f649b2439217d070f507", Printify::Fulfillment.new(order).link!("https://printify.com/app/order/5a96f649b2439217d070f507")
+    assert_equal "5a96f649b2439217d070f507", order.reload.printify_order_id
+    assert order.in_production?
+    assert_nil order.fulfillment_error
+    assert_equal 1625, order.fulfillment_cost_cents
+  end
+
+  test "staff can send an order with text the buyer typed as it is" do
+    product = Printify::Import.new.call("pf-tee")
+    order = place_order(product.variant_for(%w[ White S ]))
+    order.line_items.sole.update!(properties: { "gift_note" => "Happy birthday" })
+
+    Printify::Fulfillment.new(order).submit!
+    assert_empty @printify.orders
+
+    Printify::Fulfillment.new(order).submit!(personalized: false)
+    assert_equal [ { product_id: "pf-tee", variant_id: 1003, quantity: 1 } ], @printify.orders.sole[:line_items]
   end
 
   private

@@ -113,6 +113,15 @@ en:
           retry: Send to Printify again
           sent: Printify is making this order; it ships here with its tracking.
           open: Open in Printify
+          personalize:
+            title: Make this order in Printify yourself.
+            description: The buyer typed text to print (shown with the items below), and Printify can't
+              get it from here. Make the item with that text in Printify, order it there for this
+              address, then paste that Printify order here. Its tracking comes here as usual.
+            order: Printify order (its address or number)
+            link: Link the order
+            send_as_is: Send to Printify without the text
+            confirm_send_as_is: Printify will print the product as it is, without what the buyer typed. Send it?
         mark_paid: Mark as paid
         start_production: Start production
         mark_delivered: Mark as delivered
@@ -161,6 +170,7 @@ en:
           sent_to_printify: Sent to Printify, waiting for your approval there
           printify_cancelled: Cancelled in Printify
           printify_shipped: Printify shipped its items
+          printify_linked: Linked to the order made in Printify
           partially_refunded: Partly refunded in Stripe
           restocked: Items put back in stock
         customer: Customer
@@ -194,6 +204,11 @@ en:
         create:
           notice: Order %{number} is with Printify now.
           failed: 'Printify didn''t take it: %{error}'
+      printify_orders:
+        create:
+          notice: Order %{number} is linked to its Printify order.
+          failed: 'Couldn''t link it: %{error}'
+          not_found: paste the Printify order's address or number
       shipments:
         create:
           notice: Order %{number} is marked as shipped. The buyer was emailed.

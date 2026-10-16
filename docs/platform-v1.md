@@ -75,6 +75,10 @@ Mọi bảng dữ liệu của shop có `shop_id` (not null, có index), mọi i
 - `products`, `variants`, `collections`, `collection_products`, `promotions`, `discounts`, `product_reviews`.
 - `products.custom_fields` (JSONB) theo `custom_field_definitions` (shop × key × kiểu × nhãn).
 - `products.buyer_inputs` (JSONB): định nghĩa ô khách nhập (vd. "Tên in lên áo", tối đa 20 ký tự).
+  Printify không nhận text cho sản phẩm có sẵn qua API, nên đơn có text khách nhập không tự gửi:
+  admin tự làm đơn trên Printify rồi dán mã đơn vào admin (hoặc gửi luôn không kèm text, vd. lời
+  nhắn quà tặng). Sau đó tracking, trạng thái, chi phí về như đơn thường. Tự động hoá (tự vẽ file
+  in có text rồi gửi Printify) để sau, cần thử với tài khoản Printify thật.
 
 **Bán hàng**
 - `carts`, `cart_items` (+ `properties` JSONB cho thông tin khách nhập), `orders`, `line_items`
@@ -169,7 +173,7 @@ sẽ ghi đè form có trong file.
    `shop_id`; toàn bộ test lõi chạy theo shop. Xong khi: 2 shop cùng DB không thấy dữ liệu nhau.
 2. **Admin trung tâm**: chọn shop, sản phẩm, đơn, cài đặt, Printify, nội dung, hộp thư.
 3. **Storefront API v1** đủ bảng mục 6, có test hợp đồng, rate limit, idempotency.
-4. **Điểm mở rộng**: theme settings, trường tuỳ biến, ô khách nhập (tới Printify), pages/FAQ, forms.
+4. **Điểm mở rộng**: theme settings, trường tuỳ biến, ô khách nhập (đơn có text chờ admin làm trên Printify), pages/FAQ, forms.
 5. **Storefront template + `storefront_kit`**: chuyển giao diện hiện tại; checkout Payment Element.
 6. **Builder**: preview gọi API (key preview, demo catalog), publish ONCE với `PLATFORM_URL`/`SHOP_KEY`,
    agent rules mới, luồng `platform_requests`.

@@ -4,6 +4,10 @@
 # and once Printify has shipped all of it, the order is shipped with the tracking and the buyer
 # gets the shipped email. Cancelling or refunding the order cancels it in Printify while
 # Printify still allows it. Items not from Printify stay with staff, as before.
+#
+# Printify can't print text the buyer typed on a product already in the shop, so an order with
+# such text waits for staff: they make it in Printify and link that order here (link!), or send it
+# as it is when the text needn't be printed (a gift note).
 class Printify::Fulfillment
   # Printify's statuses for an order being made, and for one waiting on the owner.
   PRINTING = %w[ sending-to-production in-production partially-fulfilled fulfilled ].freeze
@@ -19,11 +23,18 @@ class Printify::Fulfillment
     @store.printify_connected? && !@order.test? && printify_items.any?
   end
 
+  # Whether the buyer typed text on a Printify item, which Printify won't get from the shop.
+  def needs_personalizing?
+    printify_items.any? { |item| item.properties.present? }
+  end
+
   # Sends the order to Printify once; a failure is kept on the order (fulfillment_error) for
   # staff to see and send again from /admin. When Printify already has it (sent twice at once, or
-  # a retry after an answer that got lost), the shop takes that order instead of failing.
-  def submit!
+  # a retry after an answer that got lost), the shop takes that order instead of failing. An order
+  # to personalize goes only when staff send it themselves (personalized: false).
+  def submit!(personalized: true)
     return unless applies? && @order.paid? && @order.printify_order_id.blank?
+    return if personalized && needs_personalizing?
 
     id = create_or_find_order
     @order.reload
@@ -41,6 +52,23 @@ class Printify::Fulfillment
   rescue PrintifyGateway::Error => error
     @order.update!(fulfillment_error: error.message)
     @order.record "fulfillment_failed", message: error.message
+  end
+
+  # Takes the order staff made by hand in Printify (its id, or its page's address) as this
+  # order's, so its production, tracking and cost come here like a sent order's. Returns the id, or
+  # nil when Printify has no such order (or it couldn't be asked; the error is on the order).
+  def link!(id_or_url)
+    id = id_or_url.to_s[/\h{24}/] || id_or_url.to_s.strip
+    return unless applies? && @order.paid? && @order.printify_order_id.blank? && id.present?
+
+    gateway.order(@store.printify_shop_id, id)
+    @order.update!(printify_order_id: id, fulfillment_error: nil)
+    @order.record "printify_linked", message: "Printify #{id}"
+    sync!
+    id
+  rescue PrintifyGateway::Error => error
+    @order.update!(fulfillment_error: error.message)
+    nil
   end
 
   # Asks Printify about the order (from the hourly check, or when Printify's webhook says it
@@ -184,12 +212,7 @@ class Printify::Fulfillment
         external_id:,
         label: @order.name,
         line_items: printify_items.map { |item|
-          # Printify's order for a product already in the shop has no personalization field. The
-          # line's external id is what Printify shows the printer, so the text the buyer typed rides along.
-          line = { product_id: item.variant.product.printify_product_id, variant_id: item.variant.printify_variant_id, quantity: item.quantity }
-          note = item.property_lines.join("; ")
-          line[:external_id] = note.truncate(200) if note.present?
-          line
+          { product_id: item.variant.product.printify_product_id, variant_id: item.variant.printify_variant_id, quantity: item.quantity }
         },
         shipping_method: @store.printify_shipping_method,
         send_shipping_notification: false, # the shop sends its own shipped email

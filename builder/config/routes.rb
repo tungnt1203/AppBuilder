@@ -59,6 +59,7 @@ Rails.application.routes.draw do
         resource :refund, only: :create
         resource :restock, only: :create
         resource :fulfillment, only: :create
+        resource :printify_order, only: :create
       end
     end
     resource :printify_connection, only: %i[ show create update destroy ], path: "settings/printify"
