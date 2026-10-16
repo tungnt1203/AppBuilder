@@ -154,6 +154,10 @@ sẽ ghi đè form có trong file.
 - Giữ các phần đang bán tốt: trang sản phẩm (ảnh theo màu, bảng size, thanh mua dính, zoom),
   giỏ, checkout (ZIP tự điền, phí ship thật), pixel, review, trang trống "sắp có hàng".
 - CLAUDE.md cho agent: tài liệu dữ liệu tự sinh từ API; quy tắc "chỉ giao diện"; luồng yêu cầu.
+- Code: app ở `storefront/` (template cũ `template/` giữ tới #19), gem ở `blocks/storefront_kit/`
+  (link vào `storefront/vendor/blocks/`, như các block khác). Thẻ trả tiền bằng Stripe Payment Element
+  ở `/orders/:token/payment`. Test chạy với Platform giả trong bộ nhớ (`StorefrontKit::Testing::FakeApi`).
+- Chưa có: tài khoản khách hàng (checkout luôn là khách vãng lai), CLAUDE.md/skill cho agent (#15).
 
 ## 9. Tận dụng code hiện có
 

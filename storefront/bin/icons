@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# Finds Lucide icons for the `icon` helper by name or meaning: bin/icons cake, bin/icons "hair dryer"
+require "json"
+
+words = ARGV.join(" ").downcase.split
+abort "Usage: bin/icons <words>" if words.empty?
+
+dir = File.expand_path("../vendor/icons", __dir__)
+names = JSON.parse(File.read("#{dir}/lucide.json")).keys
+tags = JSON.parse(File.read("#{dir}/tags.json"))
+
+matches = names.select do |name|
+  text = ([ name ] + tags.fetch(name, [])).join(" ").downcase
+  words.all? { |word| text.include?(word) }
+end
+puts matches.sort_by { |name| [ words.all? { |word| name.include?(word) } ? 0 : 1, name.size ] }.first(40)

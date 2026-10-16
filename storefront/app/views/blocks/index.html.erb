@@ -1,0 +1,7 @@
+<% content_for :title, "Blocks" %>
+<% @blocks.each do |block| %>
+  <div class="border-y border-dashed border-line bg-surface-muted px-4 py-1.5 font-mono text-xs text-muted" id="block-<%= block %>">
+    <%= link_to "blocks/_#{block}", blocks_path(only: block) %>
+  </div>
+  <%= render "blocks/#{block}" %>
+<% end %>

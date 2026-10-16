@@ -1,0 +1,32 @@
+<%# The checkout's totals and its button, reloaded (checkouts#shipping) as the buyer fills in the
+    address, since Printify's shipping depends on it. %>
+<%= turbo_frame_tag "checkout_totals", class: "block space-y-4", data: { checkout_totals_target: "frame" } do %>
+  <dl class="space-y-2 border-t border-line pt-4 text-sm">
+    <div class="flex justify-between"><dt class="text-muted"><%= t("checkouts.new.subtotal") %></dt><dd><%= money(quote.subtotal_cents) %></dd></div>
+    <% if quote.discount_cents.positive? %>
+      <div class="flex justify-between"><dt class="text-muted"><%= t("checkouts.new.discount", code: quote.discount_code) %></dt><dd>-<%= money(quote.discount_cents) %></dd></div>
+    <% end %>
+    <div class="flex justify-between gap-4">
+      <dt class="text-muted"><%= t("checkouts.new.shipping_cost") %></dt>
+      <dd class="text-right">
+        <% if !quote.shipping_known? %>
+          <span class="text-muted"><%= t("checkouts.new.shipping_from_address") %></span>
+        <% elsif quote.shipping_cents.zero? %>
+          <%= t("checkouts.new.free") %>
+        <% else %>
+          <%= money(quote.shipping_cents) %>
+        <% end %>
+      </dd>
+    </div>
+    <div class="flex justify-between border-t border-line pt-2 text-base font-semibold">
+      <dt><%= t("checkouts.new.total") %></dt>
+      <dd><%= quote.shipping_known? ? money(quote.total_cents) : t("checkouts.new.total_before_shipping", total: money(quote.total_cents - quote.shipping_cents)) %></dd>
+    </div>
+    <% if current_shop.tax_at_payment? && payment_method == "stripe" %>
+      <p class="text-xs text-muted"><%= t("checkouts.new.tax_at_payment") %></p>
+    <% end %>
+  </dl>
+  <% paying_now = payment_method == "stripe" && quote.payment_methods.one? %>
+  <%= submit_tag t(paying_now ? (quote.shipping_known? ? "checkouts.new.pay" : "checkouts.new.continue_to_payment") : "checkouts.new.place_order", total: money(quote.total_cents)),
+        name: nil, class: "#{button_classes(:primary)} w-full py-3 text-base" %>
+<% end %>

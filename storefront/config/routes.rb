@@ -1,0 +1,31 @@
+Rails.application.routes.draw do
+  # The shop: catalog, the owner's pages, cart, checkout, the buyer's order page, the ad catalogs' feed.
+  root "home#show"
+
+  resources :products, only: %i[ index show ]
+  resources :collections, only: :show
+  resources :pages, only: :show
+  resource :cart, only: :show do
+    resource :discount, only: %i[ create destroy ], module: :carts
+  end
+  resources :cart_items, only: %i[ create update destroy ]
+  resource :checkout, only: %i[ new create ] do
+    get :shipping
+  end
+  resources :zip_codes, only: :show
+  resources :orders, only: :show do
+    resource :payment, only: :show, module: :orders
+    resource :review, only: %i[ new create ], module: :orders
+  end
+  get "feeds/products", to: "feeds#products", defaults: { format: :xml }, as: :products_feed
+  resources :policies, only: :show
+  resource :contact, only: :show
+  post "forms/:form_key", to: "form_submissions#create", as: :form_submissions
+
+  # Every page block in this app's theme, to pick from (design skill). Development only.
+  get "_blocks" => "blocks#index", as: :blocks if Rails.env.development?
+
+  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
+  # ONCE uses it to decide whether a new version is healthy before switching traffic to it.
+  get "up" => "rails/health#show", as: :rails_health_check
+end

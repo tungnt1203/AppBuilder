@@ -1,0 +1,9 @@
+# What the owner can change in the shop's admin (Settings → Theme) without a new version of the
+# storefront. Views read them with theme_setting(:key). Applied when the storefront is published.
+# Types: text, richtext, image, color, url, boolean, select.
+- key: hero_title
+  type: text
+  label: Home page headline
+- key: hero_text
+  type: text
+  label: Home page text under the headline

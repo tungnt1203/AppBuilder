@@ -1,0 +1,19 @@
+<%# The site's footer: what shoppers look for (contact, shipping and returns, the owner's
+    "footer" menu). Redesign it for the shop, but keep the links to the policies and the contact
+    page: payment providers and ad networks check that they're there. %>
+<footer class="mt-24 border-t border-line">
+  <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 text-sm text-muted md:flex-row md:items-center md:justify-between">
+    <p>© <%= Date.current.year %> <%= current_shop.name %></p>
+    <nav aria-label="<%= t("layouts.site.footer_navigation") %>">
+      <ul class="flex flex-wrap gap-x-6 gap-y-2">
+        <% shop_menu(:footer)&.items&.each do |item| %>
+          <li><%= shop_menu_link item, class: "hover:text-ink" %></li>
+        <% end %>
+        <% current_shop.policies.each do |policy| %>
+          <li><%= link_to policy["title"], policy_path(policy["id"]), class: "hover:text-ink" %></li>
+        <% end %>
+        <li><%= link_to t("contacts.show.title"), contact_path, class: "hover:text-ink" %></li>
+      </ul>
+    </nav>
+  </div>
+</footer>

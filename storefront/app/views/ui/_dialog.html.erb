@@ -1,0 +1,13 @@
+<dialog id="<%= id %>" data-controller="dialog" data-action="click->dialog#backdrop" class="w-[calc(100%-2rem)] max-w-lg rounded-xl border border-line bg-surface p-6 text-ink shadow-xl backdrop:bg-ink/40"<% if title %> aria-labelledby="<%= id %>-title"<% end %>>
+  <div class="flex items-start justify-between gap-4">
+    <% if title %>
+      <h2 id="<%= id %>-title" class="text-lg font-semibold text-ink"><%= title %></h2>
+    <% else %>
+      <span></span>
+    <% end %>
+    <button type="button" class="<%= button_classes(:ghost, size: :sm) %>" data-action="dialog#close" aria-label="<%= t("ui.close") %>">
+      <%= t("ui.close") %>
+    </button>
+  </div>
+  <div class="mt-4"><%= body %></div>
+</dialog>

@@ -1,0 +1,7 @@
+# The forms this storefront sends to the shop, created in the shop's admin when it's published
+# (docs/platform-v1.md §7). Messages land in the admin's inbox and the owner's email.
+- key: contact
+  title: Contact us
+  fields:
+    - { key: email, label: Email, type: email, required: true }
+    - { key: message, label: Message, type: textarea, required: true }

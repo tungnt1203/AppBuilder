@@ -1,0 +1,264 @@
+# Text for the storefront's screens. Rails' own messages (dates, numbers) come from the rails-i18n gem.
+en:
+  date:
+    formats:
+      delivery: "%b %-d"
+  products:
+    coming_soon:
+      visitors: Our first products are on their way. Check back soon.
+      owner: >-
+        Only you see this, in the preview: your products aren't in the shop yet. In the shop's admin, connect Printify (Settings
+        → Printify) and import products, or add them in Products.
+    product:
+      sold_out: Sold out
+      unavailable: Not available
+      sale: Sale
+    index:
+      title: Shop
+      search: Search products
+      collections: Shop by collection
+      sort: Sort by
+      sorts:
+        newest: Newest
+        price_asc: Price, low to high
+        price_desc: Price, high to low
+        title: Name
+      no_results: Nothing matches "%{query}".
+    show:
+      photo: Photo %{number}
+      quantity: Quantity
+      add_to_cart: Add to cart
+      unavailable: This color and size isn't available.
+      sold_out: This option is sold out.
+      zoom: See the photo larger
+      close: Close
+      find_option: Find a %{option}
+      made_to_order_sizes: Printed to order, so it can't be exchanged for another size. Check the size guide first.
+      returns_made_to_order: Returns for damaged or wrong items
+      save: Save %{percent}%
+      size_guide: Size guide
+      made_to_order: Printed just for you when you order
+      free_shipping_over: Free shipping over %{amount}
+      free_shipping: Free shipping
+      shipping_from: Shipping from %{amount}
+      returns: Easy returns
+      secure_checkout: Secure checkout
+      details: Details
+      shipping_and_returns: Shipping & returns
+      shipping_policy: Shipping policy
+      refund_policy: Refund policy
+      related: You may also like
+      reviews:
+        one: 1 review
+        other: "%{count} reviews"
+      reviews_title: Reviews
+      reviews_summary:
+        one: "%{average} out of 5, from 1 buyer"
+        other: "%{average} out of 5, from %{count} buyers"
+      verified_buyer: Verified buyer
+      max_length:
+        one: Up to 1 character
+        other: Up to %{count} characters
+      'yes': 'Yes'
+      'no': 'No'
+    delivery:
+      arrives: Arrives %{dates}
+    reviews:
+      rated: Rated %{rating} out of 5
+  orders:
+    statuses:
+      pending: Awaiting payment
+      paid: Paid
+      in_production: In production
+      shipped: Shipped
+      delivered: Delivered
+      cancelled: Cancelled
+      refunded: Refunded
+    show:
+      title: Order %{number}
+      thanks: Thank you, %{name}!
+      confirmation_sent: We've sent a confirmation to %{email}. Keep this page's link to check on your order.
+      placed_on: Placed %{date}
+      status_text:
+        pending: We've got your order. It goes into production once the payment is in.
+        paid: Payment received. Your order goes into production shortly.
+        in_production: Your order is being made.
+        shipped: Your order is on its way.
+        delivered: Your order has been delivered.
+        cancelled: This order was cancelled.
+        refunded: This order was refunded.
+        unpaid_card: Your order isn't paid yet. It goes into production as soon as the payment is in.
+      how_to_pay: How to pay
+      tracking: Tracking
+      track: Track your package
+      subtotal: Subtotal
+      shipping: Shipping
+      total: Total
+      ship_to: Shipping to
+      contact: Contact
+      questions: Questions?
+      card_processing: If you just paid, it can take a moment to show here. Refresh the page in a minute.
+      pay_now: Pay %{total}
+      discount: Discount (%{code})
+      tax: Tax
+      review_prompt: How do you like it?
+      review: Write a review
+    reviews:
+      nothing_to_review: There's nothing to review on this order yet.
+      new:
+        title: Write a review
+        intro: How do you like what you got in order %{number}? Tap the stars for what you'd like to review; the rest is optional.
+        rating_for: Your rating for %{product}
+        stars:
+          one: 1 star
+          other: "%{count} stars"
+        body: What did you think?
+        body_placeholder: The fit, the print, the quality, how it washes…
+        author_name: Name shown with your review
+        author_name_hint: Your email and address stay private.
+        submit: Post review
+      create:
+        pick_stars: Tap the stars to rate at least one product.
+        thanks:
+          one: Thanks for your review!
+          other: Thanks for your reviews!
+    payments:
+      show:
+        title: Pay for order %{number}
+        total: 'Total: %{total}'
+        pay: Pay %{total}
+        test_mode: 'This is a test payment: use Stripe''s test card 4242 4242 4242 4242, any future date and any CVC.'
+  home:
+    show:
+      tagline: Original designs, printed on demand and shipped to your door.
+      shop_all: Shop all
+      collections: Collections
+      new_arrivals: New arrivals
+      view_all: View all
+  collections:
+    show:
+      empty: Nothing in this collection yet.
+  feeds:
+    products:
+      description: Everything %{app} sells.
+  carts:
+    show:
+      title: Your cart
+      quantity: Quantity
+      update: Update
+      remove: Remove
+      subtotal: Subtotal
+      shipping_at_checkout: Shipping is added at checkout.
+      free_shipping_remaining_html: You're <strong>%{amount}</strong> away from free shipping.
+      free_shipping_unlocked: You've got free shipping.
+      checkout: Check out
+      continue: Continue shopping
+      empty: Your cart is empty.
+      start_shopping: Start shopping
+      free_shipping: Free shipping
+      remove_code: Remove
+      discount_code: Discount code
+      apply: Apply
+    discounts:
+      rate_limited: Too many tries. Please wait a minute.
+      create:
+        notice: Discount applied.
+  cart_items:
+    create:
+      added: "%{product} was added to your cart."
+      unavailable: That option isn't available any more.
+  checkouts:
+    empty: Your cart is empty.
+    rate_limited: Too many tries. Wait a minute and try again.
+    new:
+      title: Checkout
+      contact: Contact
+      email_hint: For your order confirmation and shipping updates.
+      phone_hint: Optional, for the delivery driver.
+      phone_required_hint: The carrier needs it to deliver your order.
+      choose_region: Choose…
+      shipping: Shipping address
+      summary: Order summary
+      subtotal: Subtotal
+      shipping_cost: Shipping
+      shipping_from_address: Enter your address
+      total_before_shipping: "%{total} + shipping"
+      continue_to_payment: Continue to payment
+      free: Free
+      total: Total
+      place_order: Place order
+      pay: Pay %{total}
+      secure: Payment is secure and encrypted. We never see your card.
+      payment: Payment
+      methods:
+        stripe: Card
+        stripe_hint: Pay securely with your card, Apple Pay or Google Pay on the next page.
+        manual: Bank transfer or other
+        manual_hint: After placing the order you'll see how to pay.
+      agreement_html: By placing your order you agree to our %{policies}.
+      discount: Discount (%{code})
+      tax_at_payment: Tax, if any, is added on the payment page.
+  policies:
+    titles:
+      refund: Refund policy
+      shipping: Shipping policy
+      privacy: Privacy policy
+      terms: Terms of service
+    updated: Last updated %{date}
+    shipping_summary:
+      free: Shipping is free on every order.
+      rates: Shipping is %{first} for the first item and %{additional} for each additional item.
+      free_from: Orders of %{amount} or more ship free.
+  contacts:
+    show:
+      title: Contact
+      intro: Questions about an order, sizing or anything else? We're happy to help.
+      email: Email
+      phone: Phone
+      address: Address
+      order_hint: About an order? Include your order number so we can help faster.
+      form_title: Send us a message
+      form_email: Your email
+      form_message: Message
+      form_send: Send
+  form_submissions:
+    rate_limited: Too many messages. Wait a minute and try again.
+    create:
+      sent: Thanks! We've got your message and will write back soon.
+  layouts:
+    site:
+      shop: Shop
+      cart_with_count:
+        zero: Cart
+        one: Cart, 1 item
+        other: Cart, %{count} items
+      footer_navigation: Shop information
+  ui:
+    menu: Menu
+    close: Close
+    skip: Skip to content
+    navigation: Navigation
+    breadcrumbs: Breadcrumb
+    form_errors:
+      heading:
+        one: '1 problem to fix:'
+        other: "%{count} problems to fix:"
+    pagination:
+      label: Pages
+      previous: Previous
+      next: Next
+      page: Page %{number} of %{pages}
+  activemodel:
+    attributes:
+      checkout_form:
+        email: Email
+        phone: Phone
+        shipping_name: Full name
+        shipping_address1: Address
+        shipping_address2: Apartment, suite, etc. (optional)
+        shipping_city: City
+        shipping_region: State / province
+        shipping_postal_code: ZIP / postal code
+        shipping_country: Country
+        note: Note for the shop (optional)
+        payment_method: Payment

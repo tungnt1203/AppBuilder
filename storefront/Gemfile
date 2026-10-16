@@ -1,0 +1,35 @@
+source "https://rubygems.org"
+
+# The storefront has no database: its shop lives on the Platform, which it reads and buys through
+# with storefront_kit (PLATFORM_URL, SHOP_KEY).
+gem "rails", "~> 8.1.4"
+gem "propshaft"
+gem "puma", ">= 5.0"
+gem "importmap-rails"
+gem "turbo-rails"
+gem "stimulus-rails"
+gem "tailwindcss-rails"
+gem "tzinfo-data", platforms: %i[ windows jruby ]
+gem "bootsnap", require: false
+gem "thruster", require: false
+gem "rails-i18n", "~> 8.1"
+gem "storefront_kit", path: "vendor/blocks/storefront_kit"
+
+group :development, :test do
+  gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "bundler-audit", require: false
+  gem "brakeman", require: false
+  gem "rubocop-rails-omakase", require: false
+  # Headless Chrome: bin/look (screenshots and checks of the running app) and system tests
+  gem "ferrum", require: false
+end
+
+group :development do
+  gem "web-console"
+end
+
+group :test do
+  # System tests in headless Chrome, without a driver to install [https://github.com/rubycdp/cuprite]
+  gem "capybara"
+  gem "cuprite"
+end

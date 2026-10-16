@@ -1,0 +1,176 @@
+#!/usr/bin/env ruby
+# Finds free stock photos for the app, with their credits:
+#
+#   bin/images "nail salon"                      3 landscape photos
+#   bin/images "latte art" --count 5 --orientation square
+#
+#   bin/images --check https://images.unsplash.com/photo-1604654894610-df63bc536371 …
+#
+# --check takes Unsplash photo links (or ids) you know, without a key: it says which
+# exist and saves a small copy of each to tmp/images/ to look at, so a remembered link
+# that is wrong is caught before it goes on a page.
+#
+# Search in English. Sources, in order:
+# - Unsplash (UNSPLASH_ACCESS_KEY): its terms want the photos shown from Unsplash's own
+#   address, so they're linked, not saved; a small copy goes to tmp/images/ to look at.
+# - Pexels (PEXELS_API_KEY), Pixabay (PIXABAY_API_KEY), then Openverse (no key, Creative
+#   Commons): saved to app/assets/images/stock/ for image_tag "stock/<file>".
+# Every photo is credited in app/assets/images/stock/CREDITS.md.
+require "json"
+require "net/http"
+require "optparse"
+require "fileutils"
+
+USAGE = "Usage: bin/images <words> [--count N] [--orientation landscape|portrait|square]\n" \
+        "       bin/images --check <unsplash links or ids>"
+
+options = { count: 3, orientation: "landscape" }
+OptionParser.new do |parser|
+  parser.banner = USAGE
+  parser.on("--check") { options[:check] = true }
+  parser.on("--count N", Integer) { |count| options[:count] = count.clamp(1, 10) }
+  parser.on("--orientation NAME", %w[ landscape portrait square ]) { |name| options[:orientation] = name }
+end.parse!
+
+query = ARGV.join(" ").strip
+abort USAGE if query.empty?
+
+Photo = Struct.new(:source, :id, :url, :credit, :page, :license, :preview, :used, keyword_init: true)
+
+def get(url, headers = {})
+  uri = URI(url)
+  request = Net::HTTP::Get.new(uri, { "User-Agent" => "app-builder-images" }.merge(headers))
+  response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 10, read_timeout: 30) { |http| http.request(request) }
+  response = get(response["location"], headers) if response.is_a?(Net::HTTPRedirection)
+  raise "#{uri.host} answered #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+  response
+end
+
+def credits_file
+  File.expand_path("../app/assets/images/stock/CREDITS.md", __dir__).tap do |path|
+    FileUtils.mkdir_p(File.dirname(path))
+    File.write(path, "# Stock photos\n\nWhere each photo in the app comes from.\n\n") unless File.exist?(path)
+  end
+end
+
+def preview_path(name)
+  File.expand_path("../tmp/images/#{name}.jpg", __dir__).tap { |path| FileUtils.mkdir_p(File.dirname(path)) }
+end
+
+# Free Unsplash photos are images.unsplash.com/photo-<id>; Unsplash+ ones (premium_photo,
+# plus.unsplash.com) need a paid licence.
+def check_unsplash(links)
+  results = links.map do |link|
+    id = link[/(?<![a-z_])photo-([0-9]+-[0-9a-f]+)/, 1] || link[/\A([0-9]+-[0-9a-f]+)\z/, 1]
+    next "NOT FREE #{link} (Unsplash+)" if link.include?("premium_photo") || link.include?("plus.unsplash.com")
+    next "NOT AN UNSPLASH PHOTO #{link}" unless id
+
+    url = "https://images.unsplash.com/photo-#{id}?w=1600&q=80&fm=jpg&fit=max"
+    File.binwrite(preview_path("unsplash-#{id}"), get("https://images.unsplash.com/photo-#{id}?w=480&q=70&fm=jpg").body)
+    File.write(credits_file, "- #{url}: Unsplash photo, Unsplash License.\n", mode: "a") unless File.read(credits_file).include?(url)
+    "LINK #{url}\n  look at: tmp/images/unsplash-#{id}.jpg"
+  rescue => error
+    "MISSING #{link} (#{error.message})"
+  end
+
+  puts results
+  puts "Read each copy and keep only the photos that show what you meant; remove the others' lines from CREDITS.md."
+  exit(results.any? { |line| line.start_with?("LINK") } ? 0 : 1)
+end
+
+def unsplash(query, count, orientation)
+  return [] if (key = ENV["UNSPLASH_ACCESS_KEY"].to_s).empty?
+
+  referral = "utm_source=app_builder&utm_medium=referral"
+  params = URI.encode_www_form(query:, per_page: count, content_filter: "high", orientation: orientation.sub("square", "squarish"))
+  JSON.parse(get("https://api.unsplash.com/search/photos?#{params}", "Authorization" => "Client-ID #{key}").body)["results"].map do |photo|
+    Photo.new(source: "unsplash", id: photo["id"], url: "#{photo.dig("urls", "raw")}&w=1600&q=80&fm=jpg&fit=max", preview: photo.dig("urls", "small"),
+              page: "#{photo.dig("links", "html")}?#{referral}", license: "Unsplash License",
+              credit: "Photo by #{photo.dig("user", "name")} (#{photo.dig("user", "links", "html")}?#{referral}) on Unsplash (https://unsplash.com/?#{referral})",
+              used: -> { get(photo.dig("links", "download_location"), "Authorization" => "Client-ID #{key}") })
+  end
+end
+
+def pexels(query, count, orientation)
+  return [] if (key = ENV["PEXELS_API_KEY"].to_s).empty?
+
+  params = URI.encode_www_form(query:, per_page: count, orientation:)
+  JSON.parse(get("https://api.pexels.com/v1/search?#{params}", "Authorization" => key).body)["photos"].map do |photo|
+    Photo.new(source: "pexels", id: photo["id"], url: photo.dig("src", "large2x"), page: photo["url"], license: "Pexels License",
+              credit: "Photo by #{photo["photographer"]} on Pexels")
+  end
+end
+
+def pixabay(query, count, orientation)
+  return [] if (key = ENV["PIXABAY_API_KEY"].to_s).empty?
+
+  params = URI.encode_www_form(key:, q: query, image_type: "photo", safesearch: true, per_page: count.clamp(3, 200),
+                               orientation: { "landscape" => "horizontal", "portrait" => "vertical" }.fetch(orientation, "all"))
+  JSON.parse(get("https://pixabay.com/api/?#{params}").body)["hits"].map do |hit|
+    Photo.new(source: "pixabay", id: hit["id"], url: hit["largeImageURL"], page: hit["pageURL"], license: "Pixabay Content License",
+              credit: "Image by #{hit["user"]} from Pixabay")
+  end
+end
+
+def openverse(query, count, orientation)
+  params = URI.encode_www_form(q: query, license: "cc0,pdm,by", category: "photograph", mature: false, page_size: count * 2,
+                               aspect_ratio: { "landscape" => "wide", "portrait" => "tall", "square" => "square" }[orientation])
+  JSON.parse(get("https://api.openverse.org/v1/images/?#{params}").body)["results"].map do |result|
+    license = [ "CC", result["license"].to_s.upcase, result["license_version"] ].compact.join(" ").sub("CC CC0", "CC0").sub("CC PDM", "Public domain")
+    Photo.new(source: "openverse", id: result["id"].to_s[0, 8], url: result["url"], page: result["foreign_landing_url"], license:,
+              credit: "“#{result["title"].to_s[0, 60].strip}” by #{result["creator"] || "unknown"}")
+  end
+end
+
+check_unsplash(ARGV) if options[:check]
+
+photos = []
+errors = []
+%i[ unsplash pexels pixabay openverse ].each do |source|
+  break if photos.size >= options[:count]
+
+  begin
+    photos.concat(send(source, query, options[:count], options[:orientation]))
+  rescue => error
+    errors << "#{source}: #{error.message}"
+  end
+end
+
+credits = credits_file
+dir = File.dirname(credits)
+slug = query.downcase.gsub(/[^a-z0-9]+/, "-").delete_prefix("-").delete_suffix("-")
+
+saved = []
+photos.each do |photo|
+  break if saved.size >= options[:count]
+
+  if photo.preview
+    preview = preview_path("#{photo.source}-#{photo.id}")
+    File.binwrite(preview, get(photo.preview).body)
+    photo.used.() # Unsplash counts a photo as used through this
+    File.write(credits, "- #{photo.url}: #{photo.credit}, #{photo.license}. #{photo.page}\n", mode: "a") unless File.read(credits).include?(photo.url)
+    saved << "LINK #{photo.url}\n  look at: tmp/images/#{File.basename(preview)}\n  credit: #{photo.credit}"
+    next
+  end
+
+  file = "#{slug}-#{photo.source}-#{photo.id}.jpg"
+  path = File.join(dir, file)
+  unless File.exist?(path)
+    response = get(photo.url)
+    next unless response["content-type"].to_s.start_with?("image/jpeg")
+
+    File.binwrite(path, response.body)
+    File.write(credits, "- `#{file}`: #{photo.credit}, #{photo.license}. #{photo.page}\n", mode: "a")
+  end
+  saved << "app/assets/images/stock/#{file}  (#{File.size(path) / 1024} KB) #{photo.credit}"
+rescue => error
+  errors << "#{photo.url}: #{error.message}"
+end
+
+warn errors.map { |error| "Skipped #{error}" } if errors.any?
+abort "No photos found for “#{query}”. Try other or fewer English words, or again in a minute." if saved.empty?
+
+puts saved
+puts "Look at them (Read the files) before using one."
+puts "Unsplash photos (LINK): use the URL as it is in image_tag, and show their credit with both links on the page." if saved.any? { |line| line.start_with?("LINK") }
+puts "Openverse photos under CC BY need their credit (from CREDITS.md) on the page, near the photo or in the footer." if saved.any? { |line| line.include?("-openverse-") }

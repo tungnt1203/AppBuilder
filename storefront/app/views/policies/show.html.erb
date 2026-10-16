@@ -1,0 +1,6 @@
+<% content_for :title, @policy.title %>
+
+<article class="mx-auto max-w-3xl px-4 py-12 leading-relaxed text-ink">
+  <h1 class="font-display text-3xl font-semibold tracking-tight md:text-4xl"><%= @policy.title %></h1>
+  <div class="mt-4"><%= policy_text @policy.body %></div>
+</article>

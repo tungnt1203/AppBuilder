@@ -83,8 +83,10 @@ Every change to a cart answers with the whole cart.
 **Product (one)** has all of the above, plus:
 
 - `description`, `size_guide` and `size_option` (the option a size guide is for, e.g. "Size").
+- `made_to_order`: true for a product printed by Printify when ordered (it can't be exchanged for a size).
 - `options`: `[{ "name": "Color", "values": ["Black"], "colors": { "Black": "#000000" } }]`.
-- `variants`: `[{ "id", "title": "Black / S", "options": ["Black", "S"], "sku", "price_cents", "compare_at_price_cents", "available", "stock", "image_id" }]`.
+- `variants`: `[{ "id", "title": "Black / S", "options": ["Black", "S"], "sku", "catalog_id", "price_cents", "compare_at_price_cents", "available", "stock", "image_id" }]`.
+  - `catalog_id` is the id the ad pixels and the product feed use (the SKU, or `variant-<id>`), the same Meta's Conversions API gets from the Platform.
   - `stock` is only there when stock is low.
   - `image_id` is the photo that shows that variant.
 - `images`: photos, each with `option_value`, the option value it shows.
@@ -95,6 +97,7 @@ Every change to a cart answers with the whole cart.
 **Cart line** and **order line** include `properties` when the buyer typed something: `[{ "key", "label", "value" }]`. Printify can't get that text from the Platform, so an order with it isn't sent automatically: the shop's staff make it in Printify and link it in the admin (or send it without the text, for a gift note). Tracking and status then come back as for any order.
 
 **Shop** includes `theme_settings`: the storefront's declared settings, each merged with its default. An image setting is an absolute URL, or null until the owner uploads one.
+Its `shipping` has `delivery_dates` (`{ first, last }`, the dates an order placed today should arrive, when the shop says how long delivery takes) and `countries` for checkout: `[{ "code": "US", "name": "United States", "regions": { "CA": "California", … } }]`, `regions` null where the state is typed in. `tax_at_payment` is true when Stripe Tax adds tax on the payment page.
 
 **Page**: `{ "slug", "title", "blocks" }`. A block is `{ "type": "text", "body" }` or `{ "type": "faq", "items": [{ "question", "answer" }] }`.
 
@@ -123,7 +126,7 @@ Only lines that can still be bought are there.
 
 Answers `201 { order }` or `422` with `fields`.
 
-**Order**: `{ token, number, name, status, test, placed_at, paid_at, shipped_at, delivered_at, cancelled_at, refunded_at, email, currency, items, subtotal_cents, discount_cents, discount_code, shipping_cents, tax_cents, total_cents, refunded_cents, shipping_address, payment: { method, required, instructions }, tracking: { carrier, number, url }, reviewable_products: [{ slug, title }] }`.
+**Order**: `{ token, number, name, status, test, placed_at, paid_at, shipped_at, delivered_at, cancelled_at, refunded_at, email, currency, items (each with its `catalog_id`), subtotal_cents, discount_cents, discount_code, shipping_cents, tax_cents, total_cents, refunded_cents, shipping_address, payment: { method, required, instructions }, tracking: { carrier, number, url }, reviewable_products: [{ slug, title }] }`.
 
 - `status` is one of `pending`, `paid`, `in_production`, `shipped`, `delivered`, `cancelled`,
   `refunded`.

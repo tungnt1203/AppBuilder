@@ -1,0 +1,21 @@
+<%# The site's header. Redesign it for the shop: logo or wordmark, the few links visitors need
+    (the owner's "header" menu, from the admin), and the cart. Pages can add links with
+    content_for :site_nav. %>
+<header class="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
+  <div class="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4">
+    <%= link_to current_shop.name, root_path, class: "mr-2 truncate font-display font-semibold text-ink" %>
+    <nav class="flex flex-1 items-center gap-1 overflow-x-auto" aria-label="<%= t("ui.navigation") %>">
+      <%= bar_link_to t("layouts.site.shop"), products_path %>
+      <% shop_menu(:header)&.items&.each do |item| %>
+        <%= shop_menu_link item, class: "rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap text-muted hover:bg-surface-muted hover:text-ink" %>
+      <% end %>
+      <%= yield :site_nav %>
+    </nav>
+    <%= link_to cart_path, class: "#{button_classes(:ghost)} relative", id: "cart-link", aria: { label: t("layouts.site.cart_with_count", count: cart_item_count) } do %>
+      <%= icon "shopping-bag", size: 20 %>
+      <% if cart_item_count.positive? %>
+        <span class="absolute -top-0.5 -right-0.5 grid min-w-5 place-items-center rounded-full bg-brand-600 px-1 text-[0.6875rem] leading-5 font-semibold text-white"><%= cart_item_count %></span>
+      <% end %>
+    <% end %>
+  </div>
+</header>

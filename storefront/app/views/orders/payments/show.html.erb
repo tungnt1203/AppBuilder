@@ -1,0 +1,28 @@
+<% content_for :title, t(".title", number: @order.name) %>
+<% content_for :head do %>
+  <meta name="robots" content="noindex">
+  <%# Stripe asks for its script from js.stripe.com itself, never a copy. %>
+  <script src="https://js.stripe.com/v3/" async></script>
+<% end %>
+
+<%# Paying a card order with Stripe's Payment Element (card, Apple Pay, Google Pay…). Stripe
+    sends the buyer back to the order's page, which shows it paid. %>
+<div class="mx-auto max-w-lg px-4 py-12">
+  <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title", number: @order.name) %></h1>
+  <p class="mt-2 text-muted"><%= t(".total", total: money(@payment.amount_cents, @payment.currency)) %></p>
+  <% if @payment.test_mode %>
+    <p class="mt-4 rounded-lg bg-yellow-50 px-4 py-3 text-sm text-yellow-900"><%= t(".test_mode") %></p>
+  <% end %>
+
+  <%= tag.form class: "mt-8 space-y-6", data: {
+        controller: "stripe-payment", action: "stripe-payment#pay",
+        stripe_payment_publishable_key_value: @payment.publishable_key, stripe_payment_client_secret_value: @payment.client_secret,
+        stripe_payment_return_url_value: order_url(@order, placed: 1), stripe_payment_email_value: @order.email } do %>
+    <div data-stripe-payment-target="element" class="min-h-40"></div>
+    <p class="text-sm text-red-600" data-stripe-payment-target="error" hidden></p>
+    <button type="submit" class="<%= button_classes %> w-full py-3 text-base" data-stripe-payment-target="button" disabled>
+      <%= icon "lock", size: 18 %> <%= t(".pay", total: money(@payment.amount_cents, @payment.currency)) %>
+    </button>
+  <% end %>
+  <p class="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted"><%= icon "lock", size: 14 %> <%= t("checkouts.new.secure") %></p>
+</div>

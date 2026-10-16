@@ -1,0 +1,45 @@
+<% content_for :title, t(".title") %>
+
+<div class="mx-auto max-w-3xl px-4 py-12">
+  <h1 class="font-display text-3xl font-semibold tracking-tight md:text-4xl"><%= t(".title") %></h1>
+  <p class="mt-3 text-lg leading-relaxed text-muted"><%= t(".intro") %></p>
+
+  <% contact = current_shop.contact %>
+  <dl class="mt-8 space-y-6">
+    <% if contact&.email.present? %>
+      <div class="flex gap-4">
+        <%= icon "mail", size: 22, class: "mt-0.5 shrink-0 text-brand-600" %>
+        <div><dt class="font-semibold"><%= t(".email") %></dt><dd class="mt-1"><%= mail_to contact.email, class: link_classes %></dd></div>
+      </div>
+    <% end %>
+    <% if contact&.phone.present? %>
+      <div class="flex gap-4">
+        <%= icon "phone", size: 22, class: "mt-0.5 shrink-0 text-brand-600" %>
+        <div><dt class="font-semibold"><%= t(".phone") %></dt><dd class="mt-1"><%= link_to contact.phone, "tel:#{contact.phone.delete("^0-9+")}", class: link_classes %></dd></div>
+      </div>
+    <% end %>
+    <% if contact&.address.present? %>
+      <div class="flex gap-4">
+        <%= icon "map-pin", size: 22, class: "mt-0.5 shrink-0 text-brand-600" %>
+        <div><dt class="font-semibold"><%= t(".address") %></dt><dd class="mt-1 text-muted"><%= simple_format contact.address, {}, wrapper_tag: "span" %></dd></div>
+      </div>
+    <% end %>
+  </dl>
+
+  <%# The contact form (config/forms.yml): messages land in the shop's inbox and the owner's email. %>
+  <%= form_with url: form_submissions_path("contact"), class: "mt-10 space-y-4 rounded-xl border border-line bg-surface p-6" do |form| %>
+    <h2 class="text-lg font-semibold"><%= t(".form_title") %></h2>
+    <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
+    <div class="space-y-1.5">
+      <%= label_tag "answers_email", t(".form_email") %>
+      <%= email_field_tag "answers[email]", nil, id: "answers_email", required: true, autocomplete: "email", class: field_classes %>
+    </div>
+    <div class="space-y-1.5">
+      <%= label_tag "answers_message", t(".form_message") %>
+      <%= text_area_tag "answers[message]", nil, id: "answers_message", required: true, rows: 4, class: field_classes %>
+    </div>
+    <%= form.submit t(".form_send") %>
+  <% end %>
+
+  <p class="mt-10 text-sm text-muted"><%= t(".order_hint") %></p>
+</div>

@@ -1,0 +1,106 @@
+<% content_for :title, t(".title") %>
+
+<div class="mx-auto max-w-5xl px-4 py-12">
+  <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
+
+  <%= form_with model: @checkout, url: checkout_path, scope: :checkout, class: "mt-8 grid gap-10 md:grid-cols-[1fr_22rem]",
+        data: { turbo: false, controller: "checkout-totals", checkout_totals_url_value: shipping_checkout_path,
+                action: "change->checkout-totals#refresh" } do |form| %>
+    <div class="space-y-8">
+      <%= form.errors %>
+      <%# A new key on every form shown: sent twice (a double tap), the order is placed once. %>
+      <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
+
+      <fieldset class="space-y-4">
+        <legend class="mb-4 text-lg font-semibold"><%= t(".contact") %></legend>
+        <%= form.field :email, :email_field, required: true, autocomplete: "email", hint: t(".email_hint") %>
+        <%= form.field :phone, :telephone_field, autocomplete: "tel", required: @quote.phone_required?,
+              hint: t(@quote.phone_required? ? ".phone_required_hint" : ".phone_hint") %>
+      </fieldset>
+
+      <% countries = current_shop.shipping.countries %>
+      <% regions = countries.find { |country| country.code == @checkout.shipping_country }&.regions %>
+      <fieldset class="space-y-4" data-controller="region" data-region-names-value="<%= countries.to_h { |country| [ country.code, country.regions ] }.compact.to_json %>" data-region-lookup-url-value="<%= zip_code_path("ZIP") %>">
+        <legend class="mb-4 text-lg font-semibold"><%= t(".shipping") %></legend>
+        <div class="space-y-1.5">
+          <%= form.label :shipping_country %>
+          <%= form.select :shipping_country, countries.map { |country| [ country.name, country.code ] }, {}, autocomplete: "country",
+                data: { region_target: "country", action: "region#update" } %>
+        </div>
+        <%= form.field :shipping_name, required: true, autocomplete: "name" %>
+        <%= form.field :shipping_address1, required: true, autocomplete: "address-line1" %>
+        <%= form.field :shipping_address2, autocomplete: "address-line2" %>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <%= form.field :shipping_postal_code, autocomplete: "postal-code", required: regions.present?, inputmode: (@checkout.shipping_country == "US" ? "numeric" : nil),
+                data: { region_target: "postalCode", action: "input->region#lookup" } %>
+          <%= form.field :shipping_city, required: true, autocomplete: "address-level2", data: { region_target: "city" } %>
+          <div class="space-y-1.5">
+            <%= form.label :shipping_region %>
+            <%= form.select :shipping_region, (regions || {}).map { |code, name| [ name, code ] }, { include_blank: t(".choose_region") },
+                  autocomplete: "address-level1", required: true, hidden: regions.nil?, disabled: regions.nil?, data: { region_target: "select" } %>
+            <%= form.text_field :shipping_region, autocomplete: "address-level1", hidden: regions.present?, disabled: regions.present?,
+                  id: "checkout_shipping_region_text", data: { region_target: "input" } %>
+          </div>
+        </div>
+        <%= form.field :note, :text_area, rows: 2 %>
+      </fieldset>
+
+      <fieldset>
+        <legend class="mb-4 text-lg font-semibold"><%= t(".payment") %></legend>
+        <% if @quote.payment_methods.many? %>
+          <div class="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+            <% @quote.payment_methods.each do |method| %>
+              <label class="flex cursor-pointer items-start gap-3 p-4 has-checked:bg-brand-50">
+                <%= form.radio_button :payment_method, method, class: "mt-1 size-4 accent-brand-600" %>
+                <span>
+                  <span class="flex items-center gap-2 font-medium"><%= icon(method == "stripe" ? "credit-card" : "banknote", size: 18) %> <%= t(".methods.#{method}") %></span>
+                  <span class="mt-0.5 block text-sm text-muted"><%= t(".methods.#{method}_hint") %></span>
+                </span>
+              </label>
+            <% end %>
+          </div>
+        <% else %>
+          <%= form.hidden_field :payment_method %>
+          <p class="flex items-start gap-3 rounded-xl border border-line bg-surface p-4 text-sm">
+            <%= icon(@checkout.payment_method == "stripe" ? "lock" : "banknote", size: 18, class: "mt-0.5 shrink-0 text-muted") %>
+            <span><%= t(".methods.#{@checkout.payment_method}_hint") %></span>
+          </p>
+        <% end %>
+      </fieldset>
+    </div>
+
+    <aside class="h-fit space-y-4 rounded-xl border border-line bg-surface p-6 md:sticky md:top-20">
+      <h2 class="text-lg font-semibold"><%= t(".summary") %></h2>
+      <ul class="space-y-3 text-sm">
+        <% @quote.items.each do |item| %>
+          <li class="flex items-center gap-3">
+            <span class="relative shrink-0">
+              <%= product_image item.product, size: :thumb, class: "size-14 rounded-lg" %>
+              <span class="absolute -top-1.5 -right-1.5 grid min-w-5 place-items-center rounded-full bg-ink px-1 text-[0.6875rem] leading-5 font-semibold text-canvas"><%= item.quantity %></span>
+            </span>
+            <span class="min-w-0 flex-1">
+              <%= item.product.title %>
+              <% if item.variant.title %><span class="block text-muted"><%= item.variant.title %></span><% end %>
+              <% item.properties.each do |property| %><span class="block text-muted"><%= property.label %>: <%= property.value %></span><% end %>
+            </span>
+            <span class="whitespace-nowrap"><%= money(item.line_total_cents) %></span>
+          </li>
+        <% end %>
+      </ul>
+      <%= render "checkouts/totals", quote: @quote, payment_method: @checkout.payment_method %>
+      <ul class="space-y-1.5 text-xs text-muted">
+        <% if @quote.payment_methods.include?("stripe") %>
+          <li class="flex items-center gap-1.5"><%= icon "lock", size: 14 %> <%= t(".secure") %></li>
+        <% end %>
+        <% if (estimate = delivery_estimate) %>
+          <li class="flex items-center gap-1.5"><%= icon "truck", size: 14 %> <%= estimate %></li>
+        <% end %>
+      </ul>
+      <% if (policies = current_shop.policies.select { |policy| policy["id"].in?(%w[ terms refund ]) }).any? %>
+        <p class="text-xs text-muted">
+          <%= t(".agreement_html", policies: to_sentence(policies.map { |policy| link_to(policy["title"], policy_path(policy["id"]), target: "_blank", class: "underline hover:text-ink") })) %>
+        </p>
+      <% end %>
+    </aside>
+  <% end %>
+</div>

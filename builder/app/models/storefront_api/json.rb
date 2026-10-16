@@ -14,8 +14,11 @@ class StorefrontApi::Json
       announcement: @store.announcement,
       shipping: { first_item_cents: @store.shipping_first_item_cents, additional_item_cents: @store.shipping_additional_item_cents,
         free_over_cents: @store.free_shipping_threshold_cents, ships_to: @store.ship_to_countries.presence,
-        delivery_days: ({ min: @store.delivery_days_min, max: @store.delivery_days_max || @store.delivery_days_min } if @store.delivery_days_min) },
+        delivery_days: ({ min: @store.delivery_days_min, max: @store.delivery_days_max || @store.delivery_days_min } if @store.delivery_days_min),
+        delivery_dates: @store.delivery_dates&.then { |first, last| { first: first.iso8601, last: last.iso8601 } },
+        countries: @store.countries_for_checkout.map { |name, code| { code:, name:, regions: Region.for(code) } } },
       payment_methods: @store.payment_methods,
+      tax_at_payment: @store.stripe_tax? && @store.payment_methods.include?("stripe"),
       payment_instructions: @store.payment_instructions.presence,
       pixels: { meta: @store.meta_pixel_id, tiktok: @store.tiktok_pixel_id, google: @store.google_tag_id },
       policies: @store.published_policies.map { |id| { id:, title: I18n.t("policies.titles.#{id}") } },
@@ -41,6 +44,7 @@ class StorefrontApi::Json
       description: product.description.presence,
       size_guide: product.size_guide.presence,
       size_option: product.size_option_name,
+      made_to_order: product.printify_product_id.present?,
       options: product.options.map { |_slot, name, values|
         { name:, values:, colors: (values.index_with { |value| product.option_colors[value] }.compact.presence if name.match?(/\bcolou?r\b/i)) }.compact
       },
@@ -54,7 +58,7 @@ class StorefrontApi::Json
 
   def variant(variant, product = variant.product)
     {
-      id: variant.id, title: variant.title, options: variant.option_values, sku: variant.sku,
+      id: variant.id, title: variant.title, options: variant.option_values, sku: variant.sku, catalog_id: variant.catalog_id,
       price_cents: variant.price_cents, compare_at_price_cents: (variant.compare_at_price_cents if variant.on_sale?),
       available: variant.buyable?,
       stock: (variant.inventory_quantity if variant.track_inventory? && variant.low_stock?),
@@ -103,7 +107,7 @@ class StorefrontApi::Json
       delivered_at: order.delivered_at&.iso8601, cancelled_at: order.cancelled_at&.iso8601, refunded_at: order.refunded_at&.iso8601,
       email: order.email, currency: order.currency,
       items: order.line_items.map { |item|
-        line = { title: item.product_title, variant_title: item.variant_title, quantity: item.quantity,
+        line = { title: item.product_title, variant_title: item.variant_title, catalog_id: item.variant&.catalog_id || item.sku.presence, quantity: item.quantity,
           unit_price_cents: item.unit_price_cents, line_total_cents: item.unit_price_cents * item.quantity,
           product_slug: item.variant&.product&.slug, image: (image(item.variant.product.image_for(item.variant), alt: item.product_title) if item.variant) }
         line[:properties] = property_entries(item) if item.properties.present?

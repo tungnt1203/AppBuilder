@@ -1,0 +1,150 @@
+require "test_helper"
+
+class BuyingTest < ActionDispatch::IntegrationTest
+  ADDRESS = { email: "robin@example.com", phone: "", shipping_name: "Robin Buyer", shipping_address1: "5 Elm St", shipping_city: "Austin",
+    shipping_region: "TX", shipping_postal_code: "78701", shipping_country: "US" }.freeze
+
+  test "a buyer adds to the cart, changes it, uses a code and pays by bank transfer" do
+    post cart_items_path, params: { variant_id: 102, quantity: 2 }
+    assert_redirected_to cart_path
+    follow_redirect!
+    assert_select "#notice", /Cat Tee was added/
+    assert_select "a", "Check out"
+    assert_select "header span", "2"
+
+    item = @platform.carts.values.sole["lines"].sole
+    patch cart_item_path(item["id"]), params: { quantity: 3 }
+    post cart_discount_path, params: { code: "nope" }
+    follow_redirect!
+    assert_select "#alert", "That code doesn't exist"
+    post cart_discount_path, params: { code: "save10" }
+    follow_redirect!
+    assert_select "span", "SAVE10"
+    assert_select "p", /\$72\.00/
+
+    get new_checkout_path
+    assert_response :success
+    assert_select "select[name='checkout[shipping_country]'] option[value=US][selected]"
+    assert_select "[data-region-names-value*=Texas]"
+
+    post checkout_path, params: { idempotency_key: "k1", checkout: ADDRESS.merge(payment_method: "manual") }
+    order = @platform.orders.values.sole
+    assert_redirected_to order_path(order["token"], placed: 1)
+    follow_redirect!
+    assert_select "p", /Thank you, Robin Buyer/
+    assert_select "h2", "How to pay"
+    assert_select "p", /bank transfer to 123-456/
+    assert_equal 7200 - 720, order["subtotal_cents"] - order["discount_cents"]
+  end
+
+  test "a card order goes to Stripe's Payment Element, and shows paid once Stripe took it" do
+    post cart_items_path, params: { variant_id: 101 }
+    post checkout_path, params: { idempotency_key: "k2", checkout: ADDRESS.merge(payment_method: "stripe") }
+    token = @platform.orders.keys.sole
+    assert_redirected_to order_payment_path(token)
+
+    follow_redirect!
+    assert_select "script[src='https://js.stripe.com/v3/']"
+    assert_select "form[data-controller=stripe-payment][data-stripe-payment-client-secret-value=?]", "pi_fake_secret_#{token}"
+    assert_select "form[data-stripe-payment-return-url-value=?]", order_url(token, placed: 1)
+
+    get order_path(token)
+    assert_select "a[href=?]", order_payment_path(token)
+
+    @platform.pay!(token)
+    get order_path(token, placed: 1)
+    assert_select "p", /Thank you/
+    get order_payment_path(token)
+    assert_redirected_to order_path(token)
+  end
+
+  test "what the Platform finds wrong shows on the checkout form" do
+    post cart_items_path, params: { variant_id: 101 }
+    post checkout_path, params: { checkout: ADDRESS.merge(email: "nope", shipping_city: "", payment_method: "manual") }
+    assert_response :unprocessable_entity
+    assert_select "p.text-red-600", "Email is invalid"
+    assert_select "p.text-red-600", "City can't be blank"
+    assert_empty @platform.orders
+  end
+
+  test "checkout's totals follow the address, and an empty cart goes back to the cart" do
+    get new_checkout_path
+    assert_redirected_to cart_path
+
+    post cart_items_path, params: { variant_id: 101 }
+    get shipping_checkout_path(shipping_country: "US", shipping_postal_code: "78701", payment_method: "manual"), headers: { "Turbo-Frame" => "checkout_totals" }
+    assert_select "turbo-frame#checkout_totals dd", "$4.75"
+    assert_select "input[type=submit][value='Place order']"
+  end
+
+  test "what the buyer types to be printed goes with the line, and is asked for when it must be" do
+    @platform.products_data.first["buyer_inputs"] = [ { "key" => "print_name", "label" => "Name on the shirt", "required" => true, "max_length" => 20 } ]
+    get product_path("cat-tee")
+    assert_select "input[name='properties[print_name]'][required][maxlength='20']"
+
+    post cart_items_path, params: { variant_id: 101 }
+    assert_redirected_to products_path
+    follow_redirect!
+    assert_select "#alert", "can't be blank"
+
+    post cart_items_path, params: { variant_id: 101, properties: { print_name: "Ada" } }
+    follow_redirect!
+    assert_select "p", /Name on the shirt: Ada/
+  end
+
+  test "something that can't be bought isn't added" do
+    post cart_items_path, params: { variant_id: 104 }
+    follow_redirect!
+    assert_select "#alert", "That option isn't available any more."
+  end
+
+  test "ad pixels get the purchase once, with the catalog ids" do
+    @platform.shop_data["pixels"]["meta"] = "123"
+    post cart_items_path, params: { variant_id: 101 }
+    post checkout_path, params: { checkout: ADDRESS.merge(payment_method: "manual") }
+    assert_equal "123", @platform.shop.pixels.meta
+    sent = @platform.requests.find { |name, _| name == :place_order }.last
+    assert_equal "Robin Buyer", sent[:shipping_name]
+    assert sent[:attribution].key?(:ip)
+
+    follow_redirect!
+    assert_select "meta[name=tracking][content*='123']"
+    assert_match(/"name":"purchase"/, css_select("#tracking-events").text)
+    get order_path(@platform.orders.keys.sole, placed: 1)
+    assert_no_match(/"name":"purchase"/, css_select("#tracking-events").text)
+  end
+
+  test "a buyer reviews what they got once it shipped" do
+    post cart_items_path, params: { variant_id: 101 }
+    post checkout_path, params: { checkout: ADDRESS.merge(payment_method: "manual") }
+    token = @platform.orders.keys.sole
+    get new_order_review_path(token)
+    assert_redirected_to order_path(token)
+
+    @platform.ship!(token)
+    get order_path(token)
+    assert_select "a", "Track your package"
+    get new_order_review_path(token)
+    assert_select "input[name=author_name][value='Robin B.']"
+
+    post order_review_path(token), params: { author_name: "Robin B.", reviews: { "cat-tee" => { rating: "", body: "" } } }
+    assert_response :unprocessable_entity
+    post order_review_path(token), params: { author_name: "Robin B.", reviews: { "cat-tee" => { rating: "5", body: "Love it" } } }
+    assert_redirected_to order_path(token)
+  end
+
+  test "the contact form reaches the shop" do
+    get contact_path
+    assert_select "a[href='mailto:hello@chubbycat.example']"
+    post form_submissions_path("contact"), params: { answers: { email: "a@b.co", message: "Hi" } }, headers: { "Referer" => contact_url }
+    assert_redirected_to contact_url
+    assert_equal [ { key: "contact", answers: { "email" => "a@b.co", "message" => "Hi" } } ], @platform.form_submissions
+  end
+
+  test "the ZIP code fills in the city and state" do
+    get zip_code_path("78701")
+    assert_equal({ "state" => "TX", "city" => "Austin" }, response.parsed_body)
+    get zip_code_path("00000")
+    assert_response :not_found
+  end
+end

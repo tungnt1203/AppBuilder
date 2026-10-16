@@ -19,8 +19,12 @@ class StorefrontApi::CatalogTest < ActionDispatch::IntegrationTest
   test "the shop: name, money, shipping, payments, policies" do
     shop = api(:get, storefront_api_shop_path)["shop"]
     assert_equal [ "Chubby Cat Tees", "USD", false ], shop.values_at("name", "currency", "preview")
-    assert_equal({ "first_item_cents" => 500, "additional_item_cents" => 200, "free_over_cents" => 10000, "ships_to" => %w[ CA GB US ], "delivery_days" => nil },
-      shop["shipping"])
+    assert_equal({ "first_item_cents" => 500, "additional_item_cents" => 200, "free_over_cents" => 10000, "ships_to" => %w[ CA GB US ], "delivery_days" => nil, "delivery_dates" => nil },
+      shop["shipping"].except("countries"))
+    assert_equal %w[ CA GB US ], shop["shipping"]["countries"].pluck("code")
+    assert_equal "California", shop["shipping"]["countries"].last.dig("regions", "CA")
+    assert_nil shop["shipping"]["countries"].second["regions"]
+    assert_equal false, shop["tax_at_payment"]
     assert_equal [ "manual" ], shop["payment_methods"]
     assert_equal "hello@example.com", shop.dig("contact", "email")
 
@@ -51,7 +55,8 @@ class StorefrontApi::CatalogTest < ActionDispatch::IntegrationTest
     assert_equal [ "Cat Mom Tee", "Soft cotton tee with a hand-drawn cat.", "Size" ], product.values_at("title", "description", "size_option")
     assert_equal [ { "name" => "Color", "values" => %w[ Black White ] }, { "name" => "Size", "values" => %w[ S M ] } ], product["options"]
     variant = product["variants"].first
-    assert_equal [ "Black / S", %w[ Black S ], "TEE-BLK-S", 2400, true ], variant.values_at("title", "options", "sku", "price_cents", "available")
+    assert_equal [ "Black / S", %w[ Black S ], "TEE-BLK-S", "TEE-BLK-S", 2400, true ], variant.values_at("title", "options", "sku", "catalog_id", "price_cents", "available")
+    assert_equal false, product["made_to_order"]
     assert_equal [ { "slug" => "cat-lovers", "title" => "Cat Lovers" } ], product["collections"]
 
     api :get, storefront_api_product_path("draft-hoodie")
