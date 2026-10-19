@@ -1447,7 +1447,9 @@
 
   .admin-shell { display: grid; min-height: 100vh; grid-template-columns: 15rem minmax(0, 1fr); }
   .admin-side {
-    position: sticky; top: 0; height: 100vh;
+    position: sticky; top: 0; height: 100vh; height: 100dvh;
+    /* A shop's links outgrow a short window: the sidebar scrolls by itself instead of spilling out. */
+    overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.2) transparent;
     display: flex; flex-direction: column; gap: 0.25rem;
     padding: 1.25rem 0.75rem;
     background: var(--admin-side); color: rgb(228 241 238 / 0.85);
