@@ -8,15 +8,17 @@
      data-preview-version-value="<%= @project.preview_version %>" data-preview-state-value="<%= @project.preview_state %>"
      data-preview-accepts-value="<%= @project.accepts_messages? || @project.accepts_messages_while_working? %>">
     <aside class="studio-panel studio-chat" aria-label="Chat">
-      <header class="studio-bar">
+      <%# Narrow (the chat column on a laptop, a phone), the tour and theme buttons and the long
+          labels make way, so the status never runs over the buttons. %>
+      <header class="studio-bar @container">
         <%= link_to root_path, class: "btn btn-ghost btn-icon h-8 w-8", "aria-label": "All apps", title: "All apps" do %><%= icon :back %><% end %>
         <%# The app shows its own name in the preview; the bar only says what's going on. %>
         <h1 class="sr-only"><%= @project.name %></h1>
         <div class="flex min-w-0 flex-1 items-center">
-          <span class="chip inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs"><%= status_label(@project) %></span>
+          <span class="chip @max-[24rem]:hidden inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs"><%= status_label(@project) %></span>
         </div>
-        <button type="button" class="btn btn-ghost btn-icon h-8 w-8" data-action="tour#start" aria-label="Show the tour" title="Show the tour"><%= icon :help %></button>
-        <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon h-8 w-8" %>
+        <button type="button" class="btn btn-ghost btn-icon h-8 w-8 @max-[30rem]:hidden" data-action="tour#start" aria-label="Show the tour" title="Show the tour"><%= icon :help %></button>
+        <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon h-8 w-8 @max-[30rem]:hidden" %>
         <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="history">
           <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Version history" aria-label="Version history"
                    data-tour-step="5" data-tour-title="Nothing is lost"
