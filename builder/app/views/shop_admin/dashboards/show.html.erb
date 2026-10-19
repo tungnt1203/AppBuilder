@@ -10,7 +10,9 @@
         <li><%= link_to t(".setup.stripe"), edit_shop_admin_settings_path(anchor: "payments"), class: link_classes %></li>
         <li><%= link_to t(".setup.printify"), shop_admin_printify_connection_path, class: link_classes %></li>
         <li><%= link_to t(".setup.policies"), edit_shop_admin_policies_path, class: link_classes %></li>
-        <li><%= link_to t(".setup.staff"), shop_admin_users_path, class: link_classes %></li>
+      <% end %>
+      <% if current_membership.owner? %>
+        <li><%= link_to t(".setup.staff"), shop_admin_memberships_path, class: link_classes %></li>
       <% end %>
       <li><%= link_to t(".setup.view"), storefront_url, class: link_classes, target: "_blank" %></li>
     </ol>
