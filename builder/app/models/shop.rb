@@ -14,6 +14,7 @@ class Shop < ApplicationRecord
   has_one :store, dependent: :destroy
   has_many :orders, dependent: :restrict_with_error
   has_many :platform_requests, dependent: :destroy
+  has_many :webhook_events, dependent: :delete_all
 
   normalizes :subdomain, with: ->(subdomain) { subdomain.strip.downcase }
   normalizes :name, with: ->(name) { name.squish }

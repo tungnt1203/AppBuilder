@@ -143,7 +143,7 @@ Answers `201 { order }` or `422` with `fields`.
 3. Mount Stripe's Payment Element with `publishable_key` and `client_secret`, and confirm it with
    `return_url` set to the order's page.
 4. On the order's page, `GET /v1/orders/:token` checks the payment with Stripe and shows the
-   order `paid`. Stripe's webhook will confirm it too (Platform v1, 7/10).
+   order `paid`. Stripe's webhook confirms it too, when the buyer never comes back to the page.
 
 A card order that isn't paid gets one reminder email after an hour, and is cancelled a day after
 it was placed.

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -607,6 +607,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_100000) do
     t.index ["shop_id"], name: "index_variants_on_shop_id"
   end
 
+  create_table "webhook_events", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "provider", null: false
+    t.string "event_id", null: false
+    t.string "kind", null: false
+    t.string "status", default: "received", null: false
+    t.bigint "order_id"
+    t.text "error"
+    t.jsonb "payload", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_webhook_events_on_order_id"
+    t.index ["shop_id", "created_at"], name: "index_webhook_events_on_shop_id_and_created_at"
+    t.index ["shop_id", "provider", "event_id"], name: "index_webhook_events_on_shop_id_and_provider_and_event_id", unique: true
+    t.index ["shop_id"], name: "index_webhook_events_on_shop_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "agent_commands", "projects"
@@ -662,4 +679,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_100000) do
   add_foreign_key "usages", "users"
   add_foreign_key "variants", "products"
   add_foreign_key "variants", "shops"
+  add_foreign_key "webhook_events", "orders", on_delete: :nullify
+  add_foreign_key "webhook_events", "shops"
 end

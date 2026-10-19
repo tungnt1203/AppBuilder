@@ -79,6 +79,12 @@ Rails.application.routes.draw do
     resources :memberships, only: %i[ index new create update destroy ], path: "people"
   end
 
+  # Stripe and Printify call each shop's address here (Webhooks::BaseController).
+  scope "webhooks", module: :webhooks, as: :webhooks do
+    post "stripe/:shop_uid", to: "stripe#create", as: :stripe
+    post "printify/:shop_uid", to: "printify#create", as: :printify
+  end
+
   # The Storefront API, for the shops' storefronts (StorefrontApi::V1::BaseController).
   scope "v1", module: "storefront_api/v1", as: "storefront_api", defaults: { format: :json } do
     resource :shop, only: :show

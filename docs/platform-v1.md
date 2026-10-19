@@ -92,7 +92,10 @@ Mọi bảng dữ liệu của shop có `shop_id` (not null, có index), mọi i
 
 **Vận hành**
 - `platform_requests`: yêu cầu agent gửi khi không làm được (shop, nội dung, số lần lặp, trạng thái).
-- `webhook_events`: log webhook Stripe/Printify nhận về (để dò lỗi, chống xử lý trùng).
+- `webhook_events`: log webhook Stripe/Printify nhận về (để dò lỗi, chống xử lý trùng), mỗi shop
+  một dòng cho mỗi event. Địa chỉ `/webhooks/stripe/:uid`, `/webhooks/printify/:uid`: uid chọn secret
+  của shop để kiểm chữ ký; shop chỉ đổi đơn của chính nó, nên shop khác dùng chung tài khoản
+  Stripe/Printify nhận cùng event thì bỏ qua (`ignored`).
 
 ## 6. Storefront API v1
 

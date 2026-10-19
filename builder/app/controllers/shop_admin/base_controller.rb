@@ -34,9 +34,14 @@ class ShopAdmin::BaseController < ApplicationController
       redirect_to shop_admin_root_path, alert: t("shop_admin.base.only_admins") unless shop_administrator?
     end
 
-    # Stripe and Printify call the platform at one address for every shop, from Platform v1 (7/10);
-    # until then payments are confirmed when buyers come back from Stripe, and the hourly check
-    # ships Printify orders.
-    def stripe_webhook_url = nil
-    def printify_webhook_url = nil
+    # Where Stripe and Printify call the platform about this shop (Webhooks::BaseController), at
+    # its public address. They're only registered when it's on the internet over https (see
+    # Store.public_url?); otherwise payments are confirmed when buyers see their order, and the
+    # hourly check ships Printify orders.
+    def stripe_webhook_url = platform_url(webhooks_stripe_path(current_shop.uid, shop_id: nil))
+    def printify_webhook_url = platform_url(webhooks_printify_path(current_shop.uid, shop_id: nil))
+
+    def platform_url(path)
+      Rails.configuration.x.platform_url&.then { |platform| URI.join(platform, path).to_s }
+    end
 end
