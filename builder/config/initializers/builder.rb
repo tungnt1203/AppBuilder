@@ -14,6 +14,11 @@ Rails.application.configure do
   config.x.platform_url_from_containers = ENV.fetch("PLATFORM_URL_FROM_CONTAINERS") do
     config.x.platform_url&.sub(%r{//(localhost|127\.0\.0\.1)\b}, "//host.docker.internal")
   end
+  # Development only lets in localhost; storefronts in containers call it by that name. (An empty
+  # list lets every host in, so production's is left alone.)
+  if config.hosts.any? && config.x.platform_url_from_containers
+    config.hosts << URI(config.x.platform_url_from_containers).host
+  end
 
   # Claude credentials for the agent, from `claude setup-token`: the environment wins, then
   # `bin/rails credentials:edit` with claude: { oauth_token: ... }. Without either, the local

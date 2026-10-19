@@ -19,7 +19,7 @@ Rails.application.configure do
 
   # The API's answers (and their ETags), on the disk ONCE keeps: the shop still shows its catalog
   # through a short outage of the Platform, and after a restart.
-  config.cache_store = :file_store, Rails.root.join("storage/cache"), { size: 256.megabytes }
+  config.cache_store = :file_store, Rails.root.join("storage/cache")
 
   config.i18n.fallbacks = true
 end
