@@ -71,6 +71,7 @@ Rails.application.routes.draw do
     resource :custom_fields, only: %i[ edit update ], path: "settings/fields"
     resources :pages, except: :show
     resources :menus, except: :show
+    resources :platform_requests, only: %i[ index update ], path: "requests"
     resources :forms, except: :show do
       resources :submissions, only: :show, module: :forms
     end

@@ -23,8 +23,8 @@ class Sandbox::Local
     shell.capture(*command, env:)
   end
 
-  def spawn(*command, log:)
-    shell.spawn(*command, log:)
+  def spawn(*command, log:, env: {})
+    shell.spawn(*command, log:, env:)
   end
 
   # Yields the agent's stdin, stdout, stderr and waiter, like Open3.popen3. Variables set

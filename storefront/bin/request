@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# Asks the Platform for data the Storefront API doesn't have yet (a field, a setting, a kind of
+# page): bin/request "Products need a 'material' field, to show it on the product page". The
+# builder takes it to the shop's admin (Requests) after your turn. One request per need, in English.
+require "fileutils"
+require "time"
+
+text = ARGV.join(" ").strip
+abort %(Usage: bin/request "what the storefront needs from the Platform, and why") if text.empty?
+abort "Keep it under 2000 characters." if text.length > 2000
+
+folder = File.expand_path("../tmp/platform_requests", __dir__)
+FileUtils.mkdir_p(folder)
+File.write(File.join(folder, "#{Time.now.utc.strftime("%Y%m%d%H%M%S%L")}-#{rand(10_000)}.txt"), text)
+puts "Asked the Platform: #{text}"
+puts "It shows in the shop's admin under Requests after this turn. Tell the owner what waits on it."

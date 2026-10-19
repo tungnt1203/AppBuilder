@@ -17,7 +17,9 @@ class PreviewServer
     url_path.write("http://127.0.0.1:#{@project.port}") # for the app's bin/look, inside the sandbox
     @project.preview_gate.secret # made before the server starts, so it's never open
 
-    @project.sandbox.spawn("bin/rails", "server", "-p", @project.port.to_s, "-b", @project.sandbox.bind_address, log: log_path)
+    # A storefront's preview sells through the Platform with its shop's preview key (test orders only).
+    @project.sandbox.spawn("bin/rails", "server", "-p", @project.port.to_s, "-b", @project.sandbox.bind_address, log: log_path,
+      env: @project.storefront_env("preview"))
     wait_until { running? }
   end
 

@@ -16,7 +16,7 @@ class Publisher
     apply_theme_files
     announce_first_publish if first
   rescue ProjectShell::Error => error
-    @deployment.append_log(error.message)
+    @deployment.append_log(error.message.gsub(/SHOP_KEY=\S+/, "SHOP_KEY=[hidden]")) # the failed command is in it
     @deployment.failed!
   end
 
@@ -27,14 +27,24 @@ class Publisher
 
   def deploy_steps
     if first_publish?
-      [ [ @once, "deploy", @deployment.image, "--host", @project.publish_host, "--auto-update=false" ] ]
+      [ [ @once, "deploy", @deployment.image, "--host", @project.publish_host, "--auto-update=false", *env_flags ] ]
     else
       [ [ @once, "backup", @project.publish_host, backup_path.to_s ],
-        [ @once, "update", @project.publish_host, "--image", @deployment.image ] ]
+        [ @once, "update", @project.publish_host, "--image", @deployment.image, *env_flags ] ]
     end
   end
 
   private
+    # A storefront runs with its shop's live key and the Platform's address (Project#storefront_env).
+    def env_flags
+      @project.storefront_env("live").flat_map { |name, value| [ "--env", "#{name}=#{value}" ] }
+    end
+
+    # The shop key never goes in the deployment's log.
+    def loggable(command)
+      command.map { |part| part.sub(/\ASHOP_KEY=.+/, "SHOP_KEY=[hidden]") }
+    end
+
     # What the live version's theme declares becomes its shop's: config/theme_settings.yml the
     # theme settings schema, config/forms.yml its forms (a form left out keeps its messages). A
     # broken file is logged and leaves the shop's as they were; the app is live either way.
@@ -56,10 +66,16 @@ class Publisher
       @deployment.append_log("config/#{name} not applied: #{error.message}\n")
     end
 
-    # The published app starts with no accounts; tell the owner where to create theirs.
+    # A storefront's shop is live now. An app of the old template starts with no accounts: the owner
+    # is told where to create theirs.
     def announce_first_publish
-      @project.messages.create!(role: :notice, body: "Published at #{@project.publish_url}. " \
-        "Create your owner account at #{@project.publish_url}#{@project.staff_sign_in_path} before sharing it.")
+      if @project.storefront?
+        @project.shop&.update!(status: "live")
+        @project.messages.create!(role: :notice, body: "Published at #{@project.publish_url}. Its products, orders and settings are in the shop's admin.")
+      else
+        @project.messages.create!(role: :notice, body: "Published at #{@project.publish_url}. " \
+          "Create your owner account at #{@project.publish_url}#{@project.staff_sign_in_path} before sharing it.")
+      end
     end
 
     def first_publish?
@@ -72,7 +88,7 @@ class Publisher
 
     def run_steps(steps)
       steps.each do |command|
-        @deployment.append_log("$ #{command.join(" ")}\n")
+        @deployment.append_log("$ #{loggable(command).join(" ")}\n")
         @deployment.append_log(@project.shell.run(*command).last(4000))
       end
     end

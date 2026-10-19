@@ -662,6 +662,27 @@ en:
         notice: "%{title} is saved."
       destroy:
         notice: "%{title} is deleted."
+    platform_requests:
+      index:
+        title: Requests
+        description: What your storefront asked the platform for while it was being built, when the shop's data didn't have it yet. The platform team looks at each one.
+        asked: Asked %{time} ago
+        times:
+          one: asked once
+          other: asked %{count} times
+        statuses:
+          open: Waiting
+          done: Done
+          declined: Declined
+        mark:
+          open: Reopen
+          done: Mark done
+          declined: Decline
+        empty_title: Nothing asked yet
+        empty_description: When the storefront needs something the shop's data doesn't have, it shows here.
+      update:
+        notice: Updated.
+        only_platform: Only the platform team changes a request.
     forms:
       index:
         title: Forms
@@ -718,6 +739,7 @@ en:
       pages: Pages
       menus: Menus
       forms: Forms
+      platform_requests: Requests
       settings: Settings
       people: People
       view_site: View site

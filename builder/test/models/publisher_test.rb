@@ -76,4 +76,31 @@ class PublisherTest < ActiveSupport::TestCase
       assert_equal [ "contact" ], ActsAsTenant.with_tenant(shops(:cats)) { Form.pluck(:key) }
     end
   end
+
+  test "a storefront is published with the Platform's address and its shop's live key, which the log never shows" do
+    with_projects_root do
+      project = projects(:shop)
+      project.path.join("vendor/blocks/storefront_kit").mkpath
+      project.ensure_shop!
+      deployment = project.deployments.create!
+      publisher = Publisher.new(deployment, once: "once")
+
+      flags = publisher.deploy_steps.sole.each_cons(2).filter_map { |flag, value| value if flag == "--env" }
+      assert_equal %w[ PLATFORM_URL SHOP_KEY STOREFRONT_MODE ], flags.map { |flag| flag.split("=").first }
+      key = flags.find { |flag| flag.start_with?("SHOP_KEY=") }.delete_prefix("SHOP_KEY=")
+      assert_equal project.shop, ShopApiKey.authenticate(key).shop
+
+      def publisher.build_steps = []
+      shell = Object.new
+      def shell.run(*) = "abc1234\n"
+      project.define_singleton_method(:shell) { shell }
+      publisher.publish
+
+      assert deployment.reload.live?
+      assert_includes deployment.log, "SHOP_KEY=[hidden]"
+      assert_not_includes deployment.log, key
+      assert_equal "live", project.shop.reload.status
+      assert_match "in the shop's admin", project.messages.last.body
+    end
+  end
 end

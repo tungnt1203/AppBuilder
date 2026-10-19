@@ -32,7 +32,18 @@ class StorefrontApi::V1::BaseController < ActionController::API
     def store = @store ||= Store.current
 
     def json
-      @json ||= StorefrontApi::Json.new(store:, url_options: { host: request.host, port: request.optional_port, protocol: request.protocol })
+      @json ||= StorefrontApi::Json.new(store:, url_options: asset_url_options)
+    end
+
+    # Photos' addresses are for the buyer's browser: the Platform's public address, not the one a
+    # storefront in a container reached it at.
+    def asset_url_options
+      if (url = Rails.configuration.x.platform_url)
+        uri = URI(url)
+        { host: uri.host, port: (uri.port unless uri.port == uri.default_port), protocol: "#{uri.scheme}://" }
+      else
+        { host: request.host, port: request.optional_port, protocol: request.protocol }
+      end
     end
 
     def error(code, message, status:, fields: nil)

@@ -21,6 +21,7 @@ shared:
     - Bash(bin/icons:*)
     - Bash(bin/images:*)
     - Bash(bin/look:*)
+    - Bash(bin/request:*)
     - Bash(bundle exec:*)
     - Bash(git status:*)
     - Bash(git diff:*)
@@ -78,7 +79,7 @@ shared:
     language), under 60 characters, in this exact block, which the builder turns into buttons:
 
     ```next
-    ["Add a size chart to every T-shirt", "Show a monthly sales report in admin"]
+    ["Add a size chart to every T-shirt", "Make the home page hero bolder"]
     ```
 
     Leave the block out when you asked questions, only planned, or changed nothing.

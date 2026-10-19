@@ -11,7 +11,8 @@
   *([
     [ t("shop_admin.layout.pages"), shop_admin_pages_path, :file, "#{base}/pages" ],
     [ t("shop_admin.layout.menus"), shop_admin_menus_path, "menu", "#{base}/menus" ],
-    [ t("shop_admin.layout.forms"), shop_admin_forms_path, :send, "#{base}/forms" ]
+    [ t("shop_admin.layout.forms"), shop_admin_forms_path, :send, "#{base}/forms" ],
+    [ t("shop_admin.layout.platform_requests"), shop_admin_platform_requests_path, :help, "#{base}/requests" ]
   ] if shop_administrator?),
   *([ [ t("shop_admin.layout.settings"), edit_shop_admin_settings_path, :sliders, "#{base}/settings" ] ] if shop_administrator?),
   *([ [ t("shop_admin.layout.people"), shop_admin_memberships_path, :users, "#{base}/people" ] ] if current_membership.owner?)

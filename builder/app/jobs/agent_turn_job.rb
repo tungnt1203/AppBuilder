@@ -136,6 +136,7 @@ class AgentTurnJob < ApplicationJob
 
     def finish(project, message, status:)
       project.adopt_app_name_from_code
+      file_platform_requests(project)
       project.history.commit(message)
       mark_version(project)
       project.update!(activity: "Restarting the preview")
@@ -144,5 +145,15 @@ class AgentTurnJob < ApplicationJob
     rescue ProjectShell::Error => error
       project.messages.create!(role: :error, body: error.message.truncate(4000))
       project.update!(status: :failed)
+    end
+
+    # What the agent asked the Platform for (bin/request) goes to the shop's admin, and the
+    # owner reads in the chat that it's waiting there.
+    def file_platform_requests(project)
+      requests = project.take_platform_requests
+      return if requests.empty?
+
+      list = requests.map { |request| "- #{request.body.lines.first.strip}" }.join("\n")
+      project.messages.create!(role: :notice, body: "Asked the platform for what the shop's data doesn't have yet (in the shop's admin, under Requests):\n#{list}")
     end
 end

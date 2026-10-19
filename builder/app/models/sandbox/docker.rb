@@ -43,10 +43,11 @@ class Sandbox::Docker
     host.capture(*exec(command, env), env: env.compact)
   end
 
-  # In the background; its output goes to the log, which is in the project's folder.
-  def spawn(*command, log:)
+  # In the background; its output goes to the log, which is in the project's folder. Like the
+  # agent's secrets, env reaches it by name through the docker client's environment.
+  def spawn(*command, log:, env: {})
     start
-    host.run(*exec([ "sh", "-c", 'exec "$@" >> "$0" 2>&1', log.to_s, *command ], {}, detach: true))
+    host.run(*exec([ "sh", "-c", 'exec "$@" >> "$0" 2>&1', log.to_s, *command ], env, detach: true), env: env.compact)
     nil
   end
 
@@ -127,6 +128,7 @@ class Sandbox::Docker
         "--publish", "127.0.0.1:#{@project.port}:#{@project.port}",
         "--volume", "#{path}:#{path}", "--volume", "#{config.sandbox_gems_volume}:/usr/local/bundle",
         "--volume", "#{home}:/home/dev/.claude", *read_only_blocks(path), "--workdir", path,
+        "--add-host", "host.docker.internal:host-gateway", # the Platform, for a storefront's preview
         "--cpus", config.sandbox_cpus.to_s, "--memory", config.sandbox_memory, "--pids-limit", "1024",
         config.sandbox_image)
     rescue ProjectShell::Error

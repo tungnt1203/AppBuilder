@@ -4,7 +4,16 @@ Rails.application.configure do
   # real ones (still named projects/, which transcripts shorten paths by).
   test_root = Pathname(Dir.tmpdir).join("appbuilder-test", "projects") if Rails.env.test?
   config.x.projects_root = Pathname(ENV.fetch("PROJECTS_ROOT", test_root || Rails.root.join("../projects")))
-  config.x.template_path = Pathname(ENV.fetch("TEMPLATE_PATH", Rails.root.join("../template")))
+  # New projects are storefronts (Platform v1): they sell through the Storefront API.
+  config.x.template_path = Pathname(ENV.fetch("TEMPLATE_PATH", Rails.root.join("../storefront")))
+
+  # The Platform's address for browsers and published storefronts' links and photos (the API's
+  # image URLs), and where storefronts in containers reach it (a preview in the Docker sandbox, a
+  # storefront on this machine's ONCE): this machine's localhost is host.docker.internal there.
+  config.x.platform_url = ENV.fetch("PLATFORM_URL") { "http://localhost:#{ENV.fetch("PORT", 3000)}" unless Rails.env.test? }
+  config.x.platform_url_from_containers = ENV.fetch("PLATFORM_URL_FROM_CONTAINERS") do
+    config.x.platform_url&.sub(%r{//(localhost|127\.0\.0\.1)\b}, "//host.docker.internal")
+  end
 
   # Claude credentials for the agent, from `claude setup-token`: the environment wins, then
   # `bin/rails credentials:edit` with claude: { oauth_token: ... }. Without either, the local

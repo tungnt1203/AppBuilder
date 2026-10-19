@@ -5,6 +5,7 @@ class ProjectSetupJob < ApplicationJob
   def perform(project, first_request = nil, mode = "plan")
     name(project)
     copy_template(project)
+    project.ensure_shop! if project.storefront?
     configure(project)
     project.sandbox.run("bundle", "install", "--quiet")
     project.restart_preview(restart: false)
@@ -58,7 +59,8 @@ class ProjectSetupJob < ApplicationJob
       project.write_app_name
       application = project.path.join("config/application.rb")
       application.write(localize(application.read, project))
-      project.shell.run("git", "commit", "--quiet", "-am", "Set up #{project.name}")
+      # A storefront has nothing to set here (its name is its shop's), but the version is still its base.
+      project.shell.run("git", "commit", "--quiet", "--allow-empty", "-am", "Set up #{project.name}")
       project.update!(base_sha: project.history.current_sha)
     end
 

@@ -4,6 +4,7 @@
 class DuplicateJob < ApplicationJob
   def perform(copy, source)
     copy_files(source, copy)
+    copy.ensure_shop! if copy.storefront? # a shop has one storefront: the copy sells for a new one
     copy.write_app_name
     copy.history.commit("Copy “#{source.name}” as #{copy.name}")
     FileUtils.cp(source.thumbnail.path, copy.thumbnail.path) if source.thumbnail.exist?

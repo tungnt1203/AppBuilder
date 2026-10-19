@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_16_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -333,6 +333,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_090000) do
     t.index ["shop_id"], name: "index_pages_on_shop_id"
   end
 
+  create_table "platform_requests", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.bigint "project_id"
+    t.text "body", null: false
+    t.string "status", default: "open", null: false
+    t.integer "times_asked", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_platform_requests_on_project_id"
+    t.index ["shop_id", "status"], name: "index_platform_requests_on_shop_id_and_status"
+    t.index ["shop_id"], name: "index_platform_requests_on_shop_id"
+  end
+
   create_table "product_reviews", force: :cascade do |t|
     t.bigint "shop_id", null: false
     t.bigint "product_id", null: false
@@ -408,6 +421,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_090000) do
     t.text "instructions"
     t.string "template_sha"
     t.bigint "shop_id"
+    t.text "preview_shop_key"
+    t.text "live_shop_key"
     t.index ["eval_run"], name: "index_projects_on_eval_run"
     t.index ["owner_id"], name: "index_projects_on_owner_id"
     t.index ["port"], name: "index_projects_on_port", unique: true
@@ -625,6 +640,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_090000) do
   add_foreign_key "orders", "discounts", on_delete: :nullify
   add_foreign_key "orders", "shops"
   add_foreign_key "pages", "shops"
+  add_foreign_key "platform_requests", "projects"
+  add_foreign_key "platform_requests", "shops"
   add_foreign_key "product_reviews", "orders"
   add_foreign_key "product_reviews", "products"
   add_foreign_key "product_reviews", "shops"

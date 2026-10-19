@@ -11,6 +11,10 @@ class Project < ApplicationRecord
   has_many :agent_commands, dependent: :delete_all
   has_many :usages, dependent: :nullify
 
+  # The shop keys its storefront runs with (SHOP_KEY): the preview's (test orders only) and,
+  # once published, the live one's. Only digests are kept in shop_api_keys, so the tokens are here.
+  encrypts :preview_shop_key, :live_shop_key
+
   enum :status, %w[ setting_up ready working failed ].index_by(&:itself), default: "setting_up"
   enum :preview_status, %w[ starting running broken ].index_by(&:itself), prefix: :preview
 
@@ -60,6 +64,47 @@ class Project < ApplicationRecord
 
   def path
     Rails.configuration.x.projects_root.join(slug)
+  end
+
+  # A storefront of Platform v1 (made from storefront/): it sells through the Storefront API with
+  # its shop's key and has no database. Apps made from the old template have their own.
+  def storefront?
+    path.join("vendor/blocks/storefront_kit").exist?
+  end
+
+  # The shop this storefront sells for, opened for the owner with the app's name when it has none.
+  def ensure_shop!
+    return shop if shop
+
+    transaction do
+      subdomain = self.subdomain || subdomain_for(name)
+      opened = Shop.open!(owner:, name: name.delete_suffix("…").first(100), subdomain: shop_subdomain(subdomain), currency: "USD")
+      update!(shop: opened, subdomain: opened.subdomain)
+      BusinessSyncJob.perform_later(opened, owner) if owner&.business_setting&.configured?
+      opened
+    end
+  end
+
+  # What the storefront runs with: where the Platform is, its shop's key, and whether it's the
+  # preview (STOREFRONT_MODE: fresh catalog reads, test orders) or the published shop.
+  def storefront_env(mode)
+    return {} unless storefront? && shop
+
+    key = mode == "preview" ? shop_key(:preview_shop_key, "preview") : shop_key(:live_shop_key, "storefront")
+    url = mode == "preview" && sandbox.is_a?(Sandbox::Local) ? Rails.configuration.x.platform_url : Rails.configuration.x.platform_url_from_containers
+    { "PLATFORM_URL" => url, "SHOP_KEY" => key, "STOREFRONT_MODE" => mode }
+  end
+
+  # What the agent asked the Platform for this turn (bin/request writes each to
+  # tmp/platform_requests/), filed for the shop. Returns them.
+  def take_platform_requests
+    folder = path.join("tmp/platform_requests")
+    return [] unless folder.directory? && shop
+
+    files = folder.glob("*.txt").sort
+    requests = ActsAsTenant.with_tenant(shop) { files.filter_map { |file| PlatformRequest.file(file.read, project: self) } }
+    files.each(&:delete)
+    requests
   end
 
   # Apps made since the template split the customers' site from /admin keep the owner's screens
@@ -283,7 +328,12 @@ class Project < ApplicationRecord
     return true unless name_changed?
 
     self.status = :working
-    save.tap { |saved| RenameJob.perform_later(self) if saved }
+    save.tap do |saved|
+      next unless saved
+
+      shop&.update(name: name.first(100)) # what a storefront shows comes from its shop
+      RenameJob.perform_later(self)
+    end
   end
 
   # The name the app shows its visitors lives in its config.
@@ -394,7 +444,7 @@ class Project < ApplicationRecord
     # runs, or the app may have moved there (from this machine into a container, say).
     def prepare_preview
       sandbox.run("sh", "-c", "bundle check > /dev/null || bundle install --quiet")
-      sandbox.run("bin/rails", "db:prepare")
+      sandbox.run("bin/rails", "db:prepare") if path.join("config/database.yml").exist? # a storefront has none
       sandbox.run("bin/rails", "tailwindcss:build")
       nil
     rescue ProjectShell::Error => error
@@ -412,6 +462,22 @@ class Project < ApplicationRecord
       candidate = base
       candidate = "#{base}-#{SecureRandom.hex(2)}" while Project.where.not(id: id).exists?(subdomain: candidate)
       candidate
+    end
+
+    # The project's subdomain, or one like it when another shop has it.
+    def shop_subdomain(base)
+      candidate = base
+      candidate = "#{base.first(58)}-#{SecureRandom.hex(2)}" while ActsAsTenant.without_tenant { Shop.exists?(subdomain: candidate) } || Shop::RESERVED_SUBDOMAINS.include?(candidate)
+      candidate
+    end
+
+    # The token of the shop's key in this column, made the first time it's needed.
+    def shop_key(column, kind)
+      self[column] || ActsAsTenant.with_tenant(shop) do
+        key = ShopApiKey.create!(kind:)
+        update!(column => key.token)
+        key.token
+      end
     end
 
     def assign_port

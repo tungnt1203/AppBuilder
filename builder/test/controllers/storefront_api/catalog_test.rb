@@ -31,6 +31,20 @@ class StorefrontApi::CatalogTest < ActionDispatch::IntegrationTest
     assert api(:get, storefront_api_shop_path, key: api_key_for(kind: "preview"))["shop"]["preview"]
   end
 
+  test "photos are at the Platform's public address, whatever address the storefront called" do
+    original = Rails.configuration.x.platform_url
+    Rails.configuration.x.platform_url = "https://platform.example"
+    ActsAsTenant.with_tenant(shops(:cats)) do
+      ThemeSetting.apply_schema!([ { "key" => "hero", "type" => "image" } ])
+      ThemeSetting.current.images.attach(io: file_fixture("product.png").open, filename: "hero.png", content_type: "image/png", metadata: { "setting_key" => "hero" })
+    end
+
+    hero = api(:get, storefront_api_shop_path)["shop"]["theme_settings"]["hero"]
+    assert hero.start_with?("https://platform.example/rails/active_storage/"), hero
+  ensure
+    Rails.configuration.x.platform_url = original
+  end
+
   test "products on sale, newest first, with their prices; drafts aren't there" do
     body = api(:get, storefront_api_products_path)
     assert_equal %w[ morning-mug cat-mom-tee ], body["products"].pluck("slug")
