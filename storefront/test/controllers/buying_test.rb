@@ -47,9 +47,12 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_select "script[src='https://js.stripe.com/v3/']"
     assert_select "form[data-controller=stripe-payment][data-stripe-payment-client-secret-value=?]", "pi_fake_secret_#{token}"
     assert_select "form[data-stripe-payment-return-url-value=?]", order_url(token, placed: 1)
+    billing = JSON.parse(css_select("form[data-controller=stripe-payment]").first["data-stripe-payment-billing-value"])
+    assert_equal({ "name" => "Robin Buyer", "address" => { "country" => "US", "postal_code" => "78701" } }, billing, "Stripe's billing country is the shipping one, not the browser's")
 
     get order_path(token)
     assert_select "a[href=?]", order_payment_path(token)
+    assert_select "time[data-controller=local-time][datetime=?]", @platform.orders[token]["placed_at"]
 
     @platform.pay!(token)
     get order_path(token, placed: 1)

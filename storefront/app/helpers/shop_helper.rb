@@ -84,6 +84,13 @@ module ShopHelper
     badge t(order.status, scope: "orders.statuses"), tone: ORDER_STATUS_TONES.fetch(order.status, :gray)
   end
 
+  # A moment in the buyer's own time zone (the local-time controller), which only their browser
+  # knows; the date alone until it runs, so a time in the wrong zone never shows.
+  def local_time(time, date_only: false)
+    tag.time l(time.to_date, format: :long), datetime: time.iso8601,
+      data: { controller: "local-time", local_time_date_only_value: date_only }
+  end
+
   # The variants of a product for the variant picker: what each costs and whether it can be bought.
   def variants_json(product)
     product.variants.map do |variant|

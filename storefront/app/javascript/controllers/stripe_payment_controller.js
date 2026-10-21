@@ -4,7 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // confirms it, after which Stripe sends the buyer to the order's page (or shows them 3-D Secure first).
 export default class extends Controller {
   static targets = [ "element", "error", "button" ]
-  static values = { publishableKey: String, clientSecret: String, returnUrl: String, email: String }
+  static values = { publishableKey: String, clientSecret: String, returnUrl: String, email: String, billing: Object }
 
   async connect() {
     const Stripe = await this.stripe()
@@ -12,7 +12,9 @@ export default class extends Controller {
 
     this.client = Stripe(this.publishableKeyValue)
     this.elements = this.client.elements({ clientSecret: this.clientSecretValue })
-    this.paymentElement = this.elements.create("payment", { defaultValues: { billingDetails: { email: this.emailValue } } })
+    // The billing details start from the shipping address (its country, not the browser's).
+    const billingDetails = { ...this.billingValue, email: this.emailValue }
+    this.paymentElement = this.elements.create("payment", { defaultValues: { billingDetails } })
     this.paymentElement.mount(this.elementTarget)
     this.paymentElement.on("ready", () => { this.buttonTarget.disabled = false })
   }

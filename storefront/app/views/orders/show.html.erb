@@ -15,7 +15,7 @@
     <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title", number: @order.name) %></h1>
     <%= order_status_badge @order %>
   </div>
-  <p class="mt-1 text-sm text-muted"><%= t(".placed_on", date: l(@order.placed_at, format: :long)) %></p>
+  <p class="mt-1 text-sm text-muted"><%= t(".placed_on_html", date: local_time(@order.placed_at)) %></p>
 
   <p class="mt-6 text-ink"><%= t(".status_text.#{@order.card? && @order.pending? ? "unpaid_card" : @order.status}") %></p>
 

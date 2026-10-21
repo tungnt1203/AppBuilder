@@ -17,7 +17,9 @@
   <%= tag.form class: "mt-8 space-y-6", data: {
         controller: "stripe-payment", action: "stripe-payment#pay",
         stripe_payment_publishable_key_value: @payment.publishable_key, stripe_payment_client_secret_value: @payment.client_secret,
-        stripe_payment_return_url_value: order_url(@order, placed: 1), stripe_payment_email_value: @order.email } do %>
+        stripe_payment_return_url_value: order_url(@order, placed: 1), stripe_payment_email_value: @order.email,
+        stripe_payment_billing_value: { name: @order.shipping_address["name"], address: { country: @order.shipping_address["country"],
+          postal_code: @order.shipping_address["postal_code"] }.compact }.compact } do %>
     <div data-stripe-payment-target="element" class="min-h-40"></div>
     <p class="text-sm text-red-600" data-stripe-payment-target="error" hidden></p>
     <button type="submit" class="<%= button_classes %> w-full py-3 text-base" data-stripe-payment-target="button" disabled>

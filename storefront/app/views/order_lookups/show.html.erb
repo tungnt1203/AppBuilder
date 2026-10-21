@@ -19,7 +19,7 @@
               <%= order_status_badge order %>
             </div>
             <p class="mt-1 text-sm text-muted">
-              <%= l(order.placed_at.to_date, format: :long) %> ·
+              <%= local_time(order.placed_at, date_only: true) %> ·
               <%= t(".items", count: order.items.sum(&:quantity)) %> ·
               <%= money(order.total_cents, order.currency) %>
             </p>

@@ -78,7 +78,7 @@ en:
       title: Order %{number}
       thanks: Thank you, %{name}!
       confirmation_sent: We've sent a confirmation to %{email}. Keep this page's link to check on your order.
-      placed_on: Placed %{date}
+      placed_on_html: Placed %{date}
       status_text:
         pending: We've got your order. It goes into production once the payment is in.
         paid: Payment received. Your order goes into production shortly.
