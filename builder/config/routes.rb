@@ -15,6 +15,7 @@ Rails.application.routes.draw do
     resource :update, only: :create, module: :projects
     resource :build, only: :create, module: :projects
     resource :stop, only: :create, module: :projects
+    resource :worker_check, only: :show, module: :projects
     resource :preview, only: %i[ show create ], module: :projects
     resource :thumbnail, only: :show, module: :projects
     resource :duplicate, only: :create, module: :projects

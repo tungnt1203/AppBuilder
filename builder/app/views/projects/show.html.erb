@@ -77,6 +77,7 @@
                     disabled: @project.stop_requested? %>
             <% end %>
           </div>
+          <%= turbo_frame_tag "worker-check", src: project_worker_check_path(@project), data: { controller: "poll" } %>
         <% end %>
 
         <%= form_with model: [ @project, Message.new ], data: { controller: "composer attachments", action: "dragover->attachments#dragOver dragleave->attachments#dragLeave drop->attachments#drop" } do |form| %>

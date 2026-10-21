@@ -140,6 +140,8 @@ module ApplicationHelper
     duration = distance_of_time_in_words(data["duration_ms"] / 1000.0) if data["duration_ms"]
     turn_cost = data.fetch("cost_usd", data["total_cost_usd"]) # turns recorded before costs were per turn
     cost = number_to_currency(turn_cost, precision: 2) if turn_cost
-    [ ("#{data["stopped"] ? "Stopped after" : "Finished in"} #{duration}" if duration), (pluralize(data["num_turns"], "step") if data["num_turns"]), cost ].compact.join(", ")
+    details = [ (pluralize(data["num_turns"], "step") if data["num_turns"]), cost ].compact.join(", ")
+    summary = duration ? "#{data["stopped"] ? "Stopped after" : "Finished in"} #{duration}" : details
+    tag.span(summary, title: details.presence)
   end
 end

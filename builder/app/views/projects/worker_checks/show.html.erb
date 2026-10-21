@@ -1,0 +1,11 @@
+<%= turbo_frame_tag "worker-check" do %>
+  <% unless @running %>
+    <p class="worker-down" role="alert">
+      <%= icon :alert, size: 14 %>
+      <span>
+        Background jobs aren't running, so this won't move.
+        <% if Rails.env.development? %>Start them with <code>bin/dev</code> (or <code>bin/jobs</code>) in builder/.<% else %>Nothing is lost: it continues once they're back.<% end %>
+      </span>
+    </p>
+  <% end %>
+<% end %>

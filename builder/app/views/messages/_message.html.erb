@@ -20,7 +20,10 @@
     <p class="pointed-note" title="<%= pointed.data["selector"] %>"><%= icon :target, size: 12 %><span class="truncate">“<%= pointed.label %>”</span><span class="faint">on <%= pointed.page %></span></p>
   <% end %>
   <% if message.body.present? %>
-    <div class="bubble-user"><%= message.body %></div>
+    <div class="bubble-user" data-controller="clamp">
+      <div class="bubble-text" data-clamp-target="text"><%= message.body %></div>
+      <button type="button" class="bubble-more" data-clamp-target="toggle" data-action="clamp#toggle" hidden>Show more</button>
+    </div>
   <% end %>
 <% when "assistant" %>
   <% if message.body.present? %>

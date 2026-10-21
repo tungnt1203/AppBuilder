@@ -355,8 +355,12 @@
     color: white;
     font-size: 0.9375rem;
     line-height: 1.55;
-    white-space: pre-line;
     box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset;
+
+    & .bubble-text { white-space: pre-line; }
+    & .bubble-text.is-clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; overflow: hidden; }
+    & .bubble-more { margin-top: 0.35rem; font-size: 0.8125rem; font-weight: 600; color: rgb(255 255 255 / 0.85); text-decoration: underline; text-underline-offset: 3px; }
+    & .bubble-more:hover { color: white; }
   }
 
   .reply {
@@ -1107,6 +1111,22 @@
     color: var(--text-muted);
 
     & .activity-dot { width: 0.4rem; height: 0.4rem; }
+  }
+  /* Under the activity line when no worker picks up the background jobs. */
+  .worker-down {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 12px;
+    background: var(--danger-bg);
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--danger-text);
+
+    & svg { flex-shrink: 0; margin-top: 0.1rem; }
+    & code { font-size: 0.7rem; }
   }
   .activity-dot {
     width: 0.5rem;

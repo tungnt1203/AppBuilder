@@ -50,6 +50,15 @@ module ActiveSupport
       Rails.configuration.x.agent_backend = original
     end
 
+    # As if a worker (bin/jobs) were running or not.
+    def with_job_worker(running)
+      original = JobWorker.method(:running?)
+      JobWorker.define_singleton_method(:running?) { running }
+      yield
+    ensure
+      JobWorker.define_singleton_method(:running?, original)
+    end
+
     # Apps' folders in a temporary directory, removed afterwards.
     def with_projects_root
       root = Pathname(Dir.mktmpdir)
