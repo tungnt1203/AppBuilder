@@ -38,6 +38,13 @@ class OrderMailer < ApplicationMailer
       subject: t(".subject", app: order.shop.name)
   end
 
+  # The link to the buyer's orders at the shop, which they asked for by email (OrderLookup).
+  def lookup(shop, email, token)
+    @shop, @store = shop, Store.current
+    @url = shop.storefront_url("/orders/find/#{token}")
+    mail to: email, reply_to: @store.contact_email.presence, subject: t(".subject", app: shop.name)
+  end
+
   def refunded(order)
     @order, @store = order, Store.current
     mail to: order.email, reply_to: @store.contact_email.presence,

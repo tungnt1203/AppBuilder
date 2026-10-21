@@ -214,6 +214,12 @@ en:
       intro: You left before paying, so we kept your order for you. It's here whenever you're ready, for the next day.
       finish: Finish your order (%{total})
       questions: Questions? Write to %{email}.
+    lookup:
+      subject: "%{app}: your orders"
+      heading: Your orders at %{app}
+      intro: Here's the link to your orders, as you asked. It works for a day.
+      view: See your orders
+      not_you: Didn't ask for this? You can ignore this email.
     review_request:
       subject: "%{app}: how do you like it?"
       heading: How do you like it, %{name}?

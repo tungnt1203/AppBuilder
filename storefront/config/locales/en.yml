@@ -221,6 +221,30 @@ en:
       form_email: Your email
       form_message: Message
       form_send: Send
+  order_lookups:
+    rate_limited: Too many tries. Wait a few minutes and try again.
+    new:
+      title: Find my order
+      intro: Enter the email you ordered with. We'll send you a link to your orders.
+      email: Email
+      send: Email me a link
+    sent:
+      title: Check your email
+      body: If %{email} has orders with us, a link to them is on its way. It works for a day.
+      body_no_email: If that email has orders with us, a link to them is on its way. It works for a day.
+      spam: Nothing after a few minutes? Check your spam folder, or try the email you ordered with.
+      again: Try another email
+    show:
+      title: Your orders
+      intro: Orders placed with %{email}.
+      none: No orders yet.
+      items:
+        one: 1 item
+        other: "%{count} items"
+      view: View order
+    expired:
+      title: This link has expired
+      body: Links to your orders work for a day. Ask for a new one below.
   form_submissions:
     rate_limited: Too many messages. Wait a minute and try again.
     create:

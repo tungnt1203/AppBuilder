@@ -62,6 +62,8 @@ What a shop's storefront calls to show the shop and take its orders. It runs on 
 | `GET /v1/orders/:token` | The buyer's order. A card order not paid yet is checked with Stripe first |
 | `POST /v1/orders/:token/payment` | The card payment for the Payment Element (Idempotency-Key) |
 | `POST /v1/orders/:token/reviews` | Review what was bought, once it's on its way |
+| `POST /v1/order_lookups` | `{ email }`: the shop emails the buyer a link to their orders here (to `/orders/find/<token>` on the storefront). Always 202, orders or not; 3 per 10 minutes per email |
+| `GET /v1/order_lookups/:token` | The buyer's orders at the shop by the emailed link's token (a day): `{ order_lookup: { email, orders: [order…] } }`, newest first; 404 once expired |
 | `POST /v1/forms/:key/submissions` | Send a form (`{ answers }`). Idempotency-Key, same as placing an order. The shop is emailed |
 
 Every change to a cart answers with the whole cart.

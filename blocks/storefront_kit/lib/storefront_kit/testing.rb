@@ -9,7 +9,7 @@ module StorefrontKit
   module Testing
     class FakeApi
       attr_accessor :shop_data, :products_data, :collections_data, :pages_data, :menus_data, :policies_data, :reviews_data, :zip_codes
-      attr_reader :carts, :orders, :requests, :form_submissions
+      attr_reader :carts, :orders, :requests, :form_submissions, :order_lookups
 
       def initialize
         @shop_data = default_shop
@@ -22,7 +22,7 @@ module StorefrontKit
         @policies_data = { "refund" => { "id" => "refund", "title" => "Refund policy", "body" => "Returns within 30 days." } }
         @reviews_data = { "cat-tee" => [ { "rating" => 5, "body" => "Soft and cute.", "author_name" => "Robin B.", "created_at" => "2026-10-01T10:00:00Z" } ] }
         @zip_codes = { "78701" => { "zip" => "78701", "country" => "US", "region" => "TX", "city" => "Austin" } }
-        @carts, @orders, @requests, @form_submissions, @placed = {}, {}, [], [], {}
+        @carts, @orders, @requests, @form_submissions, @placed, @order_lookups = {}, {}, [], [], {}, {}
       end
 
       def shop = Shop.new(record(:shop, @shop_data))
@@ -170,6 +170,22 @@ module StorefrontKit
 
         order["reviewable_products"].reject! { |product| picked.any? { |review| review["product_slug"] == product["slug"] } }
         picked.map { |review| Review.new(review.merge("author_name" => author_name, "created_at" => Time.now.utc.iso8601)) }
+      end
+
+      # The links the shop emailed, { token => email }: only for an email with orders.
+      def request_order_lookup(email)
+        record(:request_order_lookup, email:)
+        email = email.to_s.strip.downcase
+        raise Invalid.new("Enter a valid email", status: 422, code: "invalid", fields: { "email" => "isn't a valid email" }) unless email.match?(/\A[^@\s]+@[^@\s]+\.[a-z]{2,}\z/i)
+
+        @order_lookups["lookup-#{SecureRandom.hex(4)}"] = email if @orders.values.any? { |order| order["email"].to_s.downcase == email }
+        nil
+      end
+
+      def order_lookup(token)
+        email = @order_lookups.fetch(token.to_s) { not_found("order lookup") }
+        found = @orders.values.select { |order| order["email"].to_s.downcase == email }.reverse
+        OrderLookup.new(record(:order_lookup, "email" => email, "orders" => found))
       end
 
       def submit_form(key, answers, idempotency_key: nil)

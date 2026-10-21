@@ -100,6 +100,8 @@ these for the brand, but keep each part:
 - **Checkout** (`checkouts/new`): the address with US ZIP autofill, the totals partial that reloads
   with Printify's real shipping (`checkouts/_totals`), payment by card (Stripe's Payment Element at
   `/orders/:token/payment`) or the shop's instructions. Don't change how it places orders or pays.
+- **Find my order** (`order_lookups/`, linked in the footer): buyers have no accounts, so they ask
+  for a link to their orders by email; keep the footer link and the emailed link's page.
 - **Order page**, **reviews**, **policies** and **contact** pages, the announcement bar, the
   footer links to the policies and contact page (Stripe and ad networks check them).
 - **Ad tracking**: keep `layouts/site/tracking_tags` in the head and `tracking_events` in the body,

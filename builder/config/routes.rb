@@ -108,6 +108,7 @@ Rails.application.routes.draw do
     resources :checkouts, only: :create do
       post :quote, on: :collection
     end
+    resources :order_lookups, only: %i[ create show ]
     resources :orders, only: :show do
       scope module: :orders do
         resources :reviews, only: :create

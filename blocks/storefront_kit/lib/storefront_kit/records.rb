@@ -162,6 +162,11 @@ module StorefrontKit
     def placed_at = Time.iso8601(self["placed_at"])
   end
 
+  # A buyer's orders at the shop, found by their email (Api#order_lookup).
+  class OrderLookup < Record
+    many :orders, Order
+  end
+
   class Country < Record
     def regions = self["regions"]
   end

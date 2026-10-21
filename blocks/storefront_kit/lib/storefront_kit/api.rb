@@ -69,6 +69,16 @@ module StorefrontKit
       Payment.new(client.post("orders/#{escape(order_token)}/payment", {}, idempotency_key:)["payment"])
     end
 
+    # Asks the shop to email the buyer a link to their orders (/orders/find/<token>). Answers the
+    # same whether or not the email has orders; raises Invalid for an email that isn't one.
+    def request_order_lookup(email)
+      client.post("order_lookups", { email: })
+      nil
+    end
+
+    # The buyer's orders by the emailed link's token; NotFound once it's expired.
+    def order_lookup(token) = OrderLookup.new(client.get("order_lookups/#{escape(token)}")["order_lookup"])
+
     # reviews: [{ product_slug:, rating:, body: }]
     def review_order(order_token, reviews:, author_name: nil)
       Review.wrap(client.post("orders/#{escape(order_token)}/reviews", { reviews:, author_name: }.compact)["reviews"])

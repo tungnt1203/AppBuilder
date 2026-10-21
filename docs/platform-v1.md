@@ -160,7 +160,9 @@ sẽ ghi đè form có trong file.
 - Code: app ở `storefront/` (template cũ `template/` đã gỡ ở #19), gem ở `blocks/storefront_kit/`
   (link vào `storefront/vendor/blocks/`, như các block khác). Thẻ trả tiền bằng Stripe Payment Element
   ở `/orders/:token/payment`. Test chạy với Platform giả trong bộ nhớ (`StorefrontKit::Testing::FakeApi`).
-- Chưa có: tài khoản khách hàng (checkout luôn là khách vãng lai), CLAUDE.md/skill cho agent (#15).
+- Tài khoản khách: **riêng từng shop**, không dùng chung giữa các shop (quyết định 2026-10-21: mỗi shop là một thương hiệu,
+  khách thuộc về chủ shop). Chưa có đăng ký/mật khẩu; khách tìm đơn bằng email ("Find my order", #20): shop gửi link
+  `/orders/find/<token>` (mã hoá + ký, 1 ngày) liệt kê đơn của email đó ở shop.
 
 ## 9. Tận dụng code hiện có
 

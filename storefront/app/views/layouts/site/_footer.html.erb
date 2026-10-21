@@ -12,6 +12,7 @@
         <% current_shop.policies.each do |policy| %>
           <li><%= link_to policy["title"], policy_path(policy["id"]), class: "hover:text-ink" %></li>
         <% end %>
+        <li><%= link_to t("order_lookups.new.title"), new_order_lookup_path, class: "hover:text-ink" %></li>
         <li><%= link_to t("contacts.show.title"), contact_path, class: "hover:text-ink" %></li>
       </ul>
     </nav>

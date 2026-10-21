@@ -13,6 +13,11 @@ Rails.application.routes.draw do
     get :shipping
   end
   resources :zip_codes, only: :show
+  # "Find my order": the buyer's orders by email, through a link the shop emails them.
+  get "orders/find", to: "order_lookups#new", as: :new_order_lookup
+  post "orders/find", to: "order_lookups#create", as: :order_lookups
+  get "orders/find/sent", to: "order_lookups#sent", as: :sent_order_lookup
+  get "orders/find/:token", to: "order_lookups#show", as: :order_lookup
   resources :orders, only: :show do
     resource :payment, only: :show, module: :orders
     resource :review, only: %i[ new create ], module: :orders
