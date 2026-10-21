@@ -35,6 +35,7 @@ class StorefrontApi::Json
       price: { min_cents: low, max_cents: high, currency: @store.currency,
         compare_at_cents: sale.map(&:compare_at_price_cents).max },
       image: image(product.cover_image, alt: product.title),
+      second_image: image(product.images.select(&:representable?).second, alt: product.title),
       rating: product.rating_summary
     }
   end

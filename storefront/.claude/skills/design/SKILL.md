@@ -79,6 +79,10 @@ Choose the colors from the direction: light or dark, quiet or loud, warm or cool
 accent enough contrast with the canvas to read, and keep body text near black on light themes and
 near white on dark ones.
 
+The owner can set a brand color in the admin (`brand_color`); it replaces the brand scale
+(`layouts/_theme_colors`), so use `brand-*` for what should follow it and `accent` or your own
+names for what shouldn't.
+
 A dark app sets dark `canvas`/`surface`/`line`, light `ink`/`muted`, and flips `brand-50…200`
 (used for quiet backgrounds) to dark tints and `brand-700…950` to light ones, so kit badges and
 alerts stay readable. Check the cart, checkout and order pages after changing the theme.

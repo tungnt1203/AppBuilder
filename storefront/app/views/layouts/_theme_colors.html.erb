@@ -1,0 +1,13 @@
+<%# The owner's brand color (Settings → Theme) over the theme's: the whole brand scale is mixed
+    from it, so buttons, links and badges follow. Without one the theme's own colors stay. %>
+<% if (brand = theme_setting(:brand_color).to_s).match?(/\A#\h{6}\z/) %>
+  <style>
+    :root {
+      <% { 50 => [ 8, "white" ], 100 => [ 15, "white" ], 200 => [ 30, "white" ], 300 => [ 50, "white" ], 400 => [ 72, "white" ], 500 => [ 88, "white" ],
+           700 => [ 85, "black" ], 800 => [ 70, "black" ], 900 => [ 55, "black" ], 950 => [ 40, "black" ] }.each do |step, (share, toward)| %>
+        --color-brand-<%= step %>: color-mix(in oklch, <%= brand %> <%= share %>%, <%= toward %>);
+      <% end %>
+      --color-brand-600: <%= brand %>;
+    }
+  </style>
+<% end %>

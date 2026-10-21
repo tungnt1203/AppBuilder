@@ -76,10 +76,12 @@ Every change to a cart answers with the whole cart.
 { "slug": "cat-mom-tee", "title": "Cat Mom Tee", "available": true,
   "price": { "min_cents": 2400, "max_cents": 2600, "currency": "USD", "compare_at_cents": 3000 },
   "image": { "id": 1, "alt": "Cat Mom Tee", "thumb": "https://…", "card": "https://…", "large": "https://…" },
+  "second_image": { "id": 2, … },
   "rating": { "average": 4.6, "count": 12 } }
 ```
 
 `compare_at_cents` is the highest "was" price of a variant on sale (null when none is).
+`second_image` is the product's second photo, for a card that shows it on hover (null with one photo).
 `rating` is null before the first review.
 
 **Product (one)** has all of the above, plus:

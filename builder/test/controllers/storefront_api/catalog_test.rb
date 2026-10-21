@@ -91,6 +91,16 @@ class StorefrontApi::CatalogTest < ActionDispatch::IntegrationTest
     assert_equal "Cat Lovers", api(:get, storefront_api_collection_path("cat-lovers"))["collection"]["title"]
   end
 
+  test "a product in a list has its second photo, for a card that shows it on hover" do
+    ActsAsTenant.with_tenant(shops(:cats)) do
+      2.times { |i| products(:tee).images.attach(io: file_fixture("product.png").open, filename: "tee-#{i}.png", content_type: "image/png") }
+    end
+
+    tee = api(:get, storefront_api_products_path)["products"].find { |product| product["slug"] == "cat-mom-tee" }
+    assert_equal products(:tee).images.second.id, tee.dig("second_image", "id")
+    assert_nil api(:get, storefront_api_products_path)["products"].find { |product| product["slug"] == "morning-mug" }["second_image"]
+  end
+
   test "a collection's photo is its first product on sale with one" do
     ActsAsTenant.with_tenant(shops(:cats)) do
       products(:hoodie).images.attach(io: file_fixture("product.png").open, filename: "hoodie.png", content_type: "image/png")

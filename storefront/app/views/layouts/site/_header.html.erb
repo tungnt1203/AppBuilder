@@ -1,18 +1,61 @@
-<%# The site's header. Redesign it for the shop: logo or wordmark, the few links visitors need
-    (the owner's "header" menu, from the admin), and the cart. Pages can add links with
-    content_for :site_nav. %>
+<%# The site's header. Redesign it for the shop: the logo (a theme setting the owner uploads) or
+    the name, the few links visitors need (Shop, the collections, the owner's "header" menu, from
+    the admin), and the cart. On phones the links fold into a menu. Pages can add links with
+    content_for :site_nav, or show only the logo and the cart with content_for :focused (checkout:
+    nothing to wander off to). %>
+<% menu_items = shop_menu(:header)&.items.to_a %>
+<% shop_collections = collections.select { |collection| collection.product_count.to_i.positive? }.first(6) %>
 <header class="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
-  <div class="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4">
-    <%= link_to current_shop.name, root_path, class: "mr-2 truncate font-display font-semibold text-ink" %>
-    <nav class="flex flex-1 items-center gap-1 overflow-x-auto" aria-label="<%= t("ui.navigation") %>">
+  <div class="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4">
+    <% unless content_for?(:focused) %>
+    <div class="md:hidden" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape">
+      <button type="button" class="<%= button_classes(:ghost) %> group -ml-2" data-menu-target="button" data-action="menu#toggle" aria-expanded="false" aria-label="<%= t("ui.menu") %>">
+        <%= icon "menu", size: 22, class: "group-aria-expanded:hidden" %>
+        <%= icon "x", size: 22, class: "hidden group-aria-expanded:block" %>
+      </button>
+      <nav data-menu-target="panel" class="absolute inset-x-0 top-full hidden max-h-[calc(100svh-4rem)] overflow-y-auto border-b border-line bg-surface px-4 pt-2 pb-6 shadow-lg" aria-label="<%= t("ui.navigation") %>">
+        <ul class="divide-y divide-line">
+          <li><%= link_to t("layouts.site.shop_all"), products_path, class: "flex items-center justify-between py-3.5 text-base font-medium text-ink" %></li>
+          <% shop_collections.each do |collection| %>
+            <li>
+              <%= link_to collection_path(collection), class: "flex items-center justify-between py-3.5 text-base font-medium text-ink" do %>
+                <%= collection.title %> <%= icon "chevron-right", size: 18, class: "text-muted" %>
+              <% end %>
+            </li>
+          <% end %>
+          <% menu_items.each do |item| %>
+            <li><%= shop_menu_link item, class: "block py-3.5 text-base text-muted hover:text-ink" %></li>
+          <% end %>
+        </ul>
+      </nav>
+    </div>
+    <% end %>
+
+    <%= link_to root_path, class: "mr-2 flex min-w-0 shrink items-center font-display text-lg font-semibold text-ink max-md:flex-1 max-md:justify-center" do %>
+      <% if (logo = theme_setting(:logo).presence) %>
+        <%= image_tag logo, alt: current_shop.name, class: "h-9 w-auto max-w-40 object-contain" %>
+      <% else %>
+        <span class="truncate"><%= current_shop.name %></span>
+      <% end %>
+    <% end %>
+
+    <% if content_for?(:focused) %>
+      <span class="flex-1"></span>
+    <% else %>
+    <nav class="hidden flex-1 items-center gap-1 md:flex" aria-label="<%= t("ui.navigation") %>">
       <%= bar_link_to t("layouts.site.shop"), products_path %>
-      <% shop_menu(:header)&.items&.each do |item| %>
+      <% shop_collections.first(4).each do |collection| %>
+        <%= link_to collection.title, collection_path(collection), class: "rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap text-muted hover:bg-surface-muted hover:text-ink" %>
+      <% end %>
+      <% menu_items.each do |item| %>
         <%= shop_menu_link item, class: "rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap text-muted hover:bg-surface-muted hover:text-ink" %>
       <% end %>
       <%= yield :site_nav %>
     </nav>
-    <%= link_to cart_path, class: "#{button_classes(:ghost)} relative", id: "cart-link", aria: { label: t("layouts.site.cart_with_count", count: cart_item_count) } do %>
-      <%= icon "shopping-bag", size: 20 %>
+    <% end %>
+
+    <%= link_to cart_path, class: "#{button_classes(:ghost)} relative -mr-2", id: "cart-link", aria: { label: t("layouts.site.cart_with_count", count: cart_item_count) } do %>
+      <%= icon "shopping-bag", size: 22 %>
       <% if cart_item_count.positive? %>
         <span class="absolute -top-0.5 -right-0.5 grid min-w-5 place-items-center rounded-full bg-brand-600 px-1 text-[0.6875rem] leading-5 font-semibold text-white"><%= cart_item_count %></span>
       <% end %>

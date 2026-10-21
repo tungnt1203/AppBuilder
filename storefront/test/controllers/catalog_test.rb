@@ -28,6 +28,42 @@ class CatalogTest < ActionDispatch::IntegrationTest
     assert_select "img[src=?]", "https://images.unsplash.com/photo-1", count: 0
   end
 
+  test "what the owner sets in the theme: logo, brand color, button, socials; benefits they can turn off" do
+    @platform.shop_data["theme_settings"] = { "logo" => "https://cdn.example/logo.png", "brand_color" => "#7a1f2b", "hero_button" => "See the cats",
+      "instagram_url" => "https://instagram.com/chubbycat", "show_benefits" => false }
+    get root_path
+    assert_select "header a[href='/'] img[src=?][alt=?]", "https://cdn.example/logo.png", "Chubby Cat Tees"
+    assert_select "style", /--color-brand-600: #7a1f2b;/
+    assert_select "a[href='/products']", /See the cats/
+    assert_select "footer a[href=?]", "https://instagram.com/chubbycat", text: "Instagram"
+    assert_select "li", text: /Secure checkout/, count: 0
+
+    @platform.shop_data["theme_settings"] = { "brand_color" => "red;}</style><script>", "show_benefits" => true }
+    get root_path
+    assert_select "style", count: 0
+    assert_select "li", text: /Secure checkout/
+  end
+
+  test "product cards say From for a range, the was price and how much a sale saves" do
+    get products_path
+    assert_select "a[href='/products/cat-tee']" do
+      assert_select "span", "From $24.00"
+      assert_select "s", "$30.00"
+      assert_select "span", "-20%"
+    end
+    assert_select "a[href='/products/morning-mug'] span", "$15.00"
+  end
+
+  test "the header lists the collections, and checkout keeps only the logo and the cart" do
+    get root_path
+    assert_select "header nav a[href='/collections/cats']", minimum: 1
+
+    post cart_items_path, params: { variant_id: 101, quantity: 1 }
+    get new_checkout_path
+    assert_select "header nav", count: 0
+    assert_select "header a#cart-link"
+  end
+
   test "a shop without products says they're coming, and tells the owner how in the preview" do
     @platform.products_data = []
     @platform.shop_data["preview"] = true
@@ -56,8 +92,9 @@ class CatalogTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", "/products/cat-tee", count: 0
     assert_includes @platform.requests, [ :products, { q: "mug", collection: nil, sort: "title", page: nil } ]
 
-    get collection_path("cats")
+    get collection_path("cats", sort: "price_asc")
     assert_select "h1", "Cats"
+    assert_includes @platform.requests, [ :products, { q: nil, collection: "cats", sort: "price_asc", page: nil } ]
     assert_select "a[href=?]", "/products/cat-tee"
     get collection_path("new")
     assert_select "h1", "New"

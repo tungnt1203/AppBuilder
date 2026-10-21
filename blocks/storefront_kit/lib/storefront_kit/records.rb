@@ -29,6 +29,7 @@ module StorefrontKit
   class Product < Record
     optional :description, :size_guide, :size_option
     one :image, Image
+    one :second_image, Image
     many :images, Image
     many :variants, Variant
     many :options, ProductOption

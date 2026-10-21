@@ -1,0 +1,19 @@
+<%# Why it's safe to buy here, under the first screen: each line from the shop's own settings, so
+    it stays true when the owner changes them. The owner turns it off in Settings → Theme. %>
+<% shipping = current_shop.shipping
+   lines = [
+     ([ "truck", t("products.show.free_shipping_over", amount: money(shipping.free_over_cents)) ] if shipping&.free_over_cents),
+     ([ "calendar-check", delivery_estimate ] if delivery_estimate),
+     ([ "mail", t(".questions") ] if current_shop.contact&.[](:email).present?),
+     [ "lock", t(".secure") ]
+   ].compact.first(4) %>
+<section class="border-b border-line bg-surface">
+  <ul class="mx-auto grid max-w-6xl grid-cols-2 gap-x-4 gap-y-4 px-4 py-6 md:grid-cols-4">
+    <% lines.each do |name, text| %>
+      <li class="flex items-center gap-3 text-sm font-medium text-ink">
+        <span class="grid size-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700"><%= icon name, size: 18 %></span>
+        <%= text %>
+      </li>
+    <% end %>
+  </ul>
+</section>

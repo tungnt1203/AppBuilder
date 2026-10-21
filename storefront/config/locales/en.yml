@@ -13,6 +13,8 @@ en:
       sold_out: Sold out
       unavailable: Not available
       sale: Sale
+      saves: "-%{percent}%"
+      from: From %{price}
     index:
       title: Shop
       search: Search products
@@ -129,6 +131,9 @@ en:
         pay: Pay %{total}
         test_mode: 'This is a test payment: use Stripe''s test card 4242 4242 4242 4242, any future date and any CVC.'
   home:
+    benefits:
+      questions: Questions? We answer by email
+      secure: Secure checkout
     show:
       tagline: Original designs, printed on demand and shipped to your door.
       shop_all: Shop all
@@ -252,6 +257,9 @@ en:
   layouts:
     site:
       shop: Shop
+      shop_all: Shop all
+      follow: Follow us
+      help: Help
       cart_with_count:
         zero: Cart
         one: Cart, 1 item

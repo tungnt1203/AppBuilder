@@ -106,6 +106,13 @@ these for the brand, but keep each part:
   footer links to the policies and contact page (Stripe and ad networks check them).
 - **Ad tracking**: keep `layouts/site/tracking_tags` in the head and `tracking_events` in the body,
   and `track` in the controllers; `/feeds/products.xml` and the product page's schema.org data.
+- **What the owner changes in Settings → Theme** (`config/theme_settings.yml`): the logo, the
+  brand color (`layouts/_theme_colors` mixes the brand scale from it), the home page's words,
+  button and photo, the benefits strip, the social links. Keep reading each one where it shows
+  when you redesign (a new header still shows the logo), and add settings for what else the
+  owner should change without you.
+- **Header and checkout**: the header lists the collections and folds into a menu on phones;
+  checkout sets `content_for :focused` so its header has only the logo and the cart.
 - **No products yet**: the shop shows `products/_coming_soon` until the owner's products are in.
   Never invent products, prices, photos or reviews to fill the preview.
 

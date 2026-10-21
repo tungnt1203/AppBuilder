@@ -1,12 +1,35 @@
 # What the owner can change in the shop's admin (Settings → Theme) without a new version of the
-# storefront. Views read them with theme_setting(:key). Applied when the storefront is published.
-# Types: text, richtext, image, color, url, boolean, select.
+# storefront. Views read them with theme_setting(:key). Applied when the storefront is published;
+# the preview shows the defaults. Types: text, richtext, image, color, url, boolean, select.
+- key: logo
+  type: image
+  label: Logo (shown in the header instead of the shop's name)
+- key: brand_color
+  type: color
+  label: Brand color (buttons, links, badges; pick a deep one, its text is white)
 - key: hero_title
   type: text
   label: Home page headline
 - key: hero_text
   type: text
   label: Home page text under the headline
+- key: hero_button
+  type: text
+  label: Home page button
+  default: Shop all
 - key: hero_image
   type: image
   label: Home page photo
+- key: show_benefits
+  type: boolean
+  label: Show free shipping, delivery and secure checkout under the home page photo
+  default: true
+- key: instagram_url
+  type: url
+  label: Instagram page
+- key: tiktok_url
+  type: url
+  label: TikTok page
+- key: facebook_url
+  type: url
+  label: Facebook page
