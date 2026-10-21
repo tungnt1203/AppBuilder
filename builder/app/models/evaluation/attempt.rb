@@ -49,7 +49,7 @@ module Evaluation
       end
 
       def turn
-        summary = project.messages.where(role: %w[ result error ]).where.not(data: {}).last&.data || {}
+        summary = project.messages.where(role: %w[ result error ]).order(:id).reverse.find { |message| message.data.present? }&.data || {}
         { "cost_usd" => summary["total_cost_usd"]&.round(2), "agent_turns" => summary["num_turns"],
           "agent_seconds" => summary["duration_ms"] && (summary["duration_ms"] / 1000.0).round,
           "preview_error" => project.preview_error }

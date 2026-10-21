@@ -180,8 +180,9 @@ design.
   product's (`collection_image`). Don't invent products to fill the grid: a new shop shows its
   coming-soon state (`products/_coming_soon`) until the owner's products are in.
 - **Lifestyle photos make a shop look alive.** Give the home page at least three: the first
-  screen, and two more further down (a collage, image with text, a band). People wearing or
-  using what the shop sells, in the style's light and colors (search for that: "woman laughing
+  screen, and two more further down (a collage, image with text, a band). What the designs are
+  about (the cats on a cat-tee shop, runners on a race shirt) and people wearing or using what
+  the shop sells, in the style's light and colors (search for that: "woman laughing
   in oversized tee golden hour", not "t-shirt"). Make each one a theme setting of type `image`
   with the `bin/images` link as its `default` (`hero_image` is already there), and read it with
   `theme_setting(:key)`: the owner can swap it for their own photo in the admin, and the preview
