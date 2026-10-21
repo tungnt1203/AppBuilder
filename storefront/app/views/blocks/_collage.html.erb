@@ -1,0 +1,31 @@
+<%# Collage: two big photo cards side by side, each a way into the shop (two collections, "For
+    him" / "For her", "Tees" / "Mugs", a gift guide). Stacked on phones. Use the collections'
+    photos (collection_image) or lifestyle photos made theme settings; keep each card's words to a
+    title and a link. %>
+<% cards = [
+     { title: "After dark", text: "Glow-in-the-dark prints", href: products_path, alt: "A woman in a black graphic tee on a city street at night",
+       photo: "https://images.unsplash.com/photo-1576090692357-3f7064c4754f?ixid=M3wxMTA4ODU4fDB8MXxzZWFyY2h8MXx8d29tYW4lMjB3ZWFyaW5nJTIwZ3JhcGhpYyUyMHQtc2hpcnQlMjBzdHJlZXR8ZW58MXwwfHx8MTc5MjU1MDM4Nnww&ixlib=rb-4.1.0&w=1200&q=80&fm=jpg&fit=max",
+       credit: [ "Carlos Macías", "https://unsplash.com/@carlosm2514?utm_source=app_builder&utm_medium=referral" ] },
+     { title: "Morning mugs", text: "For the first coffee", href: products_path, alt: "A glass mug that says Good morning on a wooden board",
+       photo: "https://images.unsplash.com/photo-1771499931747-5a383e3bd54d?ixid=M3wxMTA4ODU4fDB8MXxzZWFyY2h8Mnx8Y2VyYW1pYyUyMG11ZyUyMG1vcm5pbmclMjBjb2ZmZWV8ZW58MXwxfHx8MTc5MjU1MDM5M3ww&ixlib=rb-4.1.0&w=1200&q=80&fm=jpg&fit=max",
+       credit: [ "The Design Lady", "https://unsplash.com/@sarah35?utm_source=app_builder&utm_medium=referral" ] }
+   ] %>
+<section class="py-16 md:py-24">
+  <div class="mx-auto grid max-w-6xl gap-4 px-4 md:grid-cols-2">
+    <% cards.each do |card| %>
+      <%= link_to card[:href], class: "group relative isolate flex aspect-[4/5] items-end overflow-hidden rounded-2xl bg-ink p-6 md:aspect-square md:p-8" do %>
+        <%= image_tag card[:photo], alt: card[:alt], loading: "lazy", class: "absolute inset-0 -z-10 size-full object-cover transition duration-700 group-hover:scale-105" %>
+        <span class="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 to-transparent"></span>
+        <span>
+          <span class="block text-sm text-white/80"><%= card[:text] %></span>
+          <span class="mt-1 block text-3xl font-bold text-white md:text-4xl"><%= card[:title] %></span>
+          <span class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink">Shop now <%= icon "arrow-right", size: 16 %></span>
+        </span>
+      <% end %>
+    <% end %>
+  </div>
+  <p class="mx-auto mt-2 max-w-6xl px-4 text-[11px] text-muted">
+    Photos: <% cards.each_with_index do |card, i| %><%= ", " if i.positive? %><a href="<%= card[:credit].last %>" class="underline"><%= card[:credit].first %></a><% end %>
+    on <a href="https://unsplash.com/?utm_source=app_builder&utm_medium=referral" class="underline">Unsplash</a>
+  </p>
+</section>

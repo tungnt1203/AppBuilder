@@ -91,6 +91,19 @@ class StorefrontApi::CatalogTest < ActionDispatch::IntegrationTest
     assert_equal "Cat Lovers", api(:get, storefront_api_collection_path("cat-lovers"))["collection"]["title"]
   end
 
+  test "a collection's photo is its first product on sale with one" do
+    ActsAsTenant.with_tenant(shops(:cats)) do
+      products(:hoodie).images.attach(io: file_fixture("product.png").open, filename: "hoodie.png", content_type: "image/png")
+      collection_products(:cats_hoodie).update!(position: -1) # first, but a draft
+      products(:tee).images.attach(io: file_fixture("product.png").open, filename: "tee.png", content_type: "image/png")
+    end
+
+    image = api(:get, storefront_api_collections_path)["collections"].first["image"]
+    assert_equal [ products(:tee).images.first.id, "Cat Lovers" ], image.values_at("id", "alt")
+    assert image["card"].include?("/rails/active_storage/")
+    assert_equal image, api(:get, storefront_api_collection_path("cat-lovers"))["collection"]["image"]
+  end
+
   test "policies the shop wrote" do
     ActsAsTenant.with_tenant(shops(:cats)) { Store.current.update!(refund_policy: "30 days, no questions.") }
     assert_equal [ { "id" => "refund", "title" => "Refund policy" } ], api(:get, storefront_api_shop_path)["shop"]["policies"]

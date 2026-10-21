@@ -588,6 +588,7 @@ en:
         empty_description: They show up here when the storefront is published. It declares them in config/theme_settings.yml.
         save: Save
         remove_image: Remove this picture
+        default_image: The storefront's own photo. Upload yours to replace it.
       update:
         notice: Theme settings saved.
         not_declared: The storefront hasn't declared any theme settings yet.

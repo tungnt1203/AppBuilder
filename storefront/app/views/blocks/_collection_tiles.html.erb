@@ -1,0 +1,37 @@
+<%# Shop by collection: a big photo tile for each of the shop's collections, the way buyers who
+    didn't come for one product start browsing. Each tile shows its collection's photo (its first
+    product's: collection_image). Two across on phones, up to four on wide screens; three
+    collections read well as one tall tile beside two. The collections come from the shop's admin. %>
+<% tiles = collections.select { |collection| collection.product_count.to_i.positive? }.first(4) %>
+<section id="collections" class="py-16 md:py-24">
+  <div class="mx-auto max-w-6xl px-4">
+    <div class="flex items-end justify-between gap-4">
+      <h2 class="text-3xl font-bold tracking-tight text-ink md:text-4xl">Shop by collection</h2>
+      <%= link_to products_path, class: "hidden items-center gap-1 text-sm font-semibold text-ink underline-offset-4 hover:underline sm:inline-flex" do %>
+        Everything <%= icon "arrow-right", size: 16 %>
+      <% end %>
+    </div>
+
+    <% if tiles.any? %>
+      <ul class="mt-8 grid grid-cols-2 gap-3 md:gap-4 <%= tiles.size == 3 ? "md:grid-cols-3" : "md:grid-cols-4" %>">
+        <% tiles.each do |collection| %>
+          <li>
+            <%= link_to collection_path(collection), class: "group relative block aspect-[3/4] overflow-hidden rounded-xl bg-surface-muted" do %>
+              <%= collection_image collection, size: :card, class: "absolute inset-0 size-full transition duration-500 group-hover:scale-105" %>
+              <span class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent"></span>
+              <span class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4">
+                <span>
+                  <span class="block text-lg leading-tight font-bold text-white md:text-xl"><%= collection.title %></span>
+                  <span class="text-sm text-white/80"><%= pluralize(collection.product_count, "design") %></span>
+                </span>
+                <span class="grid size-9 shrink-0 place-items-center rounded-full bg-white text-ink transition group-hover:translate-x-0.5"><%= icon "arrow-up-right", size: 16 %></span>
+              </span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% elsif current_shop.preview? %>
+      <p class="mt-8 rounded-xl border border-dashed border-line px-6 py-10 text-center text-sm text-muted">The shop's collections show here once the owner makes them in the admin.</p>
+    <% end %>
+  </div>
+</section>

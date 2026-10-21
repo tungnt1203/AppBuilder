@@ -12,7 +12,7 @@ storefront.add_to_cart(current_cart!.token, variant_id: 12, properties: { print_
 
 - `StorefrontKit.api`: the API, from `PLATFORM_URL`, `SHOP_KEY` and `STOREFRONT_MODE`.
 - `Storefront` (controller concern): `current_shop`, `current_cart`, `current_cart!`, `storefront`.
-- `StorefrontHelper` (views): `theme_setting`, `money`, `price_range`, `product_image`,
+- `StorefrontHelper` (views): `theme_setting`, `money`, `price_range`, `product_image`, `collection_image`,
   `shop_menu`, `products`, `collections`.
 - Errors: `StorefrontKit::NotFound` (a 404), `Invalid` (with `fields`), `Unavailable`,
   `Unreachable` (the Platform is down; GETs fall back to what's cached).

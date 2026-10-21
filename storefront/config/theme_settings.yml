@@ -7,3 +7,6 @@
 - key: hero_text
   type: text
   label: Home page text under the headline
+- key: hero_image
+  type: image
+  label: Home page photo

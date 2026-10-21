@@ -1,0 +1,24 @@
+<%# Why it's safe to buy here, in one glance, right under the first screen or above the footer:
+    three or four short lines with icons, each one true for this shop. They come from the shop's
+    own settings, so they're right when the owner changes them; add only what the shop really
+    offers (a guarantee the owner gave you, a charity they give to). %>
+<% shipping = current_shop.shipping
+   lines = [
+     ([ "truck", t("products.show.free_shipping_over", amount: money(shipping.free_over_cents)), "Tracked to your door" ] if shipping&.free_over_cents),
+     ([ "calendar-check", delivery_estimate, "If you order today" ] if delivery_estimate),
+     [ "paintbrush", "Printed for you", "Each piece is made when you order it" ],
+     [ "lock", "Secure checkout", "Card payments by Stripe" ]
+   ].compact.first(4) %>
+<section class="border-y border-line bg-surface">
+  <ul class="mx-auto grid max-w-6xl grid-cols-2 gap-x-4 gap-y-6 px-4 py-8 md:grid-cols-4 md:py-10">
+    <% lines.each do |name, title, text| %>
+      <li class="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+        <span class="grid size-10 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700"><%= icon name, size: 20 %></span>
+        <div>
+          <p class="text-sm font-semibold text-ink"><%= title %></p>
+          <p class="text-sm text-muted"><%= text %></p>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+</section>

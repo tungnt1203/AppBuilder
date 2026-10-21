@@ -124,8 +124,9 @@ class StorefrontApi::Json
     }
   end
 
-  def collection(collection, product_count: nil)
-    { slug: collection.slug, title: collection.title, description: collection.description.presence, product_count: }.compact
+  def collection(collection, product_count: nil, cover: nil)
+    { slug: collection.slug, title: collection.title, description: collection.description.presence, product_count:,
+      image: image(cover&.cover_image, alt: collection.title) }.compact
   end
 
   def review(review)

@@ -44,7 +44,7 @@ What a shop's storefront calls to show the shop and take its orders. It runs on 
 | `GET /v1/products` | Products on sale. Query: `q`, `collection` (slug), `sort` (`newest`, `title`, `price_asc`, `price_desc`), `page`, `per_page` (max 100) |
 | `GET /v1/products/:slug` | One product: options (with colors), variants, photos, size guide, collections, rating, custom fields, buyer inputs |
 | `GET /v1/products/:slug/reviews` | Its published reviews, newest first, 10 a page |
-| `GET /v1/collections` | Collections in the shop's order, with how many products on sale each has |
+| `GET /v1/collections` | Collections in the shop's order, with how many products on sale each has and a photo (`image`: the first of its products on sale with one) |
 | `GET /v1/collections/:slug` | One collection. Its products: `/v1/products?collection=:slug` |
 | `GET /v1/policies/:id` | `refund`, `shipping`, `privacy` or `terms`, when the shop wrote it |
 | `GET /v1/pages/:slug` | A published page: text and questions |
@@ -98,7 +98,7 @@ Every change to a cart answers with the whole cart.
 
 **Cart line** and **order line** include `properties` when the buyer typed something: `[{ "key", "label", "value" }]`. Printify can't get that text from the Platform, so an order with it isn't sent automatically: the shop's staff make it in Printify and link it in the admin (or send it without the text, for a gift note). Tracking and status then come back as for any order.
 
-**Shop** includes `theme_settings`: the storefront's declared settings, each merged with its default. An image setting is an absolute URL, or null until the owner uploads one.
+**Shop** includes `theme_settings`: the storefront's declared settings, each merged with its default. An image setting is an absolute URL: the owner's upload, else the default (a stock photo's link), else null.
 Its `shipping` has `delivery_dates` (`{ first, last }`, the dates an order placed today should arrive, when the shop says how long delivery takes) and `countries` for checkout: `[{ "code": "US", "name": "United States", "regions": { "CA": "California", … } }]`, `regions` null where the state is typed in. `tax_at_payment` is true when Stripe Tax adds tax on the payment page.
 
 **Page**: `{ "slug", "title", "blocks" }`. A block is `{ "type": "text", "body" }` or `{ "type": "faq", "items": [{ "question", "answer" }] }`.

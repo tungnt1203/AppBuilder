@@ -5,11 +5,27 @@ class CatalogTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_select "h1", "Tees for people who love a chubby cat"
-    assert_select "a[href=?]", "/collections/cats", text: "Cats"
+    assert_select "a[href=?]", "/collections/cats", text: "Cats" do
+      assert_select "img[src=?]", "https://cdn.example/cat-card.webp"
+    end
     assert_select "a[href=?]", "/products/cat-tee"
     assert_select "header a[href=?]", "/pages/about", text: "About"
     assert_select "footer a[href=?]", "/policies/refund"
     assert_select "div", text: "Free shipping over $50"
+  end
+
+  test "the home page's photo and words come from the theme's file until the storefront is published" do
+    @platform.shop_data["theme_settings"] = {}
+    defaults = [ { "key" => "hero_title", "type" => "text", "default" => "Cats, printed" },
+                 { "key" => "hero_image", "type" => "image", "default" => "https://images.unsplash.com/photo-1" } ]
+    with_theme_file(defaults) { get root_path }
+    assert_select "h1", "Cats, printed"
+    assert_select "img[src=?]", "https://images.unsplash.com/photo-1"
+
+    @platform.shop_data["theme_settings"] = { "hero_title" => "Set by the owner", "hero_image" => nil }
+    with_theme_file(defaults) { get root_path }
+    assert_select "h1", "Set by the owner"
+    assert_select "img[src=?]", "https://images.unsplash.com/photo-1", count: 0
   end
 
   test "a shop without products says they're coming, and tells the owner how in the preview" do
@@ -77,4 +93,14 @@ class CatalogTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "<g:sale_price>24.00 USD</g:sale_price>"
     assert_includes response.body, "<g:id>TEE-102</g:id>"
   end
+
+  private
+    # config/theme_settings.yml with these fields, for the block.
+    def with_theme_file(fields)
+      original = YAML.method(:safe_load_file)
+      YAML.define_singleton_method(:safe_load_file) { |*| fields }
+      yield
+    ensure
+      YAML.define_singleton_method(:safe_load_file, original)
+    end
 end

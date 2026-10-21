@@ -1,21 +1,40 @@
-<%# The site's home page. A plain starting point: redesign it for the shop. The hero's words are
-    theme settings (config/theme_settings.yml), so the owner can change them in the admin. %>
-<section class="border-b border-line bg-surface">
-  <div class="mx-auto max-w-6xl px-4 py-16 sm:py-24">
-    <h1 class="max-w-2xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-6xl"><%= theme_setting(:hero_title) || current_shop.name %></h1>
-    <p class="mt-4 max-w-xl text-lg text-muted"><%= theme_setting(:hero_text) || t(".tagline") %></p>
-    <%= link_to t(".shop_all"), products_path, class: "#{button_classes} mt-8" %>
-  </div>
-</section>
+<%# The site's home page. A plain starting point: redesign it for the shop (blocks/ has the
+    sections to build from). The hero's words and photo are theme settings
+    (config/theme_settings.yml), so the owner can change them in the admin. %>
+<% if (hero_image = theme_setting(:hero_image).presence) %>
+  <section class="relative isolate flex min-h-[78svh] items-end overflow-hidden bg-ink md:min-h-[80vh] md:items-center">
+    <%= image_tag hero_image, alt: "", class: "absolute inset-0 -z-10 size-full object-cover", fetchpriority: "high" %>
+    <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/75 via-black/25 to-transparent md:bg-gradient-to-r md:from-black/60 md:via-black/20"></div>
+    <div class="mx-auto w-full max-w-6xl px-4 pt-40 pb-10 md:py-24">
+      <h1 class="max-w-xl font-display text-5xl leading-[1.02] font-semibold tracking-tight text-balance text-white md:text-7xl"><%= theme_setting(:hero_title) || current_shop.name %></h1>
+      <p class="mt-4 max-w-md text-lg text-white/85"><%= theme_setting(:hero_text) || t(".tagline") %></p>
+      <%= link_to t(".shop_all"), products_path, class: "mt-8 inline-flex items-center rounded-full bg-white px-6 py-3.5 font-semibold text-ink transition hover:bg-white/90" %>
+    </div>
+  </section>
+<% else %>
+  <section class="border-b border-line bg-surface">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:py-24">
+      <h1 class="max-w-2xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-6xl"><%= theme_setting(:hero_title) || current_shop.name %></h1>
+      <p class="mt-4 max-w-xl text-lg text-muted"><%= theme_setting(:hero_text) || t(".tagline") %></p>
+      <%= link_to t(".shop_all"), products_path, class: "#{button_classes} mt-8" %>
+    </div>
+  </section>
+<% end %>
 
 <% if @collections.any? %>
   <section class="mx-auto max-w-6xl px-4 pt-16">
     <h2 class="font-display text-2xl font-semibold tracking-tight"><%= t(".collections") %></h2>
-    <div class="mt-6 flex gap-3 overflow-x-auto pb-2">
+    <ul class="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3">
       <% @collections.each do |collection| %>
-        <%= link_to collection.title, collection_path(collection), class: "shrink-0 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium hover:border-ink" %>
+        <li>
+          <%= link_to collection_path(collection), class: "group relative block aspect-[4/5] overflow-hidden rounded-xl bg-surface-muted" do %>
+            <%= collection_image collection, class: "absolute inset-0 size-full transition duration-500 group-hover:scale-105" %>
+            <span class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></span>
+            <span class="absolute inset-x-0 bottom-0 p-4 font-display text-lg font-semibold text-white"><%= collection.title %></span>
+          <% end %>
+        </li>
       <% end %>
-    </div>
+    </ul>
   </section>
 <% end %>
 

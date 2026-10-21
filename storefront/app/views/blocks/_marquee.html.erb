@@ -1,0 +1,18 @@
+<%# A band of words that slides across: the shop's promises or its jokes, between two sections or
+    under the header. Short phrases, true ones; it stands still for visitors who turn motion off.
+    The words are written twice so the loop has no gap (the second copy is hidden from screen
+    readers). The motion is .marquee in application.css. %>
+<% phrases = [ "Printed when you order", "Free shipping over $50", "Drawn in our studio", "Ships in 3–5 days" ] %>
+<section class="overflow-hidden border-y border-ink bg-accent py-3 text-ink" aria-label="What we promise">
+  <div class="marquee flex w-max gap-8">
+    <% 2.times do |copy| %>
+      <ul class="flex shrink-0 items-center gap-8" <%= "aria-hidden=true" if copy.positive? %>>
+        <% phrases.each do |phrase| %>
+          <li class="flex items-center gap-8 text-sm font-bold tracking-widest whitespace-nowrap uppercase">
+            <%= phrase %> <%= icon "sparkle", size: 14 %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+</section>

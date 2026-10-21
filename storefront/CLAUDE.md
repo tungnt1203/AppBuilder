@@ -41,7 +41,7 @@ in, but build the storefront in English (see "Language").
   `submit_form(key, answers)`.
 - In views (`StorefrontHelper`): `current_shop` (name, currency, announcement, shipping,
   pixels, policies, contact), `theme_setting(:key)`, `money(cents)`, `price_range(product)`,
-  `product_image(product, size: :thumb|:card|:large)`, `shop_menu(:header)`, `products(...)`,
+  `product_image(product, size: :thumb|:card|:large)`, `collection_image(collection)`, `shop_menu(:header)`, `products(...)`,
   `collections` for a section of any page.
 - Records read every field of the API as a method: `product.title`, `variant.available?`,
   `product.variant_for(%w[ Black M ])`, `product.image_for(variant)`, `cart.items`,
@@ -55,8 +55,8 @@ in, but build the storefront in English (see "Language").
 - `config/theme_settings.yml` declares what the owner can change in the admin (Settings → Theme):
   `- { key: hero_title, type: text, label: Home page headline, default: "…" }`. Types: `text`,
   `richtext`, `image`, `color`, `url`, `boolean`, `select` (with `options`). Read them with
-  `theme_setting(:hero_title)`. Give every one a sensible default; a key you rename loses what the
-  owner set.
+  `theme_setting(:hero_title)`. Give every one a sensible default (the preview shows the defaults
+  until the storefront is published); a key you rename loses what the owner set.
 - `config/forms.yml` declares the forms the storefront sends to the shop (contact, a wholesale
   enquiry): `key`, `title`, `fields` (`text`, `email`, `textarea`, `boolean`). Post them to
   `form_submissions_path(key)` with `answers[<field>]`; messages land in the admin's inbox and the

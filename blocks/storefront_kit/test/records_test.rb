@@ -51,4 +51,10 @@ class RecordsTest < Minitest::Test
     assert_equal Date.today + 7, shop.shipping.delivery_dates.first
     assert_equal "Texas", shop.shipping.countries.last.regions["TX"]
   end
+
+  def test_collections_with_and_without_a_photo
+    cats, fresh = @api.collections
+    assert_equal "https://cdn.example/cat-card.webp", cats.image.url
+    assert_nil fresh.image
+  end
 end

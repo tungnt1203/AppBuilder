@@ -65,6 +65,7 @@ module StorefrontKit
 
   class Collection < Record
     optional :description, :product_count
+    one :image, Image
     def to_param = slug
   end
 

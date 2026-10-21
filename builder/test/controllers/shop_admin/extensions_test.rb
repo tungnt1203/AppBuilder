@@ -40,8 +40,11 @@ class ShopAdmin::ExtensionsTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: "No theme settings yet"
 
     ActsAsTenant.with_tenant(shops(:cats)) do
-      ThemeSetting.apply_schema!([ { "key" => "hero_title", "type" => "text", "label" => "Hero", "default" => "Hello" } ])
+      ThemeSetting.apply_schema!([ { "key" => "hero_title", "type" => "text", "label" => "Hero", "default" => "Hello" },
+        { "key" => "hero_image", "type" => "image", "label" => "Photo", "default" => "https://images.unsplash.com/photo-1" } ])
     end
+    get edit_shop_admin_theme_setting_path
+    assert_select "img[src=?]", "https://images.unsplash.com/photo-1"
     patch shop_admin_theme_setting_path, params: { theme_setting: { values: { hero_title: "Cats" } } }
     assert_redirected_to edit_shop_admin_theme_setting_path
     assert_equal "Cats", ActsAsTenant.with_tenant(shops(:cats)) { ThemeSetting.current.values["hero_title"] }

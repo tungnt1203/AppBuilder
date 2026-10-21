@@ -20,11 +20,15 @@
           <% elsif field["type"] == "image" %>
             <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
             <% if (attachment = @theme_setting.image_attachment(key)) %>
+              <%= image_tag attachment, alt: "", class: "h-24 rounded-lg object-cover" if attachment.representable? %>
               <p class="text-sm text-muted"><%= attachment.filename %></p>
               <label class="flex items-center gap-2 text-sm text-muted">
                 <%= check_box_tag "theme_setting[remove_images][]", key, false, class: "size-4 rounded border-line accent-brand-600" %>
                 <%= t(".remove_image") %>
               </label>
+            <% elsif field["default"] %>
+              <%= image_tag field["default"], alt: "", class: "h-24 rounded-lg object-cover" %>
+              <p class="text-sm text-muted"><%= t(".default_image") %></p>
             <% end %>
             <%= file_field_tag "theme_setting[images][#{key}]", accept: "image/*", class: field_classes %>
           <% elsif field["type"] == "select" %>

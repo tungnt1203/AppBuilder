@@ -1,0 +1,28 @@
+<%# A row of products to swipe: best sellers, new in, one collection. On phones the next card
+    peeks in so buyers know to swipe; on wide screens four fit and the rest scroll. Pass the
+    records from the controller (products(collection: "…", per_page: 8) here only for the
+    blocks page). Product cards are products/_product: restyle that partial, not a copy here. %>
+<% arrivals = products(per_page: 8).records %>
+<section class="py-16 md:py-24">
+  <div class="mx-auto flex max-w-6xl items-end justify-between gap-4 px-4">
+    <div>
+      <p class="text-xs font-semibold tracking-[0.2em] text-brand-700 uppercase">Just landed</p>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink md:text-4xl">New this week</h2>
+    </div>
+    <%= link_to products_path, class: "inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-ink underline-offset-4 hover:underline" do %>
+      View all <%= icon "arrow-right", size: 16 %>
+    <% end %>
+  </div>
+
+  <% if arrivals.any? %>
+    <ul class="mx-auto mt-8 flex max-w-6xl snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none]">
+      <% arrivals.each do |product| %>
+        <li class="w-[68%] shrink-0 snap-start sm:w-[40%] md:w-[calc((100%-3rem)/4)]">
+          <%= render "products/product", product: %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="mx-auto mt-8 max-w-6xl px-4"><%= render "products/coming_soon" %></div>
+  <% end %>
+</section>

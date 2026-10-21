@@ -2,7 +2,12 @@
 # the catalog straight from the API (products, collections) for a section of any page.
 module StorefrontHelper
   # A value the owner set for one of the theme's settings (config/theme_settings.yml), or its default.
-  def theme_setting(key) = current_shop.theme_settings[key.to_s]
+  # The Platform learns the settings when the storefront is published; until then (the builder's
+  # preview, a setting added since) the default comes from the file.
+  def theme_setting(key)
+    settings = current_shop.theme_settings
+    settings.key?(key.to_s) ? settings[key.to_s] : theme_setting_defaults[key.to_s]
+  end
 
   # "$24.00" in the shop's currency (or the one given).
   def money(cents, currency = current_shop.currency)
@@ -49,6 +54,17 @@ module StorefrontHelper
     end
   end
 
+  # A collection's photo (the first of its products with one), or a placeholder without one.
+  def collection_image(collection, size: :card, **options) = product_image(collection, size:, image: collection.image, **options)
+
   # A menu item's link: a path on this storefront or a full address.
   def menu_url(item) = item["url"].to_s
+
+  private
+    def theme_setting_defaults
+      @theme_setting_defaults ||= begin
+        file = Rails.root.join("config/theme_settings.yml")
+        Array(file.exist? ? YAML.safe_load_file(file) : nil).filter_map { |field| [ field["key"].to_s, field["default"] ] if field.is_a?(Hash) }.to_h
+      end
+    end
 end

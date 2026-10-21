@@ -29,6 +29,7 @@ they said it. Replace DESIGN.md with:
 # Design
 
 **For:** who opens this app, on what device, in what moment (e.g. "buyers tapping an ad on their phone between errands").
+**Style:** which shop style below it starts from, and what makes it this shop's own.
 **Feel:** three words (e.g. "warm, unhurried, pretty").
 **Color:** light or dark; canvas, ink, brand and accent and why they fit.
 **Type:** display font + text font from the list below.
@@ -46,6 +47,27 @@ choices so the owner can react before anything is built.
 
 On later turns, read DESIGN.md first and stay inside it. When the owner asks for a different look,
 update DESIGN.md and the theme together.
+
+### Shop styles
+
+Shops that sell well online look like the best Shopify themes: a big photo of people using the
+thing, a few strong sections, the products large. Start every storefront from the one of these
+styles that fits what the shop sells and who buys it (or the one the owner's words point to), then
+make it this shop's: its own colors, its name and products in the words, the photos for its
+buyers. Two shops in the same style should still not look alike. Before building, look at the
+style's reference store (`bin/look <url> --desktop --screens 3`) and take its layout ideas: the
+header, the order of sections, how photos and type are framed. Never its words, logo or photos.
+
+| Style | For shops selling | Reference |
+|---|---|---|
+| **Quiet luxury**: warm off-white, near-black ink, one deep color (espresso, olive, ink blue) and brass; a big serif (Cormorant Garamond, Playfair Display) with Manrope; square corners, hairlines, no shadows; a centered logo over a centered nav; huge serif statements with room around them | jewelry, art prints, candles, home goods, anything at a higher price | https://theme-craft-demo.myshopify.com, https://theme-studio-demo.myshopify.com, https://theme-origin-demo.myshopify.com |
+| **Bold street**: a dark canvas, white type and one loud accent (lime, safety orange, electric blue); Montserrat or Space Grotesk in heavy uppercase; square corners and solid blocks; a split hero with the photo bleeding off the edge; a marquee in the accent color | streetwear, gym and sport, gaming, music and fandom tees | https://theme-ride-demo.myshopify.com |
+| **Playful pop**: bright flat colors on cream or white, 2px ink borders with a hard offset shadow (`shadow-[4px_4px_0_var(--color-ink)]`), pills and stickers set at an angle; Baloo 2 or Bricolage Grotesque with Nunito; a photo hero with a bordered text card | funny tees, pets, kids, snacks, gifts | https://theme-colorblock-demo.myshopify.com, https://theme-crave-demo.myshopify.com |
+| **Soft natural**: pale tinted canvas, pastel gradient cards, very round corners (`rounded-3xl`); Plus Jakarta Sans or Quicksand; close-up photos in soft light with a floating text card over them | skincare, self-care, baby, wellness, tea | https://theme-sense-demo.myshopify.com, https://theme-refresh-demo.myshopify.com |
+| **Warm handmade**: cream canvas, terracotta, sage or mustard, a soft serif (Fraunces, Lora) with Nunito; gentle corners, a paper grain on bands of color; the maker's story beside a photo of hands at work | mugs, coffee, crafts, local makers, slow fashion | https://theme-craft-demo.myshopify.com |
+
+Say in DESIGN.md which style you started from and what you changed. When the owner shows another
+site or names a feel, that wins over the table.
 
 ## 2. Make it the theme
 
@@ -126,8 +148,13 @@ owner pointed at an element in the preview, that element is the one they mean. I
 would break the shop (the add-to-cart form below the fold on phones, prices hidden), build it as
 close as works and say why.
 
-**Start from the page blocks** in `app/views/blocks/`: hero (split, full-bleed photo), features,
-gallery, stats, FAQ, closing call to action, and a bottom action bar for phones. Buyers' words
+**Start from the page blocks** in `app/views/blocks/`. Shop sections, after Shopify's themes: an
+image banner (the first screen), a marquee, benefits (free shipping, delivery dates, secure
+checkout, from the shop's settings), collection tiles with photos, a product carousel, a collage
+of two photo cards, image with text, a newsletter sign-up. And general ones: hero (split,
+full-bleed photo), features, gallery, stats, FAQ, closing call to action, a bottom action bar for
+phones. A shop's home page usually runs: image banner, benefits or marquee, collection tiles,
+products (a carousel or the grid), image with text or a collage, newsletter. Buyers' words
 come from the shop's real reviews, never a block of quotes. They use only the theme's
 names, so they wear the app's look, and they already work at 390px. See them all in this app's theme
 at `/_blocks` on the preview (development only; `?only=faq` for one). To use one, **copy its
@@ -149,9 +176,17 @@ design.
   an asymmetric grid, a horizontal scroller of cards. Generous space (`py-16 md:py-24` between
   sections), one clear max width, text `text-base`/`text-lg`.
 - **Product photos** come from the Platform: products imported from Printify come with their
-  mockups, and the owner adds others in the shop's admin. Don't invent products to fill the
-  grid: a new shop shows its coming-soon state (`products/_coming_soon`) until the owner's
-  products are in.
+  mockups, and the owner adds others in the shop's admin. A collection's photo is its first
+  product's (`collection_image`). Don't invent products to fill the grid: a new shop shows its
+  coming-soon state (`products/_coming_soon`) until the owner's products are in.
+- **Lifestyle photos make a shop look alive.** Give the home page at least three: the first
+  screen, and two more further down (a collage, image with text, a band). People wearing or
+  using what the shop sells, in the style's light and colors (search for that: "woman laughing
+  in oversized tee golden hour", not "t-shirt"). Make each one a theme setting of type `image`
+  with the `bin/images` link as its `default` (`hero_image` is already there), and read it with
+  `theme_setting(:key)`: the owner can swap it for their own photo in the admin, and the preview
+  shows the default until the storefront is published. Stock photos are never product photos:
+  don't show a stock photo as if it were one of the shop's products.
 - **Images**: use what the owner gives first (a logo or photos they attach: copy them into
   `app/assets/images/`, or make them a theme setting of type `image` when they'll change them). When a page needs photos they haven't given (a hero, the services, the classes),
   get free stock photos with `bin/images`:
@@ -190,6 +225,8 @@ phone first, and judge it as a visitor would:
 
 - Does the first screen say what this is, with one obvious next step, without scrolling on a phone?
 - Does anything look like a default: gray boxes, an indigo button, everything centered, stock words?
+- Put beside the style's reference store, would a buyer believe it's a shop of the same class?
+  Are there photos of people and the products' world, or only boxes and text?
 - Is the text readable on its background, and the spacing even? Do photos show what they should?
 - Does it look the way the owner asked (SPEC.md), made for them rather than for any business like it?
 - Would the owner show it to a customer with pride?

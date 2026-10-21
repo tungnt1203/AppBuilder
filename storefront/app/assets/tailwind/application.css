@@ -50,3 +50,9 @@
 
 /* Components and effects of the app's own design (a hero, a ticket stub, a grain
    overlay, keyframes) go below, named after what they are. */
+
+/* A band of words sliding left forever (blocks/_marquee): the words are written twice, so moving
+   by half the width loops without a gap. Still for visitors who turn motion off. */
+.marquee { animation: marquee 30s linear infinite; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .marquee { animation: none; } }

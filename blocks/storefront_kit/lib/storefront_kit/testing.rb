@@ -14,7 +14,8 @@ module StorefrontKit
       def initialize
         @shop_data = default_shop
         @products_data = default_products
-        @collections_data = [ { "slug" => "cats", "title" => "Cats", "description" => "For cat people.", "product_count" => 1 },
+        @collections_data = [ { "slug" => "cats", "title" => "Cats", "description" => "For cat people.", "product_count" => 1,
+          "image" => { "id" => 1, "alt" => "Cats", "thumb" => "https://cdn.example/cat-thumb.webp", "card" => "https://cdn.example/cat-card.webp", "large" => "https://cdn.example/cat-large.webp" } },
           { "slug" => "new", "title" => "New", "product_count" => 0 } ] # no description: the API leaves empty ones out
         @pages_data = { "about" => { "slug" => "about", "title" => "About us", "blocks" => [ { "type" => "text", "body" => "We print tees." },
           { "type" => "faq", "items" => [ { "question" => "How long?", "answer" => "About a week." } ] } ] } }
