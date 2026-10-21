@@ -347,8 +347,10 @@ class Project < ApplicationRecord
   # Deletes the preview, code and chat. A published copy keeps running on ONCE.
   # The record goes first: cleaning up takes seconds, and meanwhile an open studio page or a
   # queued job could start the preview again; without the record, nothing finds the app.
+  # An eval's app goes with its test shop; an owner's shop stays when its storefront's code goes.
   def remove
     destroy!
+    shop&.purge! if eval_run
     preview.stop
     sandbox.remove
     FileUtils.rm_rf(path)

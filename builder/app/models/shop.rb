@@ -33,6 +33,34 @@ class Shop < ApplicationRecord
     ActsAsTenant.without_tenant { Shop.order(:id).to_a }.each { |shop| ActsAsTenant.with_tenant(shop, &block) }
   end
 
+  # Deletes a shop that never took an order, with all its data and photos: a test shop, an
+  # eval's. A shop with orders keeps everything (it raises): those are someone's sales.
+  def purge!
+    raise ActiveRecord::RecordNotDestroyed.new("#{name} has orders", self) if ActsAsTenant.without_tenant { Order.exists?(shop_id: id) }
+
+    ActsAsTenant.without_tenant do
+      transaction do
+        [ Product, ThemeSetting ].each { |model| ActiveStorage::Attachment.where(record_type: model.name, record_id: model.where(shop_id: id).select(:id)).find_each(&:purge) }
+        Project.where(shop_id: id).update_all(shop_id: nil)
+        self.class.data_tables.each { |table| self.class.connection.delete("DELETE FROM #{table} WHERE shop_id = #{id.to_i}") }
+        delete
+      end
+    end
+  end
+
+  # The tables of shops' data (the ones with a shop_id), each before the tables it refers to, so
+  # deleting in this order never breaks a foreign key.
+  def self.data_tables
+    tables = connection.tables.select { |table| connection.column_exists?(table, :shop_id) } - [ "projects" ]
+    refers_to = tables.index_with { |table| connection.foreign_keys(table).map(&:to_table) & tables }
+    ordered = []
+    until ordered.size == tables.size
+      table = (tables - ordered).find { |candidate| (tables - ordered).none? { |other| other != candidate && refers_to[other].include?(candidate) } }
+      ordered << (table or raise "Shops' tables refer to each other in a circle")
+    end
+    ordered
+  end
+
   # A new shop with its first owner.
   def self.open!(owner:, **attributes)
     transaction do

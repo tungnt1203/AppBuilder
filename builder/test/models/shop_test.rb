@@ -40,4 +40,24 @@ class ShopTest < ActiveSupport::TestCase
     end
     assert_raises(ActsAsTenant::Errors::NoTenantSet) { ShopApiKey.count }
   end
+
+  test "a shop that never took an order is purged with its data and photos; one with orders stays" do
+    shop = Shop.open!(owner: users(:owner), name: "Test Shop", subdomain: "test-shop")
+    product = ActsAsTenant.with_tenant(shop) do
+      Product.create!(title: "Tee", status: "active").tap do |tee|
+        tee.variants.create!(option1: "S", price_cents: 2000)
+        tee.images.attach(io: file_fixture("product.png").open, filename: "tee.png", content_type: "image/png")
+      end
+    end
+    ActsAsTenant.with_tenant(shop) { shop.api_keys.create! }
+
+    assert_difference -> { ActiveStorage::Attachment.count } => -1, -> { ActsAsTenant.without_tenant { Variant.count } } => -1 do
+      shop.purge!
+    end
+    assert_not Shop.exists?(shop.id)
+    assert_not ActsAsTenant.without_tenant { Product.exists?(product.id) }
+
+    assert_raises(ActiveRecord::RecordNotDestroyed) { shops(:cats).purge! }
+    assert Shop.exists?(shops(:cats).id)
+  end
 end
