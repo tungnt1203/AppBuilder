@@ -2,7 +2,13 @@
   <%= card class: "space-y-4" do %>
     <%= form.errors %>
     <%= form.field :title, required: true, autofocus: menu.new_record? %>
-    <%= form.field :key, hint: t(".key_hint") %>
+    <div class="space-y-1.5">
+      <%= form.label :key, t(".place") %>
+      <% places = [ [ t(".header"), "header" ], [ t(".footer"), "footer" ] ] %>
+      <% places << [ menu.key_was, menu.key_was ] if menu.key_was.present? && places.none? { |_, key| key == menu.key_was } %>
+      <%= form.select :key, places %>
+      <p class="text-xs text-muted"><%= t(".key_hint") %></p>
+    </div>
   <% end %>
 
   <%= card class: "space-y-4" do %>

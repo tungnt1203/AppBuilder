@@ -18,6 +18,8 @@ class ShopAdmin::ExtensionsTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "a", text: /About/
 
+    get new_shop_admin_menu_path
+    assert_select "select[name='menu[key]'] option", 2
     post shop_admin_menus_path, params: { menu: { title: "Header", key: "header", items: [ { label: "About", url: "/pages/about" } ] } }
     assert_redirected_to shop_admin_menus_path
 

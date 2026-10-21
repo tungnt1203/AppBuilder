@@ -650,7 +650,10 @@ en:
         delete: Delete
         confirm_delete: Delete %{title}?
       form:
-        key_hint: header or footer. The storefront asks for this.
+        place: Where it shows
+        header: Header, at the top of every page
+        footer: Footer, at the bottom of every page
+        key_hint: The storefront shows the header and footer menus. A shop has one of each.
         links: Links
         links_hint: A path on the storefront (/pages/about) or a full https address.
         label: Label
