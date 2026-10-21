@@ -26,18 +26,16 @@ cafés, boarding houses…), in Vietnamese and English. Working name only.
 
 | Folder      | What it is                                                         | License |
 |-------------|--------------------------------------------------------------------|---------|
-| `builder/`  | The builder: studio web app, agent runner, publishing, eval         | AGPL-3.0 |
-| `template/` | The Rails 8 app every generated app starts from: ONCE-ready, with auth, a UI kit, and `CLAUDE.md` + skills for the agent | MIT |
-| `blocks/`   | The parts every generated app shares, as Rails engines: `shop/` (catalog, cart, checkout, orders, Stripe, Printify), `storefront_kit/` (Platform v1's API client) | MIT |
-| `storefront/` | Platform v1: the storefront template, a Rails app with no database that sells through the Storefront API | MIT |
-| `integrations/commerce-agents/` | Backends for [anthropics/commerce-agents](https://github.com/anthropics/commerce-agents): a shopping assistant and an owner's assistant over a shop's agent API | MIT |
+| `builder/`  | The Platform: studio, agent runner, publishing, eval, and every shop's data (catalog, carts, checkout, orders, Stripe, Printify), admin, Storefront API and webhooks, on PostgreSQL | AGPL-3.0 |
+| `storefront/` | The storefront every shop starts from: a Rails app with no database that sells through the Storefront API, with `CLAUDE.md` + skills for the agent | MIT |
+| `blocks/`   | What storefronts share: `storefront_kit/` (the Storefront API client, records, cache, helpers) | MIT |
 
-New apps start from the last commit of `template/`, with a copy of each block it uses in
-`vendor/blocks/` (see `ProjectSetupJob`): the core is built once there, and each app designs its own
-screens on top of it. Each generated app
-gets its own git repository under `projects/`, which isn't part of this one. The template and the
-blocks are MIT so that the apps made with them belong to their owners; the template's
-`LICENSE` isn't copied into those apps.
+New storefronts start from the last commit of `storefront/`, with a copy of each block it uses in
+`vendor/blocks/` (see `ProjectSetupJob`): the shop's data and money logic live on the Platform, and
+each storefront designs its own pages on top of the API. Each generated storefront
+gets its own git repository under `projects/`, which isn't part of this one. The storefront template
+and the blocks are MIT so that the storefronts made with them belong to their owners; the
+template's `LICENSE` isn't copied into them.
 
 ## Run it locally
 
@@ -87,10 +85,10 @@ Before other people use it:
 
 1. Publish to a real server: a VPS, a domain, HTTPS, a private registry and real email.
 
-Then: pushing an app to a GitHub repository, and updating the blocks in existing apps.
+Then: pushing a storefront to a GitHub repository.
 
 ## License
 
 `builder/` is licensed under the [GNU AGPL v3](builder/LICENSE): if you run a modified builder
-as a service for others, you share your changes under the same license. `template/` and
-`blocks/` are [MIT](template/LICENSE).
+as a service for others, you share your changes under the same license. `storefront/` and
+`blocks/` are [MIT](storefront/LICENSE).

@@ -1,13 +1,13 @@
 # blocks
 
-The parts of generated apps that are built once and kept the same in every app, packaged as
-Rails engines, so apps get fixes by replacing the gem instead of in copied code.
+The parts of generated storefronts that are built once and kept the same in every storefront,
+packaged as gems, so storefronts get fixes by replacing the gem instead of in copied code. The
+shop's data and money logic (catalog, checkout, orders, Stripe, Printify) live on the Platform
+(`builder/`), not here.
 
 | Block   | What it is |
 |---------|------------|
-| `shop/` | Catalog, cart, checkout, orders, Stripe payments: the core of every app |
-| `booking/` | Services, staff and their hours, free times, appointments, reminders; on with `config.x.booking` |
-| `storefront_kit/` | Platform v1: what a storefront uses to call the Storefront API (client, records, cache, helpers); used by `storefront/` |
+| `storefront_kit/` | What a storefront uses to call the Storefront API (client, records, cache, helpers); used by `storefront/` |
 
-The template uses each block through a symlink in `template/vendor/blocks/`; a new app gets a
-real copy there (`ProjectSetupJob`), so its preview, sandbox and Docker image have it.
+The storefront template uses each block through a symlink in `storefront/vendor/blocks/`; a new
+storefront gets a real copy there (`ProjectSetupJob`), so its preview, sandbox and Docker image have it.

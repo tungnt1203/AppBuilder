@@ -1,9 +1,0 @@
-<%# The tabs across every settings screen. %>
-<%= tabs do %>
-  <%= tab_to t("admin.settings.edit.general"), edit_admin_settings_path %>
-  <%= tab_to t("admin.policies.edit.title"), edit_admin_policies_path %>
-  <% if Current.user.administrator? %>
-    <%= tab_to t("admin.printify_connections.show.title"), admin_printify_connection_path %>
-    <%= tab_to t("admin.agents.show.title"), admin_agents_path %>
-  <% end %>
-<% end %>

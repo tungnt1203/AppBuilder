@@ -1,8 +1,0 @@
-<%# What the site shows while the shop has no products. Visitors read that they're coming; in the
-    preview (development) the owner also reads how to add theirs. Keep it when you redesign. %>
-<div class="rounded-xl border border-dashed border-line px-6 py-16 text-center">
-  <p class="text-muted"><%= t("products.coming_soon.visitors") %></p>
-  <% if Rails.env.development? %>
-    <p class="mx-auto mt-4 max-w-md rounded-lg bg-surface-muted px-4 py-3 text-sm text-ink"><%= t("products.coming_soon.owner") %></p>
-  <% end %>
-</div>

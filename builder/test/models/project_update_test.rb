@@ -23,20 +23,20 @@ class ProjectUpdateTest < ActiveSupport::TestCase
     Rails.configuration.x.projects_root = @root.join("projects")
 
     @monorepo = @root.join("monorepo")
-    @monorepo.join("template/config").mkpath
-    @monorepo.join("template/config/application.rb").write(%(config.x.app_name = "Starter"\n))
-    @monorepo.join("template/app/views/products").mkpath
-    @monorepo.join("template/app/views/products/show.html.erb").write("<h1>Product</h1>\n")
-    @monorepo.join("template/app/views/orders").mkpath
-    @monorepo.join("template/app/views/orders/show.html.erb").write("<h1>Order</h1>\n")
-    @monorepo.join("template/CLAUDE.md").write("Rules\n")
-    @monorepo.join("template/bin").mkpath
-    @monorepo.join("blocks/shop/lib").mkpath
-    @monorepo.join("blocks/shop/lib/shop.rb").write("module Shop; end")
-    @monorepo.join("template/vendor/blocks").mkpath
-    File.symlink("../../../blocks/shop", @monorepo.join("template/vendor/blocks/shop"))
-    commit_monorepo "Add the shop core"
-    Rails.configuration.x.template_path = @monorepo.join("template")
+    @monorepo.join("storefront/config").mkpath
+    @monorepo.join("storefront/config/application.rb").write(%(config.x.app_name = "Starter"\n))
+    @monorepo.join("storefront/app/views/products").mkpath
+    @monorepo.join("storefront/app/views/products/show.html.erb").write("<h1>Product</h1>\n")
+    @monorepo.join("storefront/app/views/orders").mkpath
+    @monorepo.join("storefront/app/views/orders/show.html.erb").write("<h1>Order</h1>\n")
+    @monorepo.join("storefront/CLAUDE.md").write("Rules\n")
+    @monorepo.join("storefront/bin").mkpath
+    @monorepo.join("blocks/storefront_kit/lib").mkpath
+    @monorepo.join("blocks/storefront_kit/lib/storefront_kit.rb").write("module StorefrontKit; end")
+    @monorepo.join("storefront/vendor/blocks").mkpath
+    File.symlink("../../../blocks/storefront_kit", @monorepo.join("storefront/vendor/blocks/storefront_kit"))
+    commit_monorepo "Add the storefront kit"
+    Rails.configuration.x.template_path = @monorepo.join("storefront")
 
     @project = projects(:clinic)
     ProjectSetupJob.new.send(:copy_template, @project)
@@ -58,14 +58,14 @@ class ProjectUpdateTest < ActiveSupport::TestCase
     @project.path.join("app/views/products/show.html.erb").write("<h1 class=peach>Product</h1>\n") # the app's own design
     @project.history.commit("Restyle")
 
-    @monorepo.join("template/app/views/products/show.html.erb").write("<h1>Product</h1>\n<%= render 'reviews' %>\n")
-    @monorepo.join("template/app/views/orders/show.html.erb").write("<h1>Order</h1>\n<a>Write a review</a>\n")
-    @monorepo.join("template/app/views/orders/reviews.html.erb").write("Reviews\n")
-    @monorepo.join("template/bin/look").write("#!/bin/sh\n")
-    @monorepo.join("template/bin/look").chmod(0o755)
-    @monorepo.join("template/CLAUDE.md").write("Rules\nReviews are built in\n")
-    @monorepo.join("template/storage").mkpath
-    @monorepo.join("template/storage/dev.sqlite3").write("data")
+    @monorepo.join("storefront/app/views/products/show.html.erb").write("<h1>Product</h1>\n<%= render 'reviews' %>\n")
+    @monorepo.join("storefront/app/views/orders/show.html.erb").write("<h1>Order</h1>\n<a>Write a review</a>\n")
+    @monorepo.join("storefront/app/views/orders/reviews.html.erb").write("Reviews\n")
+    @monorepo.join("storefront/bin/look").write("#!/bin/sh\n")
+    @monorepo.join("storefront/bin/look").chmod(0o755)
+    @monorepo.join("storefront/CLAUDE.md").write("Rules\nReviews are built in\n")
+    @monorepo.join("storefront/storage").mkpath
+    @monorepo.join("storefront/storage/dev.sqlite3").write("data")
     commit_monorepo "Let buyers review what they bought"
 
     template = @project.template
@@ -87,37 +87,37 @@ class ProjectUpdateTest < ActiveSupport::TestCase
   test "an app made before the builder kept its template commit starts from the one before its setup" do
     first = ProjectShell.new(@monorepo).run("git", "rev-parse", "HEAD").strip
     @project.update!(template_sha: nil)
-    @monorepo.join("template/CLAUDE.md").write("Rules\nNew\n")
+    @monorepo.join("storefront/CLAUDE.md").write("Rules\nNew\n")
     commit_monorepo "Explain more", at: 1.hour.from_now
     assert_equal first, ProjectTemplate.new(@project).base
   end
 
   test "a newer block shows what changed since the app's copy, and updating brings it" do
-    @monorepo.join("blocks/shop/lib/shop.rb").write("module Shop; VERSION = 2; end")
+    @monorepo.join("blocks/storefront_kit/lib/storefront_kit.rb").write("module StorefrontKit; VERSION = 2; end")
     commit_monorepo "Fix checkout"
-    @monorepo.join("blocks/shop/lib/order.rb").write("class Order; end")
+    @monorepo.join("blocks/storefront_kit/lib/order.rb").write("class Order; end")
     commit_monorepo "Let buyers review"
-    @monorepo.join("template/README.md").write("not about the block")
+    @monorepo.join("storefront/README.md").write("not about the block")
     commit_monorepo "Change the template only"
 
-    assert_equal({ "shop" => [ "Let buyers review", "Fix checkout" ] }, @project.blocks.updates)
-    assert_equal "shop core", @project.blocks.titles
+    assert_equal({ "storefront_kit" => [ "Let buyers review", "Fix checkout" ] }, @project.blocks.updates)
+    assert_equal "storefront kit", @project.blocks.titles
 
-    assert_equal [ "shop" ], @project.blocks.update!
-    assert_equal "module Shop; VERSION = 2; end", @project.path.join("vendor/blocks/shop/lib/shop.rb").read
+    assert_equal [ "storefront_kit" ], @project.blocks.update!
+    assert_equal "module StorefrontKit; VERSION = 2; end", @project.path.join("vendor/blocks/storefront_kit/lib/storefront_kit.rb").read
     @project.history.commit("Update the shop core")
     assert_not @project.blocks.outdated?
   end
 
   test "a copy changed by hand is outdated, with no list of changes" do
-    @project.path.join("vendor/blocks/shop/lib/shop.rb").write("module Shop; HACK = 1; end")
+    @project.path.join("vendor/blocks/storefront_kit/lib/storefront_kit.rb").write("module StorefrontKit; HACK = 1; end")
     @project.history.commit("Edit the core")
 
-    assert_equal({ "shop" => [] }, @project.blocks.updates)
+    assert_equal({ "storefront_kit" => [] }, @project.blocks.updates)
   end
 
-  test "updating is a version of its own, with migrations, the tests and a note for the agent" do
-    @monorepo.join("blocks/shop/lib/shop.rb").write("module Shop; VERSION = 2; end")
+  test "updating is a version of its own, with the tests and a note for the agent" do
+    @monorepo.join("blocks/storefront_kit/lib/storefront_kit.rb").write("module StorefrontKit; VERSION = 2; end")
     commit_monorepo "Fix checkout"
     sandbox = FakeSandbox.new
 
@@ -127,16 +127,16 @@ class ProjectUpdateTest < ActiveSupport::TestCase
 
     @project.reload
     assert @project.ready?
-    assert_equal "Update the shop core", @project.shell.run("git", "log", "-1", "--format=%s").strip
-    assert_includes sandbox.commands, [ "bin/rails", "db:migrate" ]
-    assert_equal "Updated the shop core", @project.messages.where(role: "notice").last.body
-    assert_match "vendor/blocks/shop", @project.agent_note
+    assert_equal "Update the storefront kit", @project.shell.run("git", "log", "-1", "--format=%s").strip
+    assert_not_includes sandbox.commands, [ "bin/rails", "db:migrate" ]
+    assert_equal "Updated the storefront kit", @project.messages.where(role: "notice").last.body
+    assert_match "vendor/blocks/storefront_kit", @project.agent_note
     assert_match "- Fix checkout", @project.agent_note
     assert_no_enqueued_jobs(only: AgentTurnJob)
   end
 
   test "when the app's tests fail with the new core, the agent fixes the app" do
-    @monorepo.join("blocks/shop/lib/shop.rb").write("module Shop; VERSION = 2; end")
+    @monorepo.join("blocks/storefront_kit/lib/storefront_kit.rb").write("module StorefrontKit; VERSION = 2; end")
     commit_monorepo "Fix checkout"
     sandbox = FakeSandbox.new
     sandbox.tests_pass = false
@@ -154,7 +154,7 @@ class ProjectUpdateTest < ActiveSupport::TestCase
   test "template changes the app changed go to the agent, with their diffs" do
     @project.path.join("app/views/products/show.html.erb").write("<h1 class=peach>Product</h1>\n")
     @project.history.commit("Restyle")
-    @monorepo.join("template/app/views/products/show.html.erb").write("<h1>Product</h1>\n<%= render 'reviews' %>\n")
+    @monorepo.join("storefront/app/views/products/show.html.erb").write("<h1>Product</h1>\n<%= render 'reviews' %>\n")
     commit_monorepo "Let buyers review what they bought"
 
     @project.update_app

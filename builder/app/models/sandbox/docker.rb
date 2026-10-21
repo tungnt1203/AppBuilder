@@ -138,7 +138,7 @@ class Sandbox::Docker
       raise
     end
 
-    # The blocks (vendor/blocks/shop…) are the same in every app and updated as a whole: inside the
+    # The blocks (vendor/blocks/storefront_kit) are the same in every app and updated as a whole: inside the
     # container, the agent can read them but not change them.
     def read_only_blocks(path)
       blocks = File.join(path, "vendor/blocks")

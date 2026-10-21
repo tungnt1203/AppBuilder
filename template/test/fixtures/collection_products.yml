@@ -1,9 +1,0 @@
-cats_tee:
-  collection: cats
-  product: tee
-  position: 0
-
-cats_hoodie:
-  collection: cats
-  product: hoodie
-  position: 1

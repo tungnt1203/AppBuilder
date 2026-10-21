@@ -1,5 +1,5 @@
 # Where apps come from: the template's last commit, in the repository it's in (a folder of the
-# monorepo, or a repository of its own), and the blocks (blocks/shop…) it links from
+# monorepo, or a repository of its own), and the blocks (blocks/storefront_kit) it links from
 # vendor/blocks/, of which an app gets a real copy (see ProjectSetupJob). Apps are brought up to
 # later versions of both (ProjectBlocks, ProjectTemplate). A block's version is its git tree hash:
 # the same files have the same hash in the repository and in an app's own repository.
@@ -9,7 +9,7 @@ class TemplateSource
     @template = ProjectShell.new(@template_path)
   end
 
-  # { "shop" => "blocks/shop" }: each block the template links to, by its path in the repository.
+  # { "storefront_kit" => "blocks/storefront_kit" }: each block the template links to, by its path in the repository.
   def paths
     @paths ||= @template_path.glob("vendor/blocks/*").select(&:symlink?).to_h do |link|
       [ link.basename.to_s, Pathname(folder).join("vendor/blocks", link.readlink).cleanpath.to_s ]
@@ -95,7 +95,7 @@ class TemplateSource
     @repository ||= ProjectShell.new(@template.run("git", "rev-parse", "--show-toplevel").strip)
   end
 
-  # The template's folder in the repository ("template/"), empty when it's a repository of its own.
+  # The template's folder in the repository ("storefront/"), empty when it's a repository of its own.
   def folder
     @folder ||= @template.run("git", "rev-parse", "--show-prefix").strip
   end

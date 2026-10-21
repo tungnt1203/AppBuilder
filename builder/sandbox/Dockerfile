@@ -3,7 +3,7 @@
 # gems, tests and builds, and the coding agent. Build it with `bin/sandbox build`.
 # The project's folder is mounted at the same path as on the host.
 
-# Same Ruby as template/.ruby-version.
+# Same Ruby as storefront/.ruby-version.
 ARG RUBY_VERSION=3.3.10
 FROM docker.io/library/ruby:$RUBY_VERSION-slim
 

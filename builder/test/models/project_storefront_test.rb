@@ -1,6 +1,6 @@
 require "test_helper"
 
-# A project made from storefront/ (Platform v1): its shop, the keys and addresses its storefront
+# A project (a storefront made from storefront/): its shop, the keys and addresses its storefront
 # runs with, and what its agent asks the Platform for.
 class ProjectStorefrontTest < ActiveSupport::TestCase
   setup do
@@ -14,15 +14,8 @@ class ProjectStorefrontTest < ActiveSupport::TestCase
     Rails.configuration.x.platform_url, Rails.configuration.x.platform_url_from_containers = @originals
   end
 
-  def make_storefront
-    @project.path.join("vendor/blocks/storefront_kit").mkpath
-  end
-
   test "a storefront opens its own shop once, for the owner, at the project's address" do
     with_projects_root do
-      make_storefront
-      assert @project.storefront?
-
       shop = @project.ensure_shop!
       assert_equal [ "Shop", "shop", "owner" ], [ shop.name, shop.subdomain, shop.role_of(users(:owner)) ]
       assert_equal "shop", @project.reload.subdomain
@@ -32,7 +25,6 @@ class ProjectStorefrontTest < ActiveSupport::TestCase
 
   test "a shop's subdomain someone has gets a suffix" do
     with_projects_root do
-      make_storefront
       @project.update!(name: "Chubby Cat Tees", subdomain: "chubby-cats")
       shop = @project.ensure_shop!
       assert_match(/\Achubby-cats-\h{4}\z/, shop.subdomain)
@@ -42,7 +34,6 @@ class ProjectStorefrontTest < ActiveSupport::TestCase
 
   test "the preview runs with the shop's preview key, the published storefront with a live one" do
     with_projects_root do
-      make_storefront
       @project.ensure_shop!
 
       preview = @project.storefront_env("preview")
@@ -59,16 +50,12 @@ class ProjectStorefrontTest < ActiveSupport::TestCase
     end
   end
 
-  test "an app of the old template runs with nothing of the Platform's" do
-    with_projects_root do
-      assert_not @project.storefront?
-      assert_equal({}, @project.storefront_env("preview"))
-    end
+  test "a project without a shop yet runs with nothing of the Platform's" do
+    assert_equal({}, @project.storefront_env("preview"))
   end
 
   test "what the agent asked the Platform for is filed for the shop, once per request" do
     with_projects_root do
-      make_storefront
       shop = @project.ensure_shop!
       folder = @project.path.join("tmp/platform_requests").tap(&:mkpath)
       folder.join("1.txt").write("Products need a material field")

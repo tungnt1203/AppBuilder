@@ -1,8 +1,9 @@
 # builder
 
-The web app: describe an app, chat with the coding agent on the left, watch the live
-preview on the right. Every project starts from the last commit of `../template`, in
-`../projects/<slug>` with a git repository of its own.
+The Platform: describe a shop, chat with the coding agent on the left, watch the live
+preview on the right; the shops' data, admin, Storefront API and webhooks live here too.
+Every storefront starts from the last commit of `../storefront`, in `../projects/<slug>`
+with a git repository of its own, and a shop of its own on the Platform.
 
 ## Run locally
 

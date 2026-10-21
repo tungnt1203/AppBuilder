@@ -10,8 +10,6 @@ class ProjectManagementTest < ActiveSupport::TestCase
 
     @project.path.join("config").mkpath
     @project.path.join("config/application.rb").write(%(module App\n  config.x.app_name = "Nha khoa"\nend\n))
-    @project.path.join("storage").mkpath
-    @project.path.join("storage/development.sqlite3").write("data")
     @project.path.join("tmp/pids").mkpath
     @project.path.join("tmp/pids/server.pid").write("123")
     git "init", "--quiet", "--initial-branch=main"
@@ -49,7 +47,7 @@ class ProjectManagementTest < ActiveSupport::TestCase
     assert_equal "Nha khoa", @project.reload.name
   end
 
-  test "duplicating copies code, history and data but not the running server" do
+  test "duplicating copies code and history, not the running server, and opens a shop for the copy" do
     copy = nil
     assert_enqueued_with(job: DuplicateJob) { copy = @project.duplicate }
     assert_equal [ "Nha khoa (copy)", "vi", nil ], [ copy.name, copy.language, copy.subdomain ]
@@ -59,12 +57,13 @@ class ProjectManagementTest < ActiveSupport::TestCase
 
     stub_preview(copy) { DuplicateJob.perform_now(copy, @project) }
 
-    assert_equal "data", copy.path.join("storage/development.sqlite3").read
     assert_not copy.path.join("tmp/pids/server.pid").exist?
     assert_match 'config.x.app_name = "Nha khoa (copy)"', copy.path.join("config/application.rb").read
     assert_equal [ "Copy “Nha khoa” as Nha khoa (copy)", "Set up Nha khoa" ], copy.history.versions.map(&:subject).first(2)
     assert copy.reload.ready?
-    assert_equal "Copied from “Nha khoa”: its code, versions and preview data.", copy.messages.last.body
+    assert_equal "Copied from “Nha khoa”: its code and versions. It sells for a shop of its own.", copy.messages.last.body
+    assert copy.shop
+    assert_not_equal @project.shop, copy.shop
     assert_match 'app_name = "Nha khoa"', @project.path.join("config/application.rb").read
   end
 

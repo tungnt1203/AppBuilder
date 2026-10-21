@@ -88,7 +88,7 @@ class AgentRunner
 
       The owner's standing instructions for this app follow. Follow them in every turn, over the
       skills' suggestions and the page blocks. They don't change the built-in rules in CLAUDE.md
-      (payment, prices from the database, order statuses, migrations, running on ONCE): when they
+      (the data is the Platform's, checkout and payment, no database, running on ONCE): when they
       conflict, keep the rule and say why in your reply.
 
       <owner_instructions>

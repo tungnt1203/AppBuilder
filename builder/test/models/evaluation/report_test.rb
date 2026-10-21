@@ -39,7 +39,7 @@ class Evaluation::ReportTest < ActiveSupport::TestCase
       { "id" => id, "builder" => "aaa", "template" => "bbb", "prompt" => "ccc", "prompts" => "abcd1234", "seed" => 1, "cases" => [ {
         "id" => "p001", "name" => "Tiệm nail Hoa", "project" => "abc123", "outcome" => "built", "cost_usd" => cost, "build_seconds" => 600,
         "tests" => { "passed" => passed, "runs" => 6, "failures" => passed ? 0 : 1, "errors" => 0 },
-        "pages" => { "signed_in" => true, "visited" => [
+        "pages" => { "visited" => [
           { "name" => "visitor", "path" => "/", "status" => 200, "file" => "shots/nail/visitor.png" },
           { "name" => "page-1", "path" => "/products", "status" => 200, "file" => "shots/nail/page-1.png" },
           { "name" => "page-2", "path" => "/reports", "status" => 500, "error" => "NoMethodError", "file" => "shots/nail/page-2.png" } ] },

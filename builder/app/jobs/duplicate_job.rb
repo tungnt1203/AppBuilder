@@ -1,15 +1,14 @@
-# Copies another project's folder (code, git history, the preview's database and
-# uploads) into a new project, then names it and starts its preview. Safe to run
-# again if the job process restarted halfway.
+# Copies another project's folder (code and git history) into a new project, opens a shop for
+# it, then names it and starts its preview. Safe to run again if the job process restarted halfway.
 class DuplicateJob < ApplicationJob
   def perform(copy, source)
     copy_files(source, copy)
-    copy.ensure_shop! if copy.storefront? # a shop has one storefront: the copy sells for a new one
+    copy.ensure_shop! # a shop has one storefront: the copy sells for a new one
     copy.write_app_name
     copy.history.commit("Copy “#{source.name}” as #{copy.name}")
     FileUtils.cp(source.thumbnail.path, copy.thumbnail.path) if source.thumbnail.exist?
     copy.restart_preview(restart: false)
-    copy.messages.create!(role: :notice, body: "Copied from “#{source.name}”: its code, versions and preview data.")
+    copy.messages.create!(role: :notice, body: "Copied from “#{source.name}”: its code and versions. It sells for a shop of its own.")
     copy.update!(status: :ready)
   rescue ProjectShell::Error => error
     copy.messages.create!(role: :error, body: error.message.truncate(4000))

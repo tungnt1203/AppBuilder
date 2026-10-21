@@ -5,7 +5,7 @@ class ProjectSetupJob < ApplicationJob
   def perform(project, first_request = nil, mode = "plan")
     name(project)
     copy_template(project)
-    project.ensure_shop! if project.storefront?
+    project.ensure_shop!
     configure(project)
     project.sandbox.run("bundle", "install", "--quiet")
     project.restart_preview(restart: false)
@@ -46,7 +46,7 @@ class ProjectSetupJob < ApplicationJob
       project.shell.run("git", "commit", "--quiet", "-m", "Start from the template")
     end
 
-    # The template uses the blocks (blocks/shop…) through symlinks in vendor/blocks/; the app gets a
+    # The template uses the blocks (blocks/storefront_kit) through symlinks in vendor/blocks/; the app gets a
     # real copy of each, from the same commit, since its sandbox and Docker image only see its folder.
     def copy_blocks(project)
       source = TemplateSource.new

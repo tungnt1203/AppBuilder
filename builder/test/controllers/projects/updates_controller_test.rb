@@ -3,28 +3,28 @@ require "test_helper"
 class Projects::UpdatesControllerTest < ActionDispatch::IntegrationTest
   setup { sign_in_as users(:owner) }
 
-  test "the studio offers a newer shop core with what changed, and updating starts it" do
+  test "the studio offers a newer storefront kit with what changed, and updating starts it" do
     project = projects(:clinic)
     with_built_apps do
-      with_updates({ "shop" => [ "Fix checkout", "Let buyers review" ] }) do
+      with_updates({ "storefront_kit" => [ "Fix checkout", "Let buyers review" ] }) do
         get project_path(project)
-        assert_select "#app-update", /Update ready: shop core \(2 changes\)/
+        assert_select "#app-update", /Update ready: storefront kit \(2 changes\)/
         assert_select "#app-update li", 2
       end
     end
 
-    with_updates({ "shop" => [ "Fix checkout" ] }) do
+    with_updates({ "storefront_kit" => [ "Fix checkout" ] }) do
       assert_enqueued_with(job: ProjectUpdateJob, args: [ project ]) { post project_update_path(project) }
     end
     assert_redirected_to project_path(project)
     assert project.reload.working?
   end
 
-  test "new template features are offered with the shop core" do
+  test "new template features are offered with the storefront kit" do
     with_built_apps do
-      with_updates({ "shop" => [ "Fix checkout" ] }, template: [ "Let buyers review" ]) do
+      with_updates({ "storefront_kit" => [ "Fix checkout" ] }, template: [ "Let buyers review" ]) do
         get project_path(projects(:clinic))
-        assert_select "#app-update", /Update ready: shop core and new features \(2 changes\)/
+        assert_select "#app-update", /Update ready: storefront kit and new features \(2 changes\)/
       end
     end
   end
@@ -35,7 +35,7 @@ class Projects::UpdatesControllerTest < ActionDispatch::IntegrationTest
         get project_path(projects(:clinic))
         assert_select "#app-update", 0
       end
-      with_updates({ "shop" => [] }) do
+      with_updates({ "storefront_kit" => [] }) do
         get project_path(projects(:shop))
         assert_select "#app-update", 0
         assert_no_enqueued_jobs { post project_update_path(projects(:shop)) }

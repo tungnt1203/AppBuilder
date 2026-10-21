@@ -66,16 +66,10 @@ class Publisher
       @deployment.append_log("config/#{name} not applied: #{error.message}\n")
     end
 
-    # A storefront's shop is live now. An app of the old template starts with no accounts: the owner
-    # is told where to create theirs.
+    # The storefront's shop is live now.
     def announce_first_publish
-      if @project.storefront?
-        @project.shop&.update!(status: "live")
-        @project.messages.create!(role: :notice, body: "Published at #{@project.publish_url}. Its products, orders and settings are in the shop's admin.")
-      else
-        @project.messages.create!(role: :notice, body: "Published at #{@project.publish_url}. " \
-          "Create your owner account at #{@project.publish_url}#{@project.staff_sign_in_path} before sharing it.")
-      end
+      @project.shop&.update!(status: "live")
+      @project.messages.create!(role: :notice, body: "Published at #{@project.publish_url}. Its products, orders and settings are in the shop's admin.")
     end
 
     def first_publish?

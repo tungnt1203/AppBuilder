@@ -79,8 +79,7 @@ module Evaluation
 
       def prompt
         shots = @inspection.shots.select { |shot| shot.file.exist? }.map do |shot|
-          who = shot.signed_in ? "signed in as the owner" : "a visitor, not signed in"
-          who = "on a phone, #{who}" if shot.name.start_with?("phone")
+          who = shot.name.start_with?("phone") ? "a visitor on a phone" : "a visitor"
           "- #{shot.file} — #{shot.path} (#{who}#{", #{shot.error}" if shot.error})"
         end
 

@@ -8,20 +8,20 @@ class ProjectSetupJobTest < ActiveSupport::TestCase
 
     # A monorepo with the template in a folder, plus an edit not committed yet.
     monorepo = @root.join("monorepo")
-    monorepo.join("template/config").mkpath
+    monorepo.join("storefront/config").mkpath
     monorepo.join("builder").mkpath
-    monorepo.join("template/config/application.rb").write(%(config.x.app_name = "Starter"\n))
+    monorepo.join("storefront/config/application.rb").write(%(config.x.app_name = "Starter"\n))
     monorepo.join("builder/app.rb").write("builder")
-    monorepo.join("blocks/shop/lib").mkpath
-    monorepo.join("blocks/shop/lib/shop.rb").write("module Shop; end")
-    monorepo.join("template/vendor/blocks").mkpath
-    File.symlink("../../../blocks/shop", monorepo.join("template/vendor/blocks/shop"))
+    monorepo.join("blocks/storefront_kit/lib").mkpath
+    monorepo.join("blocks/storefront_kit/lib/storefront_kit.rb").write("module StorefrontKit; end")
+    monorepo.join("storefront/vendor/blocks").mkpath
+    File.symlink("../../../blocks/storefront_kit", monorepo.join("storefront/vendor/blocks/storefront_kit"))
     git = ProjectShell.new(monorepo)
     git.run("git", "init", "--quiet")
     git.run("git", "add", "--all")
     git.run("git", "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "--quiet", "-m", "Monorepo")
-    monorepo.join("template/README.md").write("not committed")
-    Rails.configuration.x.template_path = monorepo.join("template")
+    monorepo.join("storefront/README.md").write("not committed")
+    Rails.configuration.x.template_path = monorepo.join("storefront")
   end
 
   teardown do
@@ -43,11 +43,11 @@ class ProjectSetupJobTest < ActiveSupport::TestCase
     project = projects(:clinic)
     ProjectSetupJob.new.send(:copy_template, project)
 
-    block = project.path.join("vendor/blocks/shop")
+    block = project.path.join("vendor/blocks/storefront_kit")
     assert block.directory?
     assert_not block.symlink?
-    assert_equal "module Shop; end", block.join("lib/shop.rb").read
-    assert_includes project.shell.run("git", "ls-files"), "vendor/blocks/shop/lib/shop.rb"
+    assert_equal "module StorefrontKit; end", block.join("lib/storefront_kit.rb").read
+    assert_includes project.shell.run("git", "ls-files"), "vendor/blocks/storefront_kit/lib/storefront_kit.rb"
   end
 
   test "the app stays in English and gets the owner's time zone" do

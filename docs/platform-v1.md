@@ -157,7 +157,7 @@ sẽ ghi đè form có trong file.
 - Giữ các phần đang bán tốt: trang sản phẩm (ảnh theo màu, bảng size, thanh mua dính, zoom),
   giỏ, checkout (ZIP tự điền, phí ship thật), pixel, review, trang trống "sắp có hàng".
 - CLAUDE.md cho agent: tài liệu dữ liệu tự sinh từ API; quy tắc "chỉ giao diện"; luồng yêu cầu.
-- Code: app ở `storefront/` (template cũ `template/` giữ tới #19), gem ở `blocks/storefront_kit/`
+- Code: app ở `storefront/` (template cũ `template/` đã gỡ ở #19), gem ở `blocks/storefront_kit/`
   (link vào `storefront/vendor/blocks/`, như các block khác). Thẻ trả tiền bằng Stripe Payment Element
   ở `/orders/:token/payment`. Test chạy với Platform giả trong bộ nhớ (`StorefrontKit::Testing::FakeApi`).
 - Chưa có: tài khoản khách hàng (checkout luôn là khách vãng lai), CLAUDE.md/skill cho agent (#15).
@@ -171,8 +171,9 @@ sẽ ghi đè form có trong file.
 | `/admin` của shop + UI kit | Admin của Platform, thêm chọn shop |
 | Builder (agent, sandbox, preview, publish, eval, `/admin` Orders/Products/Settings) | Giữ; đọc DB trực tiếp |
 | View của template (products, cart, checkout, home, blocks) | Storefront template, đổi sang `storefront_kit` |
-| `AppTask`, `BusinessSync`, `OrdersSummary`, lệnh `shop:*`, `Store#uid` | Bỏ sau khi chuyển xong |
-| `blocks/booking` | Bỏ |
+| `AppTask`, lệnh `shop:*` | Đã bỏ (#10/#19) |
+| `BusinessSync`, `OrdersSummary`, `Store#uid` | Giữ: đã chuyển sang đọc DB của Platform |
+| `blocks/shop`, `blocks/booking`, `template/`, `integrations/commerce-agents` | Đã gỡ ở #19 (còn trong git history) |
 
 ## 10. Giai đoạn và tiêu chí xong
 
@@ -187,7 +188,7 @@ sẽ ghi đè form có trong file.
 7. **Webhook tập trung** (Stripe, Printify) + `webhook_events`.
 8. **Triển khai**: Platform trên server riêng, Postgres backup, R2/CDN, giám sát.
 9. **Eval POD trên kiến trúc mới** (p061–p068): không chuyển dữ liệu cũ, shop mới tạo từ đầu.
-10. **Gỡ bỏ** database riêng từng shop, `AppTask`/`shop:*`, block booking.
+10. **Gỡ bỏ** database riêng từng shop, `AppTask`/`shop:*`, block booking, `blocks/shop`, `template/`, commerce-agents (xong ở #19).
 
 ## 11. Rủi ro
 

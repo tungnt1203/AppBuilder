@@ -22,7 +22,7 @@ class PublisherTest < ActiveSupport::TestCase
     assert_equal [ "once", "update", "nha-khoa.localhost", "--image", "localhost:5050/nha-khoa:v2" ], update
   end
 
-  test "the first publish tells the owner where to create their account" do
+  test "the first publish puts the shop live and tells the owner where its admin is" do
     deployment = @project.deployments.create!
     publisher = Publisher.new(deployment, once: "once")
     def publisher.run_steps(*) = nil # no docker or ONCE in tests
@@ -34,7 +34,7 @@ class PublisherTest < ActiveSupport::TestCase
     publisher.publish
 
     assert deployment.reload.live?
-    assert_match "http://nha-khoa.localhost/session/new", @project.messages.last.body
+    assert_equal "Published at http://nha-khoa.localhost. Its products, orders and settings are in the shop's admin.", @project.messages.last.body
   end
 
   test "a live publish applies the storefront's theme settings and forms to its shop" do

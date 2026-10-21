@@ -66,12 +66,6 @@ class Project < ApplicationRecord
     Rails.configuration.x.projects_root.join(slug)
   end
 
-  # A storefront of Platform v1 (made from storefront/): it sells through the Storefront API with
-  # its shop's key and has no database. Apps made from the old template have their own.
-  def storefront?
-    path.join("vendor/blocks/storefront_kit").exist?
-  end
-
   # The shop this storefront sells for, opened for the owner with the app's name when it has none.
   def ensure_shop!
     return shop if shop
@@ -88,7 +82,7 @@ class Project < ApplicationRecord
   # What the storefront runs with: where the Platform is, its shop's key, and whether it's the
   # preview (STOREFRONT_MODE: fresh catalog reads, test orders) or the published shop.
   def storefront_env(mode)
-    return {} unless storefront? && shop
+    return {} unless shop
 
     key = mode == "preview" ? shop_key(:preview_shop_key, "preview") : shop_key(:live_shop_key, "storefront")
     url = mode == "preview" && sandbox.is_a?(Sandbox::Local) ? Rails.configuration.x.platform_url : Rails.configuration.x.platform_url_from_containers
@@ -105,20 +99,6 @@ class Project < ApplicationRecord
     requests = ActsAsTenant.with_tenant(shop) { files.filter_map { |file| PlatformRequest.file(file.read, project: self) } }
     files.each(&:delete)
     requests
-  end
-
-  # Apps made since the template split the customers' site from /admin keep the owner's screens
-  # and sign in under /admin; older apps have them at the root.
-  def admin_area?
-    path.join("app/controllers/admin/sessions_controller.rb").exist?
-  end
-
-  def staff_home_path
-    admin_area? ? "/admin" : "/"
-  end
-
-  def staff_sign_in_path
-    admin_area? ? "/admin/session/new" : "/session/new"
   end
 
   def preview_url
@@ -282,12 +262,12 @@ class Project < ApplicationRecord
     @template ||= ProjectTemplate.new(self)
   end
 
-  # Whether a newer shop core (or other block) or new template changes are ready for the app.
+  # Whether a newer storefront kit (or other block) or new template changes are ready for the app.
   def updatable?
     blocks.outdated? || template.outdated?
   end
 
-  # "shop core and new features": what an update brings, for the owner.
+  # "storefront kit and new features": what an update brings, for the owner.
   def update_title(block_names = blocks.updates.keys, template = self.template.outdated?)
     [ *(blocks.titles(block_names).presence), *("new features" if template) ].to_sentence.presence || "app"
   end
@@ -444,7 +424,6 @@ class Project < ApplicationRecord
     # runs, or the app may have moved there (from this machine into a container, say).
     def prepare_preview
       sandbox.run("sh", "-c", "bundle check > /dev/null || bundle install --quiet")
-      sandbox.run("bin/rails", "db:prepare") if path.join("config/database.yml").exist? # a storefront has none
       sandbox.run("bin/rails", "tailwindcss:build")
       nil
     rescue ProjectShell::Error => error
