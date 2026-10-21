@@ -3,11 +3,11 @@
 <section class="px-4 py-12 md:py-16">
   <div class="mx-auto flex max-w-6xl flex-col items-start gap-6 rounded-xl bg-brand-600 p-8 text-white md:flex-row md:items-center md:justify-between md:p-12">
     <div>
-      <h2 class="text-2xl font-bold text-balance md:text-3xl">Two spots left tonight, at 7 and 8 pm</h2>
-      <p class="mt-2 text-white/80">Book in 30 seconds, no account needed.</p>
+      <h2 class="text-2xl font-bold text-balance md:text-3xl">Find the one that makes you smile</h2>
+      <p class="mt-2 text-white/80">Printed when you order, at your door in about a week.</p>
     </div>
-    <a href="#book" class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-white px-5 py-3 font-semibold text-brand-700 transition hover:bg-white/90">
-      Book a spot <%= icon "arrow-right", size: 18 %>
-    </a>
+    <%= link_to products_path, class: "inline-flex shrink-0 items-center gap-2 rounded-lg bg-white px-5 py-3 font-semibold text-brand-700 transition hover:bg-white/90" do %>
+      Shop all designs <%= icon "arrow-right", size: 18 %>
+    <% end %>
   </div>
 </section>

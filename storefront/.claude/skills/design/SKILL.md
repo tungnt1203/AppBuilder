@@ -148,12 +148,11 @@ owner pointed at an element in the preview, that element is the one they mean. I
 would break the shop (the add-to-cart form below the fold on phones, prices hidden), build it as
 close as works and say why.
 
-**Start from the page blocks** in `app/views/blocks/`. Shop sections, after Shopify's themes: an
+**Start from the page blocks** in `app/views/blocks/`, after the sections of Shopify's themes: an
 image banner (the first screen), a marquee, benefits (free shipping, delivery dates, secure
 checkout, from the shop's settings), collection tiles with photos, a product carousel, a collage
-of two photo cards, image with text, a newsletter sign-up. And general ones: hero (split,
-full-bleed photo), features, gallery, stats, FAQ, closing call to action, a bottom action bar for
-phones. A shop's home page usually runs: image banner, benefits or marquee, collection tiles,
+of two photo cards, image with text, a gallery, an FAQ, a newsletter sign-up and a closing call
+to action. A shop's home page usually runs: image banner, benefits or marquee, collection tiles,
 products (a carousel or the grid), image with text or a collage, newsletter. Buyers' words
 come from the shop's real reviews, never a block of quotes. They use only the theme's
 names, so they wear the app's look, and they already work at 390px. See them all in this app's theme
@@ -189,7 +188,7 @@ design.
   shows the default until the storefront is published. Stock photos are never product photos:
   don't show a stock photo as if it were one of the shop's products.
 - **Images**: use what the owner gives first (a logo or photos they attach: copy them into
-  `app/assets/images/`, or make them a theme setting of type `image` when they'll change them). When a page needs photos they haven't given (a hero, the services, the classes),
+  `app/assets/images/`, or make them a theme setting of type `image` when they'll change them). When a page needs photos they haven't given (a banner, the shop's story, a collection's world),
   get free stock photos with `bin/images`:
   - Unsplash photos you know fit (`images.unsplash.com/photo-…`): check them first with
     `bin/images --check <links>`; it drops links that don't exist and Unsplash+ photos, which

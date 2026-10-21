@@ -2,8 +2,7 @@
 # (bin/rails tailwindcss:build first) and pick from. See the design skill.
 class BlocksController < ApplicationController
   # In the order they'd usually appear on a page; any other block comes after.
-  ORDER = %w[ image_banner hero_split hero_photo marquee benefits collection_tiles product_carousel collage image_with_text
-    features gallery stats faq newsletter cta_band action_bar ]
+  ORDER = %w[ image_banner marquee benefits collection_tiles product_carousel collage image_with_text gallery faq newsletter cta_band ]
 
   def index
     @blocks = Rails.root.glob("app/views/blocks/_*.html.erb").map { |file| file.basename.to_s.delete_prefix("_").delete_suffix(".html.erb") }

@@ -1,10 +1,10 @@
 # Page blocks
 
-The hero, features, stats, FAQ and call-to-action blocks follow the structure of components from
-HyperUI (https://www.hyperui.dev, https://github.com/markmead/hyperui), rewritten for this app's
-theme and ERB. The gallery, action bar and shop blocks (image banner, benefits, collection tiles,
-product carousel, collage, image with text, marquee, newsletter) are this template's own, after
-the sections of Shopify's free themes.
+The FAQ and call-to-action blocks follow the structure of components from HyperUI
+(https://www.hyperui.dev, https://github.com/markmead/hyperui), rewritten for this app's theme and
+ERB. The gallery and the shop blocks (image banner, benefits, collection tiles, product carousel,
+collage, image with text, marquee, newsletter) are this template's own, after the sections of
+Shopify's free themes.
 
 Sample photos, linked from Unsplash under the Unsplash License (https://unsplash.com/license):
 image banner by Dennys Lennon (https://unsplash.com/@dennys88), image with text by Deniz Demirci
