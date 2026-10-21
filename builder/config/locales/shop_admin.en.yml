@@ -589,6 +589,7 @@ en:
         save: Save
         remove_image: Remove this picture
         default_image: The storefront's own photo. Upload yours to replace it.
+        theme_color: Empty for the theme's own color
       update:
         notice: Theme settings saved.
         not_declared: The storefront hasn't declared any theme settings yet.

@@ -34,6 +34,14 @@
           <% elsif field["type"] == "select" %>
             <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
             <%= select_tag "theme_setting[values][#{key}]", options_for_select(field["options"], @theme_setting.resolved[key]), class: field_classes %>
+          <% elsif field["type"] == "color" %>
+            <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
+            <div class="flex items-center gap-2" data-controller="color-field">
+              <input type="color" class="h-10 w-14 shrink-0 cursor-pointer rounded-lg border border-line bg-surface p-1" aria-label="<%= field["label"] %>"
+                     data-color-field-target="picker" data-action="input->color-field#pick">
+              <%= text_field_tag "theme_setting[values][#{key}]", @theme_setting.values[key], id: key, placeholder: t(".theme_color"), class: field_classes,
+                    data: { color_field_target: "code", action: "input->color-field#show" } %>
+            </div>
           <% elsif field["type"].in?(%w[ richtext ]) %>
             <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
             <%= text_area_tag "theme_setting[values][#{key}]", @theme_setting.resolved[key], rows: 4, class: field_classes %>
