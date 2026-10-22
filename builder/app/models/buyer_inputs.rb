@@ -10,8 +10,9 @@ class BuyerInputs
   MAX_FIELDS = 10
   MAX_LENGTH = 80
   # The same families in the admin, the storefront and (later) the print file.
-  FONTS = [ "Baloo 2", "Bricolage Grotesque", "Fraunces", "Lora", "Montserrat", "Nunito", "Playfair Display",
-            "Quicksand", "Roboto Slab", "Space Grotesk" ].freeze
+  FONTS = [ "Baloo 2", "Bebas Neue", "Bricolage Grotesque", "Caveat", "Dancing Script", "Fraunces", "Great Vibes", "Lobster",
+            "Lora", "Montserrat", "Nunito", "Oswald", "Pacifico", "Permanent Marker", "Playfair Display", "Quicksand",
+            "Roboto Slab", "Space Grotesk" ].freeze
   ALIGNS = %w[ left center right ].freeze
   COLOR = /\A#\h{6}\z/
   MAX_CHOICES = 8

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./fonts.css";
+@import "./personalize_fonts.css";
 
 /* Theme. This is a neutral starting point, not the app's look: replace it with the
    direction in DESIGN.md (see the `design` skill). The UI kit, the owner's screens
