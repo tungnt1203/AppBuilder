@@ -45,6 +45,34 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ 1200, 750 ], [ image.width, image.height ], "the area's shape on the 40 × 50 photo"
   end
 
+  test "a Printify product's print area can be found instead of drawn, or the owner is told to draw it" do
+    printify = connect_fake_printify
+    tee = products(:tee).tap { |product| product.update!(printify_product_id: "pf-tee") }
+    tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")
+    get edit_shop_admin_product_path(tee)
+    assert_select "button[form=?]", "find_print_area_product_#{tee.id}", "Find it from Printify"
+    assert_select "form#find_print_area_product_#{tee.id}[action=?]", shop_admin_product_print_area_path(tee)
+    assert_select "form form", count: 0
+
+    post shop_admin_product_print_area_path(tee)
+    assert_redirected_to edit_shop_admin_product_path(tee, anchor: "print-area")
+    assert_match "Draw the print area yourself", flash[:alert]
+    assert_empty tee.reload.print_area
+
+    design = Vips::Image.black(400, 200, bands: 4).copy(interpretation: :srgb).draw_rect([ 0, 0, 0, 255 ], 100, 50, 200, 100, fill: true)
+    printify.product_data["print_areas"].first["placeholders"] = [
+      { "position" => "front", "images" => [ { "id" => "d", "type" => "image/png", "src" => "https://images.example/design.png", "x" => 0.5, "y" => 0.3, "scale" => 0.8 } ] }
+    ]
+    printify.define_singleton_method(:download) { |_url| StringIO.new(design.write_to_buffer(".png")) }
+    photo = Vips::Image.black(600, 600).new_from_image([ 248, 248, 248 ]).copy(interpretation: :srgb).draw_rect([ 20, 20, 20 ], 252, 222, 96, 48, fill: true)
+    tee.images.purge
+    tee.images.attach(io: StringIO.new(photo.write_to_buffer(".jpg")), filename: "front.jpg", content_type: "image/jpeg")
+
+    post shop_admin_product_print_area_path(tee)
+    assert_match "Found the print area", flash[:notice]
+    assert_in_delta 0.3, tee.reload.print_area["x"], 0.01
+  end
+
   test "staff can't add or remove demo products" do
     post shop_admin_demo_products_path
     assert_not DemoCatalog.present?

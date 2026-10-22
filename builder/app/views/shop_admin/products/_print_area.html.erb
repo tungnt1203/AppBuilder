@@ -3,12 +3,17 @@
     field's box (placement controller); without it personalized orders wait for staff. %>
 <% area = product.print_area %>
 <% photos = product.images.select(&:representable?) %>
-<details class="rounded-lg border border-line p-4" data-controller="placement" data-placement-kind="area" <%= "open" if area.present? %>>
+<details id="print-area" class="rounded-lg border border-line p-4" data-controller="placement" data-placement-kind="area" <%= "open" if area.present? || product.printify_product_id %>>
   <summary class="cursor-pointer text-sm font-medium text-ink">
     <%= t(".title") %>
     <span class="ml-2 text-xs font-normal <%= area.present? ? "text-green-700" : "text-muted" %>"><%= area.present? ? t(".set") : t(".not_set") %></span>
   </summary>
   <p class="mt-2 text-xs text-muted"><%= t(".hint") %></p>
+  <% if product.printify_product_id && Store.current.printify %>
+    <%# Its own form can't sit in the product's: the button is tied to the hidden form below with form=. %>
+    <button type="submit" form="<%= dom_id(product, :find_print_area) %>" class="mt-3 <%= button_classes(:secondary, size: :sm) %>"><%= t(".find") %></button>
+    <p class="mt-1 text-xs text-muted"><%= t(".find_hint") %></p>
+  <% end %>
   <div class="mt-3 grid gap-4 md:grid-cols-[minmax(0,18rem)_1fr]">
     <div class="space-y-2">
       <div class="relative touch-none select-none overflow-hidden rounded-lg bg-surface-muted" data-placement-target="stage"

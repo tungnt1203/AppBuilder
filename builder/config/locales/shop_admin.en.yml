@@ -344,6 +344,9 @@ en:
         sample: Print area
         clear: Remove the print area
         sample_file: See a sample print file
+        find: Find it from Printify
+        find_hint: Works it out from where your design sits in Printify and where it shows on the
+          first photo. Check it on the photo, and adjust it if it's off.
         position: Which side it is
         positions:
           front: Front
@@ -412,6 +415,12 @@ en:
       artwork:
         destroy:
           notice: The picture was removed.
+      print_areas:
+        create:
+          found: Found the print area from your Printify design and kept it. Check it on the photo;
+            if it's off, adjust it and save.
+          not_found: Couldn't find your design on the first photo (it needs a plain shirt and a clear
+            design from Printify). Draw the print area yourself.
     collections:
       index:
         title: Collections

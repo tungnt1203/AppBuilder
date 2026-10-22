@@ -44,6 +44,7 @@ Rails.application.routes.draw do
       resources :images, only: :destroy, module: :products
       resources :artwork, only: :destroy, module: :products
       resource :print_file, only: :show, module: :products
+      resource :print_area, only: :create, module: :products
     end
     resource :demo_products, only: %i[ create destroy ]
     resources :collections

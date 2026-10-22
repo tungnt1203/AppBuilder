@@ -203,6 +203,9 @@
 <% end %>
 
 <% if product.persisted? %>
+  <% if product.printify_product_id %>
+    <%= form_with url: shop_admin_product_print_area_path(product), id: dom_id(product, :find_print_area), class: "hidden" do %><%= hidden_field_tag :position, product.print_area["position"] || "front" %><% end %>
+  <% end %>
   <% product.images.each do |image| %>
     <%= form_with url: shop_admin_product_image_path(product, image), method: :delete, id: dom_id(image, :remove), class: "hidden" do %><% end %>
   <% end %>
