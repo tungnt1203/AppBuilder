@@ -66,7 +66,7 @@ class Personalization::PrintFile
       when "color" then fill(layer["color"], width, height)
       when "photo"
         upload = BuyerUpload.find_by(token: layer["upload"])
-        upload ? photo(upload.photo.download, layer["crop"], width, height) : (fill("#d1d5db", width, height) if @placeholders)
+        upload ? look(photo(upload.photo.download, layer["crop"], width, height), layer["filter"]) : (fill("#d1d5db", width, height) if @placeholders)
       when "choice" then (art = @product.artwork.attachments.find_by(id: layer["artwork"])) && picture(art.download, width, height)
       else text(layer, width, height)
       end
@@ -97,18 +97,70 @@ class Personalization::PrintFile
     end
 
     # The line at the largest size that fits the box, in its font, color and alignment (ImageMagick
-    # draws it with the font's own file; libvips's text can't use one on every system).
+    # draws it with the font's own file; libvips's text can't use one on every system): a monogram's
+    # outer letters smaller than its middle one, bent along an arc when it curves.
     def text(layer, width, height)
-      words = layer["uppercase"] ? layer["text"].upcase : layer["text"]
+      words = layer["uppercase"] || layer["style"] == "monogram" ? layer["text"].upcase : layer["text"]
+      parts = if layer["style"] == "monogram"
+        words.chars.first(3).each_with_index.map { |letter, index| [ letter, words.length == 3 && index != 1 ? MONOGRAM_SIDE : 1 ] }
+      else
+        [ [ words, 1 ] ]
+      end
+      line = side_by_side(parts.map { |part, share| label(part, layer, (height * share).round.clamp(8, 2000)) })
+      line = arc(line, layer["curve"].to_i) unless layer["curve"].to_i.zero?
+      line = line.resize([ width.to_f / line.width, height.to_f / line.height ].min)
+      left = { "left" => 0, "right" => width - line.width }.fetch(layer["align"], (width - line.width) / 2)
+      line.embed(left, (height - line.height) / 2, width, height, extend: :background, background: [ 0, 0, 0, 0 ])
+    end
+
+    MONOGRAM_SIDE = 0.72
+
+    def label(words, layer, size)
       font = FONTS.join("#{layer["font"].to_s.parameterize}.ttf")
       raise Error, "No print font for #{layer["font"]}" unless font.exist?
 
-      gravity = { "left" => "West", "right" => "East" }.fetch(layer["align"], "Center")
-      png, error, status = Open3.capture3(self.class.magick, "-background", "none", "-fill", layer["color"], "-font", font.to_s,
-        "-size", "#{width}x#{height}", "-gravity", gravity, "label:#{self.class.escape(words)}", "png32:-", binmode: true)
+      rgba(Vips::Image.new_from_buffer(magick("-background", "none", "-fill", layer["color"], "-font", font.to_s,
+        "-pointsize", size.to_s, "label:#{self.class.escape(words)}", "png32:-"), ""))
+    end
+
+    # Parts in a row, their middles level.
+    def side_by_side(images)
+      return images.first if images.one?
+
+      height = images.map(&:height).max
+      images.inject(nil) do |row, image|
+        image = image.embed(0, (height - image.height) / 2, image.width, height, extend: :background, background: [ 0, 0, 0, 0 ])
+        row ? row.join(image, :horizontal) : image
+      end
+    end
+
+    # Bent along an arc of that many degrees: up for an arch, down (negative) for a smile.
+    def arc(image, degrees)
+      flip = degrees.negative? ? %w[ -rotate 180 ] : []
+      png = magick("png32:-", "-virtual-pixel", "transparent", *flip, "-distort", "Arc", degrees.abs.to_s, *flip, "+repage", "png32:-",
+        stdin: image.write_to_buffer(".png"))
+      Vips::Image.new_from_buffer(png, "")
+    end
+
+    def magick(*arguments, stdin: nil)
+      out, error, status = Open3.capture3(self.class.magick, *arguments, stdin_data: stdin, binmode: true)
       raise Error, "Couldn't draw the text: #{error.truncate(200)}" unless status.success?
 
-      rgba(Vips::Image.new_from_buffer(png, ""))
+      out
+    end
+
+    # How the buyer chose their photo to look (CSS's grayscale(1) and sepia(1), so the print matches).
+    def look(image, filter)
+      return image unless %w[ bw sepia ].include?(filter)
+
+      color, alpha = image.extract_band(0, n: 3), image.extract_band(3)
+      color = if filter == "bw"
+        gray = color.recomb([ [ 0.2126, 0.7152, 0.0722 ] ])
+        gray.bandjoin([ gray, gray ])
+      else
+        color.recomb([ [ 0.393, 0.769, 0.189 ], [ 0.349, 0.686, 0.168 ], [ 0.272, 0.534, 0.131 ] ])
+      end
+      color.cast(:uchar).bandjoin(alpha).copy(interpretation: :srgb)
     end
 
     def rgba(image)

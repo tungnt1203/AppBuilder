@@ -155,6 +155,21 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_select "[data-personalize-target=layer][data-kind=color][data-color='#2d3a3a'] + [data-personalize-target=layer][data-kind=choice][data-picture='https://cdn.example/moon.webp']"
   end
 
+  test "a curved monogram and a photo's looks are offered as the shop set them" do
+    @platform.products_data.first["buyer_inputs"] = [
+      { "key" => "initials", "label" => "Initials", "required" => false, "max_length" => 20,
+        "preview" => { "x" => 0.3, "y" => 0.3, "w" => 0.4, "h" => 0.2, "images" => [], "font" => "Lora", "color" => "#111111", "fonts" => [], "colors" => [],
+                       "align" => "center", "uppercase" => false, "curve" => 60, "style" => "monogram" } },
+      { "key" => "photo", "label" => "Photo", "kind" => "photo", "required" => false,
+        "preview" => { "x" => 0.3, "y" => 0.6, "w" => 0.3, "h" => 0.3, "images" => [], "filters" => %w[ original bw sepia ] } }
+    ]
+    get product_path("cat-tee")
+    assert_select "input[name='properties[initials]'][maxlength='3']"
+    assert_select "[data-personalize-target=layer][data-key=initials][data-curve='60'][data-style=monogram]"
+    assert_select "input[type=radio][name='properties[photo_filter]']", 3
+    assert_select "input[type=radio][name='properties[photo_filter]'][value=original][checked]"
+  end
+
   test "something that can't be bought isn't added" do
     post cart_items_path, params: { variant_id: 104 }
     follow_redirect!

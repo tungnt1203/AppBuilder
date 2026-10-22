@@ -263,7 +263,8 @@ module StorefrontKit
             when "photo"
               upload = @uploads[value] or next
               zoom, x, y = properties["#{input["key"]}_crop"].to_s.split(",").map(&:to_f)
-              box.merge("kind" => "photo", "crop" => [ zoom || 1.0, x || 0.5, y || 0.5 ], "photo" => upload["large"])
+              filter = properties["#{input["key"]}_filter"].then { |pick| pick if preview["filters"].to_a.include?(pick) } || "original"
+              box.merge("kind" => "photo", "crop" => [ zoom || 1.0, x || 0.5, y || 0.5 ], "filter" => filter, "photo" => upload["large"])
             when "choice"
               option = input["options"].to_a.find { |candidate| candidate["id"].to_s == value.to_s } or next
               box.merge("kind" => "choice", "picture" => option["large"])
@@ -271,7 +272,7 @@ module StorefrontKit
               box.merge("kind" => "color", "color" => value)
             else
               picked = ->(kind, all) { properties["#{input["key"]}_#{kind}"].then { |pick| pick if all.to_a.include?(pick) } }
-              box.merge(preview.slice("align", "uppercase")).merge("kind" => "text", "text" => value,
+              box.merge(preview.slice("align", "uppercase", "curve", "style")).merge("kind" => "text", "text" => value,
                 "font" => picked.("font", preview["fonts"]) || preview["font"], "color" => picked.("color", preview["colors"]) || preview["color"])
             end
           end

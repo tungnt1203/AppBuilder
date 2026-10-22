@@ -165,10 +165,22 @@ export default class extends Controller {
     return { text: typed || layer.dataset.sample, sample: !typed, font: picked("font") || layer.dataset.font, color: picked("color") || layer.dataset.color }
   }
 
+  // A line of text, a monogram's three letters (the middle one big), or either bent along an arc.
   showWords(layer, { text, font, color, sample }) {
     const line = layer.firstElementChild
-    line.textContent = text
+    const curve = +layer.dataset.curve || 0
+    const monogram = layer.dataset.style === "monogram"
+    const letters = monogram ? text.replace(/[^\p{L}]/gu, "").toUpperCase().slice(0, 3) : text
+    layer.querySelector("svg")?.remove()
     Object.assign(line.style, { fontFamily: `"${font}"`, color, opacity: sample ? 0.55 : 1 })
+    line.hidden = !!curve
+    if (curve) return bend(layer, letters, monogram, { font, color, opacity: sample ? 0.55 : 1, upper: line.classList.contains("uppercase") }, curve)
+
+    if (monogram && letters.length === 3) {
+      line.replaceChildren(...[ ...letters ].map((letter, index) => Object.assign(document.createElement("span"), { textContent: letter, style: index === 1 ? "" : `font-size: ${SIDE}em` })))
+    } else {
+      line.textContent = letters
+    }
     fit(line, layer)
   }
 
@@ -178,9 +190,10 @@ export default class extends Controller {
     const key = layer.dataset.key
     if (!key) {
       const [ zoom, x, y ] = (layer.dataset.crop || "1,0.5,0.5").split(",").map(Number)
-      return layer.dataset.photo ? { url: layer.dataset.photo, zoom, x, y } : {}
+      return layer.dataset.photo ? { url: layer.dataset.photo, zoom, x, y, filter: layer.dataset.filter } : {}
     }
-    return this.photos[key] || { empty: true }
+    const filter = this.element.querySelector(`input[name="properties[${key}_filter]"]:checked`)?.value
+    return this.photos[key] ? { ...this.photos[key], filter } : { empty: true }
   }
 
   // A choice layer's picture: the one the buyer picked (nothing before they pick), or a line's.
@@ -205,7 +218,7 @@ export default class extends Controller {
     return { color: this.element.querySelector(`input[name="properties[${key}]"]:checked`)?.value }
   }
 
-  showPicture(layer, { url, zoom, x, y, empty }) {
+  showPicture(layer, { url, zoom, x, y, empty, filter }) {
     const [ image, placeholder ] = layer.children
     if (placeholder) placeholder.hidden = !empty
     image.hidden = !!empty
@@ -213,7 +226,8 @@ export default class extends Controller {
     if (empty) return
 
     if (image.getAttribute("src") !== url) image.src = url
-    Object.assign(image.style, { objectPosition: `${x * 100}% ${y * 100}%`, transformOrigin: `${x * 100}% ${y * 100}%`, transform: `scale(${zoom})` })
+    Object.assign(image.style, { objectPosition: `${x * 100}% ${y * 100}%`, transformOrigin: `${x * 100}% ${y * 100}%`, transform: `scale(${zoom})`,
+      filter: { bw: "grayscale(1)", sepia: "sepia(1)" }[filter] || "none" })
   }
 
   // The framing goes with the line as "zoom,x,y".
@@ -246,6 +260,56 @@ export default class extends Controller {
   frames() {
     return this.hasPhotoTarget ? [ this.photoTarget, ...this.mirrorTargets ] : []
   }
+}
+
+// A monogram's outer letters, as a share of its middle one (the print uses the same).
+const SIDE = 0.72
+
+// The text bent along an arc of `curve` degrees (up: an arch, down: a smile) as long as the text
+// itself, then fitted whole into the box, as the print bends it and then fits it.
+function bend(layer, letters, monogram, { font, color, opacity, upper }, curve) {
+  const ns = "http://www.w3.org/2000/svg"
+  const size = 100
+  const svg = document.createElementNS(ns, "svg")
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
+  Object.assign(svg.style, { position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible", opacity })
+  const textNode = document.createElementNS(ns, "text")
+  Object.assign(textNode.style, { fontFamily: `"${font}"`, fill: color, textTransform: upper ? "uppercase" : "none" })
+  textNode.setAttribute("font-size", size)
+  textNode.setAttribute("text-anchor", "middle")
+  const parts = monogram && letters.length === 3 ? [ ...letters ].map((letter, index) => [ letter, index === 1 ? 1 : SIDE ]) : [ [ letters, 1 ] ]
+  const spans = parts.map(([ part, share ]) => {
+    const span = document.createElementNS(ns, "tspan")
+    span.textContent = part
+    if (share !== 1) span.setAttribute("font-size", `${SIDE}em`)
+    return span
+  })
+  textNode.append(...spans)
+  svg.append(textNode)
+  layer.append(svg)
+
+  const angle = Math.abs(curve) * Math.PI / 180
+  const radius = Math.max(textNode.getComputedTextLength(), 1) / angle
+  const half = angle / 2, outer = radius + size * 0.8
+  const path = document.createElementNS(ns, "path")
+  path.id = `arc-${Math.random().toString(36).slice(2)}`
+  path.setAttribute("fill", "none")
+  let box
+  if (curve > 0) {
+    path.setAttribute("d", `M ${-radius * Math.sin(half)} ${-radius * Math.cos(half)} A ${radius} ${radius} 0 0 1 ${radius * Math.sin(half)} ${-radius * Math.cos(half)}`)
+    box = [ -outer * Math.sin(half), -outer, 2 * outer * Math.sin(half), outer - radius * Math.cos(half) + size * 0.3 ]
+  } else {
+    path.setAttribute("d", `M ${-radius * Math.sin(half)} ${radius * Math.cos(half)} A ${radius} ${radius} 0 0 0 ${radius * Math.sin(half)} ${radius * Math.cos(half)}`)
+    const top = (radius - size * 0.8) * Math.cos(half)
+    box = [ -(radius + size * 0.3) * Math.sin(half), top, 2 * (radius + size * 0.3) * Math.sin(half), radius + size * 0.3 - top ]
+  }
+  const along = document.createElementNS(ns, "textPath")
+  along.setAttribute("href", `#${path.id}`)
+  along.setAttribute("startOffset", "50%")
+  along.append(...spans)
+  textNode.replaceChildren(along)
+  svg.prepend(path)
+  svg.setAttribute("viewBox", box.join(" "))
 }
 
 function clamp(value, min, max) {

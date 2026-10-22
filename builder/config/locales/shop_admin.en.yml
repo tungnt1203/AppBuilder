@@ -398,6 +398,18 @@ en:
           center: Center
           right: Right
         uppercase: Capital letters
+        style: Style
+        styles:
+          plain: Plain text
+          monogram: Monogram (3 letters, the middle one big)
+        curve: Curve
+        curve_hint: Left bends it into a smile, right into an arch; the middle keeps it straight.
+        filters: Looks the buyer can pick
+        filter_names:
+          original: Original
+          bw: Black and white
+          sepia: Sepia
+        filters_hint: Tick two or more to let the buyer choose how their photo looks.
         fonts: Fonts the buyer can pick
         fonts_hint: Tick two or more to let the buyer choose; otherwise the font above is used.
         colors: Colors the buyer can pick

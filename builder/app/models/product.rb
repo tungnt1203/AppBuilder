@@ -182,7 +182,7 @@ class Product < ApplicationRecord
     # position on the blank ("front"), or {} until the owner draws it.
     def clean_print_area
       box = BuyerInputs.preview(print_area, kind: "photo")
-      self.print_area = box ? box.except("images").merge("position" => PRINT_POSITIONS.include?(print_area.to_h["position"]) ? print_area["position"] : "front") : {}
+      self.print_area = box ? box.slice("x", "y", "w", "h").merge("position" => PRINT_POSITIONS.include?(print_area.to_h["position"]) ? print_area["position"] : "front") : {}
     end
 
     # A choice field keeps only the product's own artwork.

@@ -42,4 +42,18 @@ class Personalization::PrintFileTest < ActiveSupport::TestCase
     assert_equal [ 255, 0, 0, 255 ], image.getpoint(100, 100).map(&:round)
     assert_equal [ 209, 213, 219, 255 ], image.getpoint(450, 100).map(&:round)
   end
+
+  test "a photo prints in the look the buyer picked, and curved text and a monogram are drawn in their boxes" do
+    upload = BuyerUpload.take(Rack::Test::UploadedFile.new(file_fixture("product.png"), "image/png"))
+    @product.update!(buyer_inputs: [
+      { "label" => "Photo", "kind" => "photo", "preview" => { "x" => 0.2, "y" => 0.2, "w" => 0.3, "h" => 0.3, "filters" => %w[ original bw ] } },
+      { "label" => "Arch", "preview" => { "x" => 0.5, "y" => 0.2, "w" => 0.3, "h" => 0.2, "font" => "Oswald", "color" => "#000000", "curve" => 120 } },
+      { "label" => "Initials", "preview" => { "x" => 0.2, "y" => 0.6, "w" => 0.6, "h" => 0.2, "font" => "Lora", "color" => "#000000", "style" => "monogram" } }
+    ])
+    image = Vips::Image.new_from_buffer(Personalization::PrintFile.new(@product, { "photo" => upload.token, "photo_filter" => "bw", "arch" => "Best Dad", "initials" => "JDS" }).render(width: 600, height: 600), "")
+    red, green, blue = image.crop(0, 0, 300, 300).extract_band(0, n: 3).bandsplit
+    assert_equal 0, (red - green).abs.max + (green - blue).abs.max, "black and white"
+    assert image.crop(300, 0, 180, 120).extract_band(3).max.positive?, "the arch"
+    assert image.crop(0, 360, 600, 120).extract_band(3).max.positive?, "the monogram"
+  end
 end

@@ -74,6 +74,12 @@ en:
       ready: Photo added. Choose another to change it.
       small: This photo is small and may print blurry. A larger one prints sharper.
       zoom: Zoom
+      monogram_hint: Three initials, in the order they go; the middle one is printed largest.
+      look: Look
+      looks:
+        original: Original
+        bw: Black & white
+        sepia: Sepia
       drag_hint: Drag the photo on the picture to move it.
       max_length:
         one: Up to 1 character

@@ -10,8 +10,10 @@
 # back view doesn't). Fields are laid in order, so a background color goes first. Text has a font
 # and color, and the fonts and colors the buyer may pick instead, which come with the line as
 # "<key>_font" and "<key>_color". A photo fills its box, and how the buyer framed it comes as
-# "<key>_crop": "zoom,x,y" (zoom from 1, the point kept in view). A picture fits its box. A color
-# fills it, from the colors the shop offers.
+# "<key>_crop": "zoom,x,y" (zoom from 1, the point kept in view), and the look the buyer picks among
+# the shop's filters (black and white, sepia) as "<key>_filter". Text can bend along an arc ("curve",
+# in degrees: up for an arch, down for a smile) or be a monogram (three letters, the middle one big).
+# A picture fits its box. A color fills it, from the colors the shop offers.
 #
 # Several photos (a collage) are several photo fields: drawing one box with a layout ("2x1": two
 # across) splits it into a field per cell.
@@ -30,6 +32,9 @@ class BuyerInputs
   MAX_CHOICES = 8
   MAX_OPTIONS = 40
   MAX_ZOOM = 4
+  STYLES = %w[ plain monogram ].freeze
+  FILTERS = %w[ original bw sepia ].freeze
+  MAX_CURVE = 180
   GAP = 0.03 # between a layout's cells, as a share of the box
 
   def self.definitions(rows)
@@ -79,7 +84,10 @@ class BuyerInputs
     box["images"] = Array(raw["images"]).map(&:to_i).select(&:positive?).uniq
     colors = Array(raw["colors"]).flat_map { |value| value.to_s.split(/[\s,]+/) }.map(&:downcase).grep(COLOR).uniq
     case kind
-    when "photo", "choice" then box
+    when "photo"
+      filters = Array(raw["filters"]) & FILTERS
+      box.merge("filters" => filters.size > 1 ? FILTERS & filters : [])
+    when "choice" then box
     when "color" then colors.any? ? box.merge("colors" => colors.first(MAX_OPTIONS)) : nil
     else
       font = FONTS.include?(raw["font"]) ? raw["font"] : FONTS.first
@@ -90,7 +98,9 @@ class BuyerInputs
         "font" => font, "fonts" => (fonts.size > 1 ? (fonts | [ font ]) : []),
         "color" => color, "colors" => (colors.size > 1 ? (colors | [ color ]) : []),
         "align" => ALIGNS.include?(raw["align"]) ? raw["align"] : "center",
-        "uppercase" => ActiveModel::Type::Boolean.new.cast(raw["uppercase"]) == true
+        "uppercase" => ActiveModel::Type::Boolean.new.cast(raw["uppercase"]) == true,
+        "curve" => raw["curve"].to_i.clamp(-MAX_CURVE, MAX_CURVE),
+        "style" => STYLES.include?(raw["style"]) ? raw["style"] : "plain"
       )
     end
   end
@@ -119,6 +129,8 @@ class BuyerInputs
 
         properties[key] = value
         properties["#{key}_crop"] = crop(raw["#{key}_crop"]).join(",")
+        filter = raw["#{key}_filter"].to_s
+        properties["#{key}_filter"] = filter if field.dig("preview", "filters").to_a.include?(filter) && filter != "original"
       when "choice"
         next errors[key] = "isn't one of the choices" unless field["options"].to_a.map(&:to_s).include?(value)
 
@@ -128,6 +140,10 @@ class BuyerInputs
 
         properties[key] = value.downcase
       else
+        if field.dig("preview", "style") == "monogram"
+          value = value.gsub(/[^[:alpha:]]/, "").upcase
+          next errors[key] = "needs one to three letters" unless value.length.between?(1, 3)
+        end
         next errors[key] = "is too long (maximum is #{field["max_length"]} characters)" if value.length > field["max_length"].to_i
 
         properties[key] = value
@@ -165,11 +181,13 @@ class BuyerInputs
 
       box = preview.slice("x", "y", "w", "h", "images")
       case field["kind"]
-      when "photo" then box.merge("kind" => "photo", "upload" => value, "crop" => crop(properties["#{field["key"]}_crop"]))
+      when "photo"
+        box.merge("kind" => "photo", "upload" => value, "crop" => crop(properties["#{field["key"]}_crop"]),
+          "filter" => properties["#{field["key"]}_filter"].presence_in(preview["filters"].to_a) || "original")
       when "choice" then box.merge("kind" => "choice", "artwork" => value.to_i)
       when "color" then box.merge("kind" => "color", "color" => value)
       else
-        box.merge(preview.slice("align", "uppercase")).merge("kind" => "text", "text" => value,
+        box.merge(preview.slice("align", "uppercase", "curve", "style")).merge("kind" => "text", "text" => value,
           "font" => properties["#{field["key"]}_font"].presence_in(preview["fonts"].to_a) || preview["font"],
           "color" => properties["#{field["key"]}_color"].presence_in(preview["colors"].to_a) || preview["color"])
       end

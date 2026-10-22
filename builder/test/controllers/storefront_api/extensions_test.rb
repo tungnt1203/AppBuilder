@@ -49,7 +49,7 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
     token = api(:post, storefront_api_carts_path)["cart"]["token"]
     line = api(:post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { name: "Ada", name_font: "Montserrat", name_color: "#000000" } })["cart"]["items"].sole
     assert_equal [ "Name", "Name font" ], line["properties"].pluck("label")
-    assert_equal [ { "x" => 0.3, "y" => 0.6, "w" => 0.4, "h" => 0.1, "align" => "center", "uppercase" => false, "kind" => "text", "text" => "Ada", "font" => "Montserrat", "color" => "#ffffff" } ], line["preview"]
+    assert_equal [ { "x" => 0.3, "y" => 0.6, "w" => 0.4, "h" => 0.1, "align" => "center", "uppercase" => false, "curve" => 0, "style" => "plain", "kind" => "text", "text" => "Ada", "font" => "Montserrat", "color" => "#ffffff" } ], line["preview"]
     assert_equal photo.id, line.dig("product", "image", "id")
   end
 
@@ -79,7 +79,7 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
 
     line = api(:post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { your_photo: upload["token"], your_photo_crop: "1.5,0.4,9" } })["cart"]["items"].sole
     assert_equal [ { "key" => "your_photo", "label" => "Your photo", "value" => "Added", "thumb" => upload["thumb"], "large" => upload["large"] } ], line["properties"]
-    assert_equal [ { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4, "kind" => "photo", "crop" => [ 1.5, 0.4, 1.0 ], "photo" => upload["large"] } ], line["preview"]
+    assert_equal [ { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4, "kind" => "photo", "crop" => [ 1.5, 0.4, 1.0 ], "filter" => "original", "photo" => upload["large"] } ], line["preview"]
   end
 
   test "a choice field lists its pictures, and its line names and shows the one picked" do

@@ -8,7 +8,7 @@ class BuyerInputsTest < ActiveSupport::TestCase
   test "a preview keeps the box on the photo, known fonts and colors, and what the buyer may pick" do
     field = BuyerInputs.definitions([ ROW ]).sole
     assert_equal({ "x" => 0.3, "y" => 0.6, "w" => 0.7, "h" => 0.1, "images" => [ 11 ], "font" => "Montserrat", "fonts" => [ "Montserrat", "Lora" ],
-                   "color" => "#ffffff", "colors" => [ "#ffffff", "#f2c45a" ], "align" => "center", "uppercase" => true }, field["preview"])
+                   "color" => "#ffffff", "colors" => [ "#ffffff", "#f2c45a" ], "align" => "center", "uppercase" => true, "curve" => 0, "style" => "plain" }, field["preview"])
   end
 
   test "no box drawn, no preview; a single font or color is no choice" do
@@ -44,7 +44,7 @@ class BuyerInputsTest < ActiveSupport::TestCase
   test "a photo field keeps a box and photos, and lines name the photo without its token" do
     in_shop
     field = BuyerInputs.definitions([ { "label" => "Your photo", "kind" => "photo", "max_length" => "9", "preview" => { "x" => "0.1", "y" => "0.1", "w" => "0.5", "h" => "0.5", "font" => "Lora" } } ]).sole
-    assert_equal [ "photo", nil, { "x" => 0.1, "y" => 0.1, "w" => 0.5, "h" => 0.5, "images" => [] } ], field.values_at("kind", "max_length", "preview")
+    assert_equal [ "photo", nil, { "x" => 0.1, "y" => 0.1, "w" => 0.5, "h" => 0.5, "images" => [], "filters" => [] } ], field.values_at("kind", "max_length", "preview")
 
     upload = BuyerUpload.take(Rack::Test::UploadedFile.new(file_fixture("product.png"), "image/png"))
     properties, = BuyerInputs.accept([ field ], "your_photo" => upload.token, "your_photo_crop" => "2,0.3,0.6")
@@ -79,5 +79,22 @@ class BuyerInputsTest < ActiveSupport::TestCase
 
     properties, = BuyerInputs.accept(fields, "background" => "#112233", "breed" => "9")
     assert_equal [ [ "color", "#112233" ], [ "choice", 9 ] ], BuyerInputs.layers(fields, properties).map { |layer| layer.values_at("kind", "color").compact + layer.values_at("artwork").compact }
+  end
+
+  test "a monogram takes one to three letters, in capitals; a photo's look is one the shop offers" do
+    fields = BuyerInputs.definitions([
+      { "label" => "Initials", "preview" => { "x" => "0.1", "y" => "0.1", "w" => "0.3", "h" => "0.2", "style" => "monogram", "curve" => "500" } },
+      { "label" => "Photo", "kind" => "photo", "preview" => { "x" => "0.5", "y" => "0.1", "w" => "0.3", "h" => "0.3", "filters" => [ "sepia", "bw", "neon" ] } }
+    ])
+    assert_equal [ "monogram", 180 ], fields.first["preview"].values_at("style", "curve")
+    assert_equal [ "bw", "sepia" ], fields.second.dig("preview", "filters")
+
+    _, errors = BuyerInputs.accept(fields, "initials" => "1 2")
+    assert_equal "needs one to three letters", errors["initials"]
+    in_shop
+    upload = BuyerUpload.take(Rack::Test::UploadedFile.new(file_fixture("product.png"), "image/png"))
+    properties, = BuyerInputs.accept(fields, "initials" => "j.d.s", "photo" => upload.token, "photo_filter" => "sepia")
+    assert_equal [ "JDS", "sepia" ], properties.values_at("initials", "photo_filter")
+    assert_equal "sepia", BuyerInputs.layers(fields, properties).second["filter"]
   end
 end

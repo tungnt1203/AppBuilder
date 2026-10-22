@@ -92,6 +92,17 @@
               <%= select_tag "product[buyer_inputs][][preview][align]", options_for_select(BuyerInputs::ALIGNS.map { |align| [ t(".aligns.#{align}"), align ] }, preview["align"] || "center"), id: nil, class: field_classes, data: { placement_target: "align", action: "placement#restyle" } %>
             </div>
           </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="space-y-1.5">
+              <%= label_tag nil, t(".style"), class: "text-sm font-medium text-ink" %>
+              <%= select_tag "product[buyer_inputs][][preview][style]", options_for_select(BuyerInputs::STYLES.map { |style| [ t(".styles.#{style}"), style ] }, preview["style"] || "plain"), id: nil, class: field_classes %>
+            </div>
+            <div class="space-y-1.5">
+              <%= label_tag nil, t(".curve"), class: "text-sm font-medium text-ink" %>
+              <%= range_field_tag "product[buyer_inputs][][preview][curve]", preview["curve"].to_i, min: -BuyerInputs::MAX_CURVE, max: BuyerInputs::MAX_CURVE, step: 10, id: nil, class: "w-full accent-brand-600" %>
+              <p class="text-xs text-muted"><%= t(".curve_hint") %></p>
+            </div>
+          </div>
           <label class="flex items-center gap-2 text-sm">
             <%= check_box_tag "product[buyer_inputs][][preview][uppercase]", "1", preview["uppercase"] == true, id: nil, class: "size-4 rounded border-line accent-brand-600", data: { placement_target: "uppercase", action: "placement#restyle" } %>
             <%= t(".uppercase") %>
@@ -116,6 +127,18 @@
             <p class="text-xs text-muted" data-for-kinds="text"><%= t(".colors_hint") %></p>
             <p class="text-xs text-muted" data-for-kinds="color"><%= t(".background_hint") %></p>
           </div>
+          <fieldset data-for-kinds="photo">
+            <legend class="text-sm font-medium text-ink"><%= t(".filters") %></legend>
+            <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              <% BuyerInputs::FILTERS.each do |filter| %>
+                <label class="flex items-center gap-1.5 text-sm">
+                  <%= check_box_tag "product[buyer_inputs][][preview][filters][]", filter, preview["filters"].to_a.include?(filter), id: nil, class: "size-4 rounded border-line accent-brand-600" %>
+                  <%= t(".filter_names.#{filter}") %>
+                </label>
+              <% end %>
+            </div>
+            <p class="mt-1 text-xs text-muted"><%= t(".filters_hint") %></p>
+          </fieldset>
           <p class="text-sm text-muted" data-for-kinds="photo"><%= t(".photo_hint") %></p>
           <p class="text-sm text-muted" data-for-kinds="choice"><%= t(".choice_hint") %></p>
         </div>

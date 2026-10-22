@@ -19,6 +19,19 @@
       <input type="range" min="1" max="4" step="0.05" value="1" class="flex-1 accent-ink" aria-label="<%= t(".zoom") %>" data-personalize-zoom="<%= input["key"] %>" data-action="input->personalize#zoom">
     </div>
     <p class="text-xs text-muted" data-personalize-framing="<%= input["key"] %>" hidden><%= t(".drag_hint") %></p>
+    <% if preview["filters"].present? %>
+      <fieldset data-personalize-framing="<%= input["key"] %>" hidden>
+        <legend class="text-sm text-muted"><%= t(".look") %></legend>
+        <div class="mt-1.5 flex flex-wrap gap-2">
+          <% preview["filters"].each_with_index do |filter, index| %>
+            <label class="cursor-pointer">
+              <%= radio_button_tag "properties[#{input["key"]}_filter]", filter, index.zero?, class: "peer sr-only", data: { action: "personalize#update" } %>
+              <span class="block rounded-lg border border-line px-3 py-1.5 text-sm peer-checked:border-ink peer-checked:ring-1 peer-checked:ring-ink peer-focus-visible:ring-2"><%= t(".looks.#{filter}") %></span>
+            </label>
+          <% end %>
+        </div>
+      </fieldset>
+    <% end %>
   <% end %>
 </div>
 <% elsif input["kind"] == "choice" %>
@@ -51,9 +64,12 @@
 <% else %>
 <div class="space-y-2">
   <%= label_tag "properties_#{input["key"]}", input["label"] %>
-  <%= text_field_tag "properties[#{input["key"]}]", nil, id: "properties_#{input["key"]}", required: input["required"], maxlength: input["max_length"], class: field_classes,
+  <% monogram = preview && preview["style"] == "monogram" %>
+  <%= text_field_tag "properties[#{input["key"]}]", nil, id: "properties_#{input["key"]}", required: input["required"], maxlength: monogram ? 3 : input["max_length"], class: field_classes,
         autocomplete: "off", data: ({ personalize_input: input["key"], action: "input->personalize#update" } if preview) %>
-  <% if input["max_length"] %>
+  <% if monogram %>
+    <p class="text-xs text-muted"><%= t(".monogram_hint") %></p>
+  <% elsif input["max_length"] %>
     <p class="text-xs text-muted"><%= t(".max_length", count: input["max_length"]) %></p>
   <% end %>
 
