@@ -16,15 +16,19 @@ class Personalization::PrintifyLine
     areas = Array(printify["print_areas"]).find { |area| Array(area["variant_ids"]).map(&:to_i).include?(variant_id) }
     raise Personalization::PrintFile::Error, "Printify's #{product.title} has no print area for this variant" unless areas
 
-    print_areas = Array(areas["placeholders"]).to_h { |placeholder| [ placeholder["position"], Array(placeholder["images"]).map { |image| design(image) } ] }
+    print_areas = Array(areas["placeholders"]).to_h { |placeholder| [ placeholder["position"], Array(placeholder["images"]).filter_map { |image| design(image) } ] }
     print_areas[position] = print_areas.fetch(position, []) + [ print_file(printify, variant_id, position) ]
-    { blueprint_id: printify["blueprint_id"], print_provider_id: printify["print_provider_id"], variant_id:, quantity: @item.quantity, print_areas: }
+    { blueprint_id: printify["blueprint_id"], print_provider_id: printify["print_provider_id"], variant_id:, quantity: @item.quantity,
+      print_areas: print_areas.reject { |_position, images| images.empty? } }
   end
 
   private
     # One of the product's own images, where it sits. Text made in Printify's editor can't go with an
-    # order made this way: the owner uploads it as an image instead.
+    # order made this way: the owner uploads it as an image instead. What Printify adds by itself
+    # (the neck label's size and care text, "text/plain") isn't the owner's design and is left out.
     def design(image)
+      return unless image["layerType"] == "text" || image["type"].to_s.start_with?("image/")
+
       if image["layerType"] == "text"
         raise Personalization::PrintFile::Error, "#{@item.variant.product.title}'s design in Printify has text made there (\"#{image["input_text"]}\"). " \
           "Printify takes only images with a personalized order: upload the design as an image (PNG) in Printify instead."

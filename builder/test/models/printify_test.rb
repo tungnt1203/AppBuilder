@@ -310,6 +310,7 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_equal [ "https://images.example/designs/design-1.png", "https://images.example/uploads/#{order.number}-#{item.id}-front.png" ], line[:print_areas]["front"].pluck(:src)
     assert_equal({ src: "https://images.example/back-design.png", x: 0.5, y: 0.3, scale: 0.5, angle: 0 }, line[:print_areas]["back"].sole)
     assert_equal({ x: 0.5, y: 0.5, scale: 1, angle: 0 }, line[:print_areas]["front"].last.except(:src))
+    assert_equal [ "front", "back" ], line[:print_areas].keys, "Printify's own neck label isn't a design to send"
 
     print_file = Vips::Image.new_from_buffer(@printify.uploads.sole[:data], "")
     assert_equal [ 300, 400, 4 ], [ print_file.width, print_file.height, print_file.bands ]

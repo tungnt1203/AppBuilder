@@ -15,8 +15,9 @@ class FakePrintifyGateway
       "id" => "pf-tee", "title" => "Sunset Tee", "description" => "<p>Soft cotton.</p><p>Printed to order.</p>",
       "blueprint_id" => 6, "print_provider_id" => 99,
       "print_areas" => [ { "variant_ids" => [ 1001, 1002, 1003, 1004, 1005 ], "placeholders" => [
-        { "position" => "front", "images" => [ { "id" => "design-1", "x" => 0.5, "y" => 0.4, "scale" => 0.8, "angle" => 0 } ] },
-        { "position" => "back", "images" => [ { "id" => "design-2", "src" => "https://images.example/back-design.png", "x" => 0.5, "y" => 0.3, "scale" => 0.5, "angle" => 0 } ] }
+        { "position" => "neck", "images" => [ { "id" => "label-1", "type" => "text/plain", "layerType" => "image", "src" => "", "x" => 0.5, "y" => 0.5, "scale" => 1 } ] },
+        { "position" => "front", "images" => [ { "id" => "design-1", "type" => "image/png", "x" => 0.5, "y" => 0.4, "scale" => 0.8, "angle" => 0 } ] },
+        { "position" => "back", "images" => [ { "id" => "design-2", "type" => "image/png", "src" => "https://images.example/back-design.png", "x" => 0.5, "y" => 0.3, "scale" => 0.5, "angle" => 0 } ] }
       ] } ],
       "options" => [
         { "name" => "Colors", "type" => "color", "values" => [ { "id" => 521, "title" => "Black", "colors" => [ "#000000" ] }, { "id" => 522, "title" => "White", "colors" => [ "#ffffff" ] }, { "id" => 523, "title" => "Red" } ] },
