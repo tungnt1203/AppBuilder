@@ -99,6 +99,9 @@ module StorefrontKit
     one :product, Product
     one :variant, Variant
     many :properties, Property
+
+    # The buyer's text as it shows on the line's photo: [{ x, y, w, h, text, font, color, align, uppercase }].
+    def preview = Array(self["preview"])
   end
 
   class Discount < Record
@@ -134,6 +137,8 @@ module StorefrontKit
     optional :variant_title, :product_slug, :catalog_id
     one :image, Image
     many :properties, Property
+
+    def preview = Array(self["preview"])
   end
 
   class Address < Record

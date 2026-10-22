@@ -52,8 +52,9 @@
 
   <ul class="mt-8 divide-y divide-line border-y border-line">
     <% @order.items.each do |item| %>
-      <li class="flex justify-between gap-4 py-4 text-sm">
-        <span class="min-w-0">
+      <li class="flex items-center justify-between gap-4 py-4 text-sm">
+        <%= render "personalization/line_image", image: item.image, layers: item.preview, alt: item.title, class: "size-16 shrink-0 rounded-lg" %>
+        <span class="min-w-0 flex-1">
           <%= item.quantity %> × <%= item.title %>
           <% if item.variant_title %><span class="block text-muted"><%= item.variant_title %></span><% end %>
           <% item.properties.each do |property| %><span class="block text-muted"><%= property.label %>: <%= property.value %></span><% end %>

@@ -1,0 +1,14 @@
+<%# A cart or order line's photo, with the buyer's text on it when the product is personalized.
+    The text needs the photo uncropped (:large), shown filling its frame like the product page. %>
+<% if image && layers.any? %>
+  <span class="relative block overflow-hidden <%= local_assigns[:class] %>" data-controller="personalize" data-personalize-frame>
+    <%= image_tag image.url(:large), alt:, loading: "lazy", class: "size-full bg-surface-muted object-cover", data: { personalize_target: "photo" } %>
+    <% layers.each do |layer| %>
+      <%= render "personalization/layer", layer: %>
+    <% end %>
+  </span>
+<% elsif image %>
+  <%= image_tag image.url(:thumb), alt:, loading: "lazy", class: class_names("bg-surface-muted object-cover", local_assigns[:class]) %>
+<% else %>
+  <span class="block bg-surface-muted <%= local_assigns[:class] %>" role="img" aria-label="<%= alt %>"></span>
+<% end %>

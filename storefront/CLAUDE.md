@@ -93,10 +93,15 @@ these for the brand, but keep each part:
 
 - **Product page**: photos (each color's photo when a color is picked), price with the sale price
   and "Save 20%", swatches (`swatch_color`) and size buttons, the text buyers type to be printed
-  (`product.buyer_inputs`), the add-to-cart button and right under it when it arrives
-  (`delivery_estimate`), shipping and returns; the size guide in a dialog; the sticky buy bar on
-  phones (`sticky-buy`); reviews (never invent any) and "You may also like".
-- **Cart**: the free-shipping bar, discount codes, trust lines by the checkout button.
+  (`products/_buyer_input`: with its font and color picks, and shown on the photo as they type,
+  `personalization/_layer` with the `personalize` controller, plus a small copy of the photo by
+  the fields on phones; personalized products are what this kind of shop sells, so keep it all),
+  the add-to-cart button and right under it when it arrives (`delivery_estimate`), shipping and
+  returns; the size guide in a dialog; the sticky buy bar on phones (`sticky-buy`); reviews
+  (never invent any) and "You may also like".
+- **Cart**: the free-shipping bar, discount codes, trust lines by the checkout button, and each
+  line's photo with the buyer's text on it (`personalization/_line_image`, also in checkout and
+  on the order page).
 - **Checkout** (`checkouts/new`): the address with US ZIP autofill, the totals partial that reloads
   with Printify's real shipping (`checkouts/_totals`), payment by card (Stripe's Payment Element at
   `/orders/:token/payment`) or the shop's instructions. Don't change how it places orders or pays.

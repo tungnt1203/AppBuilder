@@ -76,7 +76,7 @@
         <% @quote.items.each do |item| %>
           <li class="flex items-center gap-3">
             <span class="relative shrink-0">
-              <%= product_image item.product, size: :thumb, class: "size-14 rounded-lg" %>
+              <%= render "personalization/line_image", image: item.product.image, layers: item.preview, alt: item.product.title, class: "size-14 rounded-lg" %>
               <span class="absolute -top-1.5 -right-1.5 grid min-w-5 place-items-center rounded-full bg-ink px-1 text-[0.6875rem] leading-5 font-semibold text-canvas"><%= item.quantity %></span>
             </span>
             <span class="min-w-0 flex-1">

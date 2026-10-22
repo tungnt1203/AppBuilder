@@ -1,0 +1,9 @@
+<%# One line of the buyer's text over a product photo, where the shop placed it (personalize
+    controller). On the product page it follows the field named by key; on a cart or order line
+    it carries its text, font and color. Keep it inside the photo's frame, after the photo. %>
+<% data = { personalize_target: "layer", box: layer.slice("x", "y", "w", "h").to_json, font: layer["font"], color: layer["color"] } %>
+<% data.merge!(key: layer["key"], sample: sample, photos: photos.to_json) if local_assigns[:sample] %>
+<% data[:text] = layer["text"] if layer["text"] %>
+<div class="pointer-events-none absolute flex overflow-hidden" hidden <%= tag.attributes(data: data) %>>
+  <span class="w-full self-center leading-none whitespace-nowrap <%= "uppercase" if layer["uppercase"] %>" style="text-align: <%= layer["align"] %>"></span>
+</div>

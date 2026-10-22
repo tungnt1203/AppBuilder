@@ -12,14 +12,20 @@
 <%# A product page made to sell from an ad: photos, price, options, the button, and right under it
     what buyers want to know before they pay (when it arrives, shipping, returns). On a phone the
     button follows the buyer once the main one scrolls away. Restyle it; keep those parts. %>
-<div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy" data-action="variant-picker:change->sticky-buy#select">
+<% images = @product.images %>
+<%# Text the buyer types shows on the photos where the shop placed it (personalization/_layer). %>
+<% placed = images.any? ? @product.buyer_inputs.select { |input| input["preview"] } : [] %>
+<div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy<%= " personalize" if placed.any? %>" data-action="variant-picker:change->sticky-buy#select">
   <div class="min-w-0" data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
-    <% images = @product.images %>
-    <div class="aspect-4/5 overflow-hidden rounded-xl">
+    <div class="relative aspect-4/5 overflow-hidden rounded-xl" data-personalize-frame>
       <% if images.any? %>
         <button type="button" class="block size-full cursor-zoom-in" data-action="gallery#zoom" aria-label="<%= t(".zoom") %>">
-          <%= image_tag @product.image_for(@variant).url(:large), alt: @product.title, class: "size-full bg-surface-muted object-cover", data: { gallery_target: "main" } %>
+          <%= image_tag @product.image_for(@variant).url(:large), alt: @product.title, class: "size-full bg-surface-muted object-cover", data: { gallery_target: "main", personalize_target: ("photo" if placed.any?) } %>
         </button>
+        <% placed.each do |input| %>
+          <% photos = images.select { |image| input["preview"]["images"].to_a.include?(image.id) }.map { |image| image.url(:large) } %>
+          <%= render "personalization/layer", layer: input["preview"].merge("key" => input["key"]), sample: t(".your_text"), photos: %>
+        <% end %>
         <dialog class="m-auto max-h-[92vh] max-w-[92vw] overflow-hidden rounded-xl bg-canvas p-0 backdrop:bg-black/70" data-gallery-target="zoom" data-action="click->gallery#closeZoom">
           <img alt="<%= @product.title %>" class="max-h-[92vh] w-auto object-contain" data-gallery-target="zoomImage">
           <button type="button" class="absolute top-3 right-3 grid size-9 place-items-center rounded-full bg-surface/90 text-ink" aria-label="<%= t(".close") %>"><%= icon "x", size: 18 %></button>
@@ -95,14 +101,21 @@
       <%= hidden_field_tag :variant_id, @variant&.id, data: { variant_picker_target: "variantId" } %>
 
       <%# What the buyer types to have printed (a name on the shirt), when the product asks for it. %>
-      <% @product.buyer_inputs.each do |input| %>
-        <div class="space-y-1.5">
-          <%= label_tag "properties_#{input["key"]}", input["label"] %>
-          <%= text_field_tag "properties[#{input["key"]}]", nil, id: "properties_#{input["key"]}", required: input["required"], maxlength: input["max_length"], class: field_classes %>
-          <% if input["max_length"] %>
-            <p class="text-xs text-muted"><%= t(".max_length", count: input["max_length"]) %></p>
-          <% end %>
+      <% if placed.any? %>
+        <%# On phones the photo has scrolled away by the time the buyer types: a small copy of it, by the fields. %>
+        <div class="flex items-center gap-3 md:hidden">
+          <span class="relative block aspect-4/5 w-24 shrink-0 overflow-hidden rounded-lg" data-personalize-frame>
+            <%= image_tag @product.image_for(@variant).url(:large), alt: "", class: "size-full bg-surface-muted object-cover", data: { personalize_target: "mirror" } %>
+            <% placed.each do |input| %>
+              <% photos = images.select { |image| input["preview"]["images"].to_a.include?(image.id) }.map { |image| image.url(:large) } %>
+              <%= render "personalization/layer", layer: input["preview"].merge("key" => input["key"]), sample: t(".your_text"), photos: %>
+            <% end %>
+          </span>
+          <p class="text-sm text-muted"><%= t(".preview_hint") %></p>
         </div>
+      <% end %>
+      <% @product.buyer_inputs.each do |input| %>
+        <%= render "buyer_input", input: %>
       <% end %>
 
       <div class="flex items-end gap-3">

@@ -61,8 +61,16 @@ en:
       max_length:
         one: Up to 1 character
         other: Up to %{count} characters
+      your_text: Your text
+      preview_hint: Your text shows on the photo as you type.
       'yes': 'Yes'
       'no': 'No'
+    buyer_input:
+      max_length:
+        one: Up to 1 character
+        other: Up to %{count} characters
+      font: Font
+      text_color: Text color
     delivery:
       arrives: Arrives %{dates}
     reviews:

@@ -26,7 +26,7 @@
       <% @cart.items.each do |item| %>
         <li class="flex gap-4 py-5" id="cart_item_<%= item.id %>">
           <%= link_to product_path(item.product), class: "w-20 shrink-0" do %>
-            <%= product_image item.product, image: item.product.image, size: :thumb, class: "aspect-square w-20 rounded-lg" %>
+            <%= render "personalization/line_image", image: item.product.image, layers: item.preview, alt: item.product.title, class: "aspect-square w-20 rounded-lg" %>
           <% end %>
           <div class="flex min-w-0 flex-1 flex-col gap-2">
             <div class="flex justify-between gap-4">

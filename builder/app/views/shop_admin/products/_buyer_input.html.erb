@@ -1,0 +1,93 @@
+<%# One line of text the buyer types, and where it shows on the product's photos as they type
+    (BuyerInputs.preview): a box drawn on a photo, the photos it shows on, its font and color, and
+    the fonts and colors the buyer may pick. %>
+<% preview = row["preview"] || {} %>
+<% photos = product.persisted? ? product.images.select(&:representable?) : [] %>
+<div class="space-y-3 rounded-lg border border-line p-4">
+  <div class="grid gap-3 sm:grid-cols-[1fr_8rem_6rem_auto] sm:items-center">
+    <%= text_field_tag "product[buyer_inputs][][label]", row["label"], placeholder: t(".label"), aria: { label: t(".label") }, class: field_classes %>
+    <%= text_field_tag "product[buyer_inputs][][key]", row["key"], placeholder: t(".key"), aria: { label: t(".key") }, class: field_classes %>
+    <%= number_field_tag "product[buyer_inputs][][max_length]", row["max_length"], min: 1, max: BuyerInputs::MAX_LENGTH, placeholder: "40", aria: { label: t(".max") }, class: field_classes %>
+    <label class="flex items-center gap-2 text-sm">
+      <%= check_box_tag "product[buyer_inputs][][required]", "1", row["required"] == true, id: nil, class: "size-4 rounded border-line accent-brand-600" %>
+      <%= t(".required") %>
+    </label>
+  </div>
+
+  <% if photos.any? %>
+    <details class="group" <%= "open" if row["preview"] %>>
+      <summary class="cursor-pointer text-sm font-medium text-ink"><%= t(".show_on_photos") %></summary>
+      <div class="mt-3 grid gap-4 md:grid-cols-[minmax(0,18rem)_1fr]" data-controller="placement">
+        <div class="space-y-2">
+          <div class="relative touch-none select-none overflow-hidden rounded-lg bg-surface-muted" data-placement-target="stage"
+               data-action="pointerdown->placement#start pointermove->placement#drag pointerup->placement#stop pointercancel->placement#stop">
+            <%= image_tag (photos.find { |photo| preview["images"].to_a.include?(photo.id) } || photos.first).variant(:large), alt: "", class: "block h-auto w-full", draggable: false, data: { placement_target: "photo" } %>
+            <div class="pointer-events-none absolute flex overflow-hidden outline-2 outline-dashed outline-brand-500" data-placement-target="box" hidden>
+              <span class="w-full self-center leading-none whitespace-nowrap" data-placement-target="sample"><%= row["label"].presence || t(".sample") %></span>
+            </div>
+          </div>
+          <p class="text-xs text-muted"><%= t(".draw_hint") %></p>
+          <button type="button" class="text-xs text-muted underline hover:text-ink" data-action="placement#clear"><%= t(".clear") %></button>
+          <% %w[ x y w h ].each do |side| %>
+            <%= hidden_field_tag "product[buyer_inputs][][preview][#{side}]", preview[side], id: nil, data: { placement_target: side } %>
+          <% end %>
+        </div>
+
+        <div class="space-y-4">
+          <fieldset>
+            <legend class="text-sm font-medium text-ink"><%= t(".photos") %></legend>
+            <p class="text-xs text-muted"><%= t(".photos_hint") %></p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <% photos.each do |photo| %>
+                <label class="relative cursor-pointer">
+                  <%= check_box_tag "product[buyer_inputs][][preview][images][]", photo.id, preview["images"].to_a.include?(photo.id), id: nil, class: "peer absolute top-1 left-1 size-4 accent-brand-600",
+                        data: { action: "placement#use", large: url_for(photo.variant(:large)) } %>
+                  <%= product_image product, image: photo, size: :thumb, class: "size-16 rounded-md ring-2 ring-transparent peer-checked:ring-brand-500" %>
+                </label>
+              <% end %>
+            </div>
+          </fieldset>
+
+          <div class="grid gap-3 sm:grid-cols-3">
+            <div class="space-y-1.5">
+              <%= label_tag nil, t(".font"), class: "text-sm font-medium text-ink" %>
+              <%= select_tag "product[buyer_inputs][][preview][font]", options_for_select(BuyerInputs::FONTS, preview["font"]), id: nil, class: field_classes, data: { placement_target: "font", action: "placement#restyle" } %>
+            </div>
+            <div class="space-y-1.5">
+              <%= label_tag nil, t(".color"), class: "text-sm font-medium text-ink" %>
+              <%= color_field_tag "product[buyer_inputs][][preview][color]", preview["color"] || "#111111", id: nil, class: "h-10 w-full rounded-lg border border-line", data: { placement_target: "color", action: "placement#restyle" } %>
+            </div>
+            <div class="space-y-1.5">
+              <%= label_tag nil, t(".align"), class: "text-sm font-medium text-ink" %>
+              <%= select_tag "product[buyer_inputs][][preview][align]", options_for_select(BuyerInputs::ALIGNS.map { |align| [ t(".aligns.#{align}"), align ] }, preview["align"] || "center"), id: nil, class: field_classes, data: { placement_target: "align", action: "placement#restyle" } %>
+            </div>
+          </div>
+          <label class="flex items-center gap-2 text-sm">
+            <%= check_box_tag "product[buyer_inputs][][preview][uppercase]", "1", preview["uppercase"] == true, id: nil, class: "size-4 rounded border-line accent-brand-600", data: { placement_target: "uppercase", action: "placement#restyle" } %>
+            <%= t(".uppercase") %>
+          </label>
+
+          <fieldset>
+            <legend class="text-sm font-medium text-ink"><%= t(".fonts") %></legend>
+            <p class="text-xs text-muted"><%= t(".fonts_hint") %></p>
+            <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              <% BuyerInputs::FONTS.each do |font| %>
+                <label class="flex items-center gap-1.5 text-sm" style="font-family: '<%= font %>'">
+                  <%= check_box_tag "product[buyer_inputs][][preview][fonts][]", font, preview["fonts"].to_a.include?(font), id: nil, class: "size-4 rounded border-line accent-brand-600" %>
+                  <%= font %>
+                </label>
+              <% end %>
+            </div>
+          </fieldset>
+          <div class="space-y-1.5">
+            <%= label_tag nil, t(".colors"), class: "text-sm font-medium text-ink" %>
+            <%= text_field_tag "product[buyer_inputs][][preview][colors]", preview["colors"].to_a.join(", "), id: nil, placeholder: "#111111, #ffffff, #c8a15a", class: field_classes %>
+            <p class="text-xs text-muted"><%= t(".colors_hint") %></p>
+          </div>
+        </div>
+      </div>
+    </details>
+  <% elsif product.persisted? %>
+    <p class="text-xs text-muted"><%= t(".add_photos_first") %></p>
+  <% end %>
+</div>

@@ -95,6 +95,22 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_select "p", /Name on the shirt: Ada/
   end
 
+  test "a personalized product shows the buyer's text on its photo, and the line keeps it" do
+    @platform.products_data.first["buyer_inputs"] = [ { "key" => "print_name", "label" => "Name on the shirt", "required" => false, "max_length" => 14,
+      "preview" => { "x" => 0.3, "y" => 0.6, "w" => 0.4, "h" => 0.1, "images" => [], "font" => "Lora", "fonts" => [ "Lora", "Montserrat" ],
+                     "color" => "#ffffff", "colors" => [ "#ffffff", "#f2c45a" ], "align" => "center", "uppercase" => true } } ]
+    get product_path("cat-tee")
+    assert_select "[data-controller~=personalize] img[data-personalize-target=photo]"
+    assert_select "[data-personalize-target=layer][data-key=print_name][data-font=Lora][data-sample='Your text'] .uppercase"
+    assert_select "input[name='properties[print_name]'][data-personalize-input=print_name]"
+    assert_select "input[type=radio][name='properties[print_name_font]'][value=Montserrat]"
+    assert_select "input[type=radio][name='properties[print_name_color]'][value='#f2c45a']"
+
+    post cart_items_path, params: { variant_id: 101, properties: { print_name: "Ada", print_name_font: "Montserrat" } }
+    get cart_path
+    assert_select "[data-controller=personalize] [data-personalize-target=layer][data-text=Ada][data-font=Montserrat][data-color='#ffffff']"
+  end
+
   test "something that can't be bought isn't added" do
     post cart_items_path, params: { variant_id: 104 }
     follow_redirect!

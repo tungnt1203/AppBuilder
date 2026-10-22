@@ -86,7 +86,7 @@ class StorefrontApi::Json
     product = item.product
     { id: item.id, quantity: item.quantity, line_total_cents: item.total_cents,
       product: { slug: product.slug, title: product.title, image: image(product.image_for(item.variant), alt: product.title) },
-      variant: variant(item.variant, product) }.tap { |line| line[:properties] = property_entries(item) if item.properties.present? }
+      variant: variant(item.variant, product) }.tap { |line| add_properties(line, item, product.image_for(item.variant)) }
   end
 
   # What a checkout comes to before it's placed: shipping is only known once the address is
@@ -111,7 +111,7 @@ class StorefrontApi::Json
         line = { title: item.product_title, variant_title: item.variant_title, catalog_id: item.variant&.catalog_id || item.sku.presence, quantity: item.quantity,
           unit_price_cents: item.unit_price_cents, line_total_cents: item.unit_price_cents * item.quantity,
           product_slug: item.variant&.product&.slug, image: (image(item.variant.product.image_for(item.variant), alt: item.product_title) if item.variant) }
-        line[:properties] = property_entries(item) if item.properties.present?
+        add_properties(line, item, item.variant&.product&.image_for(item.variant))
         line
       },
       subtotal_cents: order.subtotal_cents, discount_cents: order.discount_cents, discount_code: order.discount_code,
@@ -154,11 +154,20 @@ class StorefrontApi::Json
       setting.resolved(image_url: ->(attachment) { url_helpers.rails_blob_url(attachment, **@url_options) })
     end
 
-    def property_entries(record)
+    # What the buyer typed (and the font and color they picked) as labelled entries, and the text
+    # as it shows on the line's photo (preview), for a cart or order line.
+    def add_properties(line, record, photo)
       return if record.properties.blank?
 
-      labels = record.product&.buyer_inputs.to_a.to_h { |field| [ field["key"], field["label"] ] }
-      record.properties.map { |key, value| { key:, label: labels[key] || key, value: } }
+      fields = record.product&.buyer_inputs.to_a
+      labels = fields.each_with_object({}) do |field, all|
+        all[field["key"]] = field["label"]
+        all["#{field["key"]}_font"] = "#{field["label"]} font"
+        all["#{field["key"]}_color"] = "#{field["label"]} color"
+      end
+      line[:properties] = record.properties.map { |key, value| { key:, label: labels[key] || key, value: } }
+      layers = BuyerInputs.layers(fields, record.properties).select { |layer| layer["images"].empty? || layer["images"].include?(photo&.id) }
+      line[:preview] = layers.map { |layer| layer.except("images") } if layers.any? && photo
     end
     # { id, alt, thumb, card, large } for a photo, nil without one.
     def image(attachment, alt:)

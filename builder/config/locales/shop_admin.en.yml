@@ -314,10 +314,7 @@ en:
         buyer_inputs: What the buyer types
         buyer_inputs_hint: A line of text on the product, such as a name to print.
           It is saved on the order and sent to Printify. Leave a row blank to skip it.
-        buyer_label: Label
-        buyer_key: Key
-        buyer_max: Max characters
-        buyer_required: Required
+          Show it on the photos, and buyers see their text on the product as they type.
         status_hint: Only active products are on the site.
         base_price_hint: Every variant starts at this price; change them one by one
           after saving.
@@ -325,6 +322,31 @@ en:
         collections: Collections
         create: Add product
         save: Save
+      buyer_input:
+        label: Label
+        key: Key
+        max: Max characters
+        required: Required
+        show_on_photos: Show it on the photos
+        sample: Your text
+        draw_hint: Drag on the photo to draw where the text goes; drag the box to move it.
+        clear: Don't show it on the photos
+        photos: Photos it shows on
+        photos_hint: Tick the photos where this part of the product faces the buyer (not a back view).
+          None ticked shows it on all of them.
+        font: Font
+        color: Color
+        align: Alignment
+        aligns:
+          left: Left
+          center: Center
+          right: Right
+        uppercase: Capital letters
+        fonts: Fonts the buyer can pick
+        fonts_hint: Tick two or more to let the buyer choose; otherwise the font above is used.
+        colors: Colors the buyer can pick
+        colors_hint: Two or more hex codes, separated by commas; otherwise the color above is used.
+        add_photos_first: Add photos to show the text on them as the buyer types.
       create:
         notice: "%{title} was added."
       update:

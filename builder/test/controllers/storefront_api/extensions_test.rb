@@ -34,6 +34,25 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
     assert_equal 2, api(:get, storefront_api_cart_path(token))["cart"]["items"].size
   end
 
+  test "a personalized line comes with the buyer's text as it shows on its photo" do
+    photo = ActsAsTenant.with_tenant(shops(:cats)) do
+      tee = products(:tee)
+      tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")
+      tee.update!(buyer_inputs: [ { "label" => "Name", "preview" => { "x" => 0.3, "y" => 0.6, "w" => 0.4, "h" => 0.1, "font" => "Lora",
+        "fonts" => [ "Lora", "Montserrat" ], "color" => "#ffffff", "colors" => "#ffffff, #f2c45a" } } ])
+      tee.images.attachments.sole
+    end
+
+    preview = api(:get, storefront_api_product_path("cat-mom-tee"))["product"]["buyer_inputs"].sole["preview"]
+    assert_equal [ [ "Lora", "Montserrat" ], [ "#ffffff", "#f2c45a" ] ], preview.values_at("fonts", "colors")
+
+    token = api(:post, storefront_api_carts_path)["cart"]["token"]
+    line = api(:post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { name: "Ada", name_font: "Montserrat", name_color: "#000000" } })["cart"]["items"].sole
+    assert_equal [ "Name", "Name font" ], line["properties"].pluck("label")
+    assert_equal [ { "x" => 0.3, "y" => 0.6, "w" => 0.4, "h" => 0.1, "align" => "center", "uppercase" => false, "text" => "Ada", "font" => "Montserrat", "color" => "#ffffff" } ], line["preview"]
+    assert_equal photo.id, line.dig("product", "image", "id")
+  end
+
   test "pages, menus and a form message" do
     ActsAsTenant.with_tenant(shops(:cats)) do
       Page.create!(title: "Questions", body: "We print tees.", faqs: [ { "question" => "How long?", "answer" => "A week." } ], published: true)

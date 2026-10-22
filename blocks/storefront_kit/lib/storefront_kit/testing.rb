@@ -231,7 +231,21 @@ module StorefrontKit
           labels = product["buyer_inputs"].to_a.to_h { |input| [ input["key"], input["label"] ] }
           { "id" => line["id"], "quantity" => line["quantity"], "line_total_cents" => variant["price_cents"] * line["quantity"],
             "product" => { "slug" => product["slug"], "title" => product["title"], "image" => image }, "variant" => variant,
-            "properties" => (line["properties"].map { |key, value| { "key" => key, "label" => labels[key] || key, "value" => value } } if line["properties"].any?) }.compact
+            "properties" => (line["properties"].map { |key, value| { "key" => key, "label" => labels[key] || key, "value" => value } } if line["properties"].any?),
+            "preview" => preview_layers(product, line["properties"], image).presence }.compact
+        end
+
+        # The buyer's text on the line's photo, as the Platform places it (BuyerInputs.layers).
+        def preview_layers(product, properties, image)
+          properties = properties.to_h.stringify_keys
+          product["buyer_inputs"].to_a.filter_map do |input|
+            preview, text = input["preview"], properties[input["key"]]
+            next unless preview && text.present? && image && (preview["images"].to_a.empty? || preview["images"].include?(image["id"]))
+
+            picked = ->(kind, all) { properties["#{input["key"]}_#{kind}"].then { |value| value if all.to_a.include?(value) } }
+            preview.slice("x", "y", "w", "h", "align", "uppercase").merge("text" => text,
+              "font" => picked.("font", preview["fonts"]) || preview["font"], "color" => picked.("color", preview["colors"]) || preview["color"])
+          end
         end
 
         def checkout_json(data, fields)

@@ -138,15 +138,7 @@
       <p class="text-sm text-muted"><%= t(".buyer_inputs_hint") %></p>
       <% blanks = [ 2, BuyerInputs::MAX_FIELDS - product.buyer_inputs.size ].min.clamp(0, 2) %>
       <% (product.buyer_inputs + Array.new(blanks) { {} }).each do |row| %>
-        <div class="grid gap-3 sm:grid-cols-[1fr_8rem_6rem_auto] sm:items-center">
-          <%= text_field_tag "product[buyer_inputs][][label]", row["label"], placeholder: t(".buyer_label"), aria: { label: t(".buyer_label") }, class: field_classes %>
-          <%= text_field_tag "product[buyer_inputs][][key]", row["key"], placeholder: t(".buyer_key"), aria: { label: t(".buyer_key") }, class: field_classes %>
-          <%= number_field_tag "product[buyer_inputs][][max_length]", row["max_length"], min: 1, max: BuyerInputs::MAX_LENGTH, placeholder: "40", aria: { label: t(".buyer_max") }, class: field_classes %>
-          <label class="flex items-center gap-2 text-sm">
-            <%= check_box_tag "product[buyer_inputs][][required]", "1", row["required"] == true, class: "size-4 rounded border-line accent-brand-600" %>
-            <%= t(".buyer_required") %>
-          </label>
-        </div>
+        <%= render "buyer_input", product:, row: %>
       <% end %>
     <% end %>
   </div>
