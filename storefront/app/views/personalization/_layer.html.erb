@@ -1,10 +1,16 @@
 <%# What the buyer adds, over a product photo where the shop placed it (personalize controller): a
-    line of text, or their photo filling the box as they framed it. On the product page it follows
-    the field named by key (a sample until they add something); on a cart or order line it carries
-    its text, font and color, or its photo and framing. Keep it inside the photo's frame, after the photo. %>
-<% photo = layer["kind"] == "photo" %>
-<% data = { personalize_target: "layer", box: layer.slice("x", "y", "w", "h").to_json, kind: (photo ? "photo" : "text") } %>
-<% data.merge!(font: layer["font"], color: layer["color"]) unless photo %>
+    line of text, their photo filling the box as they framed it, the picture they picked fitting
+    it, or the color they picked filling it. On the product page it follows the field named by key
+    (a sample until they add something); on a cart or order line it carries what they added. Keep it
+    inside the photo's frame, after the photo, in the fields' order (a background first). %>
+<% kind = layer["kind"].presence_in(%w[ photo choice color ]) || "text" %>
+<% photo = kind == "photo" %>
+<% data = { personalize_target: "layer", box: layer.slice("x", "y", "w", "h").to_json, kind: } %>
+<% data.merge!(font: layer["font"], color: layer["color"]) if kind == "text" %>
+<% data[:color] = layer["color"] if kind == "color" && layer["color"] %>
+<% data[:picture] = layer["picture"] if layer["picture"] %>
+<% data[:options] = layer["options"].to_h { |option| [ option["id"].to_s, option["large"] ] }.to_json if layer["options"] %>
+<% data[:colors] = layer["colors"].to_json if kind == "color" && layer["colors"] %>
 <% data.merge!(key: layer["key"], sample: sample, photos: photos.to_json) if local_assigns[:sample] %>
 <% data[:text] = layer["text"] if layer["text"] %>
 <% data.merge!(photo: layer["photo"], crop: layer["crop"].to_a.join(",")) if layer["photo"] %>
@@ -15,6 +21,12 @@
       <%= icon "image-plus", size: 20 %>
     </span>
   </div>
+<% elsif kind == "choice" %>
+  <div class="pointer-events-none absolute" hidden <%= tag.attributes(data: data) %>>
+    <img alt="" class="size-full object-contain">
+  </div>
+<% elsif kind == "color" %>
+  <div class="pointer-events-none absolute" hidden <%= tag.attributes(data: data) %>></div>
 <% else %>
   <div class="pointer-events-none absolute flex overflow-hidden" hidden <%= tag.attributes(data: data) %>>
     <span class="w-full self-center leading-none whitespace-nowrap <%= "uppercase" if layer["uppercase"] %>" style="text-align: <%= layer["align"] %>"></span>

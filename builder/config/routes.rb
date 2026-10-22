@@ -42,6 +42,7 @@ Rails.application.routes.draw do
 
     resources :products do
       resources :images, only: :destroy, module: :products
+      resources :artwork, only: :destroy, module: :products
     end
     resource :demo_products, only: %i[ create destroy ]
     resources :collections

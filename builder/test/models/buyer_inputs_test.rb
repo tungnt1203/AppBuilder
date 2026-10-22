@@ -55,4 +55,29 @@ class BuyerInputsTest < ActiveSupport::TestCase
     assert_equal [ "Your photo: Photo added" ], item.property_lines
     assert_equal [ [ "Your photo", upload, [ 2.0, 0.3, 0.6 ] ] ], item.buyer_photos.map { |photo| photo.values_at(:label, :upload, :crop) }
   end
+
+  test "a photo box drawn with a layout becomes a photo field per cell, with gaps between them" do
+    fields = BuyerInputs.definitions([ { "label" => "Photo", "kind" => "photo", "layout" => "2x1", "preview" => { "x" => "0.1", "y" => "0.2", "w" => "0.6", "h" => "0.3", "images" => [ "5" ] } } ])
+    assert_equal [ "photo_1", "photo_2" ], fields.pluck("key")
+    assert_equal [ "Photo 1", "Photo 2" ], fields.pluck("label")
+    first, second = fields.pluck("preview")
+    assert_equal [ 0.1, 0.2, 0.291, 0.3, [ 5 ] ], first.values_at("x", "y", "w", "h", "images")
+    assert_in_delta 0.409, second["x"], 0.001
+    assert_nil fields.first["layout"]
+  end
+
+  test "a picture and a color are picked from what the shop offers, and show on the line's photo" do
+    fields = BuyerInputs.definitions([
+      { "label" => "Background", "kind" => "color", "preview" => { "x" => "0", "y" => "0", "w" => "1", "h" => "1", "colors" => "#FFEEDD, #112233" } },
+      { "label" => "Breed", "kind" => "choice", "options" => [ "7", "9" ], "preview" => { "x" => "0.3", "y" => "0.3", "w" => "0.4", "h" => "0.4" } }
+    ])
+    assert_equal [ "#ffeedd", "#112233" ], fields.first.dig("preview", "colors")
+    assert_equal [ 7, 9 ], fields.second["options"]
+
+    _, errors = BuyerInputs.accept(fields, "background" => "#000000", "breed" => "8")
+    assert_equal({ "background" => "isn't one of the colors", "breed" => "isn't one of the choices" }, errors)
+
+    properties, = BuyerInputs.accept(fields, "background" => "#112233", "breed" => "9")
+    assert_equal [ [ "color", "#112233" ], [ "choice", 9 ] ], BuyerInputs.layers(fields, properties).map { |layer| layer.values_at("kind", "color").compact + layer.values_at("artwork").compact }
+  end
 end

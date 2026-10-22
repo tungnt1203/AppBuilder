@@ -53,7 +53,7 @@ class StorefrontApi::Json
       images: product.images.select(&:representable?).map { |photo| image(photo, alt: product.title).merge(option_value: product.photo_option(photo)) },
       collections: product.collections.map { |collection| { slug: collection.slug, title: collection.title } },
       custom_fields: product.custom_field_entries,
-      buyer_inputs: product.buyer_inputs
+      buyer_inputs: buyer_inputs(product)
     )
   end
 
@@ -159,33 +159,57 @@ class StorefrontApi::Json
       setting.resolved(image_url: ->(attachment) { url_helpers.rails_blob_url(attachment, **@url_options) })
     end
 
-    # What the buyer added (text with the font and color they picked, a photo) as labelled entries,
-    # and how it shows on the line's photo (preview), for a cart or order line.
+    # A product's fields, with a choice field's pictures as { id, label, thumb, large }.
+    def buyer_inputs(product)
+      artwork = product.artwork.attachments.index_by(&:id)
+      product.buyer_inputs.map do |field|
+        next field unless field["kind"] == "choice"
+
+        field.merge("options" => field["options"].to_a.filter_map { |id| artwork[id] }.map { |art| { id: art.id, label: artwork_label(art) }.merge(artwork_urls(art)) })
+      end
+    end
+
+    # What the buyer added (text with the font and color they picked, a photo, a picture, a color)
+    # as labelled entries, and how it shows on the line's photo (preview), for a cart or order line.
     def add_properties(line, record, photo)
       return if record.properties.blank?
 
-      fields = record.product&.buyer_inputs.to_a
-      photos = fields.select { |field| field["kind"] == "photo" }.map { |field| field["key"] }
-      uploads = BuyerUpload.where(token: record.properties.values_at(*photos).compact).index_by(&:token)
+      product = record.product
+      fields = product&.buyer_inputs.to_a
+      kinds = fields.to_h { |field| [ field["key"], field["kind"] ] }
+      uploads = BuyerUpload.where(token: record.properties.select { |key, _| kinds[key] == "photo" }.values).index_by(&:token)
+      artwork = product ? product.artwork.attachments.index_by(&:id) : {}
       labels = fields.each_with_object({}) do |field, all|
         all[field["key"]] = field["label"]
         all["#{field["key"]}_font"] = "#{field["label"]} font"
         all["#{field["key"]}_color"] = "#{field["label"]} color"
       end
       line[:properties] = record.properties.filter_map do |key, value|
-        next if photos.any? { |field| key == "#{field}_crop" }
+        next if key.end_with?("_crop") && kinds[key.delete_suffix("_crop")] == "photo"
 
-        upload = uploads[value] if photos.include?(key)
-        { key:, label: labels[key] || key, value: (upload ? "Added" : value) }.merge(upload ? upload_urls(upload) : {})
+        entry = { key:, label: labels[key] || key, value: }
+        case kinds[key]
+        when "photo" then (upload = uploads[value]) ? entry.merge(value: "Added").merge(upload_urls(upload)) : entry
+        when "choice" then (art = artwork[value.to_i]) ? entry.merge(value: artwork_label(art)).merge(artwork_urls(art)) : entry
+        else entry
+        end
       end
       layers = BuyerInputs.layers(fields, record.properties).select { |layer| layer["images"].empty? || layer["images"].include?(photo&.id) }
       layers = layers.filter_map do |layer|
-        next layer.except("images") unless layer["kind"] == "photo"
-
-        upload = uploads[layer["upload"]] or next
-        layer.except("images", "upload").merge("photo" => upload_urls(upload)[:large])
+        layer = layer.except("images")
+        case layer["kind"]
+        when "photo" then (upload = uploads[layer["upload"]]) && layer.except("upload").merge("photo" => upload_urls(upload)[:large])
+        when "choice" then (art = artwork[layer["artwork"]]) && layer.except("artwork").merge("picture" => artwork_urls(art)[:large])
+        else layer
+        end
       end
       line[:preview] = layers if layers.any? && photo
+    end
+
+    def artwork_label(art) = art.filename.base.humanize
+
+    def artwork_urls(art)
+      %i[ thumb large ].index_with { |size| url_helpers.rails_representation_url(art.variant(size), **@url_options) }
     end
 
     def upload_urls(upload)

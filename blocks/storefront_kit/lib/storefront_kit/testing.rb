@@ -245,7 +245,8 @@ module StorefrontKit
               next if key.end_with?("_crop")
 
               upload = @uploads[value]
-              { "key" => key, "label" => labels[key] || key, "value" => (upload ? "Added" : value) }.merge(upload ? upload.slice("thumb", "large") : {})
+              option = product["buyer_inputs"].to_a.find { |input| input["key"] == key }.to_h["options"].to_a.find { |candidate| candidate["id"].to_s == value.to_s }
+              { "key" => key, "label" => labels[key] || key, "value" => (upload ? "Added" : option ? option["label"] : value) }.merge((upload || option || {}).slice("thumb", "large"))
             } if line["properties"].any?),
             "preview" => preview_layers(product, line["properties"], image).presence }.compact
         end
@@ -258,10 +259,16 @@ module StorefrontKit
             next unless preview && value.present? && image && (preview["images"].to_a.empty? || preview["images"].include?(image["id"]))
 
             box = preview.slice("x", "y", "w", "h")
-            if input["kind"] == "photo"
+            case input["kind"]
+            when "photo"
               upload = @uploads[value] or next
               zoom, x, y = properties["#{input["key"]}_crop"].to_s.split(",").map(&:to_f)
               box.merge("kind" => "photo", "crop" => [ zoom || 1.0, x || 0.5, y || 0.5 ], "photo" => upload["large"])
+            when "choice"
+              option = input["options"].to_a.find { |candidate| candidate["id"].to_s == value.to_s } or next
+              box.merge("kind" => "choice", "picture" => option["large"])
+            when "color"
+              box.merge("kind" => "color", "color" => value)
             else
               picked = ->(kind, all) { properties["#{input["key"]}_#{kind}"].then { |pick| pick if all.to_a.include?(pick) } }
               box.merge(preview.slice("align", "uppercase")).merge("kind" => "text", "text" => value,

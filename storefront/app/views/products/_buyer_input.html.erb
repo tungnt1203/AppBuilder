@@ -21,6 +21,33 @@
     <p class="text-xs text-muted" data-personalize-framing="<%= input["key"] %>" hidden><%= t(".drag_hint") %></p>
   <% end %>
 </div>
+<% elsif input["kind"] == "choice" %>
+<fieldset class="space-y-2">
+  <legend class="font-medium"><%= input["label"] %></legend>
+  <div class="grid grid-cols-4 gap-2 sm:grid-cols-5">
+    <% input["options"].to_a.each_with_index do |option, index| %>
+      <label class="cursor-pointer text-center" title="<%= option["label"] %>">
+        <%= radio_button_tag "properties[#{input["key"]}]", option["id"], false, required: input["required"] && index.zero?, class: "peer sr-only", data: { action: "personalize#update" } %>
+        <span class="block aspect-square rounded-lg border border-line bg-surface p-1.5 peer-checked:border-ink peer-checked:ring-1 peer-checked:ring-ink peer-focus-visible:ring-2">
+          <%= image_tag option["thumb"], alt: "", class: "size-full object-contain", loading: "lazy" %>
+        </span>
+        <span class="mt-1 block truncate text-xs text-muted peer-checked:text-ink"><%= option["label"] %></span>
+      </label>
+    <% end %>
+  </div>
+</fieldset>
+<% elsif input["kind"] == "color" %>
+<fieldset class="space-y-2">
+  <legend class="font-medium"><%= input["label"] %></legend>
+  <div class="flex flex-wrap gap-2">
+    <% preview.to_h["colors"].to_a.each_with_index do |color, index| %>
+      <label class="cursor-pointer" title="<%= color %>">
+        <%= radio_button_tag "properties[#{input["key"]}]", color, index.zero?, class: "peer sr-only", data: { action: "personalize#update" }, aria: { label: color } %>
+        <span class="block size-9 rounded-full border border-line ring-offset-2 peer-checked:ring-2 peer-checked:ring-ink peer-focus-visible:ring-2" style="background: <%= color %>"></span>
+      </label>
+    <% end %>
+  </div>
+</fieldset>
 <% else %>
 <div class="space-y-2">
   <%= label_tag "properties_#{input["key"]}", input["label"] %>

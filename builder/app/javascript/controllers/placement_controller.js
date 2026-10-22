@@ -68,10 +68,11 @@ export default class extends Controller {
   }
 
   render() {
-    const photo = this.hasKindTarget && this.kindTarget.value === "photo"
-    this.element.querySelectorAll("[data-text-only]").forEach((element) => { element.hidden = photo })
-    this.element.querySelectorAll("[data-photo-only]").forEach((element) => { element.hidden = !photo })
+    const kind = this.hasKindTarget ? this.kindTarget.value : "text"
+    this.element.querySelectorAll("[data-for-kinds]").forEach((element) => { element.hidden = !element.dataset.forKinds.split(" ").includes(kind) })
     if (!this.hasBoxTarget) return
+
+    const photo = kind !== "text"
 
     const box = this.current()
     this.boxTarget.hidden = !box
@@ -79,7 +80,7 @@ export default class extends Controller {
 
     Object.assign(this.boxTarget.style, { left: `${box.x * 100}%`, top: `${box.y * 100}%`, width: `${box.w * 100}%`, height: `${box.h * 100}%` })
     this.boxTarget.classList.toggle("bg-white/60", photo)
-    this.sampleTarget.textContent = photo ? this.sampleTarget.dataset.photo : this.sampleTarget.dataset.text
+    this.sampleTarget.textContent = photo ? this.sampleTarget.dataset[kind] : this.sampleTarget.dataset.text
     Object.assign(this.sampleTarget.style, {
       fontFamily: photo ? "" : `"${this.fontTarget.value}"`, color: photo ? "" : this.colorTarget.value, textAlign: photo ? "center" : this.alignTarget.value,
       textTransform: !photo && this.uppercaseTarget.checked ? "uppercase" : "none"

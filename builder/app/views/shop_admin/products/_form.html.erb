@@ -136,6 +136,25 @@
     <%= card class: "space-y-4" do %>
       <h2 class="text-sm font-semibold text-ink"><%= t(".buyer_inputs") %></h2>
       <p class="text-sm text-muted"><%= t(".buyer_inputs_hint") %></p>
+      <%# The pictures buyers pick from (a "Choice" field below: a dog breed, a zodiac sign). %>
+      <div class="space-y-2 rounded-lg bg-surface-muted p-4">
+        <p class="text-sm font-medium text-ink"><%= t(".artwork") %></p>
+        <% if product.persisted? && product.artwork.attached? %>
+          <ul class="flex flex-wrap gap-3">
+            <% product.artwork.each do |art| %>
+              <li class="relative w-20 text-center">
+                <%= image_tag art.variant(:thumb), alt: "", class: "size-20 rounded-lg bg-surface object-contain p-1" %>
+                <span class="mt-1 block truncate text-xs text-muted"><%= art.filename.base.humanize %></span>
+                <button type="submit" form="<%= dom_id(art, :remove_art) %>" class="absolute -top-2 -right-2 grid size-6 place-items-center rounded-full bg-surface text-muted shadow ring-1 ring-line hover:text-red-600" aria-label="<%= t(".remove_artwork") %>">
+                  <%= icon "x", size: 14 %>
+                </button>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+        <%= form.file_field :artwork, multiple: true, accept: "image/png,image/webp,image/jpeg", aria: { label: t(".add_artwork") } %>
+        <p class="text-xs text-muted"><%= t(".artwork_hint") %></p>
+      </div>
       <% blanks = [ 2, BuyerInputs::MAX_FIELDS - product.buyer_inputs.size ].min.clamp(0, 2) %>
       <% (product.buyer_inputs + Array.new(blanks) { {} }).each do |row| %>
         <%= render "buyer_input", product:, row: %>
@@ -183,5 +202,8 @@
 <% if product.persisted? %>
   <% product.images.each do |image| %>
     <%= form_with url: shop_admin_product_image_path(product, image), method: :delete, id: dom_id(image, :remove), class: "hidden" do %><% end %>
+  <% end %>
+  <% product.artwork.each do |art| %>
+    <%= form_with url: shop_admin_product_artwork_path(product, art), method: :delete, id: dom_id(art, :remove_art), class: "hidden" do %><% end %>
   <% end %>
 <% end %>

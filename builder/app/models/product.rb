@@ -18,6 +18,12 @@ class Product < ApplicationRecord
     image.variant :card, resize_to_fill: [ 640, 800 ], format: :webp
     image.variant :large, resize_to_limit: [ 1400, 1400 ], format: :webp
   end
+  # Pictures the buyer picks from to have printed (a "choice" field of buyer_inputs: their dog's
+  # breed), kept apart from the product's photos. A picture's name is its file's ("Golden retriever.png").
+  has_many_attached :artwork do |art|
+    art.variant :thumb, resize_to_limit: [ 160, 160 ], format: :webp
+    art.variant :large, resize_to_limit: [ 1000, 1000 ], format: :webp
+  end
 
   accepts_nested_attributes_for :variants
 
@@ -169,8 +175,12 @@ class Product < ApplicationRecord
       self.published_at ||= Time.current if active?
     end
 
+    # A choice field keeps only the product's own artwork.
     def clean_buyer_inputs
-      self.buyer_inputs = BuyerInputs.definitions(buyer_inputs)
+      artwork_ids = artwork.attachments.map(&:id)
+      self.buyer_inputs = BuyerInputs.definitions(buyer_inputs).map do |field|
+        field["options"] ? field.merge("options" => field["options"] & artwork_ids) : field
+      end
     end
 
     def coerce_custom_fields
@@ -200,7 +210,7 @@ class Product < ApplicationRecord
     end
 
     def images_are_images
-      images.each do |image|
+      (images.to_a + artwork.to_a).each do |image|
         next if image.blob.content_type.to_s.start_with?("image/")
         errors.add(:images, :not_an_image, name: image.blob.filename.to_s)
       end

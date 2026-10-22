@@ -82,6 +82,26 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
     assert_equal [ { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4, "kind" => "photo", "crop" => [ 1.5, 0.4, 1.0 ], "photo" => upload["large"] } ], line["preview"]
   end
 
+  test "a choice field lists its pictures, and its line names and shows the one picked" do
+    art = ActsAsTenant.with_tenant(shops(:cats)) do
+      tee = products(:tee)
+      tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")
+      tee.artwork.attach(io: file_fixture("product.png").open, filename: "golden_retriever.png", content_type: "image/png")
+      art = tee.artwork.attachments.sole
+      tee.update!(buyer_inputs: [ { "label" => "Breed", "kind" => "choice", "options" => [ art.id, 999 ], "preview" => { "x" => 0.3, "y" => 0.3, "w" => 0.4, "h" => 0.4 } } ])
+      art
+    end
+
+    options = api(:get, storefront_api_product_path("cat-mom-tee"))["product"]["buyer_inputs"].sole["options"]
+    assert_equal [ [ art.id, "Golden retriever" ] ], options.map { |option| option.values_at("id", "label") }
+    assert options.sole["large"].present?
+
+    token = api(:post, storefront_api_carts_path)["cart"]["token"]
+    line = api(:post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { breed: art.id.to_s } })["cart"]["items"].sole
+    assert_equal [ "Breed", "Golden retriever" ], line["properties"].sole.values_at("label", "value")
+    assert_equal [ "choice", options.sole["large"] ], line["preview"].sole.values_at("kind", "picture")
+  end
+
   test "pages, menus and a form message" do
     ActsAsTenant.with_tenant(shops(:cats)) do
       Page.create!(title: "Questions", body: "We print tees.", faqs: [ { "question" => "How long?", "answer" => "A week." } ], published: true)

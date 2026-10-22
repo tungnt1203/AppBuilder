@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // What the buyer adds to a product, on its photo where the shop placed it. Each layer is a box in
 // fractions of the photo (data-box), laid over the photo as it shows (cropped to fill its frame).
 // Text is shrunk to fit its box; a photo fills it, framed by a zoom and the point kept in view
-// ("zoom,x,y", as the print will be).
+// ("zoom,x,y", as the print will be); a picture the buyer picks fits it; a color fills it.
 //
 // On the product page a layer follows its field (data-key): the text the buyer types and the font
 // and color they pick, or the photo they choose, shown at once and sent to the Platform meanwhile
@@ -136,8 +136,8 @@ export default class extends Controller {
 
     this.layerTargets.filter((layer) => holder.contains(layer)).forEach((layer) => {
       const photos = JSON.parse(layer.dataset.photos || "[]")
-      const content = layer.dataset.kind === "photo" ? this.picture(layer) : this.words(layer)
-      layer.hidden = !content || !(content.text || content.url || content.empty) || (photos.length > 0 && !photos.includes(source))
+      const content = { photo: this.picture, choice: this.chosen, color: this.fill }[layer.dataset.kind]?.call(this, layer) || this.words(layer)
+      layer.hidden = !(content.text || content.url || content.empty || content.color) || (photos.length > 0 && !photos.includes(source))
       if (layer.hidden) return
 
       const box = JSON.parse(layer.dataset.box)
@@ -145,7 +145,12 @@ export default class extends Controller {
         left: `${offset.left + box.x * shown.width}px`, top: `${offset.top + box.y * shown.height}px`,
         width: `${box.w * shown.width}px`, height: `${box.h * shown.height}px`
       })
-      layer.dataset.kind === "photo" ? this.showPicture(layer, content) : this.showWords(layer, content)
+      switch (layer.dataset.kind) {
+        case "photo": this.showPicture(layer, content); break
+        case "choice": this.showChosen(layer, content); break
+        case "color": layer.style.background = content.color; break
+        default: this.showWords(layer, content)
+      }
     })
   }
 
@@ -173,9 +178,31 @@ export default class extends Controller {
     const key = layer.dataset.key
     if (!key) {
       const [ zoom, x, y ] = (layer.dataset.crop || "1,0.5,0.5").split(",").map(Number)
-      return layer.dataset.photo ? { url: layer.dataset.photo, zoom, x, y } : null
+      return layer.dataset.photo ? { url: layer.dataset.photo, zoom, x, y } : {}
     }
     return this.photos[key] || { empty: true }
+  }
+
+  // A choice layer's picture: the one the buyer picked (nothing before they pick), or a line's.
+  chosen(layer) {
+    const key = layer.dataset.key
+    if (!key) return { url: layer.dataset.picture }
+
+    const picked = this.element.querySelector(`input[name="properties[${key}]"]:checked`)?.value
+    return { url: picked && JSON.parse(layer.dataset.options || "{}")[picked] }
+  }
+
+  showChosen(layer, { url }) {
+    const image = layer.firstElementChild
+    if (image.getAttribute("src") !== url) image.src = url
+  }
+
+  // A color layer's color: the one the buyer picked, or a line's.
+  fill(layer) {
+    const key = layer.dataset.key
+    if (!key) return { color: layer.dataset.color }
+
+    return { color: this.element.querySelector(`input[name="properties[${key}]"]:checked`)?.value }
   }
 
   showPicture(layer, { url, zoom, x, y, empty }) {

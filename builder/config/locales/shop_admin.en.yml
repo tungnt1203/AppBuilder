@@ -317,6 +317,11 @@ en:
         buyer_inputs_hint: A line of text on the product, such as a name to print.
           It is saved on the order and sent to Printify. Leave a row blank to skip it.
           Show it on the photos, and buyers see their text on the product as they type.
+        artwork: Pictures buyers pick from
+        artwork_hint: For a Choice field (a dog breed, a zodiac sign). Name each file as buyers
+          should see it ("Golden retriever.png"); a transparent PNG sits best on the product.
+        add_artwork: Add pictures
+        remove_artwork: Remove this picture
         status_hint: Only active products are on the site.
         base_price_hint: Every variant starts at this price; change them one by one
           after saving.
@@ -330,6 +335,24 @@ en:
         kinds:
           text: Text
           photo: Photo
+          choice: Choice
+          color: Background color
+        options: Pictures the buyer picks from
+        options_empty: Add pictures under "Pictures buyers pick from" above, then save.
+        layout: Photos in the box
+        layout_hint: Split the box into several photos (a collage); each becomes its own photo field.
+        layouts:
+          1x1: One photo
+          2x1: Two side by side
+          1x2: Two stacked
+          3x1: Three side by side
+          2x2: Four in a grid
+          3x2: Six in a grid
+        choice_hint: The picture the buyer picks fits the box.
+        background_hint: The colors the buyer picks from, as hex codes separated by commas; the color
+          fills the box. Put this field first so text and photos sit on it.
+        sample_choice: Picture
+        sample_color: Background
         photo_hint: The buyer's photo fills the box; they move and zoom it to frame it. Draw the
           box the shape of the print area (a circle on a mug shows as its square).
         sample_photo: Photo
@@ -365,6 +388,9 @@ en:
       images:
         destroy:
           notice: The photo was removed.
+      artwork:
+        destroy:
+          notice: The picture was removed.
     collections:
       index:
         title: Collections

@@ -19,6 +19,7 @@ class ShopAdmin::ProductsController < ShopAdmin::BaseController
   def create
     @product = Product.new(product_params)
     @product.images.attach(uploaded_images)
+    @product.artwork.attach(uploaded_images(:artwork))
 
     if @product.save
       redirect_to edit_shop_admin_product_path(@product), notice: t(".notice", title: @product.title)
@@ -34,6 +35,7 @@ class ShopAdmin::ProductsController < ShopAdmin::BaseController
   def update
     if @product.update(product_params)
       @product.images.attach(uploaded_images) if uploaded_images.any?
+      @product.artwork.attach(uploaded_images(:artwork)) if uploaded_images(:artwork).any?
       redirect_to edit_shop_admin_product_path(@product), notice: t(".notice", title: @product.title)
     else
       render :edit, status: :unprocessable_entity
@@ -56,16 +58,16 @@ class ShopAdmin::ProductsController < ShopAdmin::BaseController
         :title, :slug, :description, :size_guide, :status, :base_price,
         :option1_name, :option1_values_text, :option2_name, :option2_values_text, :option3_name, :option3_values_text,
         collection_ids: [], photo_options: {}, custom_fields: {},
-        buyer_inputs: [ [ :key, :label, :kind, :max_length, :required, preview: [ :x, :y, :w, :h, :font, :color, :colors, :align, :uppercase, fonts: [], images: [] ] ] ],
+        buyer_inputs: [ [ :key, :label, :kind, :max_length, :required, :layout, options: [], preview: [ :x, :y, :w, :h, :font, :color, :colors, :align, :uppercase, fonts: [], images: [] ] ] ],
         variants_attributes: [ [ :id, :price, :compare_at_price, :sku, :available, :cost, :track_inventory, :inventory_quantity ] ]
       ])
     end
 
     MAX_IMAGE_SIZE = 20.megabytes
 
-    # Photos from the form: images only, up to 20 MB each.
-    def uploaded_images
-      @uploaded_images ||= Array(params.dig(:product, :images)).select do |file|
+    # Photos (or artwork) from the form: images only, up to 20 MB each.
+    def uploaded_images(field = :images)
+      (@uploaded_images ||= {})[field] ||= Array(params.dig(:product, field)).select do |file|
         file.respond_to?(:content_type) && file.content_type.to_s.start_with?("image/") && file.size <= MAX_IMAGE_SIZE
       end
     end

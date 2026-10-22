@@ -19,7 +19,7 @@ class LineItem < ApplicationRecord
 
   # "Name on the shirt: Ada", using the product's labels while it still has them.
   # What the buyer added, as "Label: value" lines (emails, the admin): a photo as "Photo added",
-  # without its framing.
+  # without its framing; a picture by its name.
   def property_lines
     return [] if properties.blank?
 
@@ -30,10 +30,14 @@ class LineItem < ApplicationRecord
       all["#{field["key"]}_font"] = "#{field["label"]} font"
       all["#{field["key"]}_color"] = "#{field["label"]} color"
     end
+    choices = fields.select { |field| field["kind"] == "choice" }.map { |field| field["key"] }
+    artwork = choices.any? ? product.artwork.attachments.index_by(&:id) : {}
     properties.filter_map do |key, value|
       next if photos.any? { |photo| key == "#{photo}_crop" }
 
-      "#{labels[key] || key}: #{photos.include?(key) ? "Photo added" : value}"
+      value = "Photo added" if photos.include?(key)
+      value = artwork[value.to_i]&.filename&.base&.humanize || value if choices.include?(key)
+      "#{labels[key] || key}: #{value}"
     end
   end
 

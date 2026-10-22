@@ -136,6 +136,25 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_select "[data-personalize-target=layer][data-kind=photo][data-crop='1.8,0.4,0.6'][data-photo$='upl_test1/large.webp']"
   end
 
+  test "a picture and a background the buyer picks show on the product, and on their line" do
+    moon = { "id" => 7, "label" => "Moon", "thumb" => "https://cdn.example/moon-thumb.webp", "large" => "https://cdn.example/moon.webp" }
+    @platform.products_data.first["buyer_inputs"] = [
+      { "key" => "background", "label" => "Background", "kind" => "color", "required" => false, "preview" => { "x" => 0, "y" => 0, "w" => 1, "h" => 1, "images" => [], "colors" => [ "#f4efe6", "#2d3a3a" ] } },
+      { "key" => "sign", "label" => "Sign", "kind" => "choice", "required" => true, "options" => [ moon ], "preview" => { "x" => 0.4, "y" => 0.4, "w" => 0.2, "h" => 0.2, "images" => [] } }
+    ]
+    get product_path("cat-tee")
+    assert_select "input[type=radio][name='properties[background]'][value='#f4efe6'][checked]"
+    assert_select "input[type=radio][name='properties[sign]'][value='7'][required]"
+    assert_select "img[src='https://cdn.example/moon-thumb.webp']"
+    assert_select "[data-personalize-target=layer][data-kind=color][data-key=background]"
+    assert_select "[data-personalize-target=layer][data-kind=choice][data-key=sign][data-options=?]", { "7" => moon["large"] }.to_json
+
+    post cart_items_path, params: { variant_id: 101, properties: { background: "#2d3a3a", sign: "7" } }
+    get cart_path
+    assert_select "p", /Sign: Moon/
+    assert_select "[data-personalize-target=layer][data-kind=color][data-color='#2d3a3a'] + [data-personalize-target=layer][data-kind=choice][data-picture='https://cdn.example/moon.webp']"
+  end
+
   test "something that can't be bought isn't added" do
     post cart_items_path, params: { variant_id: 104 }
     follow_redirect!
