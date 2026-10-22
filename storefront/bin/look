@@ -42,8 +42,11 @@ end
 require "ferrum"
 require "openssl"
 
-browser = Ferrum::Browser.new(window_size: [ 1280, 800 ], timeout: 20, process_timeout: 30,
-  browser_options: { "no-sandbox" => nil })
+browser_options = { "no-sandbox" => nil }
+# In the builder's container, localhost is the container, but the shop's photos are at the
+# Platform's address for buyers' browsers (localhost:3000), on the host. The preview is at 127.0.0.1.
+browser_options["host-resolver-rules"] = "MAP localhost host.docker.internal" if File.exist?("/.dockerenv")
+browser = Ferrum::Browser.new(window_size: [ 1280, 800 ], timeout: 20, process_timeout: 30, browser_options:)
 host = URI(base).host
 # The builder keeps its preview private (config/initializers/preview_gate.rb); bin/look has the pass.
 secret_path = File.join(root, "tmp/preview_secret")
