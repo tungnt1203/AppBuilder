@@ -17,6 +17,15 @@ class BuyerUpload < ApplicationRecord
 
   before_create { self.token = "upl_#{SecureRandom.base58(24)}" }
 
+  # Photos added over 30 days ago that no cart line or order line has (the buyer didn't buy, and the
+  # cart was cleared): Cart::CleanupJob removes them.
+  scope :unused, -> { where(created_at: ...30.days.ago).where.not(token: tokens_in_use) }
+
+  def self.tokens_in_use
+    [ CartItem, LineItem ].flat_map { |lines| lines.where("properties::text LIKE '%upl\\_%'").pluck(:properties) }
+      .flat_map { |properties| properties.to_h.values }.grep(/\Aupl_/).uniq
+  end
+
   # Takes an uploaded file: keeps it and its size, or returns the upload with its errors.
   def self.take(file)
     upload = new
