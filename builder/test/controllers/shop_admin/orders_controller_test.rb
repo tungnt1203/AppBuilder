@@ -47,6 +47,22 @@ class ShopAdmin::OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href*='disposition=attachment']", "Download the photo"
   end
 
+  test "a paid order that hasn't gone to Printify yet can be sent now" do
+    printify = connect_fake_printify
+    variant = Printify::Import.new.call("pf-tee").variant_for(%w[ Black S ])
+    order = Order.create!(email: "robin@example.com", shipping_name: "Robin Buyer", shipping_address1: "5 Elm St", shipping_city: "Austin",
+      shipping_region: "TX", shipping_postal_code: "78701", shipping_country: "US", phone: "5125550100", currency: "USD", payment_method: "manual",
+      status: "paid", paid_at: Time.current, subtotal_cents: 2500, shipping_cents: 0, total_cents: 2500,
+      line_items: [ LineItem.new(variant:, product_title: "Sunset Tee", variant_title: variant.title, unit_price_cents: 2500, quantity: 1) ])
+
+    get shop_admin_order_path(order)
+    assert_select "button", "Send to Printify now"
+
+    post shop_admin_order_fulfillment_path(order)
+    assert_equal 1, printify.orders.size
+    assert order.reload.printify_order_id.present?
+  end
+
   test "a personalized line shows the print file that went to Printify" do
     line_items(:pending_tee).print_file.attach(io: file_fixture("product.png").open, filename: "1001-1-front.png", content_type: "image/png")
 
