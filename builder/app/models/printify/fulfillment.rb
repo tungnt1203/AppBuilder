@@ -23,9 +23,10 @@ class Printify::Fulfillment
     @store.printify_connected? && !@order.test? && printify_items.any?
   end
 
-  # Whether the buyer typed text on a Printify item, which Printify won't get from the shop.
+  # Whether the buyer added something to a Printify item that the shop can't print by itself (its
+  # product has no print area drawn: Personalization::PrintFile), for staff to do in Printify.
   def needs_personalizing?
-    printify_items.any? { |item| item.properties.present? }
+    printify_items.any? { |item| item.properties.present? && !printable?(item) }
   end
 
   # Sends the order to Printify once; a failure is kept on the order (fulfillment_error) for
@@ -49,7 +50,7 @@ class Printify::Fulfillment
     end
   rescue Order::InvalidTransition
     nil
-  rescue PrintifyGateway::Error => error
+  rescue PrintifyGateway::Error, Personalization::PrintFile::Error => error
     @order.update!(fulfillment_error: error.message)
     @order.record "fulfillment_failed", message: error.message
   end
@@ -202,6 +203,11 @@ class Printify::Fulfillment
       @gateway ||= @store.printify
     end
 
+    # A personalized item the shop prints by itself: its print file goes with its line.
+    def printable?(item)
+      item.properties.present? && Personalization::PrintFile.new(item.variant.product, item.properties).printable?
+    end
+
     def printify_items
       @order.line_items.select { |item| item.variant&.printify_variant_id && item.variant.product.printify_product_id }
     end
@@ -212,7 +218,11 @@ class Printify::Fulfillment
         external_id:,
         label: @order.name,
         line_items: printify_items.map { |item|
-          { product_id: item.variant.product.printify_product_id, variant_id: item.variant.printify_variant_id, quantity: item.quantity }
+          if printable?(item)
+            Personalization::PrintifyLine.new(item, gateway:, shop_id: @store.printify_shop_id).to_h
+          else
+            { product_id: item.variant.product.printify_product_id, variant_id: item.variant.printify_variant_id, quantity: item.quantity }
+          end
         },
         shipping_method: @store.printify_shipping_method,
         send_shipping_notification: false, # the shop sends its own shipped email

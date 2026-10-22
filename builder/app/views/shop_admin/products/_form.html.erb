@@ -155,6 +155,9 @@
         <%= form.file_field :artwork, multiple: true, accept: "image/png,image/webp,image/jpeg", aria: { label: t(".add_artwork") } %>
         <p class="text-xs text-muted"><%= t(".artwork_hint") %></p>
       </div>
+      <% if product.persisted? && product.images.attached? %>
+        <%= render "print_area", product: %>
+      <% end %>
       <% blanks = [ 2, BuyerInputs::MAX_FIELDS - product.buyer_inputs.size ].min.clamp(0, 2) %>
       <% (product.buyer_inputs + Array.new(blanks) { {} }).each do |row| %>
         <%= render "buyer_input", product:, row: %>

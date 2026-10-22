@@ -1,3 +1,5 @@
+require "base64"
+
 # Every call to Printify goes through here, with the owner's personal access token
 # (Store#printify). Printify prints and ships the shop's products: the shop imports them from it
 # (Printify::Import), sends it paid orders and asks it for their shipments (Printify::Fulfillment).
@@ -33,7 +35,26 @@ class PrintifyGateway
     get("/shops/#{shop_id}/products/#{product_id}.json")
   end
 
-  # Returns Printify's order id.
+  # Puts an image (its bytes) in the account's media library, for a print file: { "id", "preview_url",
+  # "width", "height", … }.
+  def upload_image(file_name, data)
+    post("/uploads/images.json", { file_name:, contents: Base64.strict_encode64(data) })
+  end
+
+  # An image of the media library (a product design's): { "id", "preview_url", … }.
+  def upload(id)
+    get("/uploads/#{id}.json")
+  end
+
+  # A blank's variants from a print provider, with each print area's size in pixels:
+  # { "variants" => [{ "id", "placeholders" => [{ "position" => "front", "width", "height" }] }] }.
+  def catalog_variants(blueprint_id, print_provider_id)
+    get("/catalog/blueprints/#{blueprint_id}/print_providers/#{print_provider_id}/variants.json")
+  end
+
+  # Returns Printify's order id. A line is a product's variant ({ product_id, variant_id, quantity }),
+  # or a blank's made for this order ({ blueprint_id, print_provider_id, variant_id, quantity,
+  # print_areas: { "front" => [{ src, x, y, scale, angle }] } }: a personalized item's).
   def create_order(shop_id, order)
     post("/shops/#{shop_id}/orders.json", order).fetch("id")
   end

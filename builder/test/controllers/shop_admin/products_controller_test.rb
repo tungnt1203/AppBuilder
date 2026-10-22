@@ -27,6 +27,24 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, Product.count
   end
 
+  test "the owner draws the print area and sees a sample print file in its shape" do
+    tee = products(:tee)
+    tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")
+    tee.update!(buyer_inputs: [ { "label" => "Name", "preview" => { "x" => 0.3, "y" => 0.5, "w" => 0.4, "h" => 0.1, "font" => "Lora" } } ])
+    get shop_admin_product_print_file_path(tee)
+    assert_response :not_found
+
+    patch shop_admin_product_path(tee), params: { product: { print_area: { x: "0.25", y: "0.2", w: "0.5", h: "0.25", position: "back" } } }
+    assert_equal({ "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.25, "position" => "back" }, tee.reload.print_area)
+    follow_redirect!
+    assert_select "a[href=?]", shop_admin_product_print_file_path(tee), "See a sample print file"
+
+    get shop_admin_product_print_file_path(tee)
+    assert_equal "image/png", response.media_type
+    image = Vips::Image.new_from_buffer(response.body, "")
+    assert_equal [ 1200, 750 ], [ image.width, image.height ], "the area's shape on the 40 × 50 photo"
+  end
+
   test "staff can't add or remove demo products" do
     post shop_admin_demo_products_path
     assert_not DemoCatalog.present?

@@ -1,0 +1,43 @@
+# A personalized item's line of a Printify order: the product's blank made for this order (Printify
+# makes a product per line from its blueprint, print provider and print areas) with the product's
+# own design in each print area and, over it in the personalized one, the item's print file
+# (Personalization::PrintFile, at that print area's size). The print file is kept on the item for
+# staff to see.
+class Personalization::PrintifyLine
+  def initialize(item, gateway:, shop_id:)
+    @item, @gateway, @shop_id = item, gateway, shop_id
+  end
+
+  def to_h
+    product = @item.variant.product
+    printify = @gateway.product(@shop_id, product.printify_product_id)
+    variant_id = @item.variant.printify_variant_id.to_i
+    position = product.print_area["position"]
+    areas = Array(printify["print_areas"]).find { |area| Array(area["variant_ids"]).map(&:to_i).include?(variant_id) }
+    raise Personalization::PrintFile::Error, "Printify's #{product.title} has no print area for this variant" unless areas
+
+    print_areas = Array(areas["placeholders"]).to_h { |placeholder| [ placeholder["position"], Array(placeholder["images"]).map { |image| design(image) } ] }
+    print_areas[position] = print_areas.fetch(position, []) + [ print_file(printify, variant_id, position) ]
+    { blueprint_id: printify["blueprint_id"], print_provider_id: printify["print_provider_id"], variant_id:, quantity: @item.quantity, print_areas: }
+  end
+
+  private
+    # One of the product's own images, where it sits.
+    def design(image)
+      src = image["src"].presence || @gateway.upload(image["id"])["preview_url"]
+      { src:, x: image["x"], y: image["y"], scale: image["scale"], angle: image["angle"] || 0 }
+    end
+
+    # The buyer's part, the print area's size, over the whole of it.
+    def print_file(printify, variant_id, position)
+      sizes = @gateway.catalog_variants(printify["blueprint_id"], printify["print_provider_id"])
+      area = Array(sizes["variants"]).find { |variant| variant["id"].to_i == variant_id }.to_h["placeholders"].to_a.find { |placeholder| placeholder["position"] == position }
+      raise Personalization::PrintFile::Error, "Printify has no #{position} print area for this variant" unless area
+
+      png = Personalization::PrintFile.new(@item.variant.product, @item.properties).render(width: area["width"].to_i, height: area["height"].to_i)
+      name = "#{@item.order.number}-#{@item.id}-#{position}.png"
+      @item.print_file.attach(io: StringIO.new(png), filename: name, content_type: "image/png")
+      upload = @gateway.upload_image(name, png)
+      { src: upload["preview_url"], x: 0.5, y: 0.5, scale: 1, angle: 0 }
+    end
+end

@@ -4,6 +4,8 @@ class LineItem < ApplicationRecord
 
   belongs_to :order
   belongs_to :variant, optional: true
+  # A personalized item's print file, as it went to Printify (Personalization::PrintifyLine).
+  has_one_attached :print_file
 
   validates :product_title, presence: true
   validates :unit_price_cents, numericality: { greater_than_or_equal_to: 0, only_integer: true }

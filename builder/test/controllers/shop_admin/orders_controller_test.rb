@@ -47,6 +47,14 @@ class ShopAdmin::OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href*='disposition=attachment']", "Download the photo"
   end
 
+  test "a personalized line shows the print file that went to Printify" do
+    line_items(:pending_tee).print_file.attach(io: file_fixture("product.png").open, filename: "1001-1-front.png", content_type: "image/png")
+
+    get shop_admin_order_path(orders(:pending))
+    assert_select "img[alt='Print file']"
+    assert_select "a[href*='disposition=attachment']", "Download the print file"
+  end
+
   test "marks paid, then ships with tracking and emails the buyer" do
     order = orders(:pending)
     post shop_admin_order_payment_path(order)

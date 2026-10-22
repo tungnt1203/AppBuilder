@@ -296,6 +296,27 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_equal 1625, order.fulfillment_cost_cents
   end
 
+  test "an order with what the buyer added goes by itself when the product's print area is drawn, its print file over the design" do
+    product = Printify::Import.new.call("pf-tee")
+    product.update!(print_area: { "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.6, "position" => "front" },
+      buyer_inputs: [ { "label" => "Name", "required" => "1", "preview" => { "x" => 0.3, "y" => 0.5, "w" => 0.4, "h" => 0.1, "font" => "Pacifico", "color" => "#ff0000" } } ])
+    order = place_order(product.variant_for(%w[ Black S ]), status: "pending")
+    item = order.line_items.sole.tap { |line| line.update!(properties: { "name" => "Ada" }) }
+    assert_not Printify::Fulfillment.new(order).needs_personalizing?
+
+    perform_enqueued_jobs(only: Order::FulfillJob) { order.mark_paid! }
+    line = @printify.orders.sole[:line_items].sole
+    assert_equal [ 6, 99, 1001, 1 ], line.values_at(:blueprint_id, :print_provider_id, :variant_id, :quantity)
+    assert_equal [ "https://images.example/designs/design-1.png", "https://images.example/uploads/#{order.number}-#{item.id}-front.png" ], line[:print_areas]["front"].pluck(:src)
+    assert_equal({ src: "https://images.example/back-design.png", x: 0.5, y: 0.3, scale: 0.5, angle: 0 }, line[:print_areas]["back"].sole)
+    assert_equal({ x: 0.5, y: 0.5, scale: 1, angle: 0 }, line[:print_areas]["front"].last.except(:src))
+
+    print_file = Vips::Image.new_from_buffer(@printify.uploads.sole[:data], "")
+    assert_equal [ 300, 400, 4 ], [ print_file.width, print_file.height, print_file.bands ]
+    assert item.reload.print_file.attached?
+    assert order.reload.printify_order_id.present?
+  end
+
   test "staff can send an order with text the buyer typed as it is" do
     product = Printify::Import.new.call("pf-tee")
     order = place_order(product.variant_for(%w[ White S ]))

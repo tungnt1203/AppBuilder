@@ -45,7 +45,7 @@ export default class extends Controller {
 
   // A photo ticked to show the text on: the box is drawn on it.
   use(event) {
-    if (event.target.checked && event.target.dataset.large) this.photoTarget.src = event.target.dataset.large
+    if (event.target.checked !== false && event.target.dataset.large) this.photoTarget.src = event.target.dataset.large
   }
 
   restyle() {
@@ -68,7 +68,7 @@ export default class extends Controller {
   }
 
   render() {
-    const kind = this.hasKindTarget ? this.kindTarget.value : "text"
+    const kind = this.hasKindTarget ? this.kindTarget.value : (this.element.dataset.placementKind || "text")
     this.element.querySelectorAll("[data-for-kinds]").forEach((element) => { element.hidden = !element.dataset.forKinds.split(" ").includes(kind) })
     if (!this.hasBoxTarget) return
 
@@ -79,7 +79,7 @@ export default class extends Controller {
     if (!box) return
 
     Object.assign(this.boxTarget.style, { left: `${box.x * 100}%`, top: `${box.y * 100}%`, width: `${box.w * 100}%`, height: `${box.h * 100}%` })
-    this.boxTarget.classList.toggle("bg-white/60", photo)
+    this.boxTarget.classList.toggle("bg-white/60", photo && kind !== "area")
     this.sampleTarget.textContent = photo ? this.sampleTarget.dataset[kind] : this.sampleTarget.dataset.text
     Object.assign(this.sampleTarget.style, {
       fontFamily: photo ? "" : `"${this.fontTarget.value}"`, color: photo ? "" : this.colorTarget.value, textAlign: photo ? "center" : this.alignTarget.value,

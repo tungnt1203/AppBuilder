@@ -80,6 +80,16 @@
               <% item.property_lines.each do |line| %>
                 <p class="text-ink"><%= line %></p>
               <% end %>
+              <% if item.print_file.attached? %>
+                <%# The print file the shop made from what the buyer added, as it went to Printify. %>
+                <div class="mt-2 flex items-center gap-3">
+                  <%= image_tag item.print_file, alt: t(".print_file"), class: "size-14 rounded-lg bg-[repeating-conic-gradient(#e5e7eb_0_25%,#fff_0_50%)] bg-[length:12px_12px] object-contain" %>
+                  <div class="text-xs text-muted">
+                    <p><%= t(".print_file_sent") %></p>
+                    <%= link_to t(".print_file_download"), rails_blob_path(item.print_file, disposition: "attachment"), class: "font-medium text-brand-700 underline" %>
+                  </div>
+                </div>
+              <% end %>
               <% item.buyer_photos.each do |photo| %>
                 <%# The buyer's photo as they sent it, to print; the zoom and point they framed it at. %>
                 <div class="mt-2 flex items-center gap-3">

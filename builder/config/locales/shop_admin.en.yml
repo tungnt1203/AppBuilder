@@ -104,6 +104,9 @@ en:
         title: Order %{number}
         photo_crop: "framed at %{zoom}× around %{x}%, %{y}%"
         photo_download: Download the photo
+        print_file: Print file
+        print_file_sent: Print file made from what the buyer added, sent to Printify over the design.
+        print_file_download: Download the print file
         printify:
           failed: This order didn't reach Printify.
           stopped: Printify stopped this order.
@@ -329,6 +332,22 @@ en:
         collections: Collections
         create: Add product
         save: Save
+      print_area:
+        title: Print area
+        set: Drawn — personalized orders print by themselves
+        not_set: Not drawn — personalized orders wait for you in Printify
+        hint: On the product's photo, draw the area Printify prints on (the design's area on the
+          front of the shirt, the wrap on the mug). What buyers add is placed on the print file
+          from there, over the product's own design, and the order goes to Printify by itself.
+        sample: Print area
+        clear: Remove the print area
+        sample_file: See a sample print file
+        position: Which side it is
+        positions:
+          front: Front
+          back: Back
+        photo: Draw on this photo
+        photo_hint: The one you drew the fields' boxes on.
       buyer_input:
         label: Label
         kind: Kind

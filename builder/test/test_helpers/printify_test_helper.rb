@@ -3,16 +3,21 @@
 # the orders the app sends.
 class FakePrintifyGateway
   attr_reader :sent_to_production, :deleted_webhooks, :cancelled
-  attr_reader :shipping_requests
+  attr_reader :shipping_requests, :uploads
   attr_accessor :shipping_cost
   attr_accessor :error, :shipments, :product_data, :shop_list, :status, :existing_webhooks, :fail_webhook_after, :existing_orders
 
   SHOP = { "id" => 4242, "title" => "Fake Printify shop", "sales_channel" => "custom_integration" }.freeze
 
   def initialize
-    @orders, @sent_to_production, @shipments, @shop_list, @webhooks, @deleted_webhooks, @cancelled = [], [], [], [ SHOP ], [], [], []
+    @orders, @sent_to_production, @shipments, @shop_list, @webhooks, @deleted_webhooks, @cancelled, @uploads = [], [], [], [ SHOP ], [], [], [], []
     @product_data = {
       "id" => "pf-tee", "title" => "Sunset Tee", "description" => "<p>Soft cotton.</p><p>Printed to order.</p>",
+      "blueprint_id" => 6, "print_provider_id" => 99,
+      "print_areas" => [ { "variant_ids" => [ 1001, 1002, 1003, 1004, 1005 ], "placeholders" => [
+        { "position" => "front", "images" => [ { "id" => "design-1", "x" => 0.5, "y" => 0.4, "scale" => 0.8, "angle" => 0 } ] },
+        { "position" => "back", "images" => [ { "id" => "design-2", "src" => "https://images.example/back-design.png", "x" => 0.5, "y" => 0.3, "scale" => 0.5, "angle" => 0 } ] }
+      ] } ],
       "options" => [
         { "name" => "Colors", "type" => "color", "values" => [ { "id" => 521, "title" => "Black", "colors" => [ "#000000" ] }, { "id" => 522, "title" => "White", "colors" => [ "#ffffff" ] }, { "id" => 523, "title" => "Red" } ] },
         { "name" => "Sizes", "type" => "size", "values" => [ { "id" => 14, "title" => "S" }, { "id" => 15, "title" => "M" } ] }
@@ -73,6 +78,18 @@ class FakePrintifyGateway
 
   def delete_webhook(_shop_id, id, host:) = fail_or(@deleted_webhooks << [ id, host ])
   def download(_url) = fail_or(StringIO.new(Rails.root.join("test/fixtures/files/product.png").binread))
+
+  # Print files put in the media library: their names and bytes.
+  def upload_image(file_name, data)
+    fail_or(@uploads << { file_name:, data: })
+    { "id" => "upload-#{@uploads.size}", "preview_url" => "https://images.example/uploads/#{file_name}" }
+  end
+
+  def upload(id) = fail_or({ "id" => id, "preview_url" => "https://images.example/designs/#{id}.png" })
+
+  def catalog_variants(_blueprint_id, _print_provider_id)
+    fail_or({ "variants" => product_data["variants"].map { |variant| { "id" => variant["id"], "placeholders" => [ { "position" => "front", "width" => 300, "height" => 400 }, { "position" => "back", "width" => 300, "height" => 400 } ] } } })
+  end
 
   private
     def fail_or(value)

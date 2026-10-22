@@ -13,6 +13,9 @@ class Product < ApplicationRecord
   has_many :collection_products, dependent: :destroy
   has_many :collections, through: :collection_products
   has_many :product_reviews, dependent: :destroy
+  # The print areas a personalized product's print area can be (Printify's placeholder positions).
+  PRINT_POSITIONS = %w[ front back ].freeze
+
   has_many_attached :images do |image|
     image.variant :thumb, resize_to_fill: [ 160, 160 ], format: :webp
     image.variant :card, resize_to_fill: [ 640, 800 ], format: :webp
@@ -45,7 +48,7 @@ class Product < ApplicationRecord
     normalizes :"option#{slot}_values", with: ->(values) { Array(values).map { |value| value.to_s.squish }.compact_blank.uniq }
   end
 
-  before_validation :clean_buyer_inputs
+  before_validation :clean_buyer_inputs, :clean_print_area
   before_validation :coerce_custom_fields
   before_save :stamp_published_at
   after_save :sync_variants
@@ -173,6 +176,13 @@ class Product < ApplicationRecord
 
     def stamp_published_at
       self.published_at ||= Time.current if active?
+    end
+
+    # Where Printify's print area sits on a photo of the product (BuyerInputs.preview's box) and its
+    # position on the blank ("front"), or {} until the owner draws it.
+    def clean_print_area
+      box = BuyerInputs.preview(print_area, kind: "photo")
+      self.print_area = box ? box.except("images").merge("position" => PRINT_POSITIONS.include?(print_area.to_h["position"]) ? print_area["position"] : "front") : {}
     end
 
     # A choice field keeps only the product's own artwork.
