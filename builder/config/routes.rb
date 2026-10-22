@@ -100,6 +100,7 @@ Rails.application.routes.draw do
       resources :submissions, only: :create, module: :forms
     end
     resources :zip_codes, only: :show
+    resources :uploads, only: :create
     resources :carts, only: %i[ create show ] do
       scope module: :carts do
         resources :items, only: %i[ create update destroy ]

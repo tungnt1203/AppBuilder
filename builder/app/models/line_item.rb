@@ -18,10 +18,32 @@ class LineItem < ApplicationRecord
   end
 
   # "Name on the shirt: Ada", using the product's labels while it still has them.
+  # What the buyer added, as "Label: value" lines (emails, the admin): a photo as "Photo added",
+  # without its framing.
   def property_lines
     return [] if properties.blank?
 
-    labels = product&.buyer_inputs.to_a.to_h { |field| [ field["key"], field["label"] ] }
-    properties.map { |key, value| "#{labels[key] || key}: #{value}" }
+    fields = product&.buyer_inputs.to_a
+    photos = fields.select { |field| field["kind"] == "photo" }.map { |field| field["key"] }
+    labels = fields.each_with_object({}) do |field, all|
+      all[field["key"]] = field["label"]
+      all["#{field["key"]}_font"] = "#{field["label"]} font"
+      all["#{field["key"]}_color"] = "#{field["label"]} color"
+    end
+    properties.filter_map do |key, value|
+      next if photos.any? { |photo| key == "#{photo}_crop" }
+
+      "#{labels[key] || key}: #{photos.include?(key) ? "Photo added" : value}"
+    end
+  end
+
+  # The photos the buyer added, to print: [{ label, upload, crop: [zoom, x, y] }].
+  def buyer_photos
+    fields = product&.buyer_inputs.to_a.select { |field| field["kind"] == "photo" && properties.to_h[field["key"]].present? }
+    uploads = BuyerUpload.where(token: fields.map { |field| properties[field["key"]] }).index_by(&:token)
+    fields.filter_map do |field|
+      upload = uploads[properties[field["key"]]] or next
+      { label: field["label"], upload:, crop: BuyerInputs.crop(properties["#{field["key"]}_crop"]) }
+    end
   end
 end

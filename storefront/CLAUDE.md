@@ -93,7 +93,8 @@ these for the brand, but keep each part:
 
 - **Product page**: photos (each color's photo when a color is picked), price with the sale price
   and "Save 20%", swatches (`swatch_color`) and size buttons, the text buyers type to be printed
-  (`products/_buyer_input`: with its font and color picks, and shown on the photo as they type,
+  or the photo they add (`products/_buyer_input`: text with its font and color picks, a photo
+  they move and zoom; both shown on the product photo as they add them,
   `personalization/_layer` with the `personalize` controller, plus a small copy of the photo by
   the fields on phones; personalized products are what this kind of shop sells, so keep it all),
   the add-to-cart button and right under it when it arrives (`delivery_estimate`), shipping and

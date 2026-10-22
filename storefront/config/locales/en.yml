@@ -3,6 +3,9 @@ en:
   date:
     formats:
       delivery: "%b %-d"
+  uploads:
+    create:
+      missing: Pick a photo first.
   products:
     coming_soon:
       visitors: Our first products are on their way. Check back soon.
@@ -66,6 +69,12 @@ en:
       'yes': 'Yes'
       'no': 'No'
     buyer_input:
+      pick: Choose a photo
+      uploading: Adding your photo…
+      ready: Photo added. Choose another to change it.
+      small: This photo is small and may print blurry. A larger one prints sharper.
+      zoom: Zoom
+      drag_hint: Drag the photo on the picture to move it.
       max_length:
         one: Up to 1 character
         other: Up to %{count} characters

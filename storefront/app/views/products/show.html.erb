@@ -15,7 +15,8 @@
 <% images = @product.images %>
 <%# Text the buyer types shows on the photos where the shop placed it (personalization/_layer). %>
 <% placed = images.any? ? @product.buyer_inputs.select { |input| input["preview"] } : [] %>
-<div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy<%= " personalize" if placed.any? %>" data-action="variant-picker:change->sticky-buy#select">
+<% personalized = placed.any? || @product.buyer_inputs.any? { |input| input["kind"] == "photo" } %>
+<div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy<%= " personalize" if personalized %>" <%= tag.attributes(data: { personalize_upload_url: (uploads_path if personalized) }) %> data-action="variant-picker:change->sticky-buy#select">
   <div class="min-w-0" data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
     <div class="relative aspect-4/5 overflow-hidden rounded-xl" data-personalize-frame>
       <% if images.any? %>
@@ -24,7 +25,7 @@
         </button>
         <% placed.each do |input| %>
           <% photos = images.select { |image| input["preview"]["images"].to_a.include?(image.id) }.map { |image| image.url(:large) } %>
-          <%= render "personalization/layer", layer: input["preview"].merge("key" => input["key"]), sample: t(".your_text"), photos: %>
+          <%= render "personalization/layer", layer: input["preview"].merge("key" => input["key"], "kind" => input["kind"]), sample: t(".your_text"), photos: %>
         <% end %>
         <dialog class="m-auto max-h-[92vh] max-w-[92vw] overflow-hidden rounded-xl bg-canvas p-0 backdrop:bg-black/70" data-gallery-target="zoom" data-action="click->gallery#closeZoom">
           <img alt="<%= @product.title %>" class="max-h-[92vh] w-auto object-contain" data-gallery-target="zoomImage">
@@ -108,7 +109,7 @@
             <%= image_tag @product.image_for(@variant).url(:large), alt: "", class: "size-full bg-surface-muted object-cover", data: { personalize_target: "mirror" } %>
             <% placed.each do |input| %>
               <% photos = images.select { |image| input["preview"]["images"].to_a.include?(image.id) }.map { |image| image.url(:large) } %>
-              <%= render "personalization/layer", layer: input["preview"].merge("key" => input["key"]), sample: t(".your_text"), photos: %>
+              <%= render "personalization/layer", layer: input["preview"].merge("key" => input["key"], "kind" => input["kind"]), sample: t(".your_text"), photos: %>
             <% end %>
           </span>
           <p class="text-sm text-muted"><%= t(".preview_hint") %></p>

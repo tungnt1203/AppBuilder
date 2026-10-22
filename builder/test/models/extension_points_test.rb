@@ -35,7 +35,7 @@ class ExtensionPointsTest < ActiveSupport::TestCase
   test "buyer inputs are their own cart lines, and have to fit" do
     product = products(:tee)
     product.update!(buyer_inputs: [ { "key" => "print_name", "label" => "Name on the shirt", "required" => "1", "max_length" => "20" } ])
-    assert_equal [ { "key" => "print_name", "label" => "Name on the shirt", "required" => true, "max_length" => 20 } ], product.buyer_inputs
+    assert_equal [ { "key" => "print_name", "label" => "Name on the shirt", "kind" => "text", "required" => true, "max_length" => 20 } ], product.buyer_inputs
 
     variant = variants(:tee_black_s)
     _properties, problems = product.buyer_properties({})

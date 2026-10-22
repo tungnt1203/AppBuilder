@@ -40,7 +40,7 @@ class Shop < ApplicationRecord
 
     ActsAsTenant.without_tenant do
       transaction do
-        [ Product, ThemeSetting ].each { |model| ActiveStorage::Attachment.where(record_type: model.name, record_id: model.where(shop_id: id).select(:id)).find_each(&:purge) }
+        [ Product, ThemeSetting, BuyerUpload ].each { |model| ActiveStorage::Attachment.where(record_type: model.name, record_id: model.where(shop_id: id).select(:id)).find_each(&:purge) }
         Project.where(shop_id: id).update_all(shop_id: nil)
         self.class.data_tables.each { |table| self.class.connection.delete("DELETE FROM #{table} WHERE shop_id = #{id.to_i}") }
         delete

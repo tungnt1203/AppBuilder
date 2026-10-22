@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_22_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -78,6 +78,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_110000) do
     t.datetime "updated_at", null: false
     t.string "stripe_publishable_key"
     t.index ["user_id"], name: "index_business_settings_on_user_id", unique: true
+  end
+
+  create_table "buyer_uploads", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "token", null: false
+    t.integer "width"
+    t.integer "height"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "created_at"], name: "index_buyer_uploads_on_shop_id_and_created_at"
+    t.index ["shop_id"], name: "index_buyer_uploads_on_shop_id"
+    t.index ["token"], name: "index_buyer_uploads_on_token", unique: true
   end
 
   create_table "cart_items", force: :cascade do |t|
@@ -629,6 +641,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_110000) do
   add_foreign_key "agent_commands", "projects"
   add_foreign_key "api_idempotency_keys", "shops"
   add_foreign_key "business_settings", "users"
+  add_foreign_key "buyer_uploads", "shops"
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "shops"
   add_foreign_key "cart_items", "variants"

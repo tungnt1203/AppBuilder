@@ -31,7 +31,28 @@ class BuyerInputsTest < ActiveSupport::TestCase
   test "a line's text on the photo, in the buyer's picks or the shop's defaults" do
     fields = BuyerInputs.definitions([ ROW, { "label" => "Date" } ])
     layer = BuyerInputs.layers(fields, "name_on_the_shirt" => "Joe", "name_on_the_shirt_font" => "Lora", "date" => "1970").sole
-    assert_equal [ "Joe", "Lora", "#ffffff", [ 11 ], true ], layer.values_at("text", "font", "color", "images", "uppercase")
+    assert_equal [ "text", "Joe", "Lora", "#ffffff", [ 11 ], true ], layer.values_at("kind", "text", "font", "color", "images", "uppercase")
     assert_empty BuyerInputs.layers(fields, "date" => "1970")
+  end
+
+  test "a photo's framing stays within what can be printed" do
+    assert_equal [ 1.5, 0.4, 1.0 ], BuyerInputs.crop("1.5,0.4,9")
+    assert_equal [ 4, 0.5, 0.5 ], BuyerInputs.crop("12")
+    assert_equal [ 1, 0.5, 0.5 ], BuyerInputs.crop("junk")
+  end
+
+  test "a photo field keeps a box and photos, and lines name the photo without its token" do
+    in_shop
+    field = BuyerInputs.definitions([ { "label" => "Your photo", "kind" => "photo", "max_length" => "9", "preview" => { "x" => "0.1", "y" => "0.1", "w" => "0.5", "h" => "0.5", "font" => "Lora" } } ]).sole
+    assert_equal [ "photo", nil, { "x" => 0.1, "y" => 0.1, "w" => 0.5, "h" => 0.5, "images" => [] } ], field.values_at("kind", "max_length", "preview")
+
+    upload = BuyerUpload.take(Rack::Test::UploadedFile.new(file_fixture("product.png"), "image/png"))
+    properties, = BuyerInputs.accept([ field ], "your_photo" => upload.token, "your_photo_crop" => "2,0.3,0.6")
+    assert_equal({ "your_photo" => upload.token, "your_photo_crop" => "2.0,0.3,0.6" }, properties)
+
+    product = products(:tee).tap { |tee| tee.update!(buyer_inputs: [ field ]) }
+    item = LineItem.new(product_title: product.title, variant: product.variants.first, properties:)
+    assert_equal [ "Your photo: Photo added" ], item.property_lines
+    assert_equal [ [ "Your photo", upload, [ 2.0, 0.3, 0.6 ] ] ], item.buyer_photos.map { |photo| photo.values_at(:label, :upload, :crop) }
   end
 end

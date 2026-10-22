@@ -102,6 +102,8 @@ en:
         no_results: Nothing matches "%{query}".
       show:
         title: Order %{number}
+        photo_crop: "framed at %{zoom}× around %{x}%, %{y}%"
+        photo_download: Download the photo
         printify:
           failed: This order didn't reach Printify.
           stopped: Printify stopped this order.
@@ -324,12 +326,19 @@ en:
         save: Save
       buyer_input:
         label: Label
+        kind: Kind
+        kinds:
+          text: Text
+          photo: Photo
+        photo_hint: The buyer's photo fills the box; they move and zoom it to frame it. Draw the
+          box the shape of the print area (a circle on a mug shows as its square).
+        sample_photo: Photo
         key: Key
         max: Max characters
         required: Required
         show_on_photos: Show it on the photos
         sample: Your text
-        draw_hint: Drag on the photo to draw where the text goes; drag the box to move it.
+        draw_hint: Drag on the photo to draw where it goes; drag the box to move it.
         clear: Don't show it on the photos
         photos: Photos it shows on
         photos_hint: Tick the photos where this part of the product faces the buyer (not a back view).

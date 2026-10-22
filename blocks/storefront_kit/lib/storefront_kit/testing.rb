@@ -13,6 +13,7 @@ module StorefrontKit
 
       def initialize
         @shop_data = default_shop
+        @uploads = {}
         @products_data = default_products
         @collections_data = [ { "slug" => "cats", "title" => "Cats", "description" => "For cat people.", "product_count" => 1,
           "image" => { "id" => 1, "alt" => "Cats", "thumb" => "https://cdn.example/cat-thumb.webp", "card" => "https://cdn.example/cat-card.webp", "large" => "https://cdn.example/cat-large.webp" } },
@@ -59,6 +60,15 @@ module StorefrontKit
       end
 
       def cart(token) = Cart.new(cart_json(find_cart(token)))
+
+      def upload(file)
+        record(:upload, { filename: file.respond_to?(:original_filename) ? file.original_filename : nil })
+        raise Invalid.new("Some details need fixing", status: 422, code: "invalid", fields: { "photo" => "must be a JPEG, PNG or WebP photo" }) unless file.respond_to?(:content_type) && file.content_type.to_s.start_with?("image/")
+
+        token = "upl_test#{@uploads.size + 1}"
+        @uploads[token] = { "token" => token, "width" => 1200, "height" => 1200, "thumb" => "https://platform.test/uploads/#{token}/thumb.webp", "large" => "https://platform.test/uploads/#{token}/large.webp" }
+        Record.new(@uploads[token])
+      end
 
       def add_to_cart(token, variant_id:, quantity: 1, properties: {})
         record(:add_to_cart, { token:, variant_id:, quantity:, properties: })
@@ -231,20 +241,32 @@ module StorefrontKit
           labels = product["buyer_inputs"].to_a.to_h { |input| [ input["key"], input["label"] ] }
           { "id" => line["id"], "quantity" => line["quantity"], "line_total_cents" => variant["price_cents"] * line["quantity"],
             "product" => { "slug" => product["slug"], "title" => product["title"], "image" => image }, "variant" => variant,
-            "properties" => (line["properties"].map { |key, value| { "key" => key, "label" => labels[key] || key, "value" => value } } if line["properties"].any?),
+            "properties" => (line["properties"].filter_map { |key, value|
+              next if key.end_with?("_crop")
+
+              upload = @uploads[value]
+              { "key" => key, "label" => labels[key] || key, "value" => (upload ? "Added" : value) }.merge(upload ? upload.slice("thumb", "large") : {})
+            } if line["properties"].any?),
             "preview" => preview_layers(product, line["properties"], image).presence }.compact
         end
 
-        # The buyer's text on the line's photo, as the Platform places it (BuyerInputs.layers).
+        # What the buyer added on the line's photo, as the Platform places it (BuyerInputs.layers).
         def preview_layers(product, properties, image)
           properties = properties.to_h.stringify_keys
           product["buyer_inputs"].to_a.filter_map do |input|
-            preview, text = input["preview"], properties[input["key"]]
-            next unless preview && text.present? && image && (preview["images"].to_a.empty? || preview["images"].include?(image["id"]))
+            preview, value = input["preview"], properties[input["key"]]
+            next unless preview && value.present? && image && (preview["images"].to_a.empty? || preview["images"].include?(image["id"]))
 
-            picked = ->(kind, all) { properties["#{input["key"]}_#{kind}"].then { |value| value if all.to_a.include?(value) } }
-            preview.slice("x", "y", "w", "h", "align", "uppercase").merge("text" => text,
-              "font" => picked.("font", preview["fonts"]) || preview["font"], "color" => picked.("color", preview["colors"]) || preview["color"])
+            box = preview.slice("x", "y", "w", "h")
+            if input["kind"] == "photo"
+              upload = @uploads[value] or next
+              zoom, x, y = properties["#{input["key"]}_crop"].to_s.split(",").map(&:to_f)
+              box.merge("kind" => "photo", "crop" => [ zoom || 1.0, x || 0.5, y || 0.5 ], "photo" => upload["large"])
+            else
+              picked = ->(kind, all) { properties["#{input["key"]}_#{kind}"].then { |pick| pick if all.to_a.include?(pick) } }
+              box.merge(preview.slice("align", "uppercase")).merge("kind" => "text", "text" => value,
+                "font" => picked.("font", preview["fonts"]) || preview["font"], "color" => picked.("color", preview["colors"]) || preview["color"])
+            end
           end
         end
 

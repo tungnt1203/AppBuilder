@@ -97,12 +97,17 @@ Every change to a cart answers with the whole cart.
 - `images`: photos, each with `option_value`, the option value it shows.
 - `collections`: `[{ "slug", "title" }]`.
 - `custom_fields`: `[{ "key", "label", "type": "text"|"number"|"boolean", "value" }]`, only the ones this product has a value for.
-- `buyer_inputs`: `[{ "key", "label", "required", "max_length", "preview" }]`. Send what the buyer typed as `properties` when adding the line.
+- `buyer_inputs`: `[{ "key", "label", "kind", "required", "max_length", "preview" }]`. Send what the buyer typed as `properties` when adding the line.
+  `kind` is `"text"` or `"photo"`: for a photo, send the buyer's file to `POST /v1/uploads` (multipart, field `photo`:
+  JPEG, PNG or WebP, 20 MB at most) first; it answers `{ "upload": { "token", "width", "height", "thumb", "large" } }`.
+  Send the token as the field's property, and how the buyer framed it as `"<key>_crop"`: `"zoom,x,y"` (zoom from 1
+  to 4, the point of the photo kept in view as fractions).
   `preview` (when the shop placed the text on the photos): `{ "x", "y", "w", "h" }` (the box, as fractions of the photo),
   `"images"` (photo ids it shows on; empty: all), `"font"`, `"color"`, `"fonts"` and `"colors"` (what the buyer may pick;
   empty: no choice), `"align"`, `"uppercase"`. Send the buyer's picks as `properties` `"<key>_font"` and `"<key>_color"`.
-  A cart or order line then has `preview`: `[{ "x", "y", "w", "h", "text", "font", "color", "align", "uppercase" }]`, the
-  text as it shows on the line's photo (its `large` size, uncropped).
+  A cart or order line then has `preview`: `[{ "x", "y", "w", "h", "kind", "text", "font", "color", "align", "uppercase" }]`
+  for text, `[{ "x", "y", "w", "h", "kind", "photo", "crop" }]` for a photo (`crop`: `[zoom, x, y]`), as it shows on the
+  line's photo (its `large` size, uncropped). A photo's property reads `"Added"`, with its `thumb` and `large`.
 
 **Cart line** and **order line** include `properties` when the buyer typed something: `[{ "key", "label", "value" }]`. Printify can't get that text from the Platform, so an order with it isn't sent automatically: the shop's staff make it in Printify and link it in the admin (or send it without the text, for a gift note). Tracking and status then come back as for any order.
 

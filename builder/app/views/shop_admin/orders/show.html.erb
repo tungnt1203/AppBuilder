@@ -80,6 +80,16 @@
               <% item.property_lines.each do |line| %>
                 <p class="text-ink"><%= line %></p>
               <% end %>
+              <% item.buyer_photos.each do |photo| %>
+                <%# The buyer's photo as they sent it, to print; the zoom and point they framed it at. %>
+                <div class="mt-2 flex items-center gap-3">
+                  <%= image_tag photo[:upload].photo.variant(:thumb), alt: photo[:label], class: "size-14 rounded-lg object-cover" %>
+                  <div class="text-xs text-muted">
+                    <p><%= photo[:upload].width %> × <%= photo[:upload].height %> px · <%= t(".photo_crop", zoom: photo[:crop][0], x: (photo[:crop][1] * 100).round, y: (photo[:crop][2] * 100).round) %></p>
+                    <%= link_to t(".photo_download"), rails_blob_path(photo[:upload].photo, disposition: "attachment"), class: "font-medium text-brand-700 underline" %>
+                  </div>
+                </div>
+              <% end %>
               <p class="text-muted sm:hidden"><%= money(item.unit_price_cents, @order.currency) %> × <%= item.quantity %></p>
             </div>
             <p class="hidden text-sm text-muted whitespace-nowrap sm:block"><%= money(item.unit_price_cents, @order.currency) %> × <%= item.quantity %></p>

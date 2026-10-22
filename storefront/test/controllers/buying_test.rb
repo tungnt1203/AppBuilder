@@ -111,6 +111,31 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_select "[data-controller=personalize] [data-personalize-target=layer][data-text=Ada][data-font=Montserrat][data-color='#ffffff']"
   end
 
+  test "a buyer's photo is sent as they pick it, and their line shows it framed on the product" do
+    @platform.products_data.first["buyer_inputs"] = [ { "key" => "your_photo", "label" => "Your photo", "kind" => "photo", "required" => true,
+      "preview" => { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4, "images" => [] } } ]
+    get product_path("cat-tee")
+    assert_select "[data-controller~=personalize][data-personalize-upload-url='/uploads']"
+    assert_select "input[type=file][data-personalize-pick=your_photo][accept*='image/jpeg']"
+    assert_select "input[type=hidden][name='properties[your_photo]'][required]"
+    assert_select "input[type=hidden][name='properties[your_photo_crop]'][value='1,0.5,0.5']"
+    assert_select "[data-personalize-target=layer][data-kind=photo][data-key=your_photo] img"
+
+    post uploads_path, params: { photo: Rack::Test::UploadedFile.new(StringIO.new("not a photo"), "text/plain", original_filename: "notes.txt") }, as: :json
+    assert_response :unprocessable_entity
+    assert_match "JPEG, PNG or WebP", response.parsed_body["error"]
+
+    post uploads_path, params: { photo: Rack::Test::UploadedFile.new(StringIO.new("\xFF\xD8\xFF"), "image/jpeg", original_filename: "family.jpg") }
+    assert_response :created
+    token = response.parsed_body["token"]
+    assert_equal [ "upl_test1", 1200 ], [ token, response.parsed_body["width"] ]
+
+    post cart_items_path, params: { variant_id: 101, properties: { your_photo: token, your_photo_crop: "1.8,0.4,0.6" } }
+    get cart_path
+    assert_select "p", /Your photo: Added/
+    assert_select "[data-personalize-target=layer][data-kind=photo][data-crop='1.8,0.4,0.6'][data-photo$='upl_test1/large.webp']"
+  end
+
   test "something that can't be bought isn't added" do
     post cart_items_path, params: { variant_id: 104 }
     follow_redirect!

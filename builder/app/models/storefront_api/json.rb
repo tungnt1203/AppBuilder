@@ -138,6 +138,11 @@ class StorefrontApi::Json
     { id:, title: I18n.t("policies.titles.#{id}"), body: @store.policy(id) }
   end
 
+  # A buyer's photo (BuyerUpload): its token for the line, its size, and where to show it.
+  def upload(upload)
+    { token: upload.token, width: upload.width, height: upload.height }.merge(upload_urls(upload))
+  end
+
   def page(page)
     { slug: page.slug, title: page.title, blocks: page.blocks }
   end
@@ -154,21 +159,41 @@ class StorefrontApi::Json
       setting.resolved(image_url: ->(attachment) { url_helpers.rails_blob_url(attachment, **@url_options) })
     end
 
-    # What the buyer typed (and the font and color they picked) as labelled entries, and the text
-    # as it shows on the line's photo (preview), for a cart or order line.
+    # What the buyer added (text with the font and color they picked, a photo) as labelled entries,
+    # and how it shows on the line's photo (preview), for a cart or order line.
     def add_properties(line, record, photo)
       return if record.properties.blank?
 
       fields = record.product&.buyer_inputs.to_a
+      photos = fields.select { |field| field["kind"] == "photo" }.map { |field| field["key"] }
+      uploads = BuyerUpload.where(token: record.properties.values_at(*photos).compact).index_by(&:token)
       labels = fields.each_with_object({}) do |field, all|
         all[field["key"]] = field["label"]
         all["#{field["key"]}_font"] = "#{field["label"]} font"
         all["#{field["key"]}_color"] = "#{field["label"]} color"
       end
-      line[:properties] = record.properties.map { |key, value| { key:, label: labels[key] || key, value: } }
+      line[:properties] = record.properties.filter_map do |key, value|
+        next if photos.any? { |field| key == "#{field}_crop" }
+
+        upload = uploads[value] if photos.include?(key)
+        { key:, label: labels[key] || key, value: (upload ? "Added" : value) }.merge(upload ? upload_urls(upload) : {})
+      end
       layers = BuyerInputs.layers(fields, record.properties).select { |layer| layer["images"].empty? || layer["images"].include?(photo&.id) }
-      line[:preview] = layers.map { |layer| layer.except("images") } if layers.any? && photo
+      layers = layers.filter_map do |layer|
+        next layer.except("images") unless layer["kind"] == "photo"
+
+        upload = uploads[layer["upload"]] or next
+        layer.except("images", "upload").merge("photo" => upload_urls(upload)[:large])
+      end
+      line[:preview] = layers if layers.any? && photo
     end
+
+    def upload_urls(upload)
+      return {} unless upload.photo.attached?
+
+      %i[ thumb large ].index_with { |size| url_helpers.rails_representation_url(upload.photo.variant(size), **@url_options) }
+    end
+
     # { id, alt, thumb, card, large } for a photo, nil without one.
     def image(attachment, alt:)
       return unless attachment&.representable?

@@ -42,6 +42,10 @@ module StorefrontKit
     def create_cart = cart_from(client.post("carts"))
     def cart(token) = cart_from(client.get("carts/#{escape(token)}"))
 
+    # A buyer's photo for a personalized product (an uploaded file): { "token", "width", "height",
+    # "thumb", "large" }. Send the token as the photo field's property when adding the line.
+    def upload(file) = Record.new(client.post_file("uploads", photo: file)["upload"])
+
     def add_to_cart(token, variant_id:, quantity: 1, properties: {})
       cart_from(client.post("carts/#{escape(token)}/items", { variant_id:, quantity:, properties: }))
     end

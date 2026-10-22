@@ -49,8 +49,37 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
     token = api(:post, storefront_api_carts_path)["cart"]["token"]
     line = api(:post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { name: "Ada", name_font: "Montserrat", name_color: "#000000" } })["cart"]["items"].sole
     assert_equal [ "Name", "Name font" ], line["properties"].pluck("label")
-    assert_equal [ { "x" => 0.3, "y" => 0.6, "w" => 0.4, "h" => 0.1, "align" => "center", "uppercase" => false, "text" => "Ada", "font" => "Montserrat", "color" => "#ffffff" } ], line["preview"]
+    assert_equal [ { "x" => 0.3, "y" => 0.6, "w" => 0.4, "h" => 0.1, "align" => "center", "uppercase" => false, "kind" => "text", "text" => "Ada", "font" => "Montserrat", "color" => "#ffffff" } ], line["preview"]
     assert_equal photo.id, line.dig("product", "image", "id")
+  end
+
+  test "a buyer's photo is kept, and its line shows it framed on the product photo" do
+    ActsAsTenant.with_tenant(shops(:cats)) do
+      tee = products(:tee)
+      tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")
+      tee.update!(buyer_inputs: [ { "label" => "Your photo", "kind" => "photo", "required" => "1", "preview" => { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4 } } ])
+    end
+
+    api :post, storefront_api_uploads_path, params: nil, headers: { "Content-Type" => nil }
+    assert_response :bad_request
+    post storefront_api_uploads_path, params: { photo: fixture_file_upload("notes.txt", "text/plain") }, headers: { "Authorization" => "Bearer #{@api_key}" }
+    assert_response :unprocessable_entity
+    assert_match "JPEG, PNG or WebP", response.parsed_body.dig("error", "fields", "photo")
+
+    post storefront_api_uploads_path, params: { photo: fixture_file_upload("product.png", "image/png") }, headers: { "Authorization" => "Bearer #{@api_key}" }
+    assert_response :created
+    upload = response.parsed_body["upload"]
+    assert_match(/\Aupl_/, upload["token"])
+    assert upload["width"].positive?
+    assert upload["large"].present?
+
+    token = api(:post, storefront_api_carts_path)["cart"]["token"]
+    api :post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { your_photo: "upl_nope" } }
+    assert_equal "isn't a photo you added", response.parsed_body.dig("error", "fields", "your_photo")
+
+    line = api(:post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { your_photo: upload["token"], your_photo_crop: "1.5,0.4,9" } })["cart"]["items"].sole
+    assert_equal [ { "key" => "your_photo", "label" => "Your photo", "value" => "Added", "thumb" => upload["thumb"], "large" => upload["large"] } ], line["properties"]
+    assert_equal [ { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4, "kind" => "photo", "crop" => [ 1.5, 0.4, 1.0 ], "photo" => upload["large"] } ], line["preview"]
   end
 
   test "pages, menus and a form message" do

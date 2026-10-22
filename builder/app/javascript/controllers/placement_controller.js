@@ -4,9 +4,10 @@ import { Controller } from "@hotwired/stimulus"
 // box to move it). The box is kept as fractions of the photo (x, y, w, h), and a sample line shows
 // in the chosen font, color and alignment, shrunk to fit as it will be in the storefront.
 export default class extends Controller {
-  static targets = [ "stage", "photo", "box", "sample", "x", "y", "w", "h", "font", "color", "align", "uppercase" ]
+  static targets = [ "stage", "photo", "box", "sample", "x", "y", "w", "h", "font", "color", "align", "uppercase", "kind" ]
 
   connect() {
+    if (!this.hasPhotoTarget) return this.render()
     this.photoTarget.complete ? this.render() : this.photoTarget.addEventListener("load", () => this.render(), { once: true })
   }
 
@@ -67,16 +68,23 @@ export default class extends Controller {
   }
 
   render() {
+    const photo = this.hasKindTarget && this.kindTarget.value === "photo"
+    this.element.querySelectorAll("[data-text-only]").forEach((element) => { element.hidden = photo })
+    this.element.querySelectorAll("[data-photo-only]").forEach((element) => { element.hidden = !photo })
+    if (!this.hasBoxTarget) return
+
     const box = this.current()
     this.boxTarget.hidden = !box
     if (!box) return
 
     Object.assign(this.boxTarget.style, { left: `${box.x * 100}%`, top: `${box.y * 100}%`, width: `${box.w * 100}%`, height: `${box.h * 100}%` })
+    this.boxTarget.classList.toggle("bg-white/60", photo)
+    this.sampleTarget.textContent = photo ? this.sampleTarget.dataset.photo : this.sampleTarget.dataset.text
     Object.assign(this.sampleTarget.style, {
-      fontFamily: `"${this.fontTarget.value}"`, color: this.colorTarget.value, textAlign: this.alignTarget.value,
-      textTransform: this.uppercaseTarget.checked ? "uppercase" : "none"
+      fontFamily: photo ? "" : `"${this.fontTarget.value}"`, color: photo ? "" : this.colorTarget.value, textAlign: photo ? "center" : this.alignTarget.value,
+      textTransform: !photo && this.uppercaseTarget.checked ? "uppercase" : "none"
     })
-    fit(this.sampleTarget, this.boxTarget)
+    fit(this.sampleTarget, this.boxTarget, photo ? 0.25 : 1)
   }
 }
 
@@ -86,8 +94,8 @@ function clamp(value, min, max) {
 
 // The largest size, up to the box's height, at which the line fits the box's width (at any size
 // of photo, a thumbnail too).
-function fit(line, box) {
-  const height = box.clientHeight
+function fit(line, box, share = 1) {
+  const height = box.clientHeight * share
   line.style.fontSize = `${height}px`
   const wide = line.scrollWidth
   line.style.fontSize = `${wide > box.clientWidth ? height * box.clientWidth / wide * 0.98 : height}px`

@@ -40,6 +40,18 @@ module StorefrontKit
     end
 
     def post(path, body = {}, idempotency_key: nil) = send_body(Net::HTTP::Post, path, body, idempotency_key)
+    # A file as multipart form data: post_file("uploads", photo: uploaded_file).
+    def post_file(path, fields)
+      uri = uri_for(path)
+      request = Net::HTTP::Post.new(uri)
+      parts = fields.map do |name, file|
+        [ name.to_s, file.respond_to?(:tempfile) ? file.tempfile : file,
+          { filename: file.respond_to?(:original_filename) ? file.original_filename : name.to_s, content_type: file.respond_to?(:content_type) ? file.content_type : "application/octet-stream" } ]
+      end
+      request.set_form(parts, "multipart/form-data")
+      parse(perform(uri, request))
+    end
+
     def patch(path, body = {}) = send_body(Net::HTTP::Patch, path, body, nil)
     def delete(path) = send_body(Net::HTTP::Delete, path, nil, nil)
 
