@@ -317,6 +317,19 @@ class PrintifyTest < ActiveSupport::TestCase
     assert order.reload.printify_order_id.present?
   end
 
+  test "a personalized order whose design is text made in Printify's editor waits, saying why" do
+    product = Printify::Import.new.call("pf-tee")
+    @printify.product_data["print_areas"].first["placeholders"].first["images"] = [ { "id" => "t-1", "layerType" => "text", "input_text" => "SARCASM", "x" => 0.5, "y" => 0.2, "scale" => 0.8 } ]
+    product.update!(print_area: { "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.6 },
+      buyer_inputs: [ { "label" => "Name", "preview" => { "x" => 0.3, "y" => 0.5, "w" => 0.4, "h" => 0.1, "font" => "Lora" } } ])
+    order = place_order(product.variant_for(%w[ Black S ]), status: "pending")
+    order.line_items.sole.update!(properties: { "name" => "Ada" })
+
+    perform_enqueued_jobs(only: Order::FulfillJob) { order.mark_paid! }
+    assert_empty @printify.orders
+    assert_match "text made there (\"SARCASM\")", order.reload.fulfillment_error
+  end
+
   test "staff can send an order with text the buyer typed as it is" do
     product = Printify::Import.new.call("pf-tee")
     order = place_order(product.variant_for(%w[ White S ]))

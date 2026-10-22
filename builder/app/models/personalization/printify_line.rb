@@ -22,8 +22,14 @@ class Personalization::PrintifyLine
   end
 
   private
-    # One of the product's own images, where it sits.
+    # One of the product's own images, where it sits. Text made in Printify's editor can't go with an
+    # order made this way: the owner uploads it as an image instead.
     def design(image)
+      if image["layerType"] == "text"
+        raise Personalization::PrintFile::Error, "#{@item.variant.product.title}'s design in Printify has text made there (\"#{image["input_text"]}\"). " \
+          "Printify takes only images with a personalized order: upload the design as an image (PNG) in Printify instead."
+      end
+
       src = image["src"].presence || @gateway.upload(image["id"])["preview_url"]
       { src:, x: image["x"], y: image["y"], scale: image["scale"], angle: image["angle"] || 0 }
     end
