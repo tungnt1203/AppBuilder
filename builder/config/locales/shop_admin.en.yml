@@ -261,7 +261,7 @@ en:
         empty_description: Add what you sell, with its photos, options and prices.
         demo:
           add: Add demo products
-          add_hint: Six sample products with mockups, to show the shop or try buying
+          add_hint: Eight sample products with mockups, to show the shop or try buying
             before yours are in. You remove them with one click.
           present: Your shop has demo products, and visitors see them. Remove them
             before you start selling.

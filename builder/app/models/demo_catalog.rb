@@ -44,9 +44,16 @@ class DemoCatalog
         description: "Museum-quality matte paper. Frame not included.", option1_name: "Size", option1_values_text: "12 × 16 in, 18 × 24 in")
       poster.variants.find_by(option1: "18 × 24 in")&.update!(price: "29", cost: "12")
       tote = product("Plant Person Tote", price: "18", cost: "8", photos: %w[ plant-tote ], description: "Sturdy natural canvas tote, 15 × 16 in.")
+      sweatshirt = product("Slow Mornings Sweatshirt", price: "38", cost: "18", photos: %w[ slow-mornings-sweatshirt ],
+        description: "Soft crewneck sweatshirt in sage, for unhurried starts. Printed to order.",
+        option1_name: "Size", option1_values_text: "S, M, L, XL", size_guide: TEE_SIZES)
+      stickers = product("Good Vibes Sticker Pack", price: "9", cost: "3.50", photos: %w[ good-vibes-stickers ],
+        description: "Three kiss-cut vinyl stickers, waterproof and laptop ready.")
 
-      Collection.create!(title: "Demo: Graphic tees", demo: true).arrange_products([ tee.id, sunset.id, hoodie.id ])
-      Collection.create!(title: "Demo: Gifts", demo: true).arrange_products([ mug.id, tote.id, poster.id ])
+      # Four products each and three collections, so grids and tiles fill their rows.
+      Collection.create!(title: "Apparel", demo: true).arrange_products([ tee.id, sunset.id, hoodie.id, sweatshirt.id ])
+      Collection.create!(title: "Gifts", demo: true).arrange_products([ mug.id, tote.id, poster.id, stickers.id ])
+      Collection.create!(title: "Cozy picks", demo: true).arrange_products([ hoodie.id, sweatshirt.id, mug.id, poster.id ])
     end
     Product.where(demo: true).count
   end

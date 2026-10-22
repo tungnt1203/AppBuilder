@@ -12,6 +12,7 @@
               <span class="block truncate text-sm font-medium text-ink"><%= collection.title %></span>
               <span class="block truncate text-xs text-muted">/collections/<%= collection.slug %></span>
             </span>
+            <% if collection.demo? %><%= badge t("shop_admin.products.index.demo.badge"), tone: :yellow %><% end %>
             <span class="text-sm text-muted"><%= t(".products", count: collection.products_count) %></span>
           <% end %>
         </li>

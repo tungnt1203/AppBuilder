@@ -40,11 +40,11 @@ module Evaluation
 
     STAND_IN = <<~TEXT
       The shop had no products yet (its owner imports theirs from Printify later), so the reviewer
-      put in six demo products with stock mockups, in two collections whose names start with
-      "Demo:", to see the product grids and pages. Judge the grids, collections and product page by
+      put in eight demo products with stock mockups, in three demo collections (Apparel, Gifts, Cozy
+      picks), to see the product grids and pages. Judge the grids, collections and product page by
       their layout and parts (photos, options, price, button, size guide, delivery), not by those
-      products' designs, photos or names; they aren't the owner's products and don't count against
-      what they asked for.
+      products' designs, photos or names or by those collections: they aren't the owner's and don't
+      count against what they asked for.
     TEXT
 
     # Share of what was asked that the app visibly does, leaving out what can't be seen.

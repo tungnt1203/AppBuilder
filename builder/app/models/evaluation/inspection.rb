@@ -84,7 +84,7 @@ module Evaluation
       end
 
       # A shop starts without products until the owner imports theirs from Printify, so the demo
-      # products (DemoCatalog: six with mockups, options, prices and a size guide, in two
+      # products (DemoCatalog: eight with mockups, options, prices and a size guide, in three
       # collections) are put in its shop on the Platform, for the grids, collections and product
       # page, where ads land, to be seen and judged full. A shop with products of its own is left as
       # it is. Returns the product to open: the demo tee, which has colors, sizes and a size guide.
