@@ -42,6 +42,119 @@ end
 require "ferrum"
 require "openssl"
 
+# Another site, measured rather than seen: its fonts and sizes, colors, buttons, header, its
+# sections in order (height, background, heading, grids: columns, gap, image ratio) and, on a
+# product page, where the photos sit and what the buy box holds. Printed for a site the owner shows.
+ANATOMY = <<~'JS'
+  (() => {
+    const px = (v) => Math.round(parseFloat(v) || 0)
+    const visible = (el) => { const b = el.getBoundingClientRect(); const s = getComputedStyle(el); return b.width > 0 && b.height > 0 && s.visibility !== "hidden" && s.display !== "none" && s.opacity !== "0" }
+    const color = (c) => {
+      const m = c && c.match(/rgba?\(([^)]+)\)/); if (!m) return null
+      const [r, g, b, a = 1] = m[1].split(/[ ,/]+/).filter(Boolean).map(Number)
+      if (a === 0) return null
+      return "#" + [r, g, b].map((n) => Math.round(n).toString(16).padStart(2, "0")).join("") + (a < 1 ? ` ${Math.round(a * 100)}%` : "")
+    }
+    const bgOf = (el) => { for (let e = el; e; e = e.parentElement) { const c = color(getComputedStyle(e).backgroundColor); if (c) return c } return "#ffffff" }
+    const edge = (el) => { const st = getComputedStyle(el); return px(st.borderTopWidth) ? `border ${px(st.borderTopWidth)}px ${color(st.borderTopColor)}` : st.boxShadow !== "none" && /inset|0px 0px 0px/.test(st.boxShadow) ? "outlined" : "no border" }
+    const font = (el) => { if (!el) return null; const s = getComputedStyle(el); return `${s.fontFamily.split(",")[0].replace(/["']/g, "")} ${px(s.fontSize)}px/${s.lineHeight === "normal" ? "normal" : px(s.lineHeight) + "px"} weight ${s.fontWeight}${s.textTransform !== "none" ? " " + s.textTransform : ""}${parseFloat(s.letterSpacing) ? ` tracking ${s.letterSpacing}` : ""}` }
+    const first = (sel, root = document) => [...root.querySelectorAll(sel)].find(visible)
+    const W = innerWidth, out = []
+    const text = (el) => (el?.innerText || "").replace(/\s+/g, " ").trim()
+
+    out.push(`page: ${W}px wide, ${document.documentElement.scrollHeight}px tall; canvas ${bgOf(document.body)}, text ${color(getComputedStyle(document.body).color)}`)
+    const fonts = new Set([...document.querySelectorAll("h1,h2,h3,p,a,button,span")].filter(visible).slice(0, 400).map((e) => getComputedStyle(e).fontFamily.split(",")[0].replace(/["']/g, "")))
+    out.push(`font families: ${[...fonts].slice(0, 5).join(", ")}`)
+    const type = { h1: first("h1"), h2: first("h2"), h3: first("h3"), body: first("main p, p"), "nav link": first("header nav a, header a[href]:not([href='/'])") }
+    Object.entries(type).forEach(([k, el]) => el && out.push(`  ${k}: ${font(el)}, ${color(getComputedStyle(el).color)}`))
+
+    const button = [...document.querySelectorAll("a,button")].filter(visible).find((b) => { const s = getComputedStyle(b); return (color(s.backgroundColor) || parseFloat(s.borderTopWidth) > 0) && px(s.paddingLeft) >= 12 && text(b).length > 2 && text(b).length < 30 })
+    if (button) { const s = getComputedStyle(button); out.push(`button: bg ${color(s.backgroundColor) || "none"}, text ${color(s.color)}, ${edge(button)}, radius ${s.borderRadius}, padding ${s.paddingTop} ${s.paddingLeft}, ${font(button)}`) }
+
+    const header = first("header") || first("[class*=header]")
+    if (header) {
+      const b = header.getBoundingClientRect(), logo = first("a[href='/'] img, a[href='/'], [class*=logo]", header)
+      const lb = logo?.getBoundingClientRect()
+      const links = [...header.querySelectorAll("nav a, nav summary")].filter(visible)
+      const icons = [...header.querySelectorAll("a,button,summary")].filter(visible).filter((e) => !text(e) && e.querySelector("svg,img"))
+      out.push(`header: ${px(b.height)}px tall, bg ${bgOf(header)}, ${getComputedStyle(header).position}${header.closest("[class*=sticky]") || getComputedStyle(header).position === "sticky" ? " (sticky)" : ""}; logo ${lb ? (lb.left + lb.width / 2 < W * 0.4 ? "left" : lb.left + lb.width / 2 > W * 0.6 ? "right" : "centered") + `, ${px(lb.height)}px tall` : "?"}; ${links.length} nav links${links[0] ? ` (${links[0].getBoundingClientRect().top - b.top > b.height * 0.6 ? "below the logo" : "beside the logo"})` : ""}; ${icons.length} icon buttons`)
+    }
+    const bar = first("[class*=announcement]")
+    if (bar) out.push(`announcement bar: ${px(bar.getBoundingClientRect().height)}px, bg ${bgOf(bar)}, ${font(first("p,span,a", bar) || bar)}`)
+
+    // Sections in order: the page's top-level blocks below the header.
+    let root = first("main") || document.body
+    while (root.children.length === 1) root = root.children[0]
+    // Wrappers (a React app's layers, a long container) are opened up into what they hold.
+    const kidsOf = (el) => [...el.children].filter((e) => visible(e) && e.getBoundingClientRect().height > 30)
+    const blocksOf = (el, depth) => kidsOf(el).flatMap((e) => {
+      let inner = e
+      while (kidsOf(inner).length === 1) inner = kidsOf(inner)[0]
+      return depth < 6 && e.getBoundingClientRect().height > innerHeight * 1.5 && kidsOf(inner).length >= 2 ? blocksOf(inner, depth + 1) : [ e ]
+    })
+    const blocks = blocksOf(root, 0)
+    out.push(`sections (${blocks.length}, top to bottom):`)
+    blocks.slice(0, 20).forEach((sec, i) => {
+      const b = sec.getBoundingClientRect(), s = getComputedStyle(sec)
+      const name = ((sec.id || "").replace(/shopify-section-(template--\d+__)?/, "").replace(/_[A-Za-z0-9]{6,}$/, "") || sec.className.toString().split(" ")[0] || sec.localName).replace(/-styled__.*|-sc-[\w-]+$/, "").replace(/^[0-9a-f]{12,}\w*$/, "section")
+      const heading = first("h1,h2,h3", sec)
+      const imgs = [...sec.querySelectorAll("img")].filter(visible)
+      const big = imgs.filter((im) => im.getBoundingClientRect().width > W * 0.8)
+      let inner = [...sec.querySelectorAll("*")].filter(visible).map((e) => e.getBoundingClientRect()).filter((r) => r.width < W - 2 && r.width > W * 0.4)
+      const content = inner.length ? Math.max(...inner.map((r) => r.width)) : b.width
+      const parts = [`${i + 1}. ${name}: ${px(b.height)}px tall, bg ${bgOf(sec)}`]
+      if (big.length) parts.push(`full-width image ${px(big[0].getBoundingClientRect().width)}x${px(big[0].getBoundingClientRect().height)}`)
+      if (heading) { const hs = getComputedStyle(heading); parts.push(`heading ${font(heading)} ${hs.textAlign}, "${text(heading).slice(0, 40)}"`) }
+      // A grid: the element with the most similar children that hold images or links.
+      const grids = [...sec.querySelectorAll("ul,ol,div")].filter(visible).map((g) => {
+        const kids = [...g.children].filter(visible)
+        const rows = new Set(kids.map((k) => px(k.getBoundingClientRect().top)))
+        return { g, kids, cols: kids.filter((k) => px(k.getBoundingClientRect().top) === px(kids[0]?.getBoundingClientRect().top)).length, rows: rows.size }
+      }).filter((x) => x.kids.length >= 2 && x.cols >= 2 && x.kids.every((k) => k.querySelector("img,a")))
+        .sort((a, z) => z.kids.length - a.kids.length)
+      const grid = grids[0]
+      if (grid) {
+        const card = grid.kids[0], cb = card.getBoundingClientRect(), im = [...card.querySelectorAll("img")].find(visible)
+        const ib = im?.getBoundingClientRect(), gs = getComputedStyle(grid.g)
+        const t = [...card.querySelectorAll("a,h2,h3,p,span,div")].filter((e) => visible(e) && e.children.length === 0 && text(e).length > 3)
+        parts.push(`grid of ${grid.kids.length} in ${grid.cols} columns, gap ${gs.columnGap === "normal" ? px(grid.kids[1].getBoundingClientRect().left - cb.right) + "px" : gs.columnGap}, card ${px(cb.width)}px` +
+          (ib ? `, image ${(ib.width / ib.height).toFixed(2)} (w/h) on ${bgOf(im)}, ${getComputedStyle(im).objectFit}, radius ${getComputedStyle(im).borderRadius}` : "") +
+          (t[0] ? `; card text: ${t.slice(0, 3).map((e) => font(e)).join(" | ")}` : ""))
+      }
+      const btn = [...sec.querySelectorAll("a,button")].filter(visible).find((x) => { const st = getComputedStyle(x); return (color(st.backgroundColor) || parseFloat(st.borderTopWidth) > 0) && px(st.paddingLeft) >= 12 })
+      if (btn) parts.push(`button "${text(btn).slice(0, 20)}"`)
+      if (s.paddingTop !== "0px") parts.push(`padding ${s.paddingTop} ${s.paddingBottom}`)
+      parts.push(`content ${px(content)}px wide`)
+      out.push("  " + parts.join("; "))
+    })
+    // A product page: where the photos sit, and what the buy box holds, top to bottom.
+    const add = [...document.querySelectorAll("button,input[type=submit],a")].filter(visible).find((e) => /add to (cart|bag|basket)|buy now|sold out/i.test(text(e) || e.value || ""))
+    if (add) {
+      let box = add; while (box.parentElement && box.getBoundingClientRect().height < 300) box = box.parentElement
+      const bb = box.getBoundingClientRect()
+      const photos = [...document.images].filter((im) => visible(im) && im.getBoundingClientRect().width > W * 0.25 && !box.contains(im))
+      const pb = photos[0]?.getBoundingClientRect()
+      const thumbs = [...document.images].filter((im) => visible(im) && im.getBoundingClientRect().width < 120 && im.getBoundingClientRect().width > 30 && !box.contains(im))
+      if (pb) out.push(`product page: photos ${pb.right <= bb.left + 4 ? "left of" : pb.left >= bb.right - 4 ? "right of" : pb.bottom <= bb.top + 4 ? "above" : "around"} the buy box; main photo ${px(pb.width)}x${px(pb.height)} (${(pb.width / pb.height).toFixed(2)} w/h)${photos.length > 1 ? `, ${photos.length} large photos ${Math.abs(photos[1].getBoundingClientRect().top - pb.top) < 4 ? "side by side (a swipe row)" : "stacked"}` : ""}${thumbs.length ? `, ${thumbs.length} thumbnails` : ""}; buy box ${px(bb.width)}px wide${getComputedStyle(box).position === "sticky" || box.closest("[class*=sticky]") ? ", sticky" : ""}`)
+      const items = [...box.querySelectorAll("h1,[class*=price],fieldset,select,input[type=number],[class*=quantity],button,details,[role=tab],[class*=accordion] summary")].filter(visible)
+      const seen = new Set(), order = []
+      items.forEach((e) => {
+        const label = e.matches("h1") ? `title ${font(e)}` : /price/.test(e.className) ? `price ${font(first("*", e) || e)}` :
+          e.matches("fieldset") ? `option "${text(e.querySelector("legend")).slice(0, 15)}" as ${e.querySelector("input[type=radio]") ? `buttons (radius ${getComputedStyle(e.querySelector("label") || e).borderRadius})` : "a menu"}` :
+          e.matches("select") ? "option as a menu" : e.matches("input[type=number],[class*=quantity]") ? "quantity" :
+          e.matches("details,summary,[role=tab]") ? "accordion" :
+          e.matches("button") && text(e).length > 2 ? `button "${text(e).slice(0, 20)}" (bg ${color(getComputedStyle(e).backgroundColor) || "none"}, ${edge(e)}, radius ${getComputedStyle(e).borderRadius})` : null
+        const kind = label?.split(" ")[0]
+        if (label && !seen.has(kind === "price" || kind === "quantity" || kind === "accordion" ? kind : label)) { seen.add(kind === "price" || kind === "quantity" || kind === "accordion" ? kind : label); order.push(label) }
+      })
+      out.push(`  buy box, top to bottom: ${order.slice(0, 14).join("; ")}`)
+    }
+    const footer = first("footer") || first("[class*=footer]")
+    if (footer) out.push(`footer: ${px(footer.getBoundingClientRect().height)}px, bg ${bgOf(footer)}, ${footer.querySelectorAll("h2,h3,h4").length} column headings, ${footer.querySelectorAll("a").length} links`)
+    return out.join("\n")
+  })()
+JS
+
 browser_options = { "no-sandbox" => nil }
 # In the builder's container, localhost is the container, but the shop's photos are at the
 # Platform's address for buyers' browsers (localhost:3000), on the host. The preview is at 127.0.0.1.
@@ -93,6 +206,14 @@ paths.each do |path|
       begin
         browser.network.wait_for_idle(timeout: 5)
       rescue Ferrum::TimeoutError
+      end
+      anatomy = begin
+        browser.execute("window.scrollTo(0, 0)")
+        sleep 0.5
+        browser.evaluate(ANATOMY).to_s
+      rescue Ferrum::Error => error
+        notes << "couldn't measure it (#{error.class.name.split("::").last}); go by the screenshots"
+        nil
       end
       if size == options[:sizes].keys.first && !URI(path).path.include?("/products/")
         product = browser.evaluate(<<~JS)
@@ -178,6 +299,10 @@ paths.each do |path|
     puts "#{path} (#{size} #{width}px): #{report.empty? ? "ok" : "#{report.size} problem#{"s" if report.size > 1}"}"
     report.each { |line| puts "  - #{line}" }
     notes.each { |line| puts "  · #{line}" }
+    if external.(path) && anatomy && !anatomy.empty?
+      puts "  measured from the page (match these):"
+      anatomy.each_line { |line| puts "    #{line.rstrip}" }
+    end
     puts "  screenshots: #{files.map { |file| file.delete_prefix(root + "/") }.join(", ")}"
     puts "  · the page is #{total} screens long; only the first #{files.size} were taken (--screens #{total} for all)" if files.size < total
 

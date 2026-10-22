@@ -143,8 +143,16 @@ sees a template. Check them all (section 6).
 
 **Copying a site the owner shows.** "Make it like this" means a buyer who knows that site would
 recognize it. Before deciding anything:
-- See all of it: `bin/look <url>` (the whole home page, at phone and desktop) and the product page
-  it suggests, and Read every screenshot. A screenshot the owner sends counts the same.
+- Go through all of it: `bin/look <url>` (the whole home page, at phone and desktop) and the
+  product page it suggests. Besides screenshots (Read every one), it prints what it measured from
+  the page itself: fonts with their sizes and weights, colors, buttons, the header, the sections in
+  order (height, background, heading, grids with columns, gaps and image ratios) and, on a product
+  page, where the photos sit and what the buy box holds, in order. A screenshot the owner sends
+  counts the same, without the numbers.
+- Build to those numbers at both widths: the same font (or the nearest Google font) at the same
+  sizes and weights, the same section order and heights, columns, gaps, image ratios, corners and
+  button shapes, the same buy box order. Then `bin/look` your pages and compare them with the
+  site's screenshots and numbers before you finish.
 - Match it closely, not loosely: the same kind of type (a plain sans stays a sans: the nearest
   Google font), the same canvas (white stays white), the same spacing, corners and borders, the
   same header, its sections in its order (those the shop can fill), its product cards (photo ratio,
