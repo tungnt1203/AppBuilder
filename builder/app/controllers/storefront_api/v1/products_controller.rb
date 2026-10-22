@@ -10,8 +10,8 @@ class StorefrontApi::V1::ProductsController < StorefrontApi::V1::BaseController
   PER_PAGE = 24
 
   def index
-    products = Product.visible.search(params[:q]).merge(SORTS.fetch(params[:sort].to_s) { SORTS["newest"] }.call)
-    products = products.where(id: Collection.find_by!(slug: params[:collection]).products) if params[:collection].present?
+    products = visible_products.search(params[:q]).merge(SORTS.fetch(params[:sort].to_s) { SORTS["newest"] }.call)
+    products = products.where(id: visible_collections.find_by!(slug: params[:collection]).products) if params[:collection].present?
     total = products.count
     per = params.fetch(:per_page, PER_PAGE).to_i.clamp(1, 100)
     page = params.fetch(:page, 1).to_i.clamp(1, [ (total.to_f / per).ceil, 1 ].max)
@@ -22,7 +22,7 @@ class StorefrontApi::V1::ProductsController < StorefrontApi::V1::BaseController
   end
 
   def show
-    product = Product.visible.with_attached_images.includes(:variants, :collections).find_by!(slug: params[:id])
+    product = visible_products.with_attached_images.includes(:variants, :collections).find_by!(slug: params[:id])
     render json: { product: json.product(product) }
   end
 end

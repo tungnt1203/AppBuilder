@@ -83,15 +83,16 @@ module Evaluation
         0
       end
 
-      # A shop starts without products until the owner imports theirs from Printify, so the demo
-      # products (DemoCatalog: eight with mockups, options, prices and a size guide, in three
-      # collections) are put in its shop on the Platform, for the grids, collections and product
-      # page, where ads land, to be seen and judged full. A shop with products of its own is left as
-      # it is. Returns the product to open: the demo tee, which has colors, sizes and a size guide.
+      # A shop starts without products until the owner imports theirs from Printify, so it shows
+      # the demo products (DemoCatalog: eight with mockups, options, prices and a size guide, in
+      # three collections), for the grids, collections and product page, where ads land, to be
+      # seen and judged full. Its shop got them when it opened; they're added here if they were
+      # removed. A shop with products of its own is left as it is. Returns the product to open:
+      # the demo tee, which has colors, sizes and a size guide.
       def stock_shop
         shop = @project.shop or return
         ActsAsTenant.with_tenant(shop) do
-          return Product.visible.first if Product.visible.exists?
+          return Product.visible.first if Product.visible.where(demo: false).exists?
 
           DemoCatalog.add!
           @stocked = true

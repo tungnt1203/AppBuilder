@@ -20,7 +20,7 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     post shop_admin_demo_products_path
     assert_redirected_to shop_admin_products_path
     follow_redirect!
-    assert_select "[role=status]", /demo products, and visitors see them/
+    assert_select "[role=status]", /demo products. Only the builder.s preview shows them/
     assert_select "button", "Remove demo products"
 
     delete shop_admin_demo_products_path

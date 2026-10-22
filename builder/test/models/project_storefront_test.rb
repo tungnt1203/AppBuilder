@@ -14,12 +14,13 @@ class ProjectStorefrontTest < ActiveSupport::TestCase
     Rails.configuration.x.platform_url, Rails.configuration.x.platform_url_from_containers = @originals
   end
 
-  test "a storefront opens its own shop once, for the owner, at the project's address" do
+  test "a storefront opens its own shop once, for the owner, at the project's address, with the demo products" do
     with_projects_root do
       shop = @project.ensure_shop!
       assert_equal [ "Shop", "shop", "owner" ], [ shop.name, shop.subdomain, shop.role_of(users(:owner)) ]
       assert_equal "shop", @project.reload.subdomain
       assert_equal shop, @project.ensure_shop!
+      assert_equal 8, ActsAsTenant.with_tenant(shop) { Product.where(demo: true).count }, "the preview has products to show"
     end
   end
 

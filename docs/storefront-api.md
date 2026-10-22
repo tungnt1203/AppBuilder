@@ -10,7 +10,8 @@ What a shop's storefront calls to show the shop and take its orders. It runs on 
   - `sk_shop_…` is for the published storefront.
   - `sk_preview_…` is for the builder's preview. Its orders are **test orders**: they are never
     sent to Printify, never reported to Meta and never counted in sales. They can only be paid in
-    Stripe's test mode.
+    Stripe's test mode. Until the shop has products of its own, it also lists the shop's demo
+    products and collections (marked `demo` in the admin); `sk_shop_…` keys never see them.
 - **JSON** in and out. Send bodies with `Content-Type: application/json`.
 - **Money** is in cents, with its `currency`: `{ "subtotal_cents": 4800, "currency": "USD" }`.
 - **Photos** come as absolute URLs in three sizes: `{ "id", "alt", "thumb", "card", "large" }`

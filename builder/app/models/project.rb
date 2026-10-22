@@ -78,6 +78,8 @@ class Project < ApplicationRecord
       subdomain = self.subdomain || subdomain_for(name)
       opened = Shop.open!(owner:, name: name.delete_suffix("…").first(100), subdomain: shop_subdomain(subdomain), currency: "USD")
       update!(shop: opened, subdomain: opened.subdomain)
+      # So the agent sees product grids and pages while it builds; only the preview shows them.
+      ActsAsTenant.with_tenant(opened) { DemoCatalog.add! }
       BusinessSyncJob.perform_later(opened, owner) if owner&.business_setting&.configured?
       opened
     end

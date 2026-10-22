@@ -29,6 +29,21 @@ class StorefrontApi::V1::BaseController < ActionController::API
     end
 
     def current_shop = ActsAsTenant.current_tenant
+
+    # What the storefront shows. Demo products and collections (DemoCatalog) stand in for the shop's
+    # own in the builder's preview until it has some; a published storefront never shows them.
+    def visible_products
+      demo_shown? ? Product.visible : Product.visible.where(demo: false)
+    end
+
+    def visible_collections
+      demo_shown? ? Collection.all : Collection.where(demo: false)
+    end
+
+    def demo_shown?
+      @demo_shown = api_key.preview? && !Product.visible.where(demo: false).exists? unless defined?(@demo_shown)
+      @demo_shown
+    end
     def store = @store ||= Store.current
 
     def json

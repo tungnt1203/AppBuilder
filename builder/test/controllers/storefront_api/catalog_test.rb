@@ -144,4 +144,26 @@ class StorefrontApi::CatalogTest < ActionDispatch::IntegrationTest
     api :get, storefront_api_product_path("cat-mom-tee"), headers: { "If-None-Match" => etag }
     assert_response :not_modified
   end
+
+  test "demo products show only in the preview, and only until the shop has products of its own" do
+    preview = api_key_for(kind: "preview")
+    ActsAsTenant.with_tenant(shops(:cats)) { DemoCatalog.add! }
+    demo_tee, demo_variant = ActsAsTenant.with_tenant(shops(:cats)) { Product.find_by!(title: "Good Things Tee").then { |tee| [ tee, tee.variants.first ] } }
+
+    titles = ->(key) { api(:get, storefront_api_products_path, key:)["products"].pluck("title") }
+    collections = ->(key) { api(:get, storefront_api_collections_path, key:)["collections"].pluck("title") }
+    assert_not_includes titles.(@api_key), "Good Things Tee"
+    assert_not_includes collections.(@api_key), "Apparel"
+    api :get, storefront_api_product_path(demo_tee.slug)
+    assert_response :not_found
+    token = api(:post, storefront_api_carts_path)["cart"]["token"]
+    api :post, storefront_api_cart_items_path(token), params: { variant_id: demo_variant.id }
+    assert_response :conflict
+
+    assert_not_includes titles.(preview), "Good Things Tee", "the shop has products of its own"
+    ActsAsTenant.with_tenant(shops(:cats)) { Product.where(demo: false).destroy_all }
+    assert_includes titles.(preview), "Good Things Tee"
+    assert_includes collections.(preview), "Apparel"
+    assert_not_includes titles.(@api_key), "Good Things Tee"
+  end
 end

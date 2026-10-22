@@ -1,7 +1,9 @@
 # A few print-on-demand products with mockups, colors, sizes, a size guide and Printify-like
-# costs, that the owner adds from /admin (Products, "Add demo products") to show the shop, or try
-# buying, before their own products are in. They're marked `demo` and removed together. Only
-# the owner adds or removes them; they're never added by themselves.
+# costs, so a new shop's preview has products to show and try buying before the owner's are in.
+# A builder project's shop gets them when it opens (Project#ensure_shop!); the owner adds them
+# again or removes them from /admin (Products). They're marked `demo` and removed together. Only
+# the builder's preview shows them, and only until the shop has products of its own
+# (StorefrontApi::V1::BaseController#visible_products): a published storefront never does.
 class DemoCatalog
   IMAGES = Rails.root.join("lib/platform/demo")
   TEE_SIZES = <<~GUIDE.strip
