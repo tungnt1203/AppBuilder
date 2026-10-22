@@ -8,7 +8,7 @@
 <header class="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
   <div class="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4">
     <% unless content_for?(:focused) %>
-    <div class="md:hidden" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape">
+    <div class="md:hidden" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape turbo:before-cache@document->menu#hide">
       <button type="button" class="<%= button_classes(:ghost) %> group -ml-2" data-menu-target="button" data-action="menu#toggle" aria-expanded="false" aria-label="<%= t("ui.menu") %>">
         <%= icon "menu", size: 22, class: "group-aria-expanded:hidden" %>
         <%= icon "x", size: 22, class: "hidden group-aria-expanded:block" %>

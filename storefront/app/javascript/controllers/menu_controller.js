@@ -11,15 +11,19 @@ export default class extends Controller {
   close(event) {
     if (this.element.contains(event.target)) return
 
-    this.panelTarget.classList.add("hidden")
-    this.buttonTarget.setAttribute("aria-expanded", "false")
+    this.hide()
   }
 
   escape(event) {
     if (event.key !== "Escape" || this.panelTarget.classList.contains("hidden")) return
 
+    this.hide()
+    this.buttonTarget.focus()
+  }
+
+  // Closed before Turbo caches the page, so going back doesn't show the menu still open.
+  hide() {
     this.panelTarget.classList.add("hidden")
     this.buttonTarget.setAttribute("aria-expanded", "false")
-    this.buttonTarget.focus()
   }
 }
