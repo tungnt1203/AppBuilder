@@ -7,7 +7,6 @@ require "ferrum"
 module Evaluation
   class Inspection
     MAX_PAGES = 5
-    FIXTURES = Rails.root.join("eval/fixtures")
     # The storefront's buying steps and Rails' internals; the pages the agent made are the point.
     SKIP = %r{\A/(checkout|cart_items|zip_codes|feeds|rails|up|_blocks|_preview|cable|assets|recede_historical_location|resume_historical_location|refresh_historical_location|service-worker|manifest)(/|\z)}
 
@@ -15,7 +14,7 @@ module Evaluation
 
     attr_reader :shots
 
-    # Whether the eval put in the shop's product (see #stock_shop), for the judge to know it isn't
+    # Whether the eval put in the shop's products (see #stock_shop), for the judge to know it isn't
     # the storefront's.
     def stocked? = @stocked
 
@@ -84,30 +83,22 @@ module Evaluation
         0
       end
 
-      # A shop starts without products until the owner imports theirs from Printify, so one
-      # product is put in its shop on the Platform as an import would (options, prices, costs, a
-      # mockup per color, a size guide), for the product page, where ads land, to be seen and
-      # judged. A shop with products of its own is left as it is. Returns the shop's first product.
+      # A shop starts without products until the owner imports theirs from Printify, so the demo
+      # products (DemoCatalog: six with mockups, options, prices and a size guide, in two
+      # collections) are put in its shop on the Platform, for the grids, collections and product
+      # page, where ads land, to be seen and judged full. A shop with products of its own is left as
+      # it is. Returns the product to open: the demo tee, which has colors, sizes and a size guide.
       def stock_shop
         shop = @project.shop or return
         ActsAsTenant.with_tenant(shop) do
           return Product.visible.first if Product.visible.exists?
 
-          tee = Product.create!(title: "Classic Tee", status: "active", base_price: "24", printify_product_id: "eval-tee",
-            description: "Soft, lightweight cotton tee with a classic fit.\n\n- 100% ring-spun cotton\n- Printed to order",
-            option1_name: "Color", option1_values_text: "Black, White", option2_name: "Size", option2_values_text: "S, M, L, XL, 2XL",
-            size_guide: "Size | Chest (in) | Length (in)\nS | 18 | 28\nM | 20 | 29\nL | 22 | 30\nXL | 24 | 31\n2XL | 26 | 32")
-          tee.variants.each { |variant| variant.update!(cost: "11.50", printify_variant_id: variant.id) }
-          tee.variants.where(option2: "2XL").find_each { |variant| variant.update!(price: "27") }
-          %w[ black white ].each do |color|
-            tee.images.attach(io: FIXTURES.join("tee-#{color}.jpg").open, filename: "classic-tee-#{color}.jpg", content_type: "image/jpeg")
-          end
-          tee.save!
+          DemoCatalog.add!
           @stocked = true
-          tee
+          Product.where(demo: true).order(:id).first
         end
       rescue ActiveRecord::ActiveRecordError => error
-        Rails.logger.warn "Eval: couldn't add a product to #{@project.slug}'s shop: #{error.message.truncate(300)}"
+        Rails.logger.warn "Eval: couldn't add the demo products to #{@project.slug}'s shop: #{error.message.truncate(300)}"
         nil
       end
 
