@@ -7,7 +7,7 @@
 #   bin/look                      the home page, as a visitor
 #   bin/look / /products /cart   several pages
 #   bin/look / --phone            only at phone width (or --desktop)
-#   bin/look / --screens 6        more of a long page (default: the first 3 screens)
+#   bin/look / --screens 6        more of a long page (default: the first 3 screens, 6 of another site)
 #   bin/look https://example.com  another site (one the owner likes, say): only screenshots
 #
 # Each screenshot is one screen as a visitor sees it, top first, so the text stays readable.
@@ -18,12 +18,12 @@ require "optparse"
 require "net/http"
 require "fileutils"
 
-options = { screens: 3, sizes: { "phone" => [ 390, 844 ], "desktop" => [ 1280, 800 ] } }
+options = { screens: nil, sizes: { "phone" => [ 390, 844 ], "desktop" => [ 1280, 800 ] } }
 OptionParser.new do |parser|
   parser.banner = "Usage: bin/look [paths] [--phone|--desktop]"
   parser.on("--phone", "Only at phone width (390)") { options[:sizes] = options[:sizes].slice("phone") }
   parser.on("--desktop", "Only at desktop width (1280)") { options[:sizes] = options[:sizes].slice("desktop") }
-  parser.on("--screens N", Integer, "Screens to capture per page, from the top (default 3)") { |count| options[:screens] = count.clamp(1, 20) }
+  parser.on("--screens N", Integer, "Screens to capture per page, from the top (default 3, 6 of another site)") { |count| options[:screens] = count.clamp(1, 20) }
 end.parse!
 
 external = ->(path) { path.match?(%r{\Ahttps?://}i) }
@@ -81,6 +81,22 @@ paths.each do |path|
     if external.(path)
       title = browser.evaluate("document.title").to_s.strip
       notes << "another site#{": #{title}" unless title.empty?}; only screenshots, its problems aren't checked"
+      # Sites load photos and fade sections in as they scroll into view: go down the page once
+      # first, or the screenshots show blank or half-faded product grids.
+      browser.evaluate("document.documentElement.scrollHeight").to_i.then { |height| (0..height).step(400).first(60) }.each do |y|
+        browser.execute("window.scrollTo(0, #{y})")
+        sleep 0.1
+      end
+      begin
+        browser.network.wait_for_idle(timeout: 5)
+      rescue Ferrum::TimeoutError
+      end
+      if size == options[:sizes].keys.first && !URI(path).path.include?("/products/")
+        product = browser.evaluate(<<~JS)
+          [...document.querySelectorAll("a[href*='/products/']")].map((link) => link.href).find((href) => href.startsWith(location.origin))
+        JS
+        notes << "one of its product pages, to see that too: bin/look #{product.split(/[?#]/).first}" if product
+      end
     else
       landed = URI(browser.current_url).path
       document = browser.network.traffic.find { |exchange| exchange.request&.type == "Document" && exchange.response }
@@ -143,11 +159,12 @@ paths.each do |path|
     JS
     page_height, step = pane ? [ pane["height"].to_i, pane["view"].to_i ] : [ browser.evaluate("document.documentElement.scrollHeight").to_i, height ]
     total = [ (page_height.to_f / step).ceil, 1 ].max
-    files = (0...[ total, options[:screens] ].min).map do |index|
+    screens = options[:screens] || (external.(path) ? 6 : 3) # a reference is looked at whole
+    files = (0...[ total, screens ].min).map do |index|
       # Scrolled there first, so sticky headers and lazy images show as a visitor sees them.
       top = [ index * step, page_height - step ].min.clamp(0..)
       browser.execute(pane ? "document.querySelector('#main').scrollTop = #{top}" : "window.scrollTo(0, #{top})")
-      sleep 0.3 if index > 0
+      sleep(external.(path) ? 1 : 0.3) if index > 0 || external.(path) # another site's fade-ins take longer
       File.join(out, "#{name}-#{index + 1}.png").tap do |file|
         browser.screenshot(path: file, area: { x: 0, y: pane ? 0 : top, width:, height: })
       end

@@ -66,8 +66,9 @@ header, the order of sections, how photos and type are framed. Never its words, 
 | **Soft natural**: pale tinted canvas, pastel gradient cards, very round corners (`rounded-3xl`); Plus Jakarta Sans or Quicksand; close-up photos in soft light with a floating text card over them | skincare, self-care, baby, wellness, tea | https://theme-sense-demo.myshopify.com, https://theme-refresh-demo.myshopify.com |
 | **Warm handmade**: cream canvas, terracotta, sage or mustard, a soft serif (Fraunces, Lora) with Nunito; gentle corners, a paper grain on bands of color; the maker's story beside a photo of hands at work | mugs, coffee, crafts, local makers, slow fashion | https://theme-craft-demo.myshopify.com |
 
-Say in DESIGN.md which style you started from and what you changed. When the owner shows another
-site or names a feel, that wins over the table.
+Say in DESIGN.md which style you started from and what you changed. When the owner names a feel,
+that wins over the table. When the owner shows a site (a link or a screenshot), skip the table
+altogether: that site is the direction ("Copying a site the owner shows", section 5).
 
 ## 2. Make it the theme
 
@@ -140,11 +141,22 @@ it: home, all products, a product, a collection, the cart, checkout, the order p
 and contact pages, header and footer. A buyer who taps a product and lands on the starting look
 sees a template. Check them all (section 6).
 
-**A reference is a layout, not a palette.** When the owner shows a site or a screenshot, take what
-makes it recognizable: the order of sections, the header (centered logo, mega menu, announcement
-bar), how product cards look (photo ratio, hover image, badges, price position), the product page
-(gallery beside or above, sticky buy box, accordions), the type scale and spacing, as well as the
-colors. Rebuild those in the views; don't only change the theme.
+**Copying a site the owner shows.** "Make it like this" means a buyer who knows that site would
+recognize it. Before deciding anything:
+- See all of it: `bin/look <url>` (the whole home page, at phone and desktop) and the product page
+  it suggests, and Read every screenshot. A screenshot the owner sends counts the same.
+- Match it closely, not loosely: the same kind of type (a plain sans stays a sans: the nearest
+  Google font), the same canvas (white stays white), the same spacing, corners and borders, the
+  same header, its sections in its order (those the shop can fill), its product cards (photo ratio,
+  the background behind photos, badges, where the price sits) and its product page (gallery, buy
+  box, accordions). Rebuild those in the views; don't only change the theme.
+- Add nothing of your own: no style from the table, no signature, grain or extra sections it
+  doesn't have. "Its own look" doesn't apply here; the owner chose the look.
+- The owner's colors take the place of the site's but keep their roles: a mostly white site with
+  dark text and one button color stays mostly white (or the owner's light color), with their
+  strong color on buttons, links and small accents, not on big dark bands or tinted photos unless
+  the site has them.
+- Never its words, logo or photos. DESIGN.md names the site and what differs from it.
 
 **Rearranging is moving markup.** "Put the reviews above the description", "a bigger photo", "menu in
 the middle": change the view's structure (order, grid columns, widths), not only classes. When the
