@@ -25,9 +25,15 @@ class Cart < ApplicationRecord
     item
   end
 
+  # Whether demo products count (the builder's preview, until the shop has products of its own:
+  # StorefrontApi::V1::BaseController#demo_shown?). A published storefront's cart never sells
+  # them, even when the cart was filled in the preview.
+  attr_writer :demo_shown
+
   # Items whose variant can still be bought; the others are dropped at checkout.
   def buyable_items
-    items.includes(variant: { product: { images_attachments: :blob } }).select { |item| item.variant.buyable? }
+    items.includes(variant: { product: { images_attachments: :blob } })
+      .select { |item| item.variant.buyable? && (@demo_shown != false || !item.variant.product.demo?) }
   end
 
   # Sets a line's quantity, within what's in stock; zero removes it.

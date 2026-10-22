@@ -27,7 +27,7 @@ class StorefrontApi::V1::CheckoutsController < StorefrontApi::V1::BaseController
 
   private
     def build_checkout
-      cart = Cart.find_by!(token: params.require(:cart_token))
+      cart = find_cart(params.require(:cart_token))
       Checkout.new(cart:, **params.permit(*FIELDS).to_h.symbolize_keys).tap do |checkout|
         checkout.attribution = attribution
         checkout.test = api_key.preview?

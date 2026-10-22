@@ -166,4 +166,20 @@ class StorefrontApi::CatalogTest < ActionDispatch::IntegrationTest
     assert_includes collections.(preview), "Apparel"
     assert_not_includes titles.(@api_key), "Good Things Tee"
   end
+
+  test "a cart filled in the preview doesn't sell its demo products from the published storefront" do
+    preview = api_key_for(kind: "preview")
+    demo_variant = ActsAsTenant.with_tenant(shops(:cats)) do
+      DemoCatalog.add!
+      Product.where(demo: false).destroy_all
+      Product.find_by!(title: "Good Things Tee").variants.first
+    end
+    token = api(:post, storefront_api_carts_path, key: preview)["cart"]["token"]
+    api :post, storefront_api_cart_items_path(token), key: preview, params: { variant_id: demo_variant.id }
+    assert_equal 1, api(:get, storefront_api_cart_path(token), key: preview)["cart"]["items"].size
+
+    assert_empty api(:get, storefront_api_cart_path(token))["cart"]["items"]
+    quote = api(:post, quote_storefront_api_checkouts_path, params: { cart_token: token })
+    assert_empty quote.dig("checkout", "items")
+  end
 end

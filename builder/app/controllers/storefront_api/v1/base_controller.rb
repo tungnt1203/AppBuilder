@@ -40,6 +40,10 @@ class StorefrontApi::V1::BaseController < ActionController::API
       demo_shown? ? Collection.all : Collection.where(demo: false)
     end
 
+    def find_cart(token)
+      Cart.find_by!(token:).tap { |cart| cart.demo_shown = demo_shown? }
+    end
+
     def demo_shown?
       @demo_shown = api_key.preview? && !Product.visible.where(demo: false).exists? unless defined?(@demo_shown)
       @demo_shown

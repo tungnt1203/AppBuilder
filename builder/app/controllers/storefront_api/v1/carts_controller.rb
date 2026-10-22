@@ -6,6 +6,6 @@ class StorefrontApi::V1::CartsController < StorefrontApi::V1::BaseController
   end
 
   def show
-    render json: { cart: json.cart(Cart.find_by!(token: params[:id])) }
+    render json: { cart: json.cart(find_cart(params[:id])) }
   end
 end

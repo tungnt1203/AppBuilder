@@ -4,10 +4,10 @@ class StorefrontApi::V1::Carts::BaseController < StorefrontApi::V1::BaseControll
 
   private
     def set_cart
-      @cart = Cart.find_by!(token: params[:cart_id])
+      @cart = find_cart(params[:cart_id])
     end
 
     def render_cart(status: :ok)
-      render json: { cart: json.cart(@cart.reload) }, status:
+      render json: { cart: json.cart(@cart.reload.tap { |cart| cart.demo_shown = demo_shown? }) }, status:
     end
 end
