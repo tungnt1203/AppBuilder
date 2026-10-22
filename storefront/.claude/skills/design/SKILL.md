@@ -171,7 +171,9 @@ design.
 
 - **Header and footer** (`app/views/layouts/site/_header.html.erb`, `_account.html.erb`, `_footer.html.erb`):
   redesign them for the app; with customer accounts on, also the sign-in link and the customers'
-  sign in, sign up and account pages (`app/views/sessions/`, `registrations/`, `accounts/`). The footer carries what visitors look for: the policies and contact links (keep them), social links, and for a local business its address and hours.
+  sign in, sign up and account pages (`app/views/sessions/`, `registrations/`, `accounts/`). On a
+  phone the header holds only the menu button, the logo or name, and the cart: a long name wraps
+  onto two lines (as the starting header does) rather than being cut off or crowding the icons. The footer carries what visitors look for: the policies and contact links (keep them), social links, and for a local business its address and hours.
 - **First screen**: say what this is and what to do, with real content from the owner's description
   (what they offer, prices, what's on today), not a generic welcome. Avoid the centered title +
   subtitle + button in a pale rounded box.

@@ -35,7 +35,8 @@
       <% if (logo = theme_setting(:logo).presence) %>
         <%= image_tag logo, alt: current_shop.name, class: "h-9 w-auto max-w-40 object-contain" %>
       <% else %>
-        <span class="truncate"><%= current_shop.name %></span>
+        <%# A long name wraps onto two balanced lines, a little smaller on phones, rather than losing its end. %>
+        <span class="line-clamp-2 leading-tight text-balance max-md:text-center <%= "max-md:text-base" if current_shop.name.length > 20 %>"><%= current_shop.name %></span>
       <% end %>
     <% end %>
 
