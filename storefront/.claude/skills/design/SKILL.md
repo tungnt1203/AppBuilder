@@ -149,7 +149,9 @@ recognize it. Before deciding anything:
   order (height, background, heading, grids with columns, gaps and image ratios) and, on a product
   page, where the photos sit and what the buy box holds, in order. A screenshot the owner sends
   counts the same, without the numbers.
-- Build to those numbers at both widths: the same font (or the nearest Google font) at the same
+- Read all of what it prints (or its `tmp/look/*-measured.txt` files), never a cut-off part.
+- Build to those numbers at both widths: the site's own font when Google Fonts has it (most
+  Shopify themes' do: Assistant, Archivo, Proza Libre…), else the nearest one, at the same
   sizes and weights, the same section order and heights, columns, gaps, image ratios, corners and
   button shapes, the same buy box order. Then `bin/look` your pages and compare them with the
   site's screenshots and numbers before you finish.

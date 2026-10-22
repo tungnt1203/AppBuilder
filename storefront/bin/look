@@ -272,7 +272,7 @@ paths.each do |path|
     end
 
     name = "#{path.sub(%r{\Ahttps?://}i, "").delete_prefix("/").gsub(/[^\w-]+/, "_").then { |name| name.empty? ? "home" : name }}-#{size}"
-    FileUtils.rm_f(Dir[File.join(out, "#{name}{,-*}.png")])
+    FileUtils.rm_f(Dir[File.join(out, "#{name}{,-*}.{png,txt}")])
     # /admin's layout scrolls inside #main rather than the page; follow whichever scrolls.
     pane = browser.evaluate(<<~JS)
       (() => {
@@ -300,7 +300,9 @@ paths.each do |path|
     report.each { |line| puts "  - #{line}" }
     notes.each { |line| puts "  · #{line}" }
     if external.(path) && anatomy && !anatomy.empty?
-      puts "  measured from the page (match these):"
+      # Also kept in a file: a long report cut short in the terminal loses the lower sections.
+      measured = File.join(out, "#{name}-measured.txt").tap { |file| File.write(file, anatomy) }
+      puts "  measured from the page (match these; all of it is in #{measured.delete_prefix(root + "/")}):"
       anatomy.each_line { |line| puts "    #{line.rstrip}" }
     end
     puts "  screenshots: #{files.map { |file| file.delete_prefix(root + "/") }.join(", ")}"
