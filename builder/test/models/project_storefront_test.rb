@@ -71,4 +71,12 @@ class ProjectStorefrontTest < ActiveSupport::TestCase
       end
     end
   end
+
+  test "deleting a project leaves what its agent asked for in the shop's admin" do
+    shop = @project.ensure_shop!
+    request = ActsAsTenant.with_tenant(shop) { PlatformRequest.create!(body: "Products need a material field", project: @project) }
+
+    @project.destroy!
+    assert_nil request.reload.project_id
+  end
 end

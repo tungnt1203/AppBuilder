@@ -10,10 +10,14 @@ class Project < ApplicationRecord
   has_many :deployments, dependent: :destroy
   has_many :agent_commands, dependent: :delete_all
   has_many :usages, dependent: :nullify
+  has_many :platform_requests
 
   # The shop keys its storefront runs with (SHOP_KEY): the preview's (test orders only) and,
   # once published, the live one's. Only digests are kept in shop_api_keys, so the tokens are here.
   encrypts :preview_shop_key, :live_shop_key
+
+  # What its agent asked the Platform for stays in the shop's admin (a request is the shop's).
+  before_destroy { ActsAsTenant.without_tenant { platform_requests.update_all(project_id: nil) } }
 
   enum :status, %w[ setting_up ready working failed ].index_by(&:itself), default: "setting_up"
   enum :preview_status, %w[ starting running broken ].index_by(&:itself), prefix: :preview
