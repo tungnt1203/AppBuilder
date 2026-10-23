@@ -123,6 +123,7 @@ en:
           rejected_here: Printify turned the order down for this.
           retry: Send to Printify again
           sent: Printify is making this order; it ships here with its tracking.
+          linked: This order is in Printify too.
           open: Open in Printify
           personalize:
             title: Make this order in Printify yourself.
@@ -167,6 +168,7 @@ en:
           submit: Mark as shipped
         timeline: Timeline
         by_buyer: Buyer
+        by_shop: Automatic
         events:
           placed: Order placed
           paid: Marked as paid

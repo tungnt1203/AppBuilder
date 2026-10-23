@@ -36,6 +36,19 @@ class ShopAdmin::OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", shop_admin_order_shipment_path(orders(:pending)), count: 0
   end
 
+  test "the timeline says who did what, and a cancelled order isn't said to be in the making" do
+    order = orders(:pending)
+    order.record :placed
+    order.record "sent_to_printify", message: "Printify pf-1"
+    order.update!(printify_order_id: "pf-1", status: "cancelled")
+
+    get shop_admin_order_path(order)
+    assert_select "li p.text-xs", text: /· Buyer/, minimum: 1
+    assert_select "li p.text-xs", text: /· Automatic/, minimum: 1
+    assert_match "This order is in Printify too", response.body
+    assert_no_match "Printify is making this order", response.body
+  end
+
   test "a buyer's photo shows on its line, to download for printing" do
     upload = BuyerUpload.take(Rack::Test::UploadedFile.new(file_fixture("product.png"), "image/png"))
     products(:tee).update!(buyer_inputs: [ { "label" => "Your photo", "kind" => "photo" } ])
