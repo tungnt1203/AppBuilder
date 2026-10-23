@@ -22,6 +22,16 @@ class ShopAdmin::SettingsControllerTest < ActionDispatch::IntegrationTest
       [ store.currency, store.shipping_first_item_cents, store.shipping_additional_item_cents, store.free_shipping_threshold_cents, store.ship_to_countries ]
   end
 
+  test "with Printify connected, shipping says Printify's products ship at Printify's rate" do
+    sign_in_as users(:cats_admin)
+    get edit_shop_admin_settings_path
+    assert_no_match "ship at what Printify charges", response.body
+
+    connect_fake_printify
+    get edit_shop_admin_settings_path
+    assert_match "ship at what Printify charges", response.body
+  end
+
   test "mistakes show the form again" do
     sign_in_as users(:member)
     patch shop_admin_settings_path, params: { store: { currency: "XYZ" } }

@@ -530,6 +530,7 @@ en:
         delivery_hint: From order to door, printing included. Product pages and the
           cart show the dates buyers can expect.
         shipping: Shipping
+        shipping_printify: Printify's products ship at what Printify charges for the buyer's address, worked out at checkout. These rates are for the shop's own products.
         free_shipping_hint: Leave empty for no free shipping.
         countries_hint: Two-letter codes, separated by commas. Leave empty to ship
           everywhere.
