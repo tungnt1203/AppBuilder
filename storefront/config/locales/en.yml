@@ -162,6 +162,8 @@ en:
         test_mode: 'This is a test payment: use Stripe''s test card 4242 4242 4242 4242, any future date and any CVC.'
   home:
     benefits:
+      personalize: Personalize it before you buy
+      made_to_order: Printed just for you
       questions: Questions? We answer by email
       secure: Secure checkout
     show:

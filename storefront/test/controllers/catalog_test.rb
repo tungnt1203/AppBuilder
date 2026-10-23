@@ -146,10 +146,12 @@ class CatalogTest < ActionDispatch::IntegrationTest
     get root_path
     assert_select "h2", "Make it yours"
     assert_select "a[href='/products/cat-tee'] span", /Personalize/
+    assert_select "li", "Personalize it before you buy"
 
     @platform.products_data.first["buyer_inputs"] = []
     get root_path
     assert_select "h2", text: "Make it yours", count: 0
+    assert_select "li", text: "Personalize it before you buy", count: 0
   end
 
   test "made to order never says free shipping for want of a flat rate: Printify's is known at checkout" do
