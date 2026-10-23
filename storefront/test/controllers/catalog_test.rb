@@ -98,6 +98,16 @@ class CatalogTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", "/products/cat-tee"
     get collection_path("new")
     assert_select "h1", "New"
+
+    get products_path(q: "zzz")
+    assert_select "p", /Nothing matches "zzz"/
+    assert_select "a[href=?]", products_path, "See all products"
+  end
+
+  test "you may also like tops up a small collection with the shop's others" do
+    get product_path("cat-tee")
+    assert_select "h2", "You may also like"
+    assert_select "a[href=?]", "/products/morning-mug", { minimum: 1 }, "the cats collection has only this tee"
   end
 
   test "the owner's pages and policies" do

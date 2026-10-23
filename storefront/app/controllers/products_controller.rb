@@ -16,9 +16,13 @@ class ProductsController < ApplicationController
   end
 
   private
-    # Others from the product's first collection, else the newest.
+    # Up to four others from the product's first collection (else the newest), topped up from the
+    # newest when it's small, and an even number so the two columns end level.
     def related_products
       collection = @product.collections.first
-      storefront.products(collection: collection&.slug, per_page: 5).records.reject { |product| product.slug == @product.slug }.first(4)
+      picks = storefront.products(collection: collection&.slug, per_page: 5).records
+      picks += storefront.products(per_page: 8).records if collection && picks.size < 5
+      picks = picks.uniq(&:slug).reject { |product| product.slug == @product.slug }.first(4)
+      picks.size.odd? && picks.size > 1 ? picks[0...-1] : picks
     end
 end

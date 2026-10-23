@@ -30,6 +30,7 @@ en:
         price_desc: Price, high to low
         title: Name
       no_results: Nothing matches "%{query}".
+      see_all: See all products
     show:
       photo: Photo %{number}
       quantity: Quantity

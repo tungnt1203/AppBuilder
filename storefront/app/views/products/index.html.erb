@@ -29,7 +29,10 @@
       <%= render "products/grid", products: @page.records %>
       <%= render "ui/pagination", page: @page %>
     <% elsif params[:q].present? %>
-      <p class="rounded-xl border border-dashed border-line px-6 py-16 text-center text-muted"><%= t(".no_results", query: params[:q]) %></p>
+      <div class="rounded-xl border border-dashed border-line px-6 py-16 text-center">
+        <p class="text-muted"><%= t(".no_results", query: params[:q]) %></p>
+        <%= link_to t(".see_all"), products_path(collection: params[:collection].presence), class: "mt-4 inline-block #{link_classes}" %>
+      </div>
     <% else %>
       <%= render "products/coming_soon" %>
     <% end %>
