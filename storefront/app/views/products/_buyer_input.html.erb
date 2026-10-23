@@ -90,28 +90,29 @@
   <% if preview && preview["fonts"].present? %>
     <fieldset>
       <legend class="text-sm text-muted"><%= t(".font") %></legend>
-      <div class="mt-1.5 flex flex-wrap gap-2">
+      <%# One row that scrolls sideways on phones, rather than rows of buttons pushing the cart down. %>
+      <div class="-mx-1 mt-1.5 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] md:flex-wrap">
         <% preview["fonts"].each do |font| %>
           <label class="cursor-pointer">
             <%= radio_button_tag "properties[#{input["key"]}_font]", font, font == preview["font"], class: "peer sr-only", data: { action: "personalize#update" } %>
-            <span class="block rounded-lg border border-line px-3 py-1.5 text-base peer-checked:border-ink peer-checked:ring-1 peer-checked:ring-ink peer-focus-visible:ring-2" style="font-family: '<%= font %>'"><%= font %></span>
+            <span class="block rounded-lg border border-line px-3 py-1.5 text-base whitespace-nowrap peer-checked:border-ink peer-checked:ring-1 peer-checked:ring-ink peer-focus-visible:ring-2" style="font-family: '<%= font %>'"><%= font %></span>
           </label>
         <% end %>
       </div>
     </fieldset>
   <% end %>
   <% if preview && preview["colors"].present? %>
-    <fieldset>
-      <legend class="text-sm text-muted"><%= t(".text_color") %></legend>
-      <div class="mt-1.5 flex flex-wrap gap-2">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5" role="radiogroup" aria-label="<%= t(".text_color") %>">
+      <span class="text-sm text-muted"><%= t(".text_color") %></span>
+      <div class="flex flex-wrap gap-2">
         <% preview["colors"].each do |color| %>
           <label class="cursor-pointer" title="<%= color %>">
             <%= radio_button_tag "properties[#{input["key"]}_color]", color, color == preview["color"], class: "peer sr-only", data: { action: "personalize#update" }, aria: { label: color } %>
-            <span class="block size-9 rounded-full border border-line ring-offset-2 peer-checked:ring-2 peer-checked:ring-ink peer-focus-visible:ring-2" style="background: <%= color %>"></span>
+            <span class="block size-8 rounded-full border border-line ring-offset-2 peer-checked:ring-2 peer-checked:ring-ink peer-focus-visible:ring-2" style="background: <%= color %>"></span>
           </label>
         <% end %>
       </div>
-    </fieldset>
+    </div>
   <% end %>
 </div>
 <% end %>

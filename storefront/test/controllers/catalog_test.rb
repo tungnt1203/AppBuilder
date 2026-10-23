@@ -151,4 +151,11 @@ class CatalogTest < ActionDispatch::IntegrationTest
     get root_path
     assert_select "h2", text: "Make it yours", count: 0
   end
+
+  test "made to order never says free shipping for want of a flat rate: Printify's is known at checkout" do
+    @platform.shop_data["shipping"] = @platform.shop_data["shipping"].merge("free_over_cents" => nil, "first_item_cents" => 0)
+    get product_path("cat-tee")
+    assert_select "li span", "Shipping calculated at checkout"
+    assert_select "li span", text: "Free shipping", count: 0
+  end
 end

@@ -102,22 +102,24 @@
       <%= hidden_field_tag :variant_id, @variant&.id, data: { variant_picker_target: "variantId" } %>
 
       <%# What the buyer types to have printed (a name on the shirt), when the product asks for it. %>
-      <% if placed.any? %>
-        <%# On phones the photo has scrolled away by the time the buyer types: a small copy of it, by the fields. %>
-        <div class="flex items-center gap-3 md:hidden">
-          <span class="relative block aspect-4/5 w-24 shrink-0 overflow-hidden rounded-lg" data-personalize-frame>
+      <%# On phones the photo has scrolled away by the time the buyer types: a small copy of it beside
+          the fields, staying in view as they go down them, so they take no more room. %>
+      <div class="<%= "grid grid-cols-[minmax(0,1fr)_5.5rem] items-start gap-3 md:block" if placed.any? %>">
+        <div class="min-w-0 space-y-4">
+          <% @product.buyer_inputs.each do |input| %>
+            <%= render "buyer_input", input: %>
+          <% end %>
+        </div>
+        <% if placed.any? %>
+          <span class="sticky top-20 block aspect-4/5 overflow-hidden rounded-lg shadow-sm ring-1 ring-line md:hidden" data-personalize-frame aria-hidden="true">
             <%= image_tag @product.image_for(@variant).url(:large), alt: "", class: "size-full bg-surface-muted object-cover", data: { personalize_target: "mirror" } %>
             <% placed.each do |input| %>
               <% photos = images.select { |image| input["preview"]["images"].to_a.include?(image.id) }.map { |image| image.url(:large) } %>
               <%= render "personalization/layer", layer: input["preview"].merge("key" => input["key"], "kind" => input["kind"], "options" => input["options"]), sample: t(".your_text"), photos: %>
             <% end %>
           </span>
-          <p class="text-sm text-muted"><%= t(".preview_hint") %></p>
-        </div>
-      <% end %>
-      <% @product.buyer_inputs.each do |input| %>
-        <%= render "buyer_input", input: %>
-      <% end %>
+        <% end %>
+      </div>
 
       <div class="flex items-end gap-3">
         <div class="w-20 space-y-1.5">
@@ -148,8 +150,12 @@
       <li class="flex items-center gap-2.5">
         <%= icon "package", size: 18, class: "shrink-0 text-muted" %>
         <span>
+          <%# Made to order ships at what Printify charges for the address, known at checkout: never
+              "Free shipping" because the shop's own rate is nothing. %>
           <% if shipping.free_over_cents %>
             <%= t(".free_shipping_over", amount: money(shipping.free_over_cents)) %>
+          <% elsif @product.made_to_order? %>
+            <%= t(".shipping_at_checkout") %>
           <% elsif shipping.first_item_cents.zero? %>
             <%= t(".free_shipping") %>
           <% else %>

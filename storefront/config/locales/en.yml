@@ -46,6 +46,7 @@ en:
       made_to_order: Printed just for you when you order
       free_shipping_over: Free shipping over %{amount}
       free_shipping: Free shipping
+      shipping_at_checkout: Shipping calculated at checkout
       shipping_from: Shipping from %{amount}
       returns: Easy returns
       secure_checkout: Secure checkout
@@ -66,7 +67,6 @@ en:
         one: Up to 1 character
         other: Up to %{count} characters
       your_text: Your text
-      preview_hint: Your text shows on the photo as you type.
       'yes': 'Yes'
       'no': 'No'
     buyer_input:
