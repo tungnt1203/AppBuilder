@@ -32,8 +32,10 @@ class Printify::Fulfillment
   # Sends the order to Printify once; a failure is kept on the order (fulfillment_error) for
   # staff to see and send again from /admin. When Printify already has it (sent twice at once, or
   # a retry after an answer that got lost), the shop takes that order instead of failing. An order
-  # to personalize goes only when staff send it themselves (personalized: false).
-  def submit!(personalized: true)
+  # to personalize goes only when staff send it themselves (personalized: false). When Printify
+  # can't be reached, raises PrintifyGateway::Unavailable after keeping it if asked to (retry_later: the
+  # job tries again later).
+  def submit!(personalized: true, retry_later: false)
     return unless applies? && @order.paid? && @order.printify_order_id.blank?
     return if personalized && needs_personalizing?
 
@@ -51,8 +53,11 @@ class Printify::Fulfillment
   rescue Order::InvalidTransition
     nil
   rescue PrintifyGateway::Error, Personalization::PrintFile::Error => error
-    @order.update!(fulfillment_error: error.message)
-    @order.record "fulfillment_failed", message: error.message
+    unless @order.fulfillment_error == error.message # once, not on every retry
+      @order.update!(fulfillment_error: error.message)
+      @order.record "fulfillment_failed", message: error.message
+    end
+    raise if retry_later && error.is_a?(PrintifyGateway::Unavailable)
   end
 
   # Takes the order staff made by hand in Printify (its id, or its page's address) as this

@@ -107,6 +107,32 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_not Printify::Fulfillment.new(other).applies?
   end
 
+  test "when Printify can't be reached the order is sent again later by itself; a refusal waits for staff" do
+    product = Printify::Import.new.call("pf-tee")
+    order = place_order(product.variant_for(%w[ Black M ]), status: "pending")
+    refused = place_order(product.variant_for(%w[ Black M ]), status: "pending")
+    @printify.error = PrintifyGateway::Unavailable.new("Printify answered 503")
+
+    order.mark_paid!
+    assert_enqueued_with(job: Order::FulfillJob) { perform_enqueued_jobs(only: Order::FulfillJob) }
+    assert_equal "Printify answered 503", order.reload.fulfillment_error
+    assert order.paid?
+
+    assert_enqueued_with(job: Order::FulfillJob) { perform_enqueued_jobs(only: Order::FulfillJob) }
+    assert_equal 1, order.events.where(action: "fulfillment_failed").count, "told once, not on every try"
+
+    @printify.error = nil
+    perform_enqueued_jobs(only: Order::FulfillJob)
+    assert order.reload.in_production?
+    assert_nil order.fulfillment_error
+
+    @printify.error = "Address is invalid"
+    in_shop # running jobs leaves the test's shop
+    refused.mark_paid!
+    assert_no_enqueued_jobs(only: Order::FulfillJob) { perform_enqueued_jobs(only: Order::FulfillJob) }
+    assert_equal "Address is invalid", refused.reload.fulfillment_error
+  end
+
   test "an order Printify already has (sent twice, or a retry after a lost answer) is taken, not failed" do
     product = Printify::Import.new.call("pf-tee")
     order = place_order(product.variant_for(%w[ Black M ]))

@@ -7,6 +7,8 @@ require "base64"
 # Tests replace PrintifyGateway.build with a fake (see test/test_helpers/printify_test_helper.rb).
 class PrintifyGateway
   Error = Class.new(StandardError)
+  # Printify didn't answer, was busy or failed on its side: the same call may well work later.
+  Unavailable = Class.new(Error)
 
   BASE = "https://api.printify.com/v1".freeze
   SHIPPING_METHODS = { 1 => "Standard", 2 => "Priority", 3 => "Printify Express", 4 => "Economy" }.freeze
@@ -136,9 +138,9 @@ class PrintifyGateway
       body = response.body.present? ? JSON.parse(response.body) : {}
       return body if response.is_a?(Net::HTTPSuccess)
 
-      raise Error, error_message(response, body)
+      raise (response.code.to_i == 429 || response.code.to_i >= 500 ? Unavailable : Error), error_message(response, body)
     rescue JSON::ParserError, SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError => error
-      raise Error, "Printify didn't answer (#{error.class.name.demodulize})"
+      raise Unavailable, "Printify didn't answer (#{error.class.name.demodulize})"
     end
 
     def error_message(response, body)

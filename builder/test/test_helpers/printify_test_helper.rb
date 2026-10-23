@@ -94,7 +94,7 @@ class FakePrintifyGateway
 
   private
     def fail_or(value)
-      raise PrintifyGateway::Error, error if error
+      raise(error.is_a?(Exception) ? error : PrintifyGateway::Error.new(error)) if error
       value
     end
 end
