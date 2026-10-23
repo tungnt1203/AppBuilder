@@ -24,6 +24,7 @@ class BuyingTest < ActionDispatch::IntegrationTest
 
     get new_checkout_path
     assert_response :success
+    assert_select "details summary", /Show order summary.*\$64\.80/m, "phones see what they buy and for how much (after the code) at the top"
     assert_select "select[name='checkout[shipping_country]'] option[value=US][selected]"
     assert_select "[data-region-names-value*=Texas]"
 

@@ -1,0 +1,17 @@
+<%# The cart's lines in the order summary: each one's photo with what the buyer added on it. %>
+<ul class="space-y-3 text-sm">
+  <% items.each do |item| %>
+    <li class="flex items-center gap-3">
+      <span class="relative shrink-0">
+        <%= render "personalization/line_image", image: item.product.image, layers: item.preview, alt: item.product.title, class: "size-14 rounded-lg" %>
+        <span class="absolute -top-1.5 -right-1.5 grid min-w-5 place-items-center rounded-full bg-ink px-1 text-[0.6875rem] leading-5 font-semibold text-canvas"><%= item.quantity %></span>
+      </span>
+      <span class="min-w-0 flex-1">
+        <%= item.product.title %>
+        <% if item.variant.title %><span class="block text-muted"><%= item.variant.title %></span><% end %>
+        <% item.properties.each do |property| %><span class="block text-muted"><%= property.label %>: <%= property_value(property) %></span><% end %>
+      </span>
+      <span class="whitespace-nowrap"><%= money(item.line_total_cents) %></span>
+    </li>
+  <% end %>
+</ul>

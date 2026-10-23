@@ -212,6 +212,8 @@ en:
       choose_region: Choose…
       shipping: Shipping address
       summary: Order summary
+      show_summary: Show order summary
+      hide_summary: Hide order summary
       subtotal: Subtotal
       shipping_cost: Shipping
       shipping_from_address: Enter your address

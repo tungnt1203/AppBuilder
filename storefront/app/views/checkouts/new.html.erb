@@ -4,7 +4,24 @@
 <div class="mx-auto max-w-5xl px-4 py-12">
   <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
 
-  <%= form_with model: @checkout, url: checkout_path, scope: :checkout, class: "mt-8 grid gap-10 md:grid-cols-[1fr_22rem]",
+  <%# On phones the summary is at the bottom, by the button: what's being bought, and for how much,
+      shows at the top too, folded. %>
+  <details class="group mt-6 rounded-xl border border-line bg-surface md:hidden">
+    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-medium [&::-webkit-details-marker]:hidden">
+      <span class="flex items-center gap-2">
+        <%= icon "shopping-bag", size: 18 %>
+        <span class="group-open:hidden"><%= t(".show_summary") %></span>
+        <span class="hidden group-open:inline"><%= t(".hide_summary") %></span>
+        <%= icon "chevron-down", size: 16, class: "transition-transform group-open:rotate-180" %>
+      </span>
+      <span><%= money(@quote.subtotal_cents - @quote.discount_cents) %></span>
+    </summary>
+    <div class="border-t border-line p-4">
+      <%= render "checkouts/items", items: @quote.items %>
+    </div>
+  </details>
+
+  <%= form_with model: @checkout, url: checkout_path, scope: :checkout, class: "mt-6 grid gap-10 md:mt-8 md:grid-cols-[1fr_22rem]",
         data: { turbo: false, controller: "checkout-totals", checkout_totals_url_value: shipping_checkout_path,
                 action: "change->checkout-totals#refresh" } do |form| %>
     <div class="space-y-8">
@@ -72,22 +89,7 @@
 
     <aside class="h-fit space-y-4 rounded-xl border border-line bg-surface p-6 md:sticky md:top-20">
       <h2 class="text-lg font-semibold"><%= t(".summary") %></h2>
-      <ul class="space-y-3 text-sm">
-        <% @quote.items.each do |item| %>
-          <li class="flex items-center gap-3">
-            <span class="relative shrink-0">
-              <%= render "personalization/line_image", image: item.product.image, layers: item.preview, alt: item.product.title, class: "size-14 rounded-lg" %>
-              <span class="absolute -top-1.5 -right-1.5 grid min-w-5 place-items-center rounded-full bg-ink px-1 text-[0.6875rem] leading-5 font-semibold text-canvas"><%= item.quantity %></span>
-            </span>
-            <span class="min-w-0 flex-1">
-              <%= item.product.title %>
-              <% if item.variant.title %><span class="block text-muted"><%= item.variant.title %></span><% end %>
-              <% item.properties.each do |property| %><span class="block text-muted"><%= property.label %>: <%= property_value(property) %></span><% end %>
-            </span>
-            <span class="whitespace-nowrap"><%= money(item.line_total_cents) %></span>
-          </li>
-        <% end %>
-      </ul>
+      <%= render "checkouts/items", items: @quote.items %>
       <%= render "checkouts/totals", quote: @quote, payment_method: @checkout.payment_method %>
       <ul class="space-y-1.5 text-xs text-muted">
         <% if @quote.payment_methods.include?("stripe") %>
