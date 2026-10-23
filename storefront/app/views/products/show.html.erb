@@ -16,8 +16,10 @@
 <%# Text the buyer types shows on the photos where the shop placed it (personalization/_layer). %>
 <% placed = images.any? ? @product.buyer_inputs.select { |input| input["preview"] } : [] %>
 <% personalized = placed.any? || @product.buyer_inputs.any? { |input| %w[ photo starmap ].include?(input["kind"]) } %>
-<div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy<%= " personalize" if personalized %>" <%= tag.attributes(data: { personalize_upload_url: (uploads_path if personalized) }) %> data-action="variant-picker:change->sticky-buy#select">
-  <div class="min-w-0" data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
+<%# The photos take the wider side, as on Shopify's themes, and stay in view on wide screens while
+    the buyer goes down the options and types what they add. %>
+<div class="page-width grid gap-8 py-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:gap-12 md:py-10" data-controller="sticky-buy<%= " personalize" if personalized %>" <%= tag.attributes(data: { personalize_upload_url: (uploads_path if personalized) }) %> data-action="variant-picker:change->sticky-buy#select">
+  <div class="min-w-0 md:sticky md:top-28 md:self-start" data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
     <div class="relative aspect-4/5 overflow-hidden rounded-xl" data-personalize-frame>
       <% if images.any? %>
         <button type="button" class="block size-full cursor-zoom-in" data-action="gallery#zoom" aria-label="<%= t(".zoom") %>">
@@ -226,7 +228,7 @@
 
 <%# Reviews by people who bought it, newest first. Never make up reviews. %>
 <% if (rating = @product.rating) %>
-  <section id="reviews" class="mx-auto max-w-6xl scroll-mt-20 px-4 pb-12">
+  <section id="reviews" class="page-width scroll-mt-20 pb-12">
     <div class="flex flex-wrap items-baseline gap-x-4 gap-y-2">
       <h2 class="text-2xl"><%= t(".reviews_title") %></h2>
       <p class="flex items-center gap-2 text-sm text-muted"><%= rating_stars rating.average, size: 18 %> <%= t(".reviews_summary", average: rating.average, count: rating.count) %></p>
@@ -251,7 +253,7 @@
 <% end %>
 
 <% if @related.any? %>
-  <section class="mx-auto max-w-6xl px-4 pb-8">
+  <section class="page-width pb-8">
     <h2 class="text-2xl"><%= t(".related") %></h2>
     <div class="mt-6"><%= render "products/grid", products: @related %></div>
   </section>

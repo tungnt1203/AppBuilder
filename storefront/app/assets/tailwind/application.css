@@ -7,6 +7,14 @@
    shop's own pieces go below. */
 @import "./theme.css";
 
+/* The page's width: the header, the footer and every section line up on it. Each theme sets
+   --page-width (the content's width on a wide screen); phones get a 1rem gutter, wider screens
+   2.5rem. */
+@layer components {
+  .page-width { width: 100%; max-width: calc(var(--page-width, 1200px) + 5rem); margin-inline: auto; padding-inline: 1rem; }
+  @media (width >= 48rem) { .page-width { padding-inline: 2.5rem; } }
+}
+
 /* Components and effects of the app's own design (a hero, a ticket stub, a grain
    overlay, keyframes) go below, named after what they are. */
 

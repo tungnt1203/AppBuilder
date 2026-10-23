@@ -10,7 +10,7 @@
      [ "lock", "Secure checkout", "Card payments by Stripe" ]
    ].compact.first(4) %>
 <section class="border-y border-line bg-surface">
-  <ul class="mx-auto grid max-w-6xl grid-cols-2 gap-x-4 gap-y-6 px-4 py-8 md:grid-cols-4 md:py-10">
+  <ul class="page-width grid grid-cols-2 gap-x-4 gap-y-6 py-8 md:grid-cols-4 md:py-10">
     <% lines.each do |name, title, text| %>
       <li class="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
         <span class="grid size-10 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700"><%= icon name, size: 20 %></span>

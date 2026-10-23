@@ -10,7 +10,8 @@
    - accent         a second color; unused here, as on Craft
    - canvas, surface (cards, fields), surface-muted (photo backgrounds, hovers), ink, muted, line
    - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
-   - font-display   headings; font-sans text (families from fonts.css) */
+   - font-display   headings; font-sans text (families from fonts.css)
+   - --page-width   how wide the content runs on a wide screen (.page-width) */
 @theme {
   --font-sans: "Quattrocento Sans", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Trirong", ui-serif, Georgia, serif;
@@ -40,6 +41,8 @@
   --color-brand-900: #131614;
   --color-brand-950: #0b0d0c;
 }
+
+:root { --page-width: 1200px; }
 
 @layer base {
   body { letter-spacing: 0.03em; }

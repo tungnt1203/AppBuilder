@@ -7,7 +7,7 @@
 <% shop_collections = collections.select { |collection| collection.product_count.to_i.positive? }.first(6) %>
 <% nav_link = "py-1 text-sm whitespace-nowrap text-muted underline-offset-4 hover:text-ink hover:underline aria-[current=page]:text-ink aria-[current=page]:underline" %>
 <header class="sticky top-0 z-20 bg-canvas/95 backdrop-blur md:static md:bg-transparent">
-  <div class="mx-auto grid h-16 max-w-[1200px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-auto md:px-10 md:pt-6 md:pb-3 xl:px-0">
+  <div class="page-width grid h-16 grid-cols-[1fr_auto_1fr] items-center md:h-auto md:pt-6 md:pb-3">
     <div class="flex items-center">
       <% unless content_for?(:focused) %>
       <div class="md:hidden" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape turbo:before-cache@document->menu#hide">
@@ -58,7 +58,7 @@
   </div>
 
   <% unless content_for?(:focused) %>
-  <nav class="mx-auto hidden max-w-[1200px] flex-wrap items-center justify-center gap-x-6 gap-y-1 px-10 pb-5 md:flex" aria-label="<%= t("ui.navigation") %>">
+  <nav class="page-width hidden flex-wrap items-center justify-center gap-x-6 gap-y-1 pb-5 md:flex" aria-label="<%= t("ui.navigation") %>">
     <% shop_collections.each do |collection| %>
       <%= link_to collection.title, collection_path(collection), class: nav_link, aria: { current: ("page" if current_page?(collection_path(collection))) } %>
     <% end %>

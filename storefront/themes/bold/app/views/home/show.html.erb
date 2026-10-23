@@ -7,7 +7,7 @@
 <% hero_title = theme_setting(:hero_title).presence || current_shop.name %>
 <% hero_text = theme_setting(:hero_text).presence || t(".tagline") %>
 <% hero_image = theme_setting(:hero_image).presence %>
-<section class="mx-auto grid max-w-[1180px] items-center gap-8 pb-12 md:grid-cols-2 md:gap-14 md:px-10 md:pt-6 md:pb-20 xl:px-0">
+<section class="page-width max-md:px-0 grid items-center gap-8 pb-12 md:grid-cols-2 md:gap-14 md:pt-6 md:pb-20">
   <% if hero_image %>
     <%= image_tag hero_image, alt: "", class: "aspect-4/5 w-full bg-surface-muted object-cover max-md:max-h-[44svh] md:order-last", fetchpriority: "high" %>
   <% end %>
@@ -20,7 +20,7 @@
 
 <%= render "home/benefits" if theme_setting(:show_benefits) %>
 
-<section class="mx-auto max-w-[1180px] px-4 pt-14 md:px-10 md:pt-20 xl:px-0">
+<section class="page-width pt-14 md:pt-20">
   <div class="flex items-end justify-between gap-4">
     <h2 class="text-4xl md:text-5xl"><%= t(".new_arrivals") %></h2>
     <%= link_to t(".view_all"), products_path, class: "pb-1 text-sm font-semibold tracking-[0.06em] text-ink uppercase underline underline-offset-8 hover:text-brand-600" if @products.any? %>
@@ -39,7 +39,7 @@
 <%= render "blocks/personalized", products: @personalized if @personalized.any? %>
 
 <% if (story_image = theme_setting(:story_image).presence) %>
-  <section class="mx-auto mt-14 grid max-w-[1180px] items-center gap-8 md:mt-20 md:grid-cols-[3fr_2fr] md:gap-16 md:px-10 xl:px-0">
+  <section class="page-width max-md:px-0 mt-14 grid items-center gap-8 md:mt-20 md:grid-cols-[3fr_2fr] md:gap-16">
     <%= image_tag story_image, alt: "", loading: "lazy", class: "aspect-[4/3] w-full bg-surface-muted object-cover" %>
     <div class="px-4 md:px-0">
       <h2 class="text-4xl text-balance md:text-5xl"><%= theme_setting(:story_title) %></h2>
@@ -52,7 +52,7 @@
 <% end %>
 
 <% if @collections.any? %>
-  <section class="mx-auto max-w-[1180px] px-4 pt-14 md:px-10 md:pt-24 xl:px-0">
+  <section class="page-width pt-14 md:pt-24">
     <h2 class="text-4xl md:text-5xl"><%= t(".collections") %></h2>
     <%# On phones a row to swipe (the next tile peeking in), so no count leaves a tile on its own. %>
     <ul class="-mx-4 mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-10 md:overflow-visible md:px-0">

@@ -164,7 +164,7 @@ phones, prices hidden), build it as close as works and say why.
 **A new section** (an FAQ, a gallery, a newsletter sign-up): the page blocks in
 `app/views/blocks/` (seen at `/_blocks` on the preview, `?only=faq` for one) are starting points.
 Copy one's markup into the page and make it the theme's: its spacing, type and corners, the
-shop's words and records. Don't `render "blocks/…"` from pages (except `blocks/_personalized`,
+shop's words and records, on `page-width` so it lines up with the header and the other sections. Don't `render "blocks/…"` from pages (except `blocks/_personalized`,
 which the themes share) and don't edit the blocks themselves. Add only what the owner asked for.
 
 **A look is the whole site.** After changing colors, fonts or the theme, check every page a buyer

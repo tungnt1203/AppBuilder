@@ -1,13 +1,13 @@
 <%# The site's header, as Craft has it: search on the left, the logo (a theme setting the owner
     uploads) or the name in the serif, centered and large, the cart on the right, and the
     collections in a centered row under them. On phones: the menu button, the name in the middle,
-    the cart. Pages can add links with content_for :site_nav, or show only the logo and the cart
+    search and the cart. Pages can add links with content_for :site_nav, or show only the logo and the cart
     with content_for :focused (checkout: nothing to wander off to). %>
 <% menu_items = shop_menu(:header)&.items.to_a %>
 <% shop_collections = collections.select { |collection| collection.product_count.to_i.positive? }.first(6) %>
 <% nav_link = "py-1 text-sm whitespace-nowrap text-muted underline-offset-4 hover:text-ink hover:underline aria-[current=page]:text-ink aria-[current=page]:underline" %>
 <header class="sticky top-0 z-20 bg-canvas md:static">
-  <div class="mx-auto grid h-16 max-w-[1200px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-auto md:px-10 md:pt-8 md:pb-4 xl:px-0">
+  <div class="page-width grid h-16 grid-cols-[1fr_auto_1fr] items-center md:h-auto md:pt-8 md:pb-4">
     <div class="flex items-center">
       <% unless content_for?(:focused) %>
       <div class="md:hidden" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape turbo:before-cache@document->menu#hide">
@@ -43,6 +43,11 @@
     <% end %>
 
     <div class="flex items-center justify-end">
+      <% unless content_for?(:focused) %>
+        <%= link_to products_path, class: "grid size-10 place-items-center text-ink md:hidden", aria: { label: t("products.index.search") } do %>
+          <%= icon "search", size: 22, stroke: 1.5 %>
+        <% end %>
+      <% end %>
       <%= link_to cart_path, class: "relative -mr-2 grid size-10 place-items-center text-ink", id: "cart-link", aria: { label: t("layouts.site.cart_with_count", count: cart_item_count) } do %>
         <%= icon "shopping-bag", size: 22, stroke: 1.5 %>
         <% if cart_item_count.positive? %>
@@ -53,7 +58,7 @@
   </div>
 
   <% unless content_for?(:focused) %>
-  <nav class="mx-auto hidden max-w-[1200px] flex-wrap items-center justify-center gap-x-6 gap-y-1 px-10 pb-6 md:flex" aria-label="<%= t("ui.navigation") %>">
+  <nav class="page-width hidden flex-wrap items-center justify-center gap-x-6 gap-y-1 pb-6 md:flex" aria-label="<%= t("ui.navigation") %>">
     <% shop_collections.each do |collection| %>
       <%= link_to collection.title, collection_path(collection), class: nav_link, aria: { current: ("page" if current_page?(collection_path(collection))) } %>
     <% end %>

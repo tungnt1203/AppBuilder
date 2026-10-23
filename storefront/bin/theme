@@ -13,7 +13,7 @@ require "fileutils"
 root = Pathname(__dir__).join("..").expand_path
 themes = root.join("themes").children.select(&:directory?).sort
 files = ->(theme) { theme.glob("**/*").select(&:file?).reject { |file| file.basename.to_s == "README.md" } }
-summary = ->(theme) { theme.join("README.md").read[/^# .*\n\n(.+?)\n\n/m, 1].to_s.tr("\n", " ") }
+summary = ->(theme) { theme.join("README.md").read[/\A# [^\n]*\n\n(.+?)\n\n/m, 1].to_s.tr("\n", " ") }
 in_place = ->(theme) { files.(theme).all? { |file| root.join(file.relative_path_from(theme)).then { |target| target.exist? && target.read == file.read } } }
 
 name = ARGV.reject { |arg| arg.start_with?("-") }.first

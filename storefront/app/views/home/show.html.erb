@@ -26,7 +26,7 @@
 
 <%= render "home/benefits" if theme_setting(:show_benefits) %>
 
-<section class="mx-auto max-w-[1200px] px-4 pt-12 md:px-10 md:pt-16 xl:px-0">
+<section class="page-width pt-12 md:pt-16">
   <h2 class="text-2xl"><%= t(".new_arrivals") %></h2>
   <div class="mt-6">
     <% if @products.any? %>
@@ -45,7 +45,7 @@
 <%= render "blocks/personalized", products: @personalized if @personalized.any? %>
 
 <% if @collections.any? %>
-  <section class="mx-auto max-w-[1200px] px-4 pt-14 md:px-10 md:pt-20 xl:px-0">
+  <section class="page-width pt-14 md:pt-20">
     <h2 class="text-2xl"><%= t(".collections") %></h2>
     <%# On phones a row to swipe (the next tile peeking in), so no count leaves a tile on its own. %>
     <ul class="-mx-4 mt-6 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
@@ -64,7 +64,7 @@
 <% end %>
 
 <% if (story_image = theme_setting(:story_image).presence) %>
-  <section class="mx-auto mt-14 grid max-w-[1200px] md:mt-20 md:grid-cols-2 md:px-10 xl:px-0">
+  <section class="page-width max-md:px-0 mt-14 grid md:mt-20 md:grid-cols-2">
     <%= image_tag story_image, alt: "", loading: "lazy", class: "aspect-[4/3] size-full bg-surface-muted object-cover md:aspect-auto md:min-h-[30rem]" %>
     <div class="flex flex-col justify-center bg-surface-muted px-6 py-12 md:px-14">
       <h2 class="text-3xl leading-tight text-balance md:text-[2.5rem]"><%= theme_setting(:story_title) %></h2>

@@ -8,7 +8,8 @@
    - accent         the sale badge
    - canvas, surface, surface-muted (photo backgrounds, hovers), ink, muted, line
    - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
-   - font-display   headings; font-sans text (families from fonts.css) */
+   - font-display   headings; font-sans text (families from fonts.css)
+   - --page-width   how wide the content runs on a wide screen (.page-width) */
 @theme {
   --font-sans: "Assistant", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Assistant", ui-sans-serif, system-ui, sans-serif;
@@ -38,6 +39,8 @@
   --color-brand-900: #000000;
   --color-brand-950: #000000;
 }
+
+:root { --page-width: 1200px; }
 
 @layer base {
   body { letter-spacing: 0.04em; }

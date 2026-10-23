@@ -42,7 +42,7 @@ module ShopHelper
     value = property.value.to_s
     return value unless value.match?(/\A#\h{6}\z/)
 
-    tag.span(class: "inline-block size-3.5 rounded-full align-[-2px] ring-1 ring-line", style: "background-color: #{value}", role: "img", aria: { label: value })
+    tag.span(class: "inline-block size-3.5 rounded-full align-[-2px] ring-1 ring-ink/25", style: "background-color: #{value}", role: "img", aria: { label: value })
   end
 
   # "Arrives Oct 21 – 24" for an order placed today, when the shop says how long delivery takes.

@@ -9,7 +9,8 @@
    - accent         the gradient's first color; --soft-to (below) its second
    - canvas, surface (cards, fields), surface-muted (photo backgrounds, hovers), ink, muted, line
    - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
-   - font-display   headings; font-sans text (families from fonts.css) */
+   - font-display   headings; font-sans text (families from fonts.css)
+   - --page-width   how wide the content runs on a wide screen (.page-width) */
 @theme {
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
@@ -40,7 +41,7 @@
   --color-brand-950: #2c041f;
 }
 
-:root { --soft-to: #fbe3e1; }
+:root { --page-width: 1200px; --soft-to: #fbe3e1; }
 
 @layer base {
   body { letter-spacing: 0.02em; }

@@ -4,7 +4,7 @@
     across on wide screens. The collections come from the shop's admin. %>
 <% tiles = collections.select { |collection| collection.product_count.to_i.positive? }.first(4) %>
 <section id="collections" class="py-16 md:py-24">
-  <div class="mx-auto max-w-6xl px-4">
+  <div class="page-width">
     <div class="flex items-end justify-between gap-4">
       <h2 class="text-3xl text-ink md:text-4xl">Shop by collection</h2>
       <%= link_to products_path, class: "hidden items-center gap-1 text-sm font-semibold text-ink underline-offset-4 hover:underline sm:inline-flex" do %>

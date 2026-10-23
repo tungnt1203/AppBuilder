@@ -6,7 +6,7 @@
 <% footer_menu = shop_menu(:footer) %>
 <% heading = "text-sm font-semibold tracking-[0.08em] text-ink uppercase" %>
 <footer class="mt-20 border-t border-line bg-canvas md:mt-28">
-  <div class="mx-auto max-w-[1180px] px-4 py-14 md:px-10 md:py-20 xl:px-0">
+  <div class="page-width py-14 md:py-20">
     <p class="font-display text-4xl text-ink uppercase md:text-6xl"><%= current_shop.name %></p>
     <% if (tagline = theme_setting(:hero_text).presence) %>
       <p class="mt-4 max-w-md leading-relaxed text-muted"><%= tagline %></p>
@@ -58,6 +58,6 @@
     </div>
   </div>
   <div class="border-t border-line">
-    <p class="mx-auto max-w-[1180px] px-4 py-6 text-xs text-muted md:px-10 xl:px-0">© <%= Date.current.year %> <%= current_shop.name %></p>
+    <p class="page-width py-6 text-xs text-muted">© <%= Date.current.year %> <%= current_shop.name %></p>
   </div>
 </footer>

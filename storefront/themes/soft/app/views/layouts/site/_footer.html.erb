@@ -5,7 +5,7 @@
 <% socials = { "Instagram" => theme_setting(:instagram_url), "TikTok" => theme_setting(:tiktok_url), "Facebook" => theme_setting(:facebook_url) }.compact_blank %>
 <% footer_menu = shop_menu(:footer) %>
 <footer class="mt-20 border-t border-line md:mt-28">
-  <div class="mx-auto grid max-w-[1200px] gap-10 px-4 py-12 text-sm sm:grid-cols-2 md:grid-cols-4 md:px-10 md:py-16 xl:px-0">
+  <div class="page-width grid gap-10 py-12 text-sm sm:grid-cols-2 md:grid-cols-4 md:py-16">
     <nav aria-label="<%= t("layouts.site.shop") %>">
       <p class="font-medium text-ink"><%= t("layouts.site.shop") %></p>
       <ul class="mt-4 space-y-2.5 text-muted">
@@ -53,6 +53,6 @@
     </div>
   </div>
   <div class="border-t border-line">
-    <p class="mx-auto max-w-[1200px] px-4 py-6 text-xs text-muted md:px-10 xl:px-0">© <%= Date.current.year %>, <%= current_shop.name %></p>
+    <p class="page-width py-6 text-xs text-muted">© <%= Date.current.year %>, <%= current_shop.name %></p>
   </div>
 </footer>

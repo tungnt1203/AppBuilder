@@ -3,7 +3,7 @@
     personalize, and the shop's story over a wide photo with a statement under it. The words and photos are theme settings (config/theme_settings.yml), so
     the owner changes them in the admin. Keep it this calm: room, the serif, the photos. %>
 <% hero_button = theme_setting(:hero_button).presence || t(".shop_all") %>
-<% container = "mx-auto max-w-[1200px] px-4 md:px-10 xl:px-0" %>
+<% container = "page-width" %>
 <section class="mx-auto max-w-3xl px-6 pt-10 pb-10 text-center md:pt-14 md:pb-14">
   <h1 class="text-[2.25rem] text-balance md:text-[2.75rem]"><%= theme_setting(:hero_title).presence || current_shop.name %></h1>
   <p class="mx-auto mt-4 max-w-xl leading-relaxed text-muted"><%= theme_setting(:hero_text).presence || t(".tagline") %></p>

@@ -15,14 +15,14 @@
 
     <main id="main">
       <% if flash[:notice] || flash[:alert] %>
-        <div class="mx-auto max-w-6xl px-4 pt-8">
+        <div class="page-width pt-8">
           <%= render "ui/flash" %>
         </div>
       <% end %>
       <%= yield %>
     </main>
 
-    <%= render "layouts/site/footer" %>
+    <%= render content_for?(:focused) ? "layouts/site/focused_footer" : "layouts/site/footer" %>
     <%= render "layouts/site/tracking_events" %>
   </body>
 </html>

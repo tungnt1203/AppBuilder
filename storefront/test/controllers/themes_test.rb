@@ -45,6 +45,8 @@ class ThemesTest < ActionDispatch::IntegrationTest
         assert_select "header a#cart-link"
         get new_checkout_path
         assert_select "header nav", count: 0
+        assert_select "footer a[href=?]", "/policies/refund"
+        assert_select "footer a[href=?]", "/products", count: 0
       end
     end
   end

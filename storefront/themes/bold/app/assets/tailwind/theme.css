@@ -11,7 +11,8 @@
    - accent         a second color; unused here, as on Ride
    - canvas, surface (fields, cards), surface-muted (photo backgrounds, hovers), ink, muted, line
    - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
-   - font-display   headings; font-sans text (families from fonts.css) */
+   - font-display   headings; font-sans text (families from fonts.css)
+   - --page-width   how wide the content runs on a wide screen (.page-width) */
 @theme {
   --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Oswald", "Figtree", ui-sans-serif, system-ui, sans-serif;
@@ -41,6 +42,9 @@
   --color-brand-900: #f7febb;
   --color-brand-950: #fbffdd;
 }
+
+/* Ride's content is a little narrower than the other themes'. */
+:root { --page-width: 1180px; }
 
 @layer base {
   body { font-weight: 500; }

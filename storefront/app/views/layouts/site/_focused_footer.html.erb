@@ -1,0 +1,11 @@
+<%# The footer of checkout and payment (content_for :focused), as Shopify's checkout has it: only
+    the policies and the contact page in one quiet row, nothing else to wander off to. Payment
+    providers check that those links are there. %>
+<footer class="mt-16 border-t border-line">
+  <nav class="page-width flex flex-wrap justify-center gap-x-6 gap-y-2 py-6 text-xs text-muted" aria-label="<%= t("layouts.site.footer_navigation") %>">
+    <% current_shop.policies.each do |policy| %>
+      <%= link_to policy["title"], policy_path(policy["id"]), class: "underline-offset-4 hover:text-ink hover:underline" %>
+    <% end %>
+    <%= link_to t("contacts.show.title"), contact_path, class: "underline-offset-4 hover:text-ink hover:underline" %>
+  </nav>
+</footer>

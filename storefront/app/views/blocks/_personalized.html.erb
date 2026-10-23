@@ -4,7 +4,7 @@
     `personalized?` is true); here alone (the blocks page) it finds them. Cards are products/_product. %>
 <% picks = local_assigns.fetch(:products) { products(per_page: 24).records.select(&:personalized?) }.first(4) %>
 <section class="py-16 md:py-24">
-  <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:items-center">
+  <div class="page-width grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:items-center">
     <div>
       <h2 class="text-3xl text-ink md:text-4xl">Make it yours</h2>
       <p class="mt-4 text-muted">Add a name, a date or your own photo, and see it on the product before you buy.</p>
