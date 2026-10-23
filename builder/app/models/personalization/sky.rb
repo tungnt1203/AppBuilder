@@ -43,8 +43,7 @@ class Personalization::Sky
   end
 
   # The map as SVG, size pixels across: a disc of the sky's color, the stars (bigger the brighter)
-  # and the constellations' lines in the ink's. In pixels, without a viewBox: ImageMagick's own SVG
-  # renderer (the print file's) loses small circles in a scaled one.
+  # and the constellations' lines in the ink's, in pixels.
   def svg(size, sky:, ink:, lines: true)
     half = size / 2.0
     at = ->(value) { ((value + 1) * half).round(2) }

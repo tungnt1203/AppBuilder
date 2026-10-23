@@ -73,11 +73,14 @@ class Personalization::PrintFile
       end
     end
 
-    # The night sky, as large a disc as fits, centered (ImageMagick draws its SVG: libvips's SVG
-    # loader is blocked for buyers' files).
+    # The night sky, as large a disc as fits, centered. rsvg-convert draws its SVG (libvips's SVG
+    # loader is blocked, for buyers' files; Debian's ImageMagick hands SVG to rsvg-convert anyway).
     def star_map(sky, layer, width, height)
       size = [ width, height ].min
-      disc = Vips::Image.new_from_buffer(magick("-background", "none", "svg:-", "png32:-", stdin: sky.svg(size, sky: layer["sky"], ink: layer["ink"], lines: layer["lines"])), "")
+      png, error, status = Open3.capture3("rsvg-convert", stdin_data: sky.svg(size, sky: layer["sky"], ink: layer["ink"], lines: layer["lines"]), binmode: true)
+      raise Error, "Couldn't draw the star map: #{error.truncate(200)}" unless status.success?
+
+      disc = Vips::Image.new_from_buffer(png, "")
       rgba(disc).embed((width - disc.width) / 2, (height - disc.height) / 2, width, height, extend: :background, background: [ 0, 0, 0, 0 ])
     end
 
