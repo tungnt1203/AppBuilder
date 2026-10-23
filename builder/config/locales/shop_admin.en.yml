@@ -325,10 +325,11 @@ en:
           a count of; leave it off for made-to-order products. Cost is only for your
           margins.
         custom_fields: Extra details
-        buyer_inputs: What the buyer types
-        buyer_inputs_hint: A line of text on the product, such as a name to print.
-          It is saved on the order and sent to Printify. Leave a row blank to skip it.
-          Show it on the photos, and buyers see their text on the product as they type.
+        buyer_inputs: Personalization
+        buyer_inputs_hint: What buyers add to have printed, a field each (a name, their photo, a
+          picture they pick, a background color, a star map). Show it on the photos and they see it
+          on the product as they add it. It goes with the order, and to Printify by itself once the
+          print area is drawn. Leave a row blank to skip it.
         artwork: Pictures buyers pick from
         artwork_hint: For a Choice field (a dog breed, a zodiac sign). Name each file as buyers
           should see it ("Golden retriever.png"); a transparent PNG sits best on the product.
@@ -399,6 +400,8 @@ en:
         sample_photo: Photo
         key: Key
         max: Max characters
+        max_short: Max
+        new_label: Add a field, like "Name on the shirt"
         required: Required
         show_on_photos: Show it on the photos
         sample: Your text

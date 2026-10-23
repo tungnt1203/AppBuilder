@@ -155,7 +155,8 @@
         <%= form.file_field :artwork, multiple: true, accept: "image/png,image/webp,image/jpeg", aria: { label: t(".add_artwork") } %>
         <p class="text-xs text-muted"><%= t(".artwork_hint") %></p>
       </div>
-      <% if product.persisted? && product.images.attached? %>
+      <%# Only Printify prints from a print area; the shop's own products are printed by staff. %>
+      <% if product.persisted? && product.images.attached? && product.printify_product_id %>
         <div id="print-area" class="space-y-3">
           <% Product::PRINT_POSITIONS.each do |side| %>
             <%= render "print_area", product:, side: %>

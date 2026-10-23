@@ -31,6 +31,10 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     tee = products(:tee)
     tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")
     tee.update!(buyer_inputs: [ { "label" => "Name", "preview" => { "x" => 0.3, "y" => 0.5, "w" => 0.4, "h" => 0.1, "font" => "Lora" } } ])
+    get edit_shop_admin_product_path(tee)
+    assert_select "#print-area", 0, "only Printify prints from a print area"
+
+    tee.update!(printify_product_id: "pf-tee")
     get shop_admin_product_print_file_path(tee)
     assert_response :not_found
 

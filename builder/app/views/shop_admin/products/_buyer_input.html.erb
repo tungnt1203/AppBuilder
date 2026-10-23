@@ -6,13 +6,16 @@
 <% preview = row["preview"] || {} %>
 <% photos = product.persisted? ? product.images.select(&:representable?) : [] %>
 <div class="space-y-3 rounded-lg border border-line p-4" data-controller="placement">
-  <div class="grid gap-3 sm:grid-cols-[1fr_7rem_8rem_6rem_auto] sm:items-center">
-    <%= text_field_tag "product[buyer_inputs][][label]", row["label"], placeholder: t(".label"), aria: { label: t(".label") }, class: field_classes %>
+  <div class="grid gap-3 sm:grid-cols-[1fr_8rem_auto_auto] sm:items-center">
+    <%= text_field_tag "product[buyer_inputs][][label]", row["label"], placeholder: t(row["label"].present? ? ".label" : ".new_label"), aria: { label: t(".label") }, class: field_classes %>
     <%= select_tag "product[buyer_inputs][][kind]", options_for_select(BuyerInputs::KINDS.map { |kind| [ t(".kinds.#{kind}"), kind ] }, row["kind"] || "text"), id: nil,
           aria: { label: t(".kind") }, class: field_classes, data: { placement_target: "kind", action: "placement#restyle" } %>
-    <%= text_field_tag "product[buyer_inputs][][key]", row["key"], placeholder: t(".key"), aria: { label: t(".key") }, class: field_classes %>
-    <%= number_field_tag "product[buyer_inputs][][max_length]", row["max_length"], min: 1, max: BuyerInputs::MAX_LENGTH, placeholder: "40", aria: { label: t(".max") }, class: field_classes,
-          data: { for_kinds: "text" } %>
+    <%# The key is made from the label, and kept when the label changes: the storefront reads it. %>
+    <%= hidden_field_tag "product[buyer_inputs][][key]", row["key"], id: nil %>
+    <label class="flex items-center gap-2 text-sm text-muted" data-for-kinds="text">
+      <%= t(".max_short") %>
+      <%= number_field_tag "product[buyer_inputs][][max_length]", row["max_length"], min: 1, max: BuyerInputs::MAX_LENGTH, placeholder: "40", aria: { label: t(".max") }, class: "w-20 #{field_classes}" %>
+    </label>
     <label class="flex items-center gap-2 text-sm">
       <%= check_box_tag "product[buyer_inputs][][required]", "1", row["required"] == true, id: nil, class: "size-4 rounded border-line accent-brand-600" %>
       <%= t(".required") %>
@@ -71,7 +74,7 @@
             </div>
           </fieldset>
 
-          <div class="space-y-1.5">
+          <div class="space-y-1.5" <%= "hidden" unless product.printify_product_id %>>
             <%= label_tag nil, t(".side"), class: "text-sm font-medium text-ink" %>
             <%= select_tag "product[buyer_inputs][][preview][side]", options_for_select(Product::PRINT_POSITIONS.map { |side| [ t(".sides.#{side}"), side ] }, BuyerInputs.side(row)), id: nil, class: field_classes %>
             <p class="text-xs text-muted"><%= t(".side_hint") %></p>
