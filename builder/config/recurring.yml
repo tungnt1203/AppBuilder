@@ -29,6 +29,9 @@ shared: &shared
   clear_abandoned_carts:
     class: Cart::CleanupJob
     schedule: every day at 4am
+  find_print_sizes:
+    class: Product::PrintPixelsJob
+    schedule: every day at 4:30am
 
 development:
   <<: *shared

@@ -96,6 +96,15 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_nil tee.reload.print_area["pixels"], "the back's size is asked for again"
   end
 
+  test "print areas drawn before their size was known learn it in the daily sweep" do
+    connect_fake_printify
+    tee = products(:tee)
+    tee.update_columns(printify_product_id: "pf-tee", print_area: { "x" => 0.3, "y" => 0.2, "w" => 0.5, "h" => 0.25, "position" => "front" })
+    Product::PrintPixelsJob.perform_now
+    in_shop
+    assert_equal [ 300, 400 ], tee.reload.print_area["pixels"]
+  end
+
   test "a personalized Printify product says to draw its print area, and is badged in the list" do
     tee = products(:tee).tap { |product| product.update!(printify_product_id: "pf-tee", buyer_inputs: [ { "label" => "Name" } ]) }
     assert_includes tee.launch_problems, :no_print_area
