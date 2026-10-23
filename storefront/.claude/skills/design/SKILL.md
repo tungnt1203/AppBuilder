@@ -177,9 +177,12 @@ close as works and say why.
 **Start from the page blocks** in `app/views/blocks/`, after the sections of Shopify's themes: an
 image banner (the first screen), a marquee, benefits (free shipping, delivery dates, secure
 checkout, from the shop's settings), collection tiles with photos, a product carousel, a collage
-of two photo cards, image with text, a gallery, an FAQ, a newsletter sign-up and a closing call
-to action. A shop's home page usually runs: image banner, benefits or marquee, collection tiles,
-products (a carousel or the grid), image with text or a collage, newsletter. Buyers' words
+of two photo cards, image with text, a gallery, an FAQ, a newsletter sign-up, a closing call
+to action, and "Make it yours" (the products buyers personalize). A shop's home page usually runs:
+image banner, benefits or marquee, collection tiles, products (a carousel or the grid), image with
+text or a collage, newsletter. When it sells personalized products (names, photos, star maps:
+gifts), that is its pitch: say so on the first screen ("Your name on it", "Made from your photo")
+and put "Make it yours" right after it. Buyers' words
 come from the shop's real reviews, never a block of quotes. They use only the theme's
 names, so they wear the app's look, and they already work at 390px. See them all in this app's theme
 at `/_blocks` on the preview (development only; `?only=faq` for one). To use one, **copy its

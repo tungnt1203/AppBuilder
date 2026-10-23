@@ -97,6 +97,7 @@ Every change to a cart answers with the whole cart.
 - `images`: photos, each with `option_value`, the option value it shows.
 - `collections`: `[{ "slug", "title" }]`.
 - `custom_fields`: `[{ "key", "label", "type": "text"|"number"|"boolean", "value" }]`, only the ones this product has a value for.
+- `personalized` (in lists too): whether the product has `buyer_inputs`, for a "Personalize" badge.
 - `buyer_inputs`: `[{ "key", "label", "kind", "required", "max_length", "preview" }]`. Send what the buyer typed as `properties` when adding the line.
   `kind` is `"text"`, `"photo"`, `"choice"` (one of the shop's pictures: `options` `[{ "id", "label", "thumb", "large" }]`;
   send the picked `id`), `"color"` (a background: `preview.colors`; send the picked color) or `"starmap"` (the night sky:

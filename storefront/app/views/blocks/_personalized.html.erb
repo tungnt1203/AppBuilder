@@ -1,0 +1,28 @@
+<%# Make it yours: the products buyers personalize (a name, a date, their photo, a star map), what
+    a shop of personalized gifts sells on. Says that buyers see it on the product before they buy,
+    beside up to four of them. Pass `products` from the controller (the products whose
+    `personalized?` is true); here alone (the blocks page) it finds them. Cards are products/_product. %>
+<% picks = local_assigns.fetch(:products) { products(per_page: 24).records.select(&:personalized?) }.first(4) %>
+<section class="py-16 md:py-24">
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:items-center">
+    <div>
+      <p class="text-xs font-semibold tracking-[0.2em] text-brand-700 uppercase">Made just for you</p>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink md:text-4xl">Make it yours</h2>
+      <p class="mt-4 text-muted">Add a name, a date or your own photo, and see it on the product before you buy.</p>
+      <ul class="mt-6 space-y-3 text-sm text-ink">
+        <li class="flex items-center gap-3"><%= icon "type", size: 18, class: "text-brand-700" %> Names and words in the font you like</li>
+        <li class="flex items-center gap-3"><%= icon "image-plus", size: 18, class: "text-brand-700" %> Your photo, framed the way you want</li>
+        <li class="flex items-center gap-3"><%= icon "eye", size: 18, class: "text-brand-700" %> A live preview as you type</li>
+      </ul>
+    </div>
+    <% if picks.any? %>
+      <ul class="grid grid-cols-2 gap-x-4 gap-y-8 <%= "lg:grid-cols-4" if picks.size > 3 %> <%= "lg:grid-cols-3" if picks.size == 3 %>">
+        <% picks.each do |product| %>
+          <li><%= render "products/product", product: %></li>
+        <% end %>
+      </ul>
+    <% elsif current_shop.preview? %>
+      <p class="rounded-xl border border-dashed border-line px-6 py-10 text-center text-sm text-muted">Products buyers personalize show here once the owner adds a field to them in the admin.</p>
+    <% end %>
+  </div>
+</section>

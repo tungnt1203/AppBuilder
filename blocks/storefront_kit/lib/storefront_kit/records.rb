@@ -39,6 +39,8 @@ module StorefrontKit
     def cover_image = image
     def available? = self["available"] ? true : false
     def made_to_order? = self["made_to_order"] ? true : false
+    # Whether the buyer adds something to it to be printed (a name, a photo: buyer_inputs).
+    def personalized? = self["personalized"] ? true : false
     def min_price_cents = self["price"]&.dig("min_cents")
     def max_price_cents = self["price"]&.dig("max_cents")
     def compare_at_cents = self["price"]&.dig("compare_at_cents")

@@ -223,7 +223,7 @@ module StorefrontKit
           not_found("variant")
         end
 
-        def summary(product) = product.slice("slug", "title", "available", "price", "image", "rating")
+        def summary(product) = product.slice("slug", "title", "available", "price", "image", "rating").merge("personalized" => product["buyer_inputs"].to_a.any?)
 
         def cart_json(data)
           items = data["lines"].map { |line| line_json(line) }

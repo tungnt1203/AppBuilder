@@ -102,6 +102,9 @@ these for the brand, but keep each part:
   the add-to-cart button and right under it when it arrives (`delivery_estimate`), shipping and
   returns; the size guide in a dialog; the sticky buy bar on phones (`sticky-buy`); reviews
   (never invent any) and "You may also like".
+- **Personalized products**: the "Personalize" badge on product cards (`products/_product`) and
+  the home page's "Make it yours" (`blocks/_personalized`) when the shop has any; restyle them,
+  keep them: they are what this kind of shop sells on.
 - **Cart**: the free-shipping bar, discount codes, trust lines by the checkout button, and each
   line's photo with the buyer's text on it (`personalization/_line_image`, also in checkout and
   on the order page).

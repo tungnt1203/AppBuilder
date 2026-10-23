@@ -43,6 +43,7 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
       tee.images.attachments.sole
     end
 
+    assert api(:get, storefront_api_products_path)["products"].find { |product| product["slug"] == "cat-mom-tee" }["personalized"]
     preview = api(:get, storefront_api_product_path("cat-mom-tee"))["product"]["buyer_inputs"].sole["preview"]
     assert_equal [ [ "Lora", "Montserrat" ], [ "#ffffff", "#f2c45a" ] ], preview.values_at("fonts", "colors")
 

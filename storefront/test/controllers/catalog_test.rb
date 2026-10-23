@@ -140,4 +140,15 @@ class CatalogTest < ActionDispatch::IntegrationTest
     ensure
       YAML.define_singleton_method(:safe_load_file, original)
     end
+
+  test "personalized products wear a badge and lead the home page's Make it yours" do
+    @platform.products_data.first["buyer_inputs"] = [ { "key" => "name", "label" => "Name", "required" => false, "max_length" => 12 } ]
+    get root_path
+    assert_select "h2", "Make it yours"
+    assert_select "a[href='/products/cat-tee'] span", /Personalize/
+
+    @platform.products_data.first["buyer_inputs"] = []
+    get root_path
+    assert_select "h2", text: "Make it yours", count: 0
+  end
 end

@@ -36,7 +36,8 @@ class StorefrontApi::Json
         compare_at_cents: sale.map(&:compare_at_price_cents).max },
       image: image(product.cover_image, alt: product.title),
       second_image: image(product.images.select(&:representable?).second, alt: product.title),
-      rating: product.rating_summary
+      rating: product.rating_summary,
+      personalized: product.buyer_inputs.any?
     }
   end
 

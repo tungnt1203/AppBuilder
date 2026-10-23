@@ -18,6 +18,7 @@ en:
       sale: Sale
       saves: "-%{percent}%"
       from: From %{price}
+      personalize: Personalize
     index:
       title: Shop
       search: Search products
