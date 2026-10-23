@@ -29,6 +29,7 @@ class StorefrontApi::CheckoutsTest < ActionDispatch::IntegrationTest
       assert_equal [ "Cat Mom Tee", "Black / S", 2 ], order["items"].sole.values_at("title", "variant_title", "quantity")
 
       assert_equal order["token"], api(:get, storefront_api_order_path(order["token"]))["order"]["token"]
+      assert_equal [ "US", "United States" ], order["shipping_address"].values_at("country", "country_name")
     end
     assert_empty api(:get, storefront_api_cart_path(@cart))["cart"]["items"]
   end

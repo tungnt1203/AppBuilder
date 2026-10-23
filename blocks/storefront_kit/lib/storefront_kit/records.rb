@@ -144,8 +144,8 @@ module StorefrontKit
   end
 
   class Address < Record
-    optional :name, :address1, :address2, :city, :region, :postal_code, :country
-    def lines = [ name, address1, address2.presence, [ city, region, postal_code ].compact_blank.join(" "), country ].compact_blank
+    optional :name, :address1, :address2, :city, :region, :postal_code, :country, :country_name
+    def lines = [ name, address1, address2.presence, [ city, region, postal_code ].compact_blank.join(" "), country_name || country ].compact_blank
   end
 
   class Payment < Record

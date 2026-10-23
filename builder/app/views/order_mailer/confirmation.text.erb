@@ -13,10 +13,10 @@
 <% end -%>
 <%= t("order_mailer.summary.shipping") %>: <%= money(@order.shipping_cents, @order.currency) %>
 <%= t("order_mailer.summary.total") %>: <%= money(@order.total_cents, @order.currency) %>
-<% if @order.pending? && !@order.card? && @store.payment_instructions.present? %>
+<% if @order.pending? && !@order.card? %>
 
 <%= t(".payment") %>:
-<%= @store.payment_instructions %>
+<%= @store.payment_instructions.presence || t(".payment_by_email") %>
 <% end %>
 
 <%= t(".view") %>: <%= @order.storefront_url %>

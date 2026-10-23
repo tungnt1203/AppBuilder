@@ -141,7 +141,8 @@ module StorefrontKit
           "subtotal_cents" => checkout["subtotal_cents"], "discount_cents" => checkout["discount_cents"], "discount_code" => checkout["discount_code"],
           "shipping_cents" => checkout["shipping_cents"], "tax_cents" => 0, "total_cents" => checkout["total_cents"], "refunded_cents" => 0,
           "shipping_address" => { "name" => fields["shipping_name"], "address1" => fields["shipping_address1"], "address2" => fields["shipping_address2"],
-            "city" => fields["shipping_city"], "region" => fields["shipping_region"], "postal_code" => fields["shipping_postal_code"], "country" => fields["shipping_country"] },
+            "city" => fields["shipping_city"], "region" => fields["shipping_region"], "postal_code" => fields["shipping_postal_code"], "country" => fields["shipping_country"],
+            "country_name" => { "US" => "United States", "CA" => "Canada" }[fields["shipping_country"]] }.compact,
           "payment" => { "method" => fields["payment_method"], "required" => card, "instructions" => (card ? nil : @shop_data["payment_instructions"]) },
           "tracking" => nil, "reviewable_products" => []
         }

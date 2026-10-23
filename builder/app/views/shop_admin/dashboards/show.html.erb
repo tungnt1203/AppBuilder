@@ -1,21 +1,30 @@
 <%= page_header t(".title"), t(".welcome", name: Current.user.name) %>
 
-<% if @product_count.zero? %>
+<% unless @store.ready_to_sell? %>
+  <%# Until the shop can sell: what's done, and a link to each step left. %>
+  <% steps = @store.setup_steps %>
+  <% links = { product: new_shop_admin_product_path, payments: edit_shop_admin_settings_path(anchor: "payments"),
+               policies: edit_shop_admin_policies_path, printify: shop_admin_printify_connection_path } %>
   <%= card class: "mb-6" do %>
     <h2 class="font-semibold text-ink"><%= t(".setup.title") %></h2>
-    <ol class="mt-3 list-decimal space-y-2 pl-5 text-sm text-muted">
-      <li><%= link_to t(".setup.product"), new_shop_admin_product_path, class: link_classes %></li>
-      <% if shop_administrator? %>
-        <li><%= link_to t(".setup.settings"), edit_shop_admin_settings_path, class: link_classes %></li>
-        <li><%= link_to t(".setup.stripe"), edit_shop_admin_settings_path(anchor: "payments"), class: link_classes %></li>
-        <li><%= link_to t(".setup.printify"), shop_admin_printify_connection_path, class: link_classes %></li>
-        <li><%= link_to t(".setup.policies"), edit_shop_admin_policies_path, class: link_classes %></li>
+    <ul class="mt-3 space-y-2 text-sm">
+      <% steps.each do |step, done| %>
+        <% next if step != :product && !shop_administrator? %>
+        <li class="flex items-start gap-2">
+          <% if done %>
+            <%= icon "circle-check", size: 18, class: "mt-px shrink-0 text-emerald-600" %>
+            <span class="text-muted"><%= t(".setup.#{step}_done") %></span>
+          <% else %>
+            <%= icon "circle", size: 18, class: "mt-px shrink-0 text-muted" %>
+            <%= link_to t(".setup.#{step}"), links[step], class: link_classes %>
+          <% end %>
+        </li>
       <% end %>
-      <% if current_membership.owner? %>
-        <li><%= link_to t(".setup.staff"), shop_admin_memberships_path, class: link_classes %></li>
-      <% end %>
-      <li><%= link_to t(".setup.view"), storefront_url, class: link_classes, target: "_blank" %></li>
-    </ol>
+      <li class="flex items-start gap-2">
+        <%= icon "external-link", size: 18, class: "mt-px shrink-0 text-muted" %>
+        <%= link_to t(".setup.view"), storefront_url, class: link_classes, target: "_blank" %>
+      </li>
+    </ul>
   <% end %>
 <% end %>
 

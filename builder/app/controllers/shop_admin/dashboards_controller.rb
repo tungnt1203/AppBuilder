@@ -9,7 +9,6 @@ class ShopAdmin::DashboardsController < ShopAdmin::BaseController
     @pending_count = Order.awaiting_payment.count
     @to_ship_count = Order.where(status: %w[ paid in_production ]).count
     @recent_orders = Order.where.not(id: Order.unpaid_card).newest_first.limit(8)
-    @product_count = Product.active.count
     @store = Store.current
   end
 end

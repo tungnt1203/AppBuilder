@@ -3,9 +3,9 @@
 
 <%= render "order_mailer/summary", order: @order %>
 
-<% if @order.pending? && !@order.card? && @store.payment_instructions.present? %>
+<% if @order.pending? && !@order.card? %>
   <h2><%= t(".payment") %></h2>
-  <%= simple_format @store.payment_instructions %>
+  <%= @store.payment_instructions.present? ? simple_format(@store.payment_instructions) : tag.p(t(".payment_by_email")) %>
 <% end %>
 
 <p><%= link_to t(".view"), @order.storefront_url %></p>

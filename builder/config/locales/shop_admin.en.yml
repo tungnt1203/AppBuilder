@@ -76,13 +76,15 @@ en:
         all_orders: All orders
         no_orders: No orders yet. They show up here as soon as someone checks out.
         setup:
-          title: Get your shop ready
-          product: Add your first product
-          settings: Set your currency and shipping rates
-          stripe: Connect Stripe to take card payments
-          printify: Connect Printify to import products and print orders
+          title: Get your shop ready to sell
+          product: Put your first product on sale
+          product_done: A product is on sale
+          payments: "Take payments: connect Stripe for cards, or write how buyers pay you"
+          payments_done: Buyers can pay
           policies: Publish your refund, shipping and privacy policies
-          staff: Invite your staff
+          policies_done: Policies published
+          printify: Connect Printify to import products and print orders (if Printify prints them)
+          printify_done: Printify connected
           view: Look at your shop
     orders:
       invalid_transition: Order %{number} is %{status} now, so that can't be done.

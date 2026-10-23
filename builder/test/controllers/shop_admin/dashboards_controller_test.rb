@@ -17,17 +17,22 @@ class ShopAdmin::DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "p", /Sam Staff/
   end
 
-  test "a shop without products shows its owner the first steps, people included" do
-    Product.destroy_all
+  test "until the shop can sell, the dashboard ticks what's done and links each step left" do
+    store = stores(:cats).tap { |cats| cats.update!(payment_instructions: "", stripe_secret_key: nil, stripe_publishable_key: nil, refund_policy: "", shipping_policy: "", privacy_policy: "") }
     sign_in_as users(:member)
 
     get shop_admin_root_path
-    assert_response :success
-    assert_select "ol a[href=?]", shop_admin_memberships_path
-    assert_select "ol a[href=?]", shop_admin_printify_connection_path
+    assert_select "li", text: /A product is on sale/
+    assert_select "a[href=?]", edit_shop_admin_settings_path(anchor: "payments"), /Take payments/
+    assert_select "a[href=?]", edit_shop_admin_policies_path, /Publish your refund/
+    assert_select "a[href=?]", shop_admin_printify_connection_path
 
     sign_in_as users(:cats_staff)
     get shop_admin_root_path
-    assert_select "ol a[href=?]", shop_admin_memberships_path, count: 0
+    assert_select "a[href=?]", edit_shop_admin_policies_path, { count: 0 }, "staff do not change settings"
+
+    store.update!(payment_instructions: "Bank transfer to 123", refund_policy: "30 days", shipping_policy: "3 days", privacy_policy: "We keep your email")
+    get shop_admin_root_path
+    assert_select "h2", text: /Get your shop ready/, count: 0
   end
 end

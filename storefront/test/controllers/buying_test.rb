@@ -35,6 +35,7 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_select "p", /Thank you, Robin Buyer/
     assert_select "h2", "How to pay"
     assert_select "p", /bank transfer to 123-456/
+    assert_select "p", /Austin TX 78701\s*United States/, "the country by its name"
     assert_equal 7200 - 720, order["subtotal_cents"] - order["discount_cents"]
   end
 
@@ -79,6 +80,15 @@ class BuyingTest < ActionDispatch::IntegrationTest
     get shipping_checkout_path(shipping_country: "US", shipping_postal_code: "78701", payment_method: "manual"), headers: { "Turbo-Frame" => "checkout_totals" }
     assert_select "turbo-frame#checkout_totals dd", "$4.75"
     assert_select "input[type=submit][value='Place order']"
+  end
+
+  test "a shop without payment instructions tells the buyer they come by email" do
+    @platform.shop_data["payment_instructions"] = nil
+    post cart_items_path, params: { variant_id: 102 }
+    post checkout_path, params: { idempotency_key: "k2", checkout: ADDRESS.merge(payment_method: "manual") }
+    follow_redirect!
+    assert_select "h2", "How to pay"
+    assert_select "p", /We'll email you how to pay/
   end
 
   test "what the buyer types to be printed goes with the line, and is asked for when it must be" do

@@ -256,6 +256,18 @@ class Store < ApplicationRecord
     false
   end
 
+  # What a new shop needs to sell, for the dashboard: { step => done? }. A product on sale, a way
+  # to be paid (Stripe, or instructions for buyers who pay otherwise: without them a buyer is left
+  # not knowing how) and the policies Stripe and ad networks look for; Printify when it prints.
+  def setup_steps
+    { product: Product.active.exists?, payments: card_payments? || payment_instructions.present?,
+      policies: (%w[ refund shipping privacy ] - published_policies).empty?, printify: printify_connected? }
+  end
+
+  def ready_to_sell?
+    setup_steps.except(:printify).values.all?
+  end
+
   def policy(id)
     public_send(POLICIES.fetch(id)).presence
   end

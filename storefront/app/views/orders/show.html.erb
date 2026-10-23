@@ -28,10 +28,11 @@
         <%= icon "credit-card", size: 18 %> <%= t(".pay_now", total: money(@order.total_cents, @order.currency)) %>
       <% end %>
     </div>
-  <% elsif @order.pending? && @order.payment.instructions.present? %>
+  <% elsif @order.pending? && !@order.card? %>
+    <%# Paid another way: the shop's instructions, or word that it sends them when it has none. %>
     <div class="mt-6 rounded-xl border border-line bg-surface p-6">
       <h2 class="font-semibold"><%= t(".how_to_pay") %></h2>
-      <div class="mt-2 text-sm leading-relaxed"><%= simple_format @order.payment.instructions %></div>
+      <div class="mt-2 text-sm leading-relaxed"><%= @order.payment.instructions.present? ? simple_format(@order.payment.instructions) : tag.p(t(".instructions_by_email")) %></div>
     </div>
   <% end %>
 

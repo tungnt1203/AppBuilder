@@ -193,6 +193,7 @@ en:
       heading: Thank you, %{name}!
       intro: We've received your order %{number}.
       payment: How to pay
+      payment_by_email: We'll email you how to pay. Your order goes into production once the payment is in.
       view: View your order
     shipped:
       subject: "%{app}: order %{number} is on its way"

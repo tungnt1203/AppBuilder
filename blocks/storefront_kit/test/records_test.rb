@@ -38,7 +38,7 @@ class RecordsTest < Minitest::Test
     assert order.pending?
     assert order.card?
     assert order.payment.required?
-    assert_equal [ "Robin", "5 Elm", "Austin TX 78701", "US" ], order.shipping_address.lines
+    assert_equal [ "Robin", "5 Elm", "Austin TX 78701", "United States" ], order.shipping_address.lines
     assert_equal "pk_test_fake", @api.payment(order.token).publishable_key
     assert @api.cart(cart.token).empty?
   end
