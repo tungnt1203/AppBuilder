@@ -189,6 +189,42 @@ class BuyerInputs
   end
   private_class_method :choices
 
+  LOOKS = { "bw" => "Black and white", "sepia" => "Sepia" }.freeze
+
+  # What the buyer added, for people to read on a cart or order line, in the order they added it:
+  # [{ key, label, value, kind, raw }] ("Name font: Pacifico", "Your photo: Added", "Your photo
+  # look: Sepia", "Sky: June 21, 2014, 10:00 PM"). kind is the field's (nil for a font, a color or
+  # a look); raw is what's kept (a photo's token, a picture's id, a color's hex code, for links and
+  # swatches). How a photo is framed isn't for reading. artwork: the product's pictures by id.
+  def self.entries(definitions, properties, artwork: {})
+    fields = Array(definitions).index_by { |field| field["key"] }
+    properties.to_h.filter_map do |key, raw|
+      field, part = fields[key], nil
+      field, part = fields[key.delete_suffix("_#{part}")], part if field.nil? && (part = key[/_(font|color|crop|filter|place)\z/, 1])
+      next { key:, label: key.humanize, value: raw.to_s, kind: nil, raw: } unless field
+      next if part == "crop"
+
+      label = part ? "#{field["label"]} #{{ "filter" => "look", "place" => "city" }.fetch(part, part)}" : field["label"]
+      value = case part || field["kind"]
+      when "photo" then "Added"
+      when "choice" then (art = artwork[raw.to_i]) ? art.filename.base.humanize : raw.to_s
+      when "filter" then LOOKS.fetch(raw.to_s, raw.to_s)
+      when "place" then Personalization::Sky.cities.dig(raw, "name") || raw.to_s
+      when "starmap" then moment(raw)
+      else raw.to_s
+      end
+      { key:, label:, value:, kind: (field["kind"] unless part), raw: }
+    end
+  end
+
+  # "2014-06-21T22:00" as "June 21, 2014, 10:00 PM" (a day alone as "June 21, 2014").
+  def self.moment(value)
+    time = Time.strptime(value.to_s, value.to_s.include?("T") ? "%Y-%m-%dT%H:%M" : "%Y-%m-%d")
+    time.strftime(value.to_s.include?("T") ? "%B %-d, %Y, %-l:%M %p" : "%B %-d, %Y")
+  rescue ArgumentError
+    value.to_s
+  end
+
   # What shows on the photo of a cart or order line, in the fields' order: each field that shows on
   # photos, with what the buyer added. Text in the font and color they picked; a photo as its
   # upload's token, framed as they framed it; a picture as its artwork's id; a color. Empty when

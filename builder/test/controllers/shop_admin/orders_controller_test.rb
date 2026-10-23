@@ -42,7 +42,7 @@ class ShopAdmin::OrdersControllerTest < ActionDispatch::IntegrationTest
     line_items(:pending_tee).update!(properties: { "your_photo" => upload.token, "your_photo_crop" => "1.5,0.2,0.8" })
 
     get shop_admin_order_path(orders(:pending))
-    assert_select "p", "Your photo: Photo added"
+    assert_select "p", "Your photo: Added"
     assert_select "p", /framed at 1.5× around 20%, 80%/
     assert_select "a[href*='disposition=attachment']", "Download the photo"
   end

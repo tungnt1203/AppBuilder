@@ -28,6 +28,15 @@ module ShopHelper
     option.color_for(value) || SWATCHES[value.to_s.downcase.squish]
   end
 
+  # What the buyer added, as a cart or order line shows it: a color they picked ("#f2c45a") as
+  # its swatch, the rest as written.
+  def property_value(property)
+    value = property.value.to_s
+    return value unless value.match?(/\A#\h{6}\z/)
+
+    tag.span(class: "inline-block size-3.5 rounded-full align-[-2px] ring-1 ring-line", style: "background-color: #{value}", role: "img", aria: { label: value })
+  end
+
   # "Arrives Oct 21 – 24" for an order placed today, when the shop says how long delivery takes.
   def delivery_estimate
     first, last = current_shop.shipping&.delivery_dates

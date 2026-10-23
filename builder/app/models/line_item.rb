@@ -19,30 +19,17 @@ class LineItem < ApplicationRecord
     variant&.product
   end
 
-  # "Name on the shirt: Ada", using the product's labels while it still has them.
-  # What the buyer added, as "Label: value" lines (emails, the admin): a photo as "Photo added",
-  # without its framing; a picture by its name.
+  # What the buyer added, as "Label: value" lines ("Name on the shirt: Ada", "Your photo: Added"),
+  # using the product's labels while it still has them.
   def property_lines
+    property_entries.map { |entry| "#{entry[:label]}: #{entry[:value]}" }
+  end
+
+  # What the buyer added as BuyerInputs.entries: [{ key, label, value, kind, raw }].
+  def property_entries
     return [] if properties.blank?
 
-    fields = product&.buyer_inputs.to_a
-    photos = fields.select { |field| field["kind"] == "photo" }.map { |field| field["key"] }
-    labels = fields.each_with_object({}) do |field, all|
-      all[field["key"]] = field["label"]
-      all["#{field["key"]}_font"] = "#{field["label"]} font"
-      all["#{field["key"]}_color"] = "#{field["label"]} color"
-      all["#{field["key"]}_place"] = "#{field["label"]} place"
-    end
-    choices = fields.select { |field| field["kind"] == "choice" }.map { |field| field["key"] }
-    artwork = choices.any? ? product.artwork.attachments.index_by(&:id) : {}
-    properties.filter_map do |key, value|
-      next if photos.any? { |photo| key == "#{photo}_crop" }
-
-      value = "Photo added" if photos.include?(key)
-      value = artwork[value.to_i]&.filename&.base&.humanize || value if choices.include?(key)
-      value = Personalization::Sky.cities.dig(value, "name") || value if key.end_with?("_place")
-      "#{labels[key] || key}: #{value}"
-    end
+    BuyerInputs.entries(product&.buyer_inputs, properties, artwork: product ? product.artwork.attachments.index_by(&:id) : {})
   end
 
   # The photos the buyer added, to print: [{ label, upload, crop: [zoom, x, y], sharp: whether it's

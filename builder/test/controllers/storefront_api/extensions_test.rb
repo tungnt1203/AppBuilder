@@ -115,7 +115,7 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
 
     token = api(:post, storefront_api_carts_path)["cart"]["token"]
     line = api(:post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { our_night: "2020-02-14T21:30", our_night_place: "hanoi-vietnam" } })["cart"]["items"].sole
-    assert_equal [ [ "Our night", "2020-02-14T21:30" ], [ "Our night place", "Hanoi, Vietnam" ] ], line["properties"].map { |entry| entry.values_at("label", "value") }
+    assert_equal [ [ "Our night", "February 14, 2020, 9:30 PM" ], [ "Our night city", "Hanoi, Vietnam" ] ], line["properties"].map { |entry| entry.values_at("label", "value") }
     assert_equal [ "starmap", "2020-02-14T21:30", "hanoi-vietnam", "#0b1d3a" ], line["preview"].sole.values_at("kind", "when", "place", "sky")
   end
 

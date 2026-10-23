@@ -52,7 +52,7 @@ class BuyerInputsTest < ActiveSupport::TestCase
 
     product = products(:tee).tap { |tee| tee.update!(buyer_inputs: [ field ]) }
     item = LineItem.new(product_title: product.title, variant: product.variants.first, properties:)
-    assert_equal [ "Your photo: Photo added" ], item.property_lines
+    assert_equal [ "Your photo: Added" ], item.property_lines
     assert_equal [ [ "Your photo", upload, [ 2.0, 0.3, 0.6 ] ] ], item.buyer_photos.map { |photo| photo.values_at(:label, :upload, :crop) }
   end
 
@@ -71,6 +71,17 @@ class BuyerInputsTest < ActiveSupport::TestCase
     assert item.buyer_photos.sole[:sharp]
     item.properties["photo_crop"] = "2,0.5,0.5"
     assert_not item.buyer_photos.sole[:sharp]
+  end
+
+  test "what the buyer added reads well on a line: looks, days and cities in words, no framing" do
+    fields = [ { "key" => "name", "label" => "Name", "kind" => "text" }, { "key" => "photo", "label" => "Photo", "kind" => "photo" },
+               { "key" => "night", "label" => "Our night", "kind" => "starmap" }, { "key" => "fav_color", "label" => "Favorite color", "kind" => "text" } ]
+    entries = BuyerInputs.entries(fields, { "name" => "Ada", "name_font" => "Lora", "name_color" => "#f2c45a", "photo" => "upl_x", "photo_crop" => "1,0.5,0.5",
+      "photo_filter" => "bw", "night" => "2020-02-14", "night_place" => "hanoi-vietnam", "fav_color" => "teal", "gift_note" => "Hi" })
+    assert_equal [ [ "Name", "Ada" ], [ "Name font", "Lora" ], [ "Name color", "#f2c45a" ], [ "Photo", "Added" ], [ "Photo look", "Black and white" ],
+      [ "Our night", "February 14, 2020" ], [ "Our night city", "Hanoi, Vietnam" ], [ "Favorite color", "teal" ], [ "Gift note", "Hi" ] ], entries.map { |entry| entry.values_at(:label, :value) }
+    assert_equal [ "text", nil, nil, "photo" ], entries.first(4).pluck(:kind)
+    assert_equal "upl_x", entries[3][:raw]
   end
 
   test "a photo box drawn with a layout becomes a photo field per cell, with gaps between them" do

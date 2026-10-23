@@ -36,7 +36,7 @@
                   <p class="text-sm text-muted"><%= item.variant.title %></p>
                 <% end %>
                 <% item.properties.each do |property| %>
-                  <p class="text-sm text-muted"><%= property.label %>: <span class="text-ink"><%= property.value %></span></p>
+                  <p class="text-sm text-muted"><%= property.label %>: <span class="text-ink"><%= property_value(property) %></span></p>
                 <% end %>
               </div>
               <p class="font-medium whitespace-nowrap"><%= money(item.line_total_cents) %></p>

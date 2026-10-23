@@ -106,9 +106,10 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_select "input[type=radio][name='properties[print_name_font]'][value=Montserrat]"
     assert_select "input[type=radio][name='properties[print_name_color]'][value='#f2c45a']"
 
-    post cart_items_path, params: { variant_id: 101, properties: { print_name: "Ada", print_name_font: "Montserrat" } }
+    post cart_items_path, params: { variant_id: 101, properties: { print_name: "Ada", print_name_font: "Montserrat", print_name_color: "#f2c45a" } }
     get cart_path
-    assert_select "[data-controller=personalize] [data-personalize-target=layer][data-text=Ada][data-font=Montserrat][data-color='#ffffff']"
+    assert_select "[data-controller=personalize] [data-personalize-target=layer][data-text=Ada][data-font=Montserrat][data-color='#f2c45a']"
+    assert_select "span[role=img][aria-label='#f2c45a'][style*='#f2c45a']", 1, "the color picked as its swatch, not its code"
   end
 
   test "a buyer's photo is sent as they pick it, and their line shows it framed on the product" do

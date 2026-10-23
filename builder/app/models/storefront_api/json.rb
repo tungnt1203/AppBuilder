@@ -182,22 +182,10 @@ class StorefrontApi::Json
       kinds = fields.to_h { |field| [ field["key"], field["kind"] ] }
       uploads = BuyerUpload.where(token: record.properties.select { |key, _| kinds[key] == "photo" }.values).index_by(&:token)
       artwork = product ? product.artwork.attachments.index_by(&:id) : {}
-      labels = fields.each_with_object({}) do |field, all|
-        all[field["key"]] = field["label"]
-        all["#{field["key"]}_font"] = "#{field["label"]} font"
-        all["#{field["key"]}_color"] = "#{field["label"]} color"
-        all["#{field["key"]}_place"] = "#{field["label"]} place"
-      end
-      line[:properties] = record.properties.filter_map do |key, value|
-        next if key.end_with?("_crop") && kinds[key.delete_suffix("_crop")] == "photo"
-
-        value = Personalization::Sky.cities.dig(value, "name") || value if key.end_with?("_place") && kinds[key.delete_suffix("_place")] == "starmap"
-        entry = { key:, label: labels[key] || key, value: }
-        case kinds[key]
-        when "photo" then (upload = uploads[value]) ? entry.merge(value: "Added").merge(upload_urls(upload)) : entry
-        when "choice" then (art = artwork[value.to_i]) ? entry.merge(value: artwork_label(art)).merge(artwork_urls(art)) : entry
-        else entry
-        end
+      line[:properties] = BuyerInputs.entries(fields, record.properties, artwork:).map do |entry|
+        upload, art = uploads[entry[:raw]], artwork[entry[:raw].to_i]
+        found = { "photo" => (upload_urls(upload) if upload), "choice" => (artwork_urls(art) if art) }[entry[:kind]]
+        entry.slice(:key, :label, :value).merge(found.to_h)
       end
       layers = BuyerInputs.layers(fields, record.properties).select { |layer| layer["images"].empty? || layer["images"].include?(photo&.id) }
       layers = layers.filter_map do |layer|

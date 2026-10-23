@@ -1,7 +1,7 @@
 <table cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 560px;">
   <% order.line_items.each do |item| %>
     <tr>
-      <td><%= item.quantity %> × <%= item.product_title %><% if item.variant_title %><br><small><%= item.variant_title %></small><% end %><% item.property_lines.each do |line| %><br><small><%= line %></small><% end %></td>
+      <td><%= item.quantity %> × <%= item.product_title %><% if item.variant_title %><br><small><%= item.variant_title %></small><% end %><% item.property_entries.each do |entry| %><br><small><%= entry[:label] %>: <% if entry[:value].match?(/\A#\h{6}\z/) %><span style="display: inline-block; width: 10px; height: 10px; border-radius: 5px; background-color: <%= entry[:value] %>; border: 1px solid #d1d5db;"></span> <% end %><%= entry[:value] %></small><% end %></td>
       <td align="right"><%= money(item.total_cents, order.currency) %></td>
     </tr>
   <% end %>
