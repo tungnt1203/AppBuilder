@@ -45,6 +45,7 @@
             </span>
             <span class="hidden text-sm text-ink sm:block"><%= price_range(product) %></span>
             <% if product.demo? %><%= badge t(".demo.badge"), tone: :yellow %><% end %>
+            <% if product.buyer_inputs.any? %><%= badge t(".personalized"), tone: :brand %><% end %>
             <span class="w-20 text-right"><%= product_status_badge product %></span>
           <% end %>
         </li>

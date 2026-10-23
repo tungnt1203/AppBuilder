@@ -3,8 +3,9 @@
 <%= card do %>
   <h2 class="text-sm font-semibold text-ink"><%= t("shop_admin.products.launch_checklist.title") %></h2>
   <ul class="mt-3 space-y-2 text-sm">
-    <% { no_photos: "#product_images", price_not_above_cost: "#variants", no_size_guide: "#size_guide" }.each do |problem, anchor| %>
+    <% { no_photos: "#product_images", price_not_above_cost: "#variants", no_size_guide: "#size_guide", no_print_area: "#print-area" }.each do |problem, anchor| %>
       <% next if problem == :no_size_guide && product.size_option_name.nil? %>
+      <% next if problem == :no_print_area && !product.prints_personalized? %>
       <li class="flex items-start gap-2">
         <% if problems.include?(problem) %>
           <%= icon "circle-alert", size: 18, class: "mt-px shrink-0 text-red-600" %>

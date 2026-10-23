@@ -73,6 +73,19 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_in_delta 0.3, tee.reload.print_area["x"], 0.01
   end
 
+  test "a personalized Printify product says to draw its print area, and is badged in the list" do
+    tee = products(:tee).tap { |product| product.update!(printify_product_id: "pf-tee", buyer_inputs: [ { "label" => "Name" } ]) }
+    assert_includes tee.launch_problems, :no_print_area
+
+    get edit_shop_admin_product_path(tee)
+    assert_select "a[href='#print-area']", /Draw the print area/
+    get shop_admin_products_path
+    assert_select "span", "Personalized"
+
+    tee.update!(print_area: { "x" => 0.2, "y" => 0.2, "w" => 0.5, "h" => 0.5 })
+    assert_not_includes tee.launch_problems, :no_print_area
+  end
+
   test "staff can't add or remove demo products" do
     post shop_admin_demo_products_path
     assert_not DemoCatalog.present?

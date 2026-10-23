@@ -91,12 +91,16 @@ class Product < ApplicationRecord
     problems << :no_photos unless images.attached?
     problems << :price_not_above_cost if variants.any? { |variant| variant.available? && variant.cost_cents && variant.price_cents <= variant.cost_cents }
     problems << :no_size_guide if size_option_name && size_guide.blank?
+    problems << :no_print_area if prints_personalized? && print_area.blank?
     problems
   end
 
   def available?
     active? && variants.any?(&:sellable?)
   end
+
+  # Printify prints it with what the buyer adds (a name, a photo): the print area tells where.
+  def prints_personalized? = printify_product_id.present? && buyer_inputs.any?
 
   def price_range
     prices = (available_variants.presence || variants).map(&:price_cents)

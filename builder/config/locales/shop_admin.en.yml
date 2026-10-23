@@ -251,12 +251,15 @@ en:
         price_not_above_cost_done: Every price covers its cost
         no_size_guide: Add a size guide; buyers can't exchange a printed size
         no_size_guide_done: Size guide
+        no_print_area: Draw the print area, or personalized orders wait for you in Printify
+        no_print_area_done: Print area (personalized orders print by themselves)
         publish: Put it on sale
         confirm_publish: Some checks above aren't done. Put it on sale anyway?
         draft_hint: It's a draft until then; buyers can't see it.
       index:
         title: Products
         new: Add product
+        personalized: Personalized
         import_printify: Import from Printify
         all: All
         search: Search products
