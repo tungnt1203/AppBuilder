@@ -28,6 +28,14 @@ module ShopHelper
     option.color_for(value) || SWATCHES[value.to_s.downcase.squish]
   end
 
+  # Whether dark text reads better than white on this color ("#e3fc02" yes, "#1f3a5f" no), by its
+  # relative luminance (WCAG).
+  def light_color?(hex)
+    channels = hex.delete("#").scan(/../).map { |pair| pair.to_i(16) / 255.0 }
+    red, green, blue = channels.map { |c| c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055)**2.4 }
+    0.2126 * red + 0.7152 * green + 0.0722 * blue > 0.4
+  end
+
   # What the buyer added, as a cart or order line shows it: a color they picked ("#f2c45a") as
   # its swatch, the rest as written.
   def property_value(property)

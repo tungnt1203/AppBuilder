@@ -1,0 +1,69 @@
+<%# The site's header, as Ride has it: on the dark canvas, the logo (a theme setting the owner
+    uploads) or the name in the headings' uppercase on the left, the collections in small uppercase
+    beside it, search and the cart on the right. On phones: the menu button, the name in the
+    middle, search and the cart. Pages can add links with content_for :site_nav, or show only the
+    logo and the cart with content_for :focused (checkout: nothing to wander off to). %>
+<% menu_items = shop_menu(:header)&.items.to_a %>
+<% shop_collections = collections.select { |collection| collection.product_count.to_i.positive? }.first(6) %>
+<% nav_link = "py-2 text-sm font-semibold tracking-[0.06em] whitespace-nowrap text-muted uppercase hover:text-ink aria-[current=page]:text-ink" %>
+<header class="sticky top-0 z-20 bg-canvas">
+  <div class="mx-auto flex h-16 max-w-[1180px] items-center gap-7 px-4 md:h-[104px] md:px-10 xl:px-0">
+    <% unless content_for?(:focused) %>
+    <div class="md:hidden" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape turbo:before-cache@document->menu#hide">
+      <button type="button" class="group -ml-2 grid size-10 place-items-center text-ink" data-menu-target="button" data-action="menu#toggle" aria-expanded="false" aria-label="<%= t("ui.menu") %>">
+        <%= icon "menu", size: 24, stroke: 1.75, class: "group-aria-expanded:hidden" %>
+        <%= icon "x", size: 24, stroke: 1.75, class: "hidden group-aria-expanded:block" %>
+      </button>
+      <nav data-menu-target="panel" class="absolute inset-x-0 top-full hidden max-h-[calc(100svh-4rem)] overflow-y-auto border-t border-line bg-canvas px-4 pt-2 pb-8" aria-label="<%= t("ui.navigation") %>">
+        <ul>
+          <li><%= link_to t("layouts.site.shop_all"), products_path, class: "block py-3 font-display text-2xl text-ink uppercase" %></li>
+          <% shop_collections.each do |collection| %>
+            <li>
+              <%= link_to collection_path(collection), class: "flex items-center justify-between py-3 font-display text-2xl text-ink uppercase" do %>
+                <%= collection.title %> <%= icon "arrow-right", size: 20, class: "text-muted" %>
+              <% end %>
+            </li>
+          <% end %>
+          <% menu_items.each do |item| %>
+            <li><%= shop_menu_link item, class: "block py-3 font-display text-2xl text-ink uppercase" %></li>
+          <% end %>
+        </ul>
+      </nav>
+    </div>
+    <% end %>
+
+    <%= link_to root_path, class: "flex min-w-0 shrink items-center text-ink max-md:flex-1 max-md:justify-center" do %>
+      <% if (logo = theme_setting(:logo).presence) %>
+        <%= image_tag logo, alt: current_shop.name, class: "h-9 w-auto max-w-44 object-contain md:h-14" %>
+      <% else %>
+        <%# A long name wraps onto two balanced lines rather than losing its end. %>
+        <span class="line-clamp-2 font-display text-2xl leading-[1.15] font-semibold text-balance uppercase max-md:text-center md:text-3xl <%= "max-md:text-lg" if current_shop.name.length > 16 %>"><%= current_shop.name %></span>
+      <% end %>
+    <% end %>
+
+    <% if content_for?(:focused) %>
+      <span class="flex-1"></span>
+    <% else %>
+    <nav class="hidden flex-1 items-center gap-7 md:flex" aria-label="<%= t("ui.navigation") %>">
+      <% shop_collections.first(4).each do |collection| %>
+        <%= link_to collection.title, collection_path(collection), class: nav_link, aria: { current: ("page" if current_page?(collection_path(collection))) } %>
+      <% end %>
+      <%= link_to t("layouts.site.shop_all"), products_path, class: nav_link, aria: { current: ("page" if current_page?(products_path)) } %>
+      <% menu_items.each do |item| %>
+        <%= shop_menu_link item, class: nav_link %>
+      <% end %>
+      <%= yield :site_nav %>
+    </nav>
+    <%= link_to products_path, class: "grid size-10 place-items-center text-ink", aria: { label: t("products.index.search") } do %>
+      <%= icon "search", size: 22, stroke: 1.75 %>
+    <% end %>
+    <% end %>
+
+    <%= link_to cart_path, class: "relative -mr-2 grid size-10 place-items-center text-ink", id: "cart-link", aria: { label: t("layouts.site.cart_with_count", count: cart_item_count) } do %>
+      <%= icon "shopping-bag", size: 22, stroke: 1.75 %>
+      <% if cart_item_count.positive? %>
+        <span class="absolute right-0 bottom-0.5 grid min-w-[1.125rem] place-items-center rounded-full bg-brand-600 px-1 text-[0.625rem] leading-[1.125rem] font-bold text-on-brand"><%= cart_item_count %></span>
+      <% end %>
+    <% end %>
+  </div>
+</header>

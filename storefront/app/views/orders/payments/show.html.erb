@@ -8,7 +8,7 @@
 <%# Paying a card order with Stripe's Payment Element (card, Apple Pay, Google Pay…). Stripe
     sends the buyer back to the order's page, which shows it paid. %>
 <div class="mx-auto max-w-lg px-4 py-12">
-  <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title", number: @order.name) %></h1>
+  <h1 class="text-3xl"><%= t(".title", number: @order.name) %></h1>
   <p class="mt-2 text-muted"><%= t(".total", total: money(@payment.amount_cents, @payment.currency)) %></p>
   <% if @payment.test_mode %>
     <p class="mt-4 rounded-lg bg-yellow-50 px-4 py-3 text-sm text-yellow-900"><%= t(".test_mode") %></p>

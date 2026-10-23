@@ -1,0 +1,52 @@
+/* Theme "editorial", after Shopify's Craft (https://theme-craft-demo.myshopify.com): a warm
+   light-gray canvas, a light serif for headings (Trirong) over a calm sans (Quattrocento Sans),
+   one deep color for buttons and the footer, cards drawn with a hairline and barely rounded. Put
+   by bin/theme; change the colors and fonts here, keep the rest of the theme's restraint
+   (themes/editorial/README.md).
+
+   Names every page reads:
+   - brand-50…950   buttons, links, badges, the announcement bar and the footer (600 is the
+                    button; on-brand is the text on it)
+   - accent         a second color; unused here, as on Craft
+   - canvas, surface (cards, fields), surface-muted (photo backgrounds, hovers), ink, muted, line
+   - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
+   - font-display   headings; font-sans text (families from fonts.css) */
+@theme {
+  --font-sans: "Quattrocento Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Trirong", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius-lg: 7px;
+  --radius-xl: 6px;
+
+  --color-canvas: #efecec;
+  --color-surface: #f6f4f4;
+  --color-surface-muted: #e4e0df;
+  --color-ink: #252525;
+  --color-muted: #5e5c5b;
+  --color-line: #d3cecd;
+  --color-accent: #8a6d3b;
+  --color-on-brand: #efecec;
+
+  --color-brand-50: #eef0ee;
+  --color-brand-100: #dce1dd;
+  --color-brand-200: #b9c3bc;
+  --color-brand-300: #8d9c92;
+  --color-brand-400: #5f6f65;
+  --color-brand-500: #435048;
+  --color-brand-600: #2c332f;
+  --color-brand-700: #232925;
+  --color-brand-800: #1b1f1c;
+  --color-brand-900: #131614;
+  --color-brand-950: #0b0d0c;
+}
+
+@layer base {
+  body { letter-spacing: 0.03em; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 300; letter-spacing: 0.02em; line-height: 1.25; }
+}
+
+@layer components {
+  /* Every button (button_classes): regular weight, a little spacing, as on Craft. */
+  .btn { font-weight: 400; letter-spacing: 0.06em; }
+}

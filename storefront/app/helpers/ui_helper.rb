@@ -5,13 +5,13 @@
 module UiHelper
   FIELD_CLASSES = "block w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink shadow-xs placeholder:text-muted focus:border-brand-500 focus:outline-2 focus:outline-brand-500/20"
 
-  BUTTON_BASE = "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+  BUTTON_BASE = "btn inline-flex items-center justify-center gap-2 rounded-lg transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
   BUTTON_SIZES = {
     sm: "px-2.5 py-1.5 text-xs",
     md: "px-3.5 py-2 text-sm"
   }
   BUTTON_VARIANTS = {
-    primary: "bg-brand-600 text-white shadow-xs hover:bg-brand-500 focus-visible:outline-brand-600",
+    primary: "bg-brand-600 text-on-brand hover:bg-brand-700 focus-visible:outline-brand-600",
     secondary: "bg-surface text-ink shadow-xs ring-1 ring-inset ring-line hover:bg-surface-muted",
     danger: "bg-red-600 text-white shadow-xs hover:bg-red-500 focus-visible:outline-red-600",
     ghost: "text-ink hover:bg-surface-muted"

@@ -1,7 +1,7 @@
 <% content_for :title, t(".title") %>
 
 <div class="mx-auto max-w-3xl px-4 py-12">
-  <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
+  <h1 class="text-3xl"><%= t(".title") %></h1>
 
   <% if @cart && !@cart.empty? %>
     <% threshold = current_shop.shipping.free_over_cents %>

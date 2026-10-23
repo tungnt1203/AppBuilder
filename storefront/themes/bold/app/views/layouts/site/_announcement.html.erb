@@ -1,0 +1,6 @@
+<%# A line across the top of every page, written by the owner in the shop's settings: free
+    shipping over $50, a code for a first order, a new drop. On Ride it's the loud color, in the
+    headings' uppercase. %>
+<% if (announcement = current_shop.announcement.presence) %>
+  <div class="bg-brand-600 px-4 py-2.5 text-center font-display text-sm tracking-[0.04em] text-on-brand uppercase md:text-base"><%= announcement %></div>
+<% end %>

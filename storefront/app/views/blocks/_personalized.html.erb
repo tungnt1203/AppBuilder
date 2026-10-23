@@ -6,13 +6,12 @@
 <section class="py-16 md:py-24">
   <div class="mx-auto grid max-w-6xl gap-10 px-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:items-center">
     <div>
-      <p class="text-xs font-semibold tracking-[0.2em] text-brand-700 uppercase">Made just for you</p>
-      <h2 class="mt-2 text-3xl font-bold tracking-tight text-ink md:text-4xl">Make it yours</h2>
+      <h2 class="text-3xl text-ink md:text-4xl">Make it yours</h2>
       <p class="mt-4 text-muted">Add a name, a date or your own photo, and see it on the product before you buy.</p>
       <ul class="mt-6 space-y-3 text-sm text-ink">
-        <li class="flex items-center gap-3"><%= icon "type", size: 18, class: "text-brand-700" %> Names and words in the font you like</li>
-        <li class="flex items-center gap-3"><%= icon "image-plus", size: 18, class: "text-brand-700" %> Your photo, framed the way you want</li>
-        <li class="flex items-center gap-3"><%= icon "eye", size: 18, class: "text-brand-700" %> A live preview as you type</li>
+        <li class="flex items-center gap-3"><%= icon "type", size: 18, stroke: 1.5 %> Names and words in the font you like</li>
+        <li class="flex items-center gap-3"><%= icon "image-plus", size: 18, stroke: 1.5 %> Your photo, framed the way you want</li>
+        <li class="flex items-center gap-3"><%= icon "eye", size: 18, stroke: 1.5 %> A live preview as you type</li>
       </ul>
     </div>
     <% if picks.any? %>

@@ -67,7 +67,7 @@
         <div><dt>tests</dt><dd><%= @report.tests_text(result).presence || "–" %></dd></div>
         <div><dt>pages ok</dt><dd><%= @report.ok_pages(result) %>/<%= result.dig("pages", "visited")&.size.to_i %></dd></div>
         <div><dt>asked met</dt><dd><%= @report.asked_text(judge).presence || "–" %></dd></div>
-        <div><dt>look · phone</dt><dd><%= [ judge["look"], judge["phone"] ].map { |score| score || "–" }.join(" · ") %></dd></div>
+        <div><dt>look · phone · real</dt><dd><%= [ judge["look"], judge["phone"], judge["real"] ].map { |score| score || "–" }.join(" · ") %></dd></div>
         <div><dt>cost</dt><dd>$<%= result["cost_usd"] || "–" %></dd></div>
         <div><dt>time</dt><dd><%= result["build_seconds"] ? "#{(result["build_seconds"] / 60.0).round(1)} min" : "–" %></dd></div>
         <div><dt>agent steps</dt><dd><%= result["agent_turns"] || "–" %></dd></div>
@@ -75,6 +75,7 @@
         <div><dt>rubocop</dt><dd><%= result["rubocop"] || "–" %></dd></div>
       </dl>
       <% if judge["notes"].present? %><p class="notes"><%= judge["notes"] %></p><% end %>
+      <% if judge["tells"].present? %><p class="notes faint">Looks generated: <%= judge["tells"].join("; ") %></p><% end %>
       <% if judge["asked"].present? %>
         <ul class="asked">
           <% judge["asked"].each do |item| %>

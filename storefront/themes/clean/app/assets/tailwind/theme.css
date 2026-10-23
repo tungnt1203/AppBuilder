@@ -1,0 +1,50 @@
+/* Theme "clean", after Shopify's Dawn (https://theme-dawn-demo.myshopify.com): white, near-black
+   text, one plain font at its regular weight, square corners, product photos on pale gray, and
+   the shop's color only on buttons, links and small badges. Put by bin/theme; change the colors
+   and fonts here, keep the rest of the theme's restraint (themes/clean/README.md).
+
+   Names every page reads:
+   - brand-50…950   buttons, links, badges (600 is the button; on-brand is the text on it)
+   - accent         the sale badge
+   - canvas, surface, surface-muted (photo backgrounds, hovers), ink, muted, line
+   - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
+   - font-display   headings; font-sans text (families from fonts.css) */
+@theme {
+  --font-sans: "Assistant", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Assistant", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f3f3f3;
+  --color-ink: #121212;
+  --color-muted: #5f5f5f;
+  --color-line: #e8e8e8;
+  --color-accent: #334fb4;
+  --color-on-brand: #ffffff;
+
+  --color-brand-50: #f3f3f3;
+  --color-brand-100: #e6e6e6;
+  --color-brand-200: #cccccc;
+  --color-brand-300: #a6a6a6;
+  --color-brand-400: #737373;
+  --color-brand-500: #3a3a3a;
+  --color-brand-600: #121212;
+  --color-brand-700: #000000;
+  --color-brand-800: #000000;
+  --color-brand-900: #000000;
+  --color-brand-950: #000000;
+}
+
+@layer base {
+  body { letter-spacing: 0.04em; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.04em; }
+}
+
+@layer components {
+  /* Every button (button_classes): Dawn's are regular weight with a little spacing. */
+  .btn { font-weight: 400; letter-spacing: 0.06em; }
+}

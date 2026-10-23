@@ -1,0 +1,53 @@
+/* Theme "bold", after Shopify's Ride (https://theme-ride-demo.myshopify.com): a near-black canvas,
+   white text, tall condensed uppercase headings (Oswald) over a sturdy sans (Figtree), square
+   corners and one loud color on the buttons, the announcement bar and nothing else. Put by
+   bin/theme; change the colors and fonts here, keep the rest of the theme's restraint
+   (themes/bold/README.md).
+
+   Names every page reads:
+   - brand-50…950   buttons, links, badges (600 is the button; on-brand is the text on it). On this
+                    dark canvas 50–200 are dark tints (quiet backgrounds) and 700–950 light ones
+                    (text and links), so badges and alerts stay readable.
+   - accent         a second color; unused here, as on Ride
+   - canvas, surface (fields, cards), surface-muted (photo backgrounds, hovers), ink, muted, line
+   - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
+   - font-display   headings; font-sans text (families from fonts.css) */
+@theme {
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Oswald", "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+
+  --color-canvas: #1f1f21;
+  --color-surface: #28282b;
+  --color-surface-muted: #2e2e32;
+  --color-ink: #ffffff;
+  --color-muted: #b8b8bb;
+  --color-line: #3a3a3e;
+  --color-accent: #ffffff;
+  --color-on-brand: #1f1f21;
+
+  --color-brand-50: #2b2e14;
+  --color-brand-100: #353a14;
+  --color-brand-200: #4a5212;
+  --color-brand-300: #8a9c0a;
+  --color-brand-400: #c4dc05;
+  --color-brand-500: #d6ef03;
+  --color-brand-600: #e3fc02;
+  --color-brand-700: #ecfd5a;
+  --color-brand-800: #f2fe8c;
+  --color-brand-900: #f7febb;
+  --color-brand-950: #fbffdd;
+}
+
+@layer base {
+  body { font-weight: 500; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 500; text-transform: uppercase; letter-spacing: 0.015em; line-height: 1.12; }
+}
+
+@layer components {
+  /* Every button (button_classes): uppercase with room between the letters, as on Ride. */
+  .btn { font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+}

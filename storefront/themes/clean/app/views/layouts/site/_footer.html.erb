@@ -1,0 +1,58 @@
+<%# The site's footer, as Dawn has it: plain columns of links on white (the collections, help with
+    the policies and contact page, the owner's "footer" menu), a line about the shop, and a small
+    last row. Keep the links to the policies and the contact page: payment providers and ad
+    networks check that they're there. %>
+<% socials = { "Instagram" => theme_setting(:instagram_url), "TikTok" => theme_setting(:tiktok_url), "Facebook" => theme_setting(:facebook_url) }.compact_blank %>
+<% footer_menu = shop_menu(:footer) %>
+<footer class="mt-20 border-t border-line bg-canvas md:mt-28">
+  <div class="mx-auto grid max-w-[1200px] gap-10 px-4 py-12 text-sm sm:grid-cols-2 md:grid-cols-4 md:px-10 md:py-16 xl:px-0">
+    <nav aria-label="<%= t("layouts.site.shop") %>">
+      <p class="text-lg text-ink"><%= t("layouts.site.shop") %></p>
+      <ul class="mt-4 space-y-2.5 text-muted">
+        <li><%= link_to t("layouts.site.shop_all"), products_path, class: "hover:text-ink hover:underline" %></li>
+        <% collections.select { |collection| collection.product_count.to_i.positive? }.first(5).each do |collection| %>
+          <li><%= link_to collection.title, collection_path(collection), class: "hover:text-ink hover:underline" %></li>
+        <% end %>
+      </ul>
+    </nav>
+
+    <nav aria-label="<%= t("layouts.site.footer_navigation") %>">
+      <p class="text-lg text-ink"><%= t("layouts.site.help") %></p>
+      <ul class="mt-4 space-y-2.5 text-muted">
+        <li><%= link_to t("order_lookups.new.title"), new_order_lookup_path, class: "hover:text-ink hover:underline" %></li>
+        <li><%= link_to t("contacts.show.title"), contact_path, class: "hover:text-ink hover:underline" %></li>
+        <% current_shop.policies.each do |policy| %>
+          <li><%= link_to policy["title"], policy_path(policy["id"]), class: "hover:text-ink hover:underline" %></li>
+        <% end %>
+      </ul>
+    </nav>
+
+    <% if footer_menu&.items.present? %>
+      <nav aria-label="<%= footer_menu.title %>">
+        <p class="text-lg text-ink"><%= footer_menu.title %></p>
+        <ul class="mt-4 space-y-2.5 text-muted">
+          <% footer_menu.items.each do |item| %>
+            <li><%= shop_menu_link item, class: "hover:text-ink hover:underline" %></li>
+          <% end %>
+        </ul>
+      </nav>
+    <% end %>
+
+    <div class="<%= "md:col-span-2" unless footer_menu&.items.present? %>">
+      <p class="text-lg text-ink"><%= current_shop.name %></p>
+      <% if (tagline = theme_setting(:hero_text).presence) %>
+        <p class="mt-4 max-w-sm leading-relaxed text-muted"><%= tagline %></p>
+      <% end %>
+      <% if socials.any? %>
+        <ul class="mt-4 flex flex-wrap gap-x-5 gap-y-2" aria-label="<%= t("layouts.site.follow") %>">
+          <% socials.each do |name, url| %>
+            <li><%= link_to name, url, class: "text-ink underline underline-offset-4 hover:no-underline", target: "_blank", rel: "noopener" %></li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  </div>
+  <div class="border-t border-line">
+    <p class="mx-auto max-w-[1200px] px-4 py-6 text-xs text-muted md:px-10 xl:px-0">© <%= Date.current.year %>, <%= current_shop.name %></p>
+  </div>
+</footer>

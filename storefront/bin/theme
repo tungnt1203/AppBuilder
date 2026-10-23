@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+# Puts one of the storefront's themes in place: its colors and fonts (theme.css), header, footer,
+# announcement bar, home page and product card, copied from themes/<name>/ over the app's. Each
+# theme is a close copy of a Shopify theme that sells well; the pages every theme shares (product
+# page, cart, checkout…) follow its colors, fonts and corners.
+#
+#   bin/theme              the themes, and which one is in place
+#   bin/theme bold         put "bold" in place
+#   bin/theme bold --force also over files changed since a theme put them there (the changes are lost)
+require "pathname"
+require "fileutils"
+
+root = Pathname(__dir__).join("..").expand_path
+themes = root.join("themes").children.select(&:directory?).sort
+files = ->(theme) { theme.glob("**/*").select(&:file?).reject { |file| file.basename.to_s == "README.md" } }
+summary = ->(theme) { theme.join("README.md").read[/^# .*\n\n(.+?)\n\n/m, 1].to_s.tr("\n", " ") }
+in_place = ->(theme) { files.(theme).all? { |file| root.join(file.relative_path_from(theme)).then { |target| target.exist? && target.read == file.read } } }
+
+name = ARGV.reject { |arg| arg.start_with?("-") }.first
+unless name
+  themes.each do |theme|
+    puts "#{theme.basename}#{" (in place)" if in_place.(theme)}: #{summary.(theme)}", ""
+  end
+  puts "Put one in place with bin/theme <name>; read themes/<name>/README.md first."
+  exit
+end
+
+theme = themes.find { |dir| dir.basename.to_s == name } or abort("No theme named #{name}. Themes: #{themes.map(&:basename).join(", ")}")
+
+# A file that no theme has as it is now was changed for this shop: don't lose that by accident.
+changed = files.(theme).map { |file| file.relative_path_from(theme) }.select do |path|
+  target = root.join(path)
+  target.exist? && themes.none? { |other| other.join(path).exist? && other.join(path).read == target.read }
+end
+if changed.any? && !ARGV.include?("--force")
+  abort "These files were changed for this shop since a theme put them there; bin/theme #{name} would replace them:\n" +
+    changed.map { |path| "  #{path}" }.join("\n") + "\nCopy what you need from them first, then run bin/theme #{name} --force."
+end
+
+files.(theme).each do |file|
+  target = root.join(file.relative_path_from(theme))
+  FileUtils.mkdir_p(target.dirname)
+  FileUtils.cp(file, target)
+  puts "  #{target.relative_path_from(root)}"
+end
+puts "", "#{name} is in place. Next: bin/rails tailwindcss:build, then make it this shop's (themes/#{name}/README.md)."

@@ -85,6 +85,7 @@ Minitest. Do not add JavaScript frameworks, Node build steps, databases or exter
 - `bin/rubocop`: style, must be clean
 - `bin/rails tailwindcss:build`: after changing views
 - `bin/request "…"`: ask the Platform for data the API doesn't have (above)
+- `bin/theme [name]`: the themes, or put one in place (design skill)
 
 ## What's built in (keep it working when you redesign)
 
@@ -119,7 +120,7 @@ these for the brand, but keep each part:
   and `track` in the controllers; `/feeds/products.xml` and the product page's schema.org data.
 - **What the owner changes in Settings → Theme** (`config/theme_settings.yml`): the logo, the
   brand color (`layouts/_theme_colors` mixes the brand scale from it), the home page's words,
-  button and photo, the benefits strip, the social links. Keep reading each one where it shows
+  button and photos (the first screen's and the story's), the benefits strip, the social links. Keep reading each one where it shows
   when you redesign (a new header still shows the logo), and add settings for what else the
   owner should change without you.
 - **Header and checkout**: the header lists the collections and folds into a menu on phones;
@@ -150,12 +151,15 @@ request stays unticked; say so. The owner's words outrank everything else here.
 
 ## Design
 
-Every storefront gets a look of its own, chosen for the shop and its buyers. Read `DESIGN.md`
-before touching views; on a new storefront it says "Not decided yet": choose the direction with
-the `design` skill first and write it there. The theme (colors, fonts, corners) is in
-`app/assets/tailwind/application.css`; icons are Lucide via `icon "name"` (`bin/icons <word>`);
-free stock photos come from `bin/images <english words>`; page blocks to start from are in
-`app/views/blocks/` (seen at `/_blocks`). Design at 390px wide first.
+Every storefront starts from a theme: a close copy of a Shopify theme that sells well (clean,
+bold, editorial, soft in `themes/`), put in place with `bin/theme <name>`. A new storefront has
+**clean**. Read `DESIGN.md` before touching views; on a new storefront it says "Not decided yet":
+pick the theme and write the direction there with the `design` skill first. Make the theme the
+shop's with its colors and font (`app/assets/tailwind/theme.css`), its photos and its words
+(theme settings), and keep the theme's restraint: no labels over headlines, stickers, hard
+shadows, patterns, puns or gimmicks (the skill lists them). Icons are Lucide via `icon "name"`
+(`bin/icons <word>`); free stock photos come from `bin/images <english words>`; extra sections
+start from `app/views/blocks/` (seen at `/_blocks`). Design at 390px wide first.
 
 ## Definition of done
 

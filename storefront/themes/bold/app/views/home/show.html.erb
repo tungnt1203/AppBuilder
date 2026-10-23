@@ -1,0 +1,71 @@
+<%# The home page, as Ride lays it out: a split first screen (a huge uppercase line, a few words
+    and the loud button beside a tall photo), the shop's promises, the newest products in four
+    wide-spaced columns, the products buyers personalize, the shop's story beside a photo, and the
+    collections. The words and photos are theme settings (config/theme_settings.yml), so the
+    owner changes them in the admin. Keep it this plain: big type, photos, the products. %>
+<% hero_button = theme_setting(:hero_button).presence || t(".shop_all") %>
+<% hero_title = theme_setting(:hero_title).presence || current_shop.name %>
+<% hero_text = theme_setting(:hero_text).presence || t(".tagline") %>
+<% hero_image = theme_setting(:hero_image).presence %>
+<section class="mx-auto grid max-w-[1180px] items-center gap-8 pb-12 md:grid-cols-2 md:gap-14 md:px-10 md:pt-6 md:pb-20 xl:px-0">
+  <% if hero_image %>
+    <%= image_tag hero_image, alt: "", class: "aspect-4/5 w-full bg-surface-muted object-cover max-md:max-h-[44svh] md:order-last", fetchpriority: "high" %>
+  <% end %>
+  <div class="px-4 md:px-0 <%= "md:col-span-2 md:py-16" unless hero_image %>">
+    <h1 class="text-[3.25rem] leading-[1.02] text-balance md:text-[4.5rem]"><%= hero_title %></h1>
+    <p class="mt-5 max-w-md text-lg leading-relaxed text-muted"><%= hero_text %></p>
+    <%= link_to hero_button, products_path, class: "#{button_classes} mt-8 min-h-12 px-8 text-[0.9375rem]" %>
+  </div>
+</section>
+
+<%= render "home/benefits" if theme_setting(:show_benefits) %>
+
+<section class="mx-auto max-w-[1180px] px-4 pt-14 md:px-10 md:pt-20 xl:px-0">
+  <div class="flex items-end justify-between gap-4">
+    <h2 class="text-4xl md:text-5xl"><%= t(".new_arrivals") %></h2>
+    <%= link_to t(".view_all"), products_path, class: "pb-1 text-sm font-semibold tracking-[0.06em] text-ink uppercase underline underline-offset-8 hover:text-brand-600" if @products.any? %>
+  </div>
+  <div class="mt-8">
+    <% if @products.any? %>
+      <div class="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 md:gap-x-10">
+        <%= render partial: "products/product", collection: @products.records %>
+      </div>
+    <% else %>
+      <%= render "products/coming_soon" %>
+    <% end %>
+  </div>
+</section>
+
+<%= render "blocks/personalized", products: @personalized if @personalized.any? %>
+
+<% if (story_image = theme_setting(:story_image).presence) %>
+  <section class="mx-auto mt-14 grid max-w-[1180px] items-center gap-8 md:mt-20 md:grid-cols-[3fr_2fr] md:gap-16 md:px-10 xl:px-0">
+    <%= image_tag story_image, alt: "", loading: "lazy", class: "aspect-[4/3] w-full bg-surface-muted object-cover" %>
+    <div class="px-4 md:px-0">
+      <h2 class="text-4xl text-balance md:text-5xl"><%= theme_setting(:story_title) %></h2>
+      <% if (story_text = theme_setting(:story_text).presence) %>
+        <p class="mt-5 text-lg leading-relaxed text-muted"><%= story_text %></p>
+      <% end %>
+      <%= link_to hero_button, products_path, class: "#{button_classes} mt-8 min-h-12 px-8 text-[0.9375rem]" %>
+    </div>
+  </section>
+<% end %>
+
+<% if @collections.any? %>
+  <section class="mx-auto max-w-[1180px] px-4 pt-14 md:px-10 md:pt-24 xl:px-0">
+    <h2 class="text-4xl md:text-5xl"><%= t(".collections") %></h2>
+    <%# On phones a row to swipe (the next tile peeking in), so no count leaves a tile on its own. %>
+    <ul class="-mx-4 mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-10 md:overflow-visible md:px-0">
+      <% @collections.each do |collection| %>
+        <li class="w-[72%] shrink-0 snap-start md:w-auto">
+          <%= link_to collection_path(collection), class: "group block" do %>
+            <span class="block aspect-4/5 overflow-hidden rounded-xl bg-surface-muted">
+              <%= collection_image collection, class: "size-full transition duration-500 group-hover:scale-[1.04]" %>
+            </span>
+            <span class="mt-4 flex items-center justify-between font-display text-2xl text-ink uppercase group-hover:text-brand-600"><%= collection.title %> <%= icon "arrow-right", size: 22 %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

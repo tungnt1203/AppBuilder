@@ -5,7 +5,7 @@
 
 <%# Buyers review each product of their order: stars, a few words, the name shown. %>
 <div class="mx-auto max-w-2xl px-4 py-12">
-  <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
+  <h1 class="text-3xl"><%= t(".title") %></h1>
   <p class="mt-2 text-muted"><%= t(".intro", number: @order.name) %></p>
 
   <%= form_with url: order_review_path(@order), class: "mt-8 space-y-6" do |form| %>

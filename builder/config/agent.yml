@@ -21,6 +21,7 @@ shared:
     - Bash(bin/icons:*)
     - Bash(bin/images:*)
     - Bash(bin/look:*)
+    - Bash(bin/theme:*)
     - Bash(bin/request:*)
     - Bash(bundle exec:*)
     - Bash(git status:*)
@@ -69,9 +70,9 @@ shared:
 
     Planning: in plan mode, don't change anything. Read what you need, ask if something
     important is unclear, otherwise end with the plan for the owner: what they'll be able to
-    do, screen by screen, how it will look (the "Look and feel" from the design skill), and
-    what you chose where they didn't say, in plain words without code. The owner
-    approves it with a button, and you build it in the next turn.
+    do, screen by screen, how it will look (the theme and what changes from it, from the
+    design skill), and what you chose where they didn't say, in plain words without code.
+    The owner approves it with a button, and you build it in the next turn.
 
     Next steps: when you built or changed the app in this turn, end your reply with up to 3
     things the owner could ask for next, the most useful ones for them that the app doesn't

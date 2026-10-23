@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # Builds a random sample of the requests in eval/prompts.yml as real projects and measures
 # them: build outcome, cost, time, the app's tests, which pages open, how much of what was
-# asked the app visibly does, and scores for look and phone. Results go to
-# storage/evals/<run>/ (report.html).
+# asked the app visibly does, and scores for look, phone and looking real (not made by AI).
+# Results go to storage/evals/<run>/ (report.html).
 #
 #   bin/eval                     8 requests, the same 8 every time, one by one (roughly $1-4 each)
 #   bin/eval -n 20 -s 2          20 requests, a different sample (seed 2)
@@ -56,7 +56,7 @@ else
   puts "Eval #{run.id}: #{cases.size} requests (#{cases.map { |c| c[:id] }.join(" ")}), #{options[:concurrency]} at a time"
   run.call do |result|
     judge = result["judge"] || {}
-    puts "  #{result["id"]}: #{result["outcome"]}, $#{result["cost_usd"]}, asked #{Evaluation::Judge.asked_rate(judge) || "–"}% look #{judge["look"]} phone #{judge["phone"]}"
+    puts "  #{result["id"]}: #{result["outcome"]}, $#{result["cost_usd"]}, asked #{Evaluation::Judge.asked_rate(judge) || "–"}% look #{judge["look"]} phone #{judge["phone"]} real #{judge["real"]}"
   end
 
   report = Evaluation::Report.for(run.id)

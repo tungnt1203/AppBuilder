@@ -2,7 +2,7 @@
 
 <%# A page the owner wrote in the admin: text, and questions with their answers. %>
 <article class="mx-auto max-w-3xl px-4 py-12 leading-relaxed text-ink">
-  <h1 class="font-display text-3xl font-semibold tracking-tight md:text-4xl"><%= @page.title %></h1>
+  <h1 class="text-3xl md:text-4xl"><%= @page.title %></h1>
   <% @page.blocks.each do |block| %>
     <% if block["type"] == "faq" %>
       <div class="mt-8 divide-y divide-line border-y border-line">

@@ -1,0 +1,55 @@
+/* Theme "soft", after Shopify's Sense (https://theme-sense-demo.myshopify.com): a cream canvas,
+   one rounded sans (Poppins) at medium weight, rounded corners, cards lifted by a soft shadow,
+   and a pale two-color gradient on the first screen's card, the announcement bar and the story
+   band. Put by bin/theme; change the colors and fonts here, keep the rest of the theme's
+   restraint (themes/soft/README.md).
+
+   Names every page reads:
+   - brand-50…950   buttons, links, badges (600 is the button; on-brand is the text on it)
+   - accent         the gradient's first color; --soft-to (below) its second
+   - canvas, surface (cards, fields), surface-muted (photo backgrounds, hovers), ink, muted, line
+   - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
+   - font-display   headings; font-sans text (families from fonts.css) */
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius-lg: 11px;
+  --radius-xl: 14px;
+
+  --color-canvas: #f6f4ee;
+  --color-surface: #fdfbf7;
+  --color-surface-muted: #efeae1;
+  --color-ink: #2e2a39;
+  --color-muted: #66616f;
+  --color-line: #e4ded3;
+  --color-accent: #e2f89c;
+  --color-on-brand: #fdfbf7;
+
+  --color-brand-50: #f7eef4;
+  --color-brand-100: #efdbe9;
+  --color-brand-200: #ddb3d0;
+  --color-brand-300: #c47fae;
+  --color-brand-400: #ab4a8b;
+  --color-brand-500: #a1217b;
+  --color-brand-600: #9b046f;
+  --color-brand-700: #7f055b;
+  --color-brand-800: #620647;
+  --color-brand-900: #470633;
+  --color-brand-950: #2c041f;
+}
+
+:root { --soft-to: #fbe3e1; }
+
+@layer base {
+  body { letter-spacing: 0.02em; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 500; letter-spacing: 0.01em; line-height: 1.2; }
+}
+
+@layer components {
+  /* Every button (button_classes): regular weight, a little spacing, as on Sense. */
+  .btn { font-weight: 400; letter-spacing: 0.04em; }
+  /* The pale gradient Sense puts behind its first card and its quote band. */
+  .soft-gradient { background: radial-gradient(ellipse at 40% 55%, var(--soft-to), transparent 60%), linear-gradient(135deg, var(--color-accent), color-mix(in oklch, var(--color-accent) 55%, var(--soft-to))); }
+}

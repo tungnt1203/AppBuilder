@@ -1,0 +1,33 @@
+<%# A product in a grid, as Craft has it: a card drawn with a hairline, its 4:5 photo (the second
+    photo on hover, when it has one) above the title in the serif and the price ("From" when
+    variants cost differently, the "was" price struck through before it); small badges on the
+    photo for sold out, how much a sale saves and "Personalize" when the buyer adds their name or
+    photo. %>
+<% low, high, was = product.min_price_cents, product.max_price_cents, product.compare_at_cents %>
+<% saves = ((was - low) * 100.0 / was).round if was && low && was > low %>
+<%= link_to product_path(product), class: "group block h-full overflow-hidden rounded-xl border border-line bg-surface transition hover:border-muted" do %>
+  <div class="relative aspect-4/5 overflow-hidden bg-surface-muted">
+    <%= product_image product, size: :card, class: "size-full transition duration-700 group-hover:scale-[1.03]" %>
+    <% if product.second_image %>
+      <%= product_image product, size: :card, image: product.second_image, alt: "",
+            class: "absolute inset-0 size-full opacity-0 transition duration-700 group-hover:opacity-100 max-md:hidden" %>
+    <% end %>
+    <div class="absolute bottom-2.5 left-2.5 flex flex-wrap gap-1.5 md:bottom-3 md:left-3">
+      <% if !product.available? %>
+        <span class="rounded-full bg-ink px-3 py-1 text-xs text-canvas"><%= t("products.product.sold_out") %></span>
+      <% elsif saves&.positive? %>
+        <span class="rounded-full bg-brand-600 px-3 py-1 text-xs text-on-brand"><%= t("products.product.saves", percent: saves) %></span>
+      <% end %>
+      <% if product.personalized? %>
+        <span class="rounded-full bg-surface px-3 py-1 text-xs text-ink"><%= t("products.product.personalize") %></span>
+      <% end %>
+    </div>
+  </div>
+  <div class="px-3 pt-3 pb-4 md:px-5 md:pt-4 md:pb-5">
+    <h3 class="text-base leading-snug text-ink md:text-lg"><%= product.title %></h3>
+    <p class="mt-1 flex flex-wrap items-baseline gap-x-3 text-sm text-ink">
+      <% if saves&.positive? %><s class="text-muted"><%= money(was) %></s><% end %>
+      <span><%= low == high ? money(low) : t("products.product.from", price: money(low)) %></span>
+    </p>
+  </div>
+<% end %>

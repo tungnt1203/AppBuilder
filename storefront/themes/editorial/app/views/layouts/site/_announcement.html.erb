@@ -1,0 +1,6 @@
+<%# A line across the top of every page, written by the owner in the shop's settings: free
+    shipping over $50, a code for a first order, a new collection. On Craft it sits on the deep
+    color. %>
+<% if (announcement = current_shop.announcement.presence) %>
+  <div class="bg-brand-600 px-4 py-2.5 text-center text-sm text-on-brand"><%= announcement %></div>
+<% end %>

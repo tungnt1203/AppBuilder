@@ -1,0 +1,75 @@
+<%# The home page, as Sense lays it out: a big rounded photo with a card on the pale gradient over
+    its edge (the line, a few words, the button), the shop's promises, the newest products as
+    lifted cards, the products buyers personalize, the shop's story on the gradient beside a
+    photo, and the collections. The words and photos are theme settings
+    (config/theme_settings.yml), so the owner changes them in the admin. Keep it this gentle:
+    the photos, the cards, one soft gradient. %>
+<% hero_button = theme_setting(:hero_button).presence || t(".shop_all") %>
+<% hero_image = theme_setting(:hero_image).presence %>
+<% container = "mx-auto max-w-[1200px] px-4 md:px-10 xl:px-0" %>
+<section class="<%= container %> pt-3 md:pt-4">
+  <div class="relative md:grid md:min-h-[38rem] md:grid-cols-12 md:items-center">
+    <% if hero_image %>
+      <%= image_tag hero_image, alt: "", fetchpriority: "high", class: "aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover shadow-[0_10px_40px_-16px_rgb(46_42_57/0.35)] md:absolute md:inset-y-0 md:right-0 md:aspect-auto md:h-full md:w-[63%]" %>
+    <% end %>
+    <div class="soft-gradient relative rounded-[1.5rem] px-8 py-10 md:col-span-5 md:px-14 md:py-16 <%= "-mt-14 mx-3 md:m-0" if hero_image %> <%= "md:col-span-12 md:text-center" unless hero_image %>">
+      <h1 class="text-[2.5rem] leading-[1.15] text-balance md:text-5xl"><%= theme_setting(:hero_title).presence || current_shop.name %></h1>
+      <p class="mt-5 leading-relaxed text-muted"><%= theme_setting(:hero_text).presence || t(".tagline") %></p>
+      <%= link_to hero_button, products_path, class: "mt-8 inline-flex min-h-12 items-center rounded-lg bg-ink px-8 text-[0.9375rem] tracking-[0.04em] text-accent transition hover:bg-ink/90" %>
+    </div>
+  </div>
+</section>
+
+<div class="mt-10"><%= render "home/benefits" if theme_setting(:show_benefits) %></div>
+
+<section class="<%= container %> pt-12 md:pt-16">
+  <div class="flex items-end justify-between gap-4">
+    <h2 class="text-[1.75rem] md:text-[2rem]"><%= t(".new_arrivals") %></h2>
+    <%= link_to t(".view_all"), products_path, class: "text-sm text-ink underline underline-offset-4 hover:no-underline" if @products.any? %>
+  </div>
+  <div class="mt-7">
+    <% if @products.any? %>
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-8">
+        <%= render partial: "products/product", collection: @products.records %>
+      </div>
+    <% else %>
+      <%= render "products/coming_soon" %>
+    <% end %>
+  </div>
+</section>
+
+<%= render "blocks/personalized", products: @personalized if @personalized.any? %>
+
+<% if (story_image = theme_setting(:story_image).presence) %>
+  <section class="soft-gradient">
+    <div class="<%= container %> grid items-center gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-20">
+      <%= image_tag story_image, alt: "", loading: "lazy", class: "aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover" %>
+      <div>
+        <h2 class="text-[1.75rem] text-balance md:text-[2.25rem]"><%= theme_setting(:story_title) %></h2>
+        <% if (story_text = theme_setting(:story_text).presence) %>
+          <p class="mt-5 text-lg leading-relaxed text-ink/80"><%= story_text %></p>
+        <% end %>
+        <%= link_to hero_button, products_path, class: "mt-8 inline-flex min-h-12 items-center rounded-lg bg-ink px-8 text-[0.9375rem] tracking-[0.04em] text-accent transition hover:bg-ink/90" %>
+      </div>
+    </div>
+  </section>
+<% end %>
+
+<% if @collections.any? %>
+  <section class="<%= container %> pt-14 md:pt-20">
+    <h2 class="text-center text-[1.75rem] md:text-[2rem]"><%= t(".collections") %></h2>
+    <%# On phones a row to swipe (the next card peeking in), so no count leaves a card on its own. %>
+    <ul class="-mx-4 mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:px-0">
+      <% @collections.each do |collection| %>
+        <li class="w-[70%] shrink-0 snap-start md:w-auto">
+          <%= link_to collection_path(collection), class: "group block overflow-hidden rounded-xl bg-surface shadow-[0_6px_24px_-10px_rgb(46_42_57/0.18)]" do %>
+            <span class="block aspect-square overflow-hidden bg-surface-muted">
+              <%= collection_image collection, class: "size-full transition duration-700 group-hover:scale-[1.03]" %>
+            </span>
+            <span class="block px-5 py-4 text-center font-medium text-ink"><%= collection.title %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

@@ -22,17 +22,18 @@ module Evaluation
         "asked %" => average(judged.map { |judge| Judge.asked_rate(judge) }),
         "look" => average(judged.map { |judge| judge["look"] }),
         "phone" => average(judged.map { |judge| judge["phone"] }),
+        "real" => average(judged.map { |judge| judge["real"] }),
         "cost $" => cases.sum { |result| result["cost_usd"].to_f + result.dig("judge", "cost_usd").to_f }.round(2),
         "median min" => median(cases.filter_map { |result| result["build_seconds"] }.map { |seconds| seconds / 60.0 })
       }
     end
 
     def to_text
-      header = [ "request", "outcome", "tests", "pages", "asked", "look", "phone", "$", "min" ]
+      header = [ "request", "outcome", "tests", "pages", "asked", "look", "phone", "real", "$", "min" ]
       rows = @data["cases"].map do |result|
         judge = result["judge"] || {}
         [ result["id"], result["outcome"], tests_text(result), "#{ok_pages(result)}/#{result.dig("pages", "visited")&.size.to_i}",
-          asked_text(judge), judge["look"], judge["phone"], result["cost_usd"], result["build_seconds"] && (result["build_seconds"] / 60.0).round(1) ].map(&:to_s)
+          asked_text(judge), judge["look"], judge["phone"], judge["real"], result["cost_usd"], result["build_seconds"] && (result["build_seconds"] / 60.0).round(1) ].map(&:to_s)
       end
       widths = header.each_index.map { |index| ([ header ] + rows).map { |row| row[index].size }.max }
       line = ->(row) { row.each_with_index.map { |cell, index| cell.ljust(widths[index]) }.join("  ") }

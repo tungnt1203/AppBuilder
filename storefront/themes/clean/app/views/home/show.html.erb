@@ -1,0 +1,77 @@
+<%# The home page, as Dawn lays it out: one full-width photo with a short line and a button, the
+    shop's promises, the newest products in a dense grid, the products buyers personalize, the
+    collections, and the shop's story beside a photo. The words and photos are theme settings
+    (config/theme_settings.yml), so the owner changes them in the admin. Keep it this plain:
+    the photos and the products carry the page. %>
+<% hero_button = theme_setting(:hero_button).presence || t(".shop_all") %>
+<% hero_title = theme_setting(:hero_title).presence || current_shop.name %>
+<% hero_text = theme_setting(:hero_text).presence || t(".tagline") %>
+<% if (hero_image = theme_setting(:hero_image).presence) %>
+  <section class="relative isolate grid min-h-[28rem] place-items-center overflow-hidden bg-ink md:min-h-[45rem]">
+    <%= image_tag hero_image, alt: "", class: "absolute inset-0 -z-10 size-full object-cover", fetchpriority: "high" %>
+    <div class="absolute inset-0 -z-10 bg-black/35"></div>
+    <div class="mx-auto max-w-3xl px-6 py-16 text-center">
+      <h1 class="text-[2.5rem] leading-tight text-balance text-white md:text-[3.25rem]"><%= hero_title %></h1>
+      <p class="mt-4 text-white/90"><%= hero_text %></p>
+      <%= link_to hero_button, products_path, class: "mt-8 inline-flex min-h-12 items-center px-8 text-[0.9375rem] tracking-[0.06em] text-white ring-1 ring-white transition hover:ring-2" %>
+    </div>
+  </section>
+<% else %>
+  <section class="mx-auto max-w-3xl px-6 pt-14 pb-4 text-center md:pt-20">
+    <h1 class="text-[2.5rem] leading-tight text-balance md:text-[3.25rem]"><%= hero_title %></h1>
+    <p class="mt-4 text-muted"><%= hero_text %></p>
+    <%= link_to hero_button, products_path, class: "#{button_classes} mt-8 min-h-12 px-8 text-[0.9375rem]" %>
+  </section>
+<% end %>
+
+<%= render "home/benefits" if theme_setting(:show_benefits) %>
+
+<section class="mx-auto max-w-[1200px] px-4 pt-12 md:px-10 md:pt-16 xl:px-0">
+  <h2 class="text-2xl"><%= t(".new_arrivals") %></h2>
+  <div class="mt-6">
+    <% if @products.any? %>
+      <div class="grid grid-cols-2 gap-x-2 gap-y-8 md:grid-cols-4">
+        <%= render partial: "products/product", collection: @products.records %>
+      </div>
+      <div class="mt-10 text-center">
+        <%= link_to t(".view_all"), products_path, class: "#{button_classes} min-h-12 px-10 text-[0.9375rem]" %>
+      </div>
+    <% else %>
+      <%= render "products/coming_soon" %>
+    <% end %>
+  </div>
+</section>
+
+<%= render "blocks/personalized", products: @personalized if @personalized.any? %>
+
+<% if @collections.any? %>
+  <section class="mx-auto max-w-[1200px] px-4 pt-14 md:px-10 md:pt-20 xl:px-0">
+    <h2 class="text-2xl"><%= t(".collections") %></h2>
+    <%# On phones a row to swipe (the next tile peeking in), so no count leaves a tile on its own. %>
+    <ul class="-mx-4 mt-6 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+      <% @collections.each do |collection| %>
+        <li class="w-[72%] shrink-0 snap-start md:w-auto">
+          <%= link_to collection_path(collection), class: "group block" do %>
+            <span class="block aspect-[4/5] overflow-hidden rounded-xl bg-surface-muted">
+              <%= collection_image collection, class: "size-full transition duration-700 group-hover:scale-[1.03]" %>
+            </span>
+            <span class="mt-3 flex items-center gap-1.5 text-lg text-ink group-hover:underline"><%= collection.title %> <%= icon "arrow-right", size: 16, stroke: 1.5 %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>
+
+<% if (story_image = theme_setting(:story_image).presence) %>
+  <section class="mx-auto mt-14 grid max-w-[1200px] md:mt-20 md:grid-cols-2 md:px-10 xl:px-0">
+    <%= image_tag story_image, alt: "", loading: "lazy", class: "aspect-[4/3] size-full bg-surface-muted object-cover md:aspect-auto md:min-h-[30rem]" %>
+    <div class="flex flex-col justify-center bg-surface-muted px-6 py-12 md:px-14">
+      <h2 class="text-3xl leading-tight text-balance md:text-[2.5rem]"><%= theme_setting(:story_title) %></h2>
+      <% if (story_text = theme_setting(:story_text).presence) %>
+        <p class="mt-4 leading-relaxed text-muted"><%= story_text %></p>
+      <% end %>
+      <%= link_to hero_button, products_path, class: "mt-8 inline-flex min-h-12 w-fit items-center px-8 text-[0.9375rem] tracking-[0.06em] text-ink ring-1 ring-ink transition hover:ring-2" %>
+    </div>
+  </section>
+<% end %>

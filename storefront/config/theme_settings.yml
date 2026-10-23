@@ -20,6 +20,15 @@
 - key: hero_image
   type: image
   label: Home page photo
+- key: story_title
+  type: text
+  label: Home page story headline (beside the story photo)
+- key: story_text
+  type: text
+  label: Home page story text
+- key: story_image
+  type: image
+  label: Home page story photo (the story shows when there is one)
 - key: show_benefits
   type: boolean
   label: Show free shipping, delivery and secure checkout under the home page photo

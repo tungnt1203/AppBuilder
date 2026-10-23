@@ -1,0 +1,72 @@
+<%# The site's header, as Sense has it: search on the left, the logo (a theme setting the owner
+    uploads) or the name centered, the cart on the right, and the collections in a centered row
+    under them. On phones: the menu button, the name in the middle, search and the cart. Pages can
+    add links with content_for :site_nav, or show only the logo and the cart with content_for
+    :focused (checkout: nothing to wander off to). %>
+<% menu_items = shop_menu(:header)&.items.to_a %>
+<% shop_collections = collections.select { |collection| collection.product_count.to_i.positive? }.first(6) %>
+<% nav_link = "py-1 text-sm whitespace-nowrap text-muted underline-offset-4 hover:text-ink hover:underline aria-[current=page]:text-ink aria-[current=page]:underline" %>
+<header class="sticky top-0 z-20 bg-canvas/95 backdrop-blur md:static md:bg-transparent">
+  <div class="mx-auto grid h-16 max-w-[1200px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-auto md:px-10 md:pt-6 md:pb-3 xl:px-0">
+    <div class="flex items-center">
+      <% unless content_for?(:focused) %>
+      <div class="md:hidden" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape turbo:before-cache@document->menu#hide">
+        <button type="button" class="group -ml-2 grid size-10 place-items-center text-ink" data-menu-target="button" data-action="menu#toggle" aria-expanded="false" aria-label="<%= t("ui.menu") %>">
+          <%= icon "menu", size: 22, stroke: 1.5, class: "group-aria-expanded:hidden" %>
+          <%= icon "x", size: 22, stroke: 1.5, class: "hidden group-aria-expanded:block" %>
+        </button>
+        <nav data-menu-target="panel" class="absolute inset-x-3 top-full hidden max-h-[calc(100svh-5rem)] overflow-y-auto rounded-xl bg-surface px-5 pt-2 pb-5 shadow-lg" aria-label="<%= t("ui.navigation") %>">
+          <ul>
+            <li><%= link_to t("layouts.site.shop_all"), products_path, class: "block py-3 text-lg font-medium text-ink" %></li>
+            <% shop_collections.each do |collection| %>
+              <li><%= link_to collection.title, collection_path(collection), class: "block py-3 text-lg font-medium text-ink" %></li>
+            <% end %>
+            <% menu_items.each do |item| %>
+              <li><%= shop_menu_link item, class: "block py-3 text-lg font-medium text-ink" %></li>
+            <% end %>
+          </ul>
+        </nav>
+      </div>
+      <%= link_to products_path, class: "-ml-2 hidden size-10 place-items-center text-ink md:grid", aria: { label: t("products.index.search") } do %>
+        <%= icon "search", size: 22, stroke: 1.5 %>
+      <% end %>
+      <% end %>
+    </div>
+
+    <%= link_to root_path, class: "flex min-w-0 justify-center text-ink" do %>
+      <% if (logo = theme_setting(:logo).presence) %>
+        <%= image_tag logo, alt: current_shop.name, class: "h-8 w-auto max-w-44 object-contain md:h-10" %>
+      <% else %>
+        <%# A long name wraps onto two balanced lines rather than losing its end. %>
+        <span class="line-clamp-2 text-center text-lg leading-tight font-semibold tracking-[0.08em] text-balance uppercase md:text-xl <%= "max-md:text-sm" if current_shop.name.length > 18 %>"><%= current_shop.name %></span>
+      <% end %>
+    <% end %>
+
+    <div class="flex items-center justify-end">
+      <% unless content_for?(:focused) %>
+        <%= link_to products_path, class: "grid size-10 place-items-center text-ink md:hidden", aria: { label: t("products.index.search") } do %>
+          <%= icon "search", size: 22, stroke: 1.5 %>
+        <% end %>
+      <% end %>
+      <%= link_to cart_path, class: "relative -mr-2 grid size-10 place-items-center text-ink", id: "cart-link", aria: { label: t("layouts.site.cart_with_count", count: cart_item_count) } do %>
+        <%= icon "shopping-bag", size: 22, stroke: 1.5 %>
+        <% if cart_item_count.positive? %>
+          <span class="absolute right-0 bottom-0.5 grid min-w-[1.125rem] place-items-center rounded-full bg-brand-600 px-1 text-[0.625rem] leading-[1.125rem] text-on-brand"><%= cart_item_count %></span>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <% unless content_for?(:focused) %>
+  <nav class="mx-auto hidden max-w-[1200px] flex-wrap items-center justify-center gap-x-6 gap-y-1 px-10 pb-5 md:flex" aria-label="<%= t("ui.navigation") %>">
+    <% shop_collections.each do |collection| %>
+      <%= link_to collection.title, collection_path(collection), class: nav_link, aria: { current: ("page" if current_page?(collection_path(collection))) } %>
+    <% end %>
+    <%= link_to t("layouts.site.shop_all"), products_path, class: nav_link, aria: { current: ("page" if current_page?(products_path)) } %>
+    <% menu_items.each do |item| %>
+      <%= shop_menu_link item, class: nav_link %>
+    <% end %>
+    <%= yield :site_nav %>
+  </nav>
+  <% end %>
+</header>

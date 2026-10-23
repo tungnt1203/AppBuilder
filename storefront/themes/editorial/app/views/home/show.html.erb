@@ -1,0 +1,65 @@
+<%# The home page, as Craft lays it out: a centered line in the light serif, a wide photo, the
+    collections as cards drawn with a hairline, the newest products, the products buyers
+    personalize, and the shop's story over a wide photo with a statement under it. The words and photos are theme settings (config/theme_settings.yml), so
+    the owner changes them in the admin. Keep it this calm: room, the serif, the photos. %>
+<% hero_button = theme_setting(:hero_button).presence || t(".shop_all") %>
+<% container = "mx-auto max-w-[1200px] px-4 md:px-10 xl:px-0" %>
+<section class="mx-auto max-w-3xl px-6 pt-10 pb-10 text-center md:pt-14 md:pb-14">
+  <h1 class="text-[2.25rem] text-balance md:text-[2.75rem]"><%= theme_setting(:hero_title).presence || current_shop.name %></h1>
+  <p class="mx-auto mt-4 max-w-xl leading-relaxed text-muted"><%= theme_setting(:hero_text).presence || t(".tagline") %></p>
+</section>
+
+<% if (hero_image = theme_setting(:hero_image).presence) %>
+  <div class="<%= container %>">
+    <%= image_tag hero_image, alt: "", fetchpriority: "high", class: "aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover md:aspect-[21/9]" %>
+  </div>
+<% end %>
+
+<% if @collections.any? %>
+  <section class="<%= container %> pt-5">
+    <%# Hairline cards, three to a row, a short last row centered so it leaves no hole. %>
+    <ul class="grid gap-5 md:flex md:flex-wrap md:justify-center">
+      <% @collections.each do |collection| %>
+        <li class="md:w-[calc((100%-2.5rem)/3)]">
+          <%= link_to collection_path(collection), class: "group block overflow-hidden rounded-xl border border-line bg-surface" do %>
+            <span class="block aspect-[4/3] overflow-hidden bg-surface-muted md:aspect-4/5">
+              <%= collection_image collection, class: "size-full transition duration-700 group-hover:scale-[1.03]" %>
+            </span>
+            <span class="flex items-center gap-2 px-5 py-5 font-display text-xl font-light text-ink"><%= collection.title %> <%= icon "arrow-right", size: 18, stroke: 1.5, class: "transition group-hover:translate-x-1" %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>
+
+<section class="<%= container %> pt-16 md:pt-20">
+  <div class="flex items-end justify-between gap-4">
+    <h2 class="text-[1.75rem]"><%= t(".new_arrivals") %></h2>
+    <%= link_to t(".view_all"), products_path, class: "text-sm text-ink underline underline-offset-4 hover:no-underline" if @products.any? %>
+  </div>
+  <div class="mt-6">
+    <% if @products.any? %>
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+        <%= render partial: "products/product", collection: @products.records.first(6) %>
+      </div>
+    <% else %>
+      <%= render "products/coming_soon" %>
+    <% end %>
+  </div>
+</section>
+
+<%= render "blocks/personalized", products: @personalized if @personalized.any? %>
+
+<% if (story_image = theme_setting(:story_image).presence) %>
+  <section class="<%= container %> pt-6">
+    <h2 class="text-[1.75rem]"><%= theme_setting(:story_title) %></h2>
+    <%= image_tag story_image, alt: "", loading: "lazy", class: "mt-6 aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover md:aspect-[16/8]" %>
+    <% if (story_text = theme_setting(:story_text).presence) %>
+      <p class="mx-auto mt-14 max-w-3xl text-center font-display text-2xl leading-snug font-light text-balance text-ink md:text-[1.75rem]"><%= story_text %></p>
+    <% end %>
+    <div class="mt-8 text-center">
+      <%= link_to hero_button, products_path, class: "#{button_classes} min-h-12 px-8 text-[0.9375rem]" %>
+    </div>
+  </section>
+<% end %>

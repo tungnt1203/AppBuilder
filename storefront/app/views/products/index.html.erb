@@ -2,7 +2,7 @@
 
 <div class="mx-auto max-w-6xl px-4 py-12">
   <div class="flex flex-wrap items-end justify-between gap-4">
-    <h1 class="font-display text-3xl font-semibold tracking-tight"><%= t(".title") %></h1>
+    <h1 class="text-3xl"><%= t(".title") %></h1>
     <%= form_with url: products_path, method: :get, class: "flex w-full items-center gap-2 sm:w-auto", data: { controller: "autosubmit", turbo_action: "replace" } do |form| %>
       <%# Fields are full width by default (field_classes): the wrappers size them, side by side. %>
       <div class="min-w-0 flex-1 sm:w-52 sm:flex-none">
