@@ -238,10 +238,11 @@ class PrintifyTest < ActiveSupport::TestCase
   test "cancelling or refunding cancels the order in Printify, or tells staff it couldn't" do
     product = Printify::Import.new.call("pf-tee")
     order = place_order(product.variant_for(%w[ Black S ]))
-    order.update!(printify_order_id: "pf-1")
+    order.update!(printify_order_id: "pf-1", fulfillment_cost_cents: 1625)
     order.cancel!
     assert_equal [ "pf-1" ], @printify.cancelled
     assert_equal "printify_cancelled", order.events.last.action
+    assert_nil order.margin_cents, "Printify doesn't bill a cancelled order"
 
     printing = place_order(product.variant_for(%w[ Black M ]), status: "in_production")
     printing.update!(printify_order_id: "pf-2")

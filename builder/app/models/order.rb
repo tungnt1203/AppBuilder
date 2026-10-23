@@ -98,9 +98,10 @@ class Order < ApplicationRecord
   def card? = payment_method == "stripe"
 
   # What the shop keeps once Printify is paid: the total, less tax, refunds and Printify's bill
-  # (payment fees aside). nil until Printify has billed it.
+  # (payment fees aside). nil until Printify has billed it, and for a cancelled order (Printify
+  # doesn't bill it).
   def margin_cents
-    total_cents - tax_cents - refunded_cents - fulfillment_cost_cents if fulfillment_cost_cents
+    total_cents - tax_cents - refunded_cents - fulfillment_cost_cents if fulfillment_cost_cents && !cancelled?
   end
 
   # Staff mark manual payments; card payments are confirmed by Stripe.
