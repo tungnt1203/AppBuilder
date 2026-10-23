@@ -81,7 +81,8 @@ export default class extends Controller {
       if (!response.ok) throw new Error(answer.error)
 
       token.value = answer.token
-      this.status(key, Math.min(answer.width, answer.height) < 1000 ? "small" : "ready")
+      this.photos[key].size = { width: answer.width, height: answer.height }
+      this.sharpness(key)
     } catch (error) {
       this.status(key, null, error.message)
     } finally {
@@ -96,7 +97,20 @@ export default class extends Controller {
     this.photos[key].zoom = +event.target.value
     this.field(key, "zoom").forEach((slider) => { if (slider !== event.target) slider.value = event.target.value })
     this.frame(key)
+    this.sharpness(key)
     this.render()
+  }
+
+  // Whether the photo, as zoomed, has enough pixels for its box's print size (the field's
+  // print-pixels, from the Platform; BuyerUpload#sharp_for? there): half of Printify's 300 dots an
+  // inch. Without it, a photo under 1000 pixels is small.
+  sharpness(key) {
+    const { size, zoom } = this.photos[key]
+    if (!size || !this.field(key, "token")[0].value) return
+
+    const pixels = JSON.parse(this.element.querySelector(`[data-personalize-photo-field="${key}"]`).dataset.printPixels || "null")
+    const sharp = pixels ? Math.min(size.width, size.height * pixels[0] / pixels[1]) / zoom >= pixels[0] * 0.5 : Math.min(size.width, size.height) >= 1000
+    this.status(key, sharp ? "ready" : "small")
   }
 
   // Dragging the buyer's photo in its box moves it the way the finger goes.

@@ -56,6 +56,23 @@ class BuyerInputsTest < ActiveSupport::TestCase
     assert_equal [ [ "Your photo", upload, [ 2.0, 0.3, 0.6 ] ] ], item.buyer_photos.map { |photo| photo.values_at(:label, :upload, :crop) }
   end
 
+  test "a photo too small for its box's print size, as the buyer zoomed it, is flagged for staff" do
+    in_shop
+    upload = BuyerUpload.take(Rack::Test::UploadedFile.new(file_fixture("product.png"), "image/png")) # 40 × 50
+    assert upload.sharp_for?(nil), "nothing to tell without the print size"
+    assert upload.sharp_for?([ 80, 100 ])
+    assert_not upload.sharp_for?([ 80, 100 ], 1.5), "zoomed in, less of it fills the box"
+    assert_not upload.sharp_for?([ 300, 300 ])
+
+    field = { "key" => "photo", "label" => "Photo", "kind" => "photo", "preview" => { "x" => 0.3, "y" => 0.3, "w" => 0.2, "h" => 0.2 } }
+    product = products(:tee).tap { |tee| tee.update!(buyer_inputs: [ field ], print_area: { "x" => 0.2, "y" => 0.2, "w" => 0.4, "h" => 0.4, "pixels" => [ 160, 200 ] }) }
+    assert_equal [ 80, 100 ], product.print_pixels(product.buyer_inputs.sole)
+    item = LineItem.new(product_title: product.title, variant: product.variants.first, properties: { "photo" => upload.token, "photo_crop" => "1,0.5,0.5" })
+    assert item.buyer_photos.sole[:sharp]
+    item.properties["photo_crop"] = "2,0.5,0.5"
+    assert_not item.buyer_photos.sole[:sharp]
+  end
+
   test "a photo box drawn with a layout becomes a photo field per cell, with gaps between them" do
     fields = BuyerInputs.definitions([ { "label" => "Photo", "kind" => "photo", "layout" => "2x1", "preview" => { "x" => "0.1", "y" => "0.2", "w" => "0.6", "h" => "0.3", "images" => [ "5" ] } } ])
     assert_equal [ "photo_1", "photo_2" ], fields.pluck("key")

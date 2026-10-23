@@ -113,9 +113,10 @@ class BuyingTest < ActionDispatch::IntegrationTest
 
   test "a buyer's photo is sent as they pick it, and their line shows it framed on the product" do
     @platform.products_data.first["buyer_inputs"] = [ { "key" => "your_photo", "label" => "Your photo", "kind" => "photo", "required" => true,
-      "preview" => { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4, "images" => [] } } ]
+      "preview" => { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4, "images" => [] }, "print_pixels" => [ 3600, 3200 ] } ]
     get product_path("cat-tee")
     assert_select "[data-controller~=personalize][data-personalize-upload-url='/uploads']"
+    assert_select "[data-personalize-photo-field=your_photo][data-print-pixels='[3600,3200]']", 1, "to tell the buyer when their photo is too small for it"
     assert_select "input[type=file][data-personalize-pick=your_photo][accept*='image/jpeg']"
     assert_select "input[type=hidden][name='properties[your_photo]'][required]"
     assert_select "input[type=hidden][name='properties[your_photo_crop]'][value='1,0.5,0.5']"

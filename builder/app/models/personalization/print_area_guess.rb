@@ -13,7 +13,7 @@ class Personalization::PrintAreaGuess
     @product, @gateway, @shop_id = product, gateway, shop_id
   end
 
-  # { "x", "y", "w", "h", "position" } or nil.
+  # { "x", "y", "w", "h", "position", "pixels" } or nil.
   def call(position: "front")
     printify = @gateway.product(@shop_id, @product.printify_product_id)
     placeholder = Array(printify["print_areas"]).flat_map { |area| Array(area["placeholders"]) }.find { |candidate| candidate["position"] == position }
@@ -24,7 +24,7 @@ class Personalization::PrintAreaGuess
     design = Vips::Image.new_from_buffer(@gateway.download(image["src"]).read, "")
     photo = @product.images.attachments.first or return
     box = place(design, image, area, Vips::Image.new_from_buffer(photo.download, "")) or return
-    box.merge("position" => position)
+    box.merge("position" => position, "pixels" => [ area["width"].to_i, area["height"].to_i ])
   rescue PrintifyGateway::Error, Vips::Error
     nil
   end

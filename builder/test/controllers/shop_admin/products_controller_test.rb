@@ -71,6 +71,29 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     post shop_admin_product_print_area_path(tee)
     assert_match "Found the print area", flash[:notice]
     assert_in_delta 0.3, tee.reload.print_area["x"], 0.01
+    assert_equal [ 300, 400 ], tee.print_area["pixels"], "Printify's print area in pixels"
+  end
+
+  test "a drawn print area learns its size in pixels from Printify, kept while the box moves" do
+    connect_fake_printify
+    tee = products(:tee).tap { |product| product.update!(printify_product_id: "pf-tee") }
+    perform_enqueued_jobs(only: Product::PrintPixelsJob) do
+      patch shop_admin_product_path(tee), params: { product: { print_area: { x: "0.25", y: "0.2", w: "0.5", h: "0.25", position: "front" } } }
+    end
+    in_shop
+    assert_equal [ 300, 400 ], tee.reload.print_area["pixels"]
+
+    assert_no_enqueued_jobs(only: Product::PrintPixelsJob) do
+      patch shop_admin_product_path(tee), params: { product: { print_area: { x: "0.3", y: "0.2", w: "0.5", h: "0.25", position: "front" } } }
+    end
+    in_shop
+    assert_equal [ 0.3, [ 300, 400 ] ], tee.reload.print_area.values_at("x", "pixels")
+
+    assert_enqueued_with(job: Product::PrintPixelsJob) do
+      patch shop_admin_product_path(tee), params: { product: { print_area: { x: "0.3", y: "0.2", w: "0.5", h: "0.25", position: "back" } } }
+    end
+    in_shop
+    assert_nil tee.reload.print_area["pixels"], "the back's size is asked for again"
   end
 
   test "a personalized Printify product says to draw its print area, and is badged in the list" do

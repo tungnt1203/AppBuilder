@@ -160,10 +160,12 @@ class StorefrontApi::Json
       setting.resolved(image_url: ->(attachment) { url_helpers.rails_blob_url(attachment, **@url_options) })
     end
 
-    # A product's fields, with a choice field's pictures as { id, label, thumb, large }.
+    # A product's fields, with a choice field's pictures as { id, label, thumb, large } and the
+    # pixels a photo field prints at ("print_pixels", when known).
     def buyer_inputs(product)
       artwork = product.artwork.attachments.index_by(&:id)
       product.buyer_inputs.map do |field|
+        next field.merge("print_pixels" => product.print_pixels(field)).compact if field["kind"] == "photo"
         next field unless field["kind"] == "choice"
 
         field.merge("options" => field["options"].to_a.filter_map { |id| artwork[id] }.map { |art| { id: art.id, label: artwork_label(art) }.merge(artwork_urls(art)) })

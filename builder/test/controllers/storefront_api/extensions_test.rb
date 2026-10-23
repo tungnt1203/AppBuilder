@@ -58,8 +58,11 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
     ActsAsTenant.with_tenant(shops(:cats)) do
       tee = products(:tee)
       tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")
-      tee.update!(buyer_inputs: [ { "label" => "Your photo", "kind" => "photo", "required" => "1", "preview" => { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4 } } ])
+      tee.update!(buyer_inputs: [ { "label" => "Your photo", "kind" => "photo", "required" => "1", "preview" => { "x" => 0.25, "y" => 0.3, "w" => 0.5, "h" => 0.4 } } ],
+        print_area: { "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.6, "pixels" => [ 3600, 4800 ] })
     end
+    field = api(:get, storefront_api_product_path("cat-mom-tee"))["product"]["buyer_inputs"].sole
+    assert_equal [ 3600, 3200 ], field["print_pixels"], "the box's share of the print area"
 
     api :post, storefront_api_uploads_path, params: nil, headers: { "Content-Type" => nil }
     assert_response :bad_request

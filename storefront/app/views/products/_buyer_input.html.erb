@@ -4,7 +4,7 @@
     a photo they move (drag it on the photo) and zoom to frame it. %>
 <% preview = input["preview"] %>
 <% if input["kind"] == "photo" %>
-<div class="space-y-2" data-personalize-photo-field="<%= input["key"] %>">
+<div class="space-y-2" data-personalize-photo-field="<%= input["key"] %>" <%= tag.attributes(data: { print_pixels: input["print_pixels"]&.to_json }) %>>
   <%= label_tag "photo_#{input["key"]}", input["label"] %>
   <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-line px-4 py-3 text-sm hover:border-ink">
     <%= icon "image-plus", size: 20, class: "text-muted" %>

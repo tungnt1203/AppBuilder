@@ -103,6 +103,7 @@ en:
       show:
         title: Order %{number}
         photo_crop: "framed at %{zoom}× around %{x}%, %{y}%"
+        photo_small: Small for its print size, so it may print blurry. Check it before it's printed, or ask the buyer for a larger one.
         photo_download: Download the photo
         print_file: Print file
         print_file_sent: Print file made from what the buyer added, sent to Printify over the design.

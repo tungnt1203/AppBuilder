@@ -52,6 +52,7 @@ class Product < ApplicationRecord
   before_validation :coerce_custom_fields
   before_save :stamp_published_at
   after_save :sync_variants
+  after_commit :find_print_pixels, if: -> { saved_change_to_print_area? && print_area.present? && print_area["pixels"].blank? && printify_product_id }
 
   scope :visible, -> { active }
   scope :ordered, -> { order(created_at: :desc, id: :desc) }
@@ -170,6 +171,15 @@ class Product < ApplicationRecord
     end
   end
 
+  # How many pixels a field's box prints at, [width, height] (Printify's 300 dots an inch), or nil
+  # until Printify's print area size is known.
+  def print_pixels(field)
+    pixels, box = print_area["pixels"], field["preview"]
+    return unless pixels && box
+
+    [ (box["w"] / print_area["w"] * pixels[0]).round, (box["h"] / print_area["h"] * pixels[1]).round ]
+  end
+
   private
     # The variant's color as file-name words ("Forest Green" => ["forest", "green"]), when the
     # product has a color option.
@@ -182,11 +192,21 @@ class Product < ApplicationRecord
       self.published_at ||= Time.current if active?
     end
 
-    # Where Printify's print area sits on a photo of the product (BuyerInputs.preview's box) and its
-    # position on the blank ("front"), or {} until the owner draws it.
+    # Where Printify's print area sits on a photo of the product (BuyerInputs.preview's box), its
+    # position on the blank ("front") and, once Printify said (Product::PrintPixelsJob), its size in
+    # pixels; or {} until the owner draws it. Moving the box keeps the size; another position doesn't.
     def clean_print_area
-      box = BuyerInputs.preview(print_area, kind: "photo")
-      self.print_area = box ? box.slice("x", "y", "w", "h").merge("position" => PRINT_POSITIONS.include?(print_area.to_h["position"]) ? print_area["position"] : "front") : {}
+      box = BuyerInputs.preview(print_area, kind: "photo") or return self.print_area = {}
+
+      area = print_area.to_h.stringify_keys
+      position = PRINT_POSITIONS.include?(area["position"]) ? area["position"] : "front"
+      pixels = area["pixels"].presence || (print_area_was.to_h["pixels"] if print_area_was.to_h["position"] == position)
+      pixels = Array(pixels).map(&:to_i)
+      self.print_area = box.slice("x", "y", "w", "h").merge("position" => position, "pixels" => (pixels if pixels.size == 2 && pixels.all?(&:positive?))).compact
+    end
+
+    def find_print_pixels
+      Product::PrintPixelsJob.perform_later(self)
     end
 
     # A choice field keeps only the product's own artwork.

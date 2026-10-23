@@ -45,13 +45,15 @@ class LineItem < ApplicationRecord
     end
   end
 
-  # The photos the buyer added, to print: [{ label, upload, crop: [zoom, x, y] }].
+  # The photos the buyer added, to print: [{ label, upload, crop: [zoom, x, y], sharp: whether it's
+  # big enough to print sharp }].
   def buyer_photos
     fields = product&.buyer_inputs.to_a.select { |field| field["kind"] == "photo" && properties.to_h[field["key"]].present? }
     uploads = BuyerUpload.where(token: fields.map { |field| properties[field["key"]] }).index_by(&:token)
     fields.filter_map do |field|
       upload = uploads[properties[field["key"]]] or next
-      { label: field["label"], upload:, crop: BuyerInputs.crop(properties["#{field["key"]}_crop"]) }
+      crop = BuyerInputs.crop(properties["#{field["key"]}_crop"])
+      { label: field["label"], upload:, crop:, sharp: upload.sharp_for?(product.print_pixels(field), crop[0]) }
     end
   end
 end

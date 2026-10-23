@@ -37,6 +37,19 @@ class BuyerUpload < ApplicationRecord
     upload
   end
 
+  # Printify prints at 300 dots an inch; half of that still looks sharp on a shirt or a mug.
+  SHARP = 0.5
+
+  # Whether the photo, filling a box printed at pixels ([width, height], Product#print_pixels) and
+  # zoomed in as the buyer framed it, has enough of its own pixels to print sharp. True when the
+  # box's size isn't known.
+  def sharp_for?(pixels, zoom = 1)
+    return true unless pixels && width.to_i.positive? && height.to_i.positive?
+
+    shown = [ width, height * pixels[0].to_f / pixels[1] ].min / zoom
+    shown >= pixels[0] * SHARP
+  end
+
   private
     def photo_is_an_image
       return unless photo.attached?

@@ -102,6 +102,9 @@
                   <%= image_tag photo[:upload].photo.variant(:thumb), alt: photo[:label], class: "size-14 rounded-lg object-cover" %>
                   <div class="text-xs text-muted">
                     <p><%= photo[:upload].width %> × <%= photo[:upload].height %> px · <%= t(".photo_crop", zoom: photo[:crop][0], x: (photo[:crop][1] * 100).round, y: (photo[:crop][2] * 100).round) %></p>
+                    <% unless photo[:sharp] %>
+                      <p class="font-medium text-yellow-800"><%= t(".photo_small") %></p>
+                    <% end %>
                     <%= link_to t(".photo_download"), rails_blob_path(photo[:upload].photo, disposition: "attachment"), class: "font-medium text-brand-700 underline" %>
                   </div>
                 </div>
