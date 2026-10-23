@@ -9,7 +9,7 @@
     <h2 class="text-sm font-semibold text-ink"><%= t(".contact") %></h2>
     <p class="text-sm text-muted"><%= t(".contact_hint_html", link: link_to("/contact", storefront_url("/contact"), target: "_blank", class: link_classes)) %></p>
     <div class="grid gap-4 sm:grid-cols-2">
-      <%= form.field :contact_email, :email_field %>
+      <%= form.field :contact_email, :email_field, hint: t("shop_admin.settings.edit.contact_email_hint") %>
       <%= form.field :contact_phone, :telephone_field %>
     </div>
     <%= form.field :business_address, :text_area, rows: 3, hint: t(".business_address_hint") %>

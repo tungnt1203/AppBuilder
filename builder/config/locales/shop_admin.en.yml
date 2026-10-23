@@ -32,8 +32,8 @@ en:
         send_to_production_hint: Off, they wait in Printify for you to review and
           send them yourself.
         shipping_method: Shipping
-        shipping_method_hint: What Printify ships with. Price your shipping in General
-          to cover it.
+        shipping_method_hint: What Printify ships with. Buyers pay what Printify charges for it
+          to their address, worked out at checkout.
         save: Save
       create:
         notice: Printify is connected.

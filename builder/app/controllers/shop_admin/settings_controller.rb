@@ -28,7 +28,7 @@ class ShopAdmin::SettingsController < ShopAdmin::BaseController
     end
 
     def store_params
-      params.expect(store: [ :currency, :contact_email, :shipping_first_item, :shipping_additional_item,
+      params.expect(store: [ :currency, :shipping_first_item, :shipping_additional_item,
         :free_shipping_threshold, :ship_to_countries_text, :announcement, :delivery_days_min, :delivery_days_max,
         :meta_pixel_id, :meta_access_token, :meta_test_event_code, :tiktok_pixel_id, :google_tag_id,
         :payment_instructions, :manual_payments, :stripe_tax, :low_stock_threshold ]).then { |store| keep_meta_access_token(store) }

@@ -86,7 +86,6 @@
         <%= form.select :currency, Store::CURRENCIES.keys %>
         <p class="text-xs text-muted"><%= t(".currency_hint") %></p>
       </div>
-      <%= form.field :contact_email, :email_field, hint: t(".contact_email_hint") %>
       <%= form.field :announcement, placeholder: t(".announcement_placeholder"), hint: t(".announcement_hint") %>
       <%= form.field :low_stock_threshold, :number_field, min: 0, step: 1, hint: t(".low_stock_hint") %>
     <% end %>
