@@ -52,6 +52,8 @@ class DemoCatalog
       stickers = product("Good Vibes Sticker Pack", price: "9", cost: "3.50", photos: %w[ good-vibes-stickers ],
         description: "Three kiss-cut vinyl stickers, waterproof and laptop ready.")
 
+      personalize(tee, mug, poster)
+
       # Four products each and three collections, so grids and tiles fill their rows.
       Collection.create!(title: "Apparel", demo: true).arrange_products([ tee.id, sunset.id, hoodie.id, sweatshirt.id ])
       Collection.create!(title: "Gifts", demo: true).arrange_products([ mug.id, tote.id, poster.id, stickers.id ])
@@ -70,6 +72,21 @@ class DemoCatalog
     end
     products.size
   end
+
+  # What makes personalized products the shop's kind: a name on the tee (on its dark photos, in the
+  # buyer's pick of fonts and colors), the buyer's photo on the mug (in their pick of looks), and
+  # names under the poster's art. Boxes are where the mockups have room.
+  def self.personalize(tee, mug, poster)
+    dark = tee.images.select { |photo| photo.filename.to_s.match?(/black|navy/) }.map(&:id)
+    tee.update!(buyer_inputs: [ { "label" => "Name", "max_length" => "14",
+      "preview" => { "x" => 0.3125, "y" => 0.6812, "w" => 0.3819, "h" => 0.0826, "images" => dark, "font" => "Montserrat", "color" => "#ffffff",
+                     "fonts" => [ "Montserrat", "Pacifico", "Playfair Display" ], "colors" => "#ffffff, #f2c45a, #e86a45", "uppercase" => "1" } } ])
+    mug.update!(buyer_inputs: [ { "label" => "Your photo", "kind" => "photo", "required" => "1",
+      "preview" => { "x" => 0.2847, "y" => 0.3878, "w" => 0.3125, "h" => 0.3067, "filters" => %w[ original bw sepia ] } } ])
+    poster.update!(buyer_inputs: [ { "label" => "Names", "max_length" => "24",
+      "preview" => { "x" => 0.30, "y" => 0.735, "w" => 0.40, "h" => 0.05, "font" => "Dancing Script", "color" => "#2f4a3f" } } ])
+  end
+  private_class_method :personalize
 
   def self.product(title, price:, cost:, photos:, **attributes)
     product = Product.create!(title:, status: "active", base_price: price, demo: true, **attributes)
