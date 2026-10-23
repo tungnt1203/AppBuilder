@@ -31,6 +31,7 @@ class LineItem < ApplicationRecord
       all[field["key"]] = field["label"]
       all["#{field["key"]}_font"] = "#{field["label"]} font"
       all["#{field["key"]}_color"] = "#{field["label"]} color"
+      all["#{field["key"]}_place"] = "#{field["label"]} place"
     end
     choices = fields.select { |field| field["kind"] == "choice" }.map { |field| field["key"] }
     artwork = choices.any? ? product.artwork.attachments.index_by(&:id) : {}
@@ -39,6 +40,7 @@ class LineItem < ApplicationRecord
 
       value = "Photo added" if photos.include?(key)
       value = artwork[value.to_i]&.filename&.base&.humanize || value if choices.include?(key)
+      value = Personalization::Sky.cities.dig(value, "name") || value if key.end_with?("_place")
       "#{labels[key] || key}: #{value}"
     end
   end

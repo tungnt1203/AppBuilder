@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import * as sky from "sky"
 
 // What the buyer adds to a product, on its photo where the shop placed it. Each layer is a box in
 // fractions of the photo (data-box), laid over the photo as it shows (cropped to fill its frame).
@@ -30,6 +31,7 @@ export default class extends Controller {
       layer.addEventListener("pointercancel", this.drop)
     })
     document.fonts.ready.then(this.render)
+    if (this.layerTargets.some((layer) => layer.dataset.kind === "starmap")) sky.load().then(this.render)
     this.render()
   }
 
@@ -40,8 +42,15 @@ export default class extends Controller {
     Object.values(this.photos).forEach(({ url }) => URL.revokeObjectURL(url))
   }
 
-  // An input or a pick changed (the form is inside this controller on the product page).
+  // An input or a pick changed (the form is inside this controller on the product page). A star
+  // map's day and time make its value, "2014-06-21T22:00".
   update() {
+    this.element.querySelectorAll("[data-personalize-starmap-value]").forEach((value) => {
+      const key = value.dataset.personalizeStarmapValue
+      const date = this.element.querySelector(`[data-personalize-starmap-date="${key}"]`)?.value
+      const time = this.element.querySelector(`[data-personalize-starmap-time="${key}"]`)?.value
+      value.value = date ? (time ? `${date}T${time}` : date) : ""
+    })
     this.render()
   }
 
@@ -136,8 +145,8 @@ export default class extends Controller {
 
     this.layerTargets.filter((layer) => holder.contains(layer)).forEach((layer) => {
       const photos = JSON.parse(layer.dataset.photos || "[]")
-      const content = { photo: this.picture, choice: this.chosen, color: this.fill }[layer.dataset.kind]?.call(this, layer) || this.words(layer)
-      layer.hidden = !(content.text || content.url || content.empty || content.color) || (photos.length > 0 && !photos.includes(source))
+      const content = { photo: this.picture, choice: this.chosen, color: this.fill, starmap: this.night }[layer.dataset.kind]?.call(this, layer) || this.words(layer)
+      layer.hidden = !(content.text || content.url || content.empty || content.color || content.svg) || (photos.length > 0 && !photos.includes(source))
       if (layer.hidden) return
 
       const box = JSON.parse(layer.dataset.box)
@@ -149,6 +158,7 @@ export default class extends Controller {
         case "photo": this.showPicture(layer, content); break
         case "choice": this.showChosen(layer, content); break
         case "color": layer.style.background = content.color; break
+        case "starmap": layer.replaceChildren(content.svg); break
         default: this.showWords(layer, content)
       }
     })
@@ -208,6 +218,19 @@ export default class extends Controller {
   showChosen(layer, { url }) {
     const image = layer.firstElementChild
     if (image.getAttribute("src") !== url) image.src = url
+  }
+
+  // A star map's sky: the day and city the buyer picked (once the stars have loaded), or a line's.
+  night(layer) {
+    const key = layer.dataset.key
+    const value = key ? this.element.querySelector(`[data-personalize-starmap-value="${key}"]`)?.value : layer.dataset.when
+    const place = key ? this.element.querySelector(`[data-personalize-starmap-place="${key}"]`)?.value : layer.dataset.place
+    const signature = [ value, place, layer.clientWidth ].join("|")
+    if (layer.dataset.drawn === signature) return { svg: layer.firstElementChild }
+
+    const svg = sky.draw(value, place, { sky: layer.dataset.sky, ink: layer.dataset.ink, lines: layer.dataset.lines !== "false" })
+    if (svg) layer.dataset.drawn = signature
+    return { svg }
   }
 
   // A color layer's color: the one the buyer picked, or a line's.

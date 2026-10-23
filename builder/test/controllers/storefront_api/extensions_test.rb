@@ -102,6 +102,19 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
     assert_equal [ "choice", options.sole["large"] ], line["preview"].sole.values_at("kind", "picture")
   end
 
+  test "a star map's line names its city, and shows the sky on its photo" do
+    ActsAsTenant.with_tenant(shops(:cats)) do
+      tee = products(:tee)
+      tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")
+      tee.update!(buyer_inputs: [ { "label" => "Our night", "kind" => "starmap", "preview" => { "x" => 0.3, "y" => 0.3, "w" => 0.4, "h" => 0.4 } } ])
+    end
+
+    token = api(:post, storefront_api_carts_path)["cart"]["token"]
+    line = api(:post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { our_night: "2020-02-14T21:30", our_night_place: "hanoi-vietnam" } })["cart"]["items"].sole
+    assert_equal [ [ "Our night", "2020-02-14T21:30" ], [ "Our night place", "Hanoi, Vietnam" ] ], line["properties"].map { |entry| entry.values_at("label", "value") }
+    assert_equal [ "starmap", "2020-02-14T21:30", "hanoi-vietnam", "#0b1d3a" ], line["preview"].sole.values_at("kind", "when", "place", "sky")
+  end
+
   test "pages, menus and a form message" do
     ActsAsTenant.with_tenant(shops(:cats)) do
       Page.create!(title: "Questions", body: "We print tees.", faqs: [ { "question" => "How long?", "answer" => "A week." } ], published: true)

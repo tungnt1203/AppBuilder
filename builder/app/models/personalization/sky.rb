@@ -19,6 +19,7 @@ class Personalization::Sky
     city = cities[place.to_s] or return
     parts = value.to_s.match(WHEN)&.captures or return
     year, month, day, hour, minute = parts
+    return unless Date.valid_date?(year.to_i, month.to_i, day.to_i)
     local = ActiveSupport::TimeZone[city["tz"]].local(year.to_i, month.to_i, day.to_i, (hour || DEFAULT_TIME[0, 2]).to_i, (minute || DEFAULT_TIME[3, 2]).to_i)
     new(local.utc, city["lat"], city["lon"]) if local.year.between?(1900, 2100)
   rescue ArgumentError
@@ -42,21 +43,24 @@ class Personalization::Sky
   end
 
   # The map as SVG, size pixels across: a disc of the sky's color, the stars (bigger the brighter)
-  # and the constellations' lines in the ink's.
+  # and the constellations' lines in the ink's. In pixels, without a viewBox: ImageMagick's own SVG
+  # renderer (the print file's) loses small circles in a scaled one.
   def svg(size, sky:, ink:, lines: true)
-    paths = lines ? self.lines.map { |(x1, y1), (x2, y2)| "M#{x1.round(4)} #{y1.round(4)}L#{x2.round(4)} #{y2.round(4)}" }.join : ""
-    dots = stars.map { |x, y, magnitude| %(<circle cx="#{x.round(4)}" cy="#{y.round(4)}" r="#{self.class.radius(magnitude).round(4)}"/>) }.join
+    half = size / 2.0
+    at = ->(value) { ((value + 1) * half).round(2) }
+    paths = lines ? self.lines.map { |(x1, y1), (x2, y2)| "M#{at.(x1)} #{at.(y1)}L#{at.(x2)} #{at.(y2)}" }.join : ""
+    dots = stars.map { |x, y, magnitude| %(<circle cx="#{at.(x)}" cy="#{at.(y)}" r="#{(self.class.radius(magnitude) * half).round(2)}" fill="#{ink}"/>) }.join
     <<~SVG
-      <svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}" viewBox="-1 -1 2 2">
-        <circle r="1" fill="#{sky}"/>
-        <path d="#{paths}" fill="none" stroke="#{ink}" stroke-width="0.003" stroke-opacity="0.55" stroke-linecap="round"/>
-        <g fill="#{ink}">#{dots}</g>
+      <svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}">
+        <circle cx="#{half}" cy="#{half}" r="#{half}" fill="#{sky}"/>
+        #{%(<path d="#{paths}" fill="none" stroke="#{ink}" stroke-width="#{(0.003 * half).round(2)}" stroke-opacity="0.35" stroke-linecap="round"/>) if paths.present?}
+        #{dots}
       </svg>
     SVG
   end
 
-  # A star's dot, as a share of the map's radius: Sirius about 0.014, the faintest 0.0035.
-  def self.radius(magnitude) = [ 0.012 * (5.5 - magnitude) / 6, 0.0035 ].max
+  # A star's dot, as a share of the map's radius: the brightest 0.02, the faintest 0.003.
+  def self.radius(magnitude) = (0.004 * (5.6 - magnitude)).clamp(0.003, 0.02)
 
   private
     # Where a star (right ascension and declination, degrees) is on the map, or nil below the horizon.

@@ -34,6 +34,20 @@
     <% end %>
   <% end %>
 </div>
+<% elsif input["kind"] == "starmap" %>
+<%# The night sky the buyer picks: a day (and time) and a city; the field's value is "2014-06-21T22:00". %>
+<fieldset class="space-y-2" data-personalize-starmap="<%= input["key"] %>">
+  <legend class="font-medium"><%= input["label"] %></legend>
+  <div class="grid grid-cols-[1fr_8rem] gap-2">
+    <%= date_field_tag nil, nil, required: input["required"], min: "1900-01-01", max: "2100-12-31", class: field_classes, aria: { label: t(".date") },
+          data: { personalize_starmap_date: input["key"], action: "input->personalize#update" } %>
+    <%= time_field_tag nil, "22:00", class: field_classes, aria: { label: t(".time") }, data: { personalize_starmap_time: input["key"], action: "input->personalize#update" } %>
+  </div>
+  <%= select_tag "properties[#{input["key"]}_place]", options_for_select(star_map_cities), include_blank: t(".place"), required: input["required"], class: field_classes,
+        aria: { label: t(".place") }, data: { personalize_starmap_place: input["key"], action: "change->personalize#update" } %>
+  <%= hidden_field_tag "properties[#{input["key"]}]", nil, id: nil, data: { personalize_starmap_value: input["key"] } %>
+  <p class="text-xs text-muted"><%= t(".starmap_hint") %></p>
+</fieldset>
 <% elsif input["kind"] == "choice" %>
 <fieldset class="space-y-2">
   <legend class="font-medium"><%= input["label"] %></legend>

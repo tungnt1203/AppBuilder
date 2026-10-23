@@ -75,6 +75,10 @@ en:
       small: This photo is small and may print blurry. A larger one prints sharper.
       zoom: Zoom
       monogram_hint: Three initials, in the order they go; the middle one is printed largest.
+      date: Date
+      time: Time
+      place: City
+      starmap_hint: The stars as they were over that city on that night.
       look: Look
       looks:
         original: Original

@@ -15,7 +15,7 @@
 <% images = @product.images %>
 <%# Text the buyer types shows on the photos where the shop placed it (personalization/_layer). %>
 <% placed = images.any? ? @product.buyer_inputs.select { |input| input["preview"] } : [] %>
-<% personalized = placed.any? || @product.buyer_inputs.any? { |input| input["kind"] == "photo" } %>
+<% personalized = placed.any? || @product.buyer_inputs.any? { |input| %w[ photo starmap ].include?(input["kind"]) } %>
 <div class="mx-auto grid max-w-6xl gap-10 px-4 py-8 md:grid-cols-2 md:py-12" data-controller="sticky-buy<%= " personalize" if personalized %>" <%= tag.attributes(data: { personalize_upload_url: (uploads_path if personalized) }) %> data-action="variant-picker:change->sticky-buy#select">
   <div class="min-w-0" data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
     <div class="relative aspect-4/5 overflow-hidden rounded-xl" data-personalize-frame>

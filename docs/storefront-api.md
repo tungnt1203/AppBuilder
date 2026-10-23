@@ -99,7 +99,11 @@ Every change to a cart answers with the whole cart.
 - `custom_fields`: `[{ "key", "label", "type": "text"|"number"|"boolean", "value" }]`, only the ones this product has a value for.
 - `buyer_inputs`: `[{ "key", "label", "kind", "required", "max_length", "preview" }]`. Send what the buyer typed as `properties` when adding the line.
   `kind` is `"text"`, `"photo"`, `"choice"` (one of the shop's pictures: `options` `[{ "id", "label", "thumb", "large" }]`;
-  send the picked `id`) or `"color"` (a background: `preview.colors`; send the picked color). For a photo, send the buyer's file to `POST /v1/uploads` (multipart, field `photo`:
+  send the picked `id`), `"color"` (a background: `preview.colors`; send the picked color) or `"starmap"` (the night sky:
+  send `"2014-06-21T22:00"`, the city's own time, and `"<key>_place"`, a city id from the storefront's
+  `public/personalization/cities.json`; `preview` has `sky`, `ink` and `lines`). Text's `preview` also has `curve`
+  (degrees, up an arch, down a smile) and `style` (`"plain"` or `"monogram"`), and a photo's `filters` (the looks the
+  buyer may pick: send `"<key>_filter"`). For a photo, send the buyer's file to `POST /v1/uploads` (multipart, field `photo`:
   JPEG, PNG or WebP, 20 MB at most) first; it answers `{ "upload": { "token", "width", "height", "thumb", "large" } }`.
   Send the token as the field's property, and how the buyer framed it as `"<key>_crop"`: `"zoom,x,y"` (zoom from 1
   to 4, the point of the photo kept in view as fractions).
@@ -108,7 +112,7 @@ Every change to a cart answers with the whole cart.
   empty: no choice), `"align"`, `"uppercase"`. Send the buyer's picks as `properties` `"<key>_font"` and `"<key>_color"`.
   A cart or order line then has `preview`: `[{ "x", "y", "w", "h", "kind", "text", "font", "color", "align", "uppercase" }]`
   for text, `[{ "x", "y", "w", "h", "kind", "photo", "crop" }]` for a photo (`crop`: `[zoom, x, y]`), `"picture"` (its
-  `large` URL) for a choice, `"color"` for a color, in the fields' order (a background first), as it shows on the
+  `large` URL) for a choice, `"color"` for a color, `"when"`, `"place"`, `"sky"`, `"ink"`, `"lines"` for a star map, in the fields' order (a background first), as it shows on the
   line's photo (its `large` size, uncropped). A photo's property reads `"Added"`, with its `thumb` and `large`.
 
 **Cart line** and **order line** include `properties` when the buyer typed something: `[{ "key", "label", "value" }]`. Printify can't get that text from the Platform, so an order with it isn't sent automatically: the shop's staff make it in Printify and link it in the admin (or send it without the text, for a gift note). Tracking and status then come back as for any order.

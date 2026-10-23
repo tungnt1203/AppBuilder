@@ -56,4 +56,12 @@ class Personalization::PrintFileTest < ActiveSupport::TestCase
     assert image.crop(300, 0, 180, 120).extract_band(3).max.positive?, "the arch"
     assert image.crop(0, 360, 600, 120).extract_band(3).max.positive?, "the monogram"
   end
+
+  test "a star map prints as the sky's disc in its box" do
+    @product.update!(buyer_inputs: [ { "label" => "Night", "kind" => "starmap", "preview" => { "x" => 0.2, "y" => 0.2, "w" => 0.6, "h" => 0.6, "sky" => "#102030", "ink" => "#ffffff" } } ])
+    properties, = BuyerInputs.accept(@product.buyer_inputs, "night" => "2020-02-14T21:30", "night_place" => "hanoi-vietnam")
+    image = Vips::Image.new_from_buffer(Personalization::PrintFile.new(@product, properties).render(width: 600, height: 600), "")
+    assert_equal [ 0, 0 ], [ image.getpoint(5, 5)[3], image.getpoint(594, 594)[3] ], "the corners, outside the disc"
+    assert_operator image.crop(150, 150, 300, 300).extract_band(0).avg, :>, 16, "the sky, with its stars"
+  end
 end

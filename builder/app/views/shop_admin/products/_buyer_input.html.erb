@@ -46,7 +46,7 @@
             <%= image_tag (photos.find { |photo| preview["images"].to_a.include?(photo.id) } || photos.first).variant(:large), alt: "", class: "block h-auto w-full", draggable: false, data: { placement_target: "photo" } %>
             <div class="pointer-events-none absolute flex overflow-hidden outline-2 outline-dashed outline-brand-500" data-placement-target="box" hidden>
               <span class="w-full self-center leading-none whitespace-nowrap" data-placement-target="sample"
-                    data-text="<%= row["label"].presence || t(".sample") %>" data-photo="<%= t(".sample_photo") %>" data-choice="<%= t(".sample_choice") %>" data-color="<%= t(".sample_color") %>"><%= row["label"].presence || t(".sample") %></span>
+                    data-text="<%= row["label"].presence || t(".sample") %>" data-photo="<%= t(".sample_photo") %>" data-choice="<%= t(".sample_choice") %>" data-color="<%= t(".sample_color") %>" data-starmap="<%= t(".sample_starmap") %>"><%= row["label"].presence || t(".sample") %></span>
             </div>
           </div>
           <p class="text-xs text-muted"><%= t(".draw_hint") %></p>
@@ -141,6 +141,23 @@
           </fieldset>
           <p class="text-sm text-muted" data-for-kinds="photo"><%= t(".photo_hint") %></p>
           <p class="text-sm text-muted" data-for-kinds="choice"><%= t(".choice_hint") %></p>
+          <div class="space-y-3" data-for-kinds="starmap">
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="space-y-1.5">
+                <%= label_tag nil, t(".sky"), class: "text-sm font-medium text-ink" %>
+                <%= color_field_tag "product[buyer_inputs][][preview][sky]", preview["sky"] || "#0b1d3a", id: nil, class: "h-10 w-full rounded-lg border border-line" %>
+              </div>
+              <div class="space-y-1.5">
+                <%= label_tag nil, t(".ink"), class: "text-sm font-medium text-ink" %>
+                <%= color_field_tag "product[buyer_inputs][][preview][ink]", preview["ink"] || "#ffffff", id: nil, class: "h-10 w-full rounded-lg border border-line" %>
+              </div>
+            </div>
+            <label class="flex items-center gap-2 text-sm">
+              <%= check_box_tag "product[buyer_inputs][][preview][no_lines]", "1", preview["lines"] == false, id: nil, class: "size-4 rounded border-line accent-brand-600" %>
+              <%= t(".no_lines") %>
+            </label>
+            <p class="text-sm text-muted"><%= t(".starmap_hint") %></p>
+          </div>
         </div>
       </div>
     </details>

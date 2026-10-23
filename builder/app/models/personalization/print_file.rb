@@ -4,8 +4,8 @@ require "open3"
 # owner placed it on the product's photo and moved onto Printify's print area (the product's
 # print_area, drawn on that photo), at the print area's size, on a transparent canvas. Printify
 # prints it over the product's own design. In the fields' order, as the storefront shows them: a
-# background color fills its box, a photo fills it as the buyer framed it, a picture fits it, and
-# text fits it in its font and color.
+# background color fills its box, a photo fills it as the buyer framed it, a picture fits it, a
+# star map is the sky's disc in it, and text fits it in its font and color.
 class Personalization::PrintFile
   FONTS = Rails.root.join("lib/personalization/fonts")
 
@@ -68,8 +68,17 @@ class Personalization::PrintFile
         upload = BuyerUpload.find_by(token: layer["upload"])
         upload ? look(photo(upload.photo.download, layer["crop"], width, height), layer["filter"]) : (fill("#d1d5db", width, height) if @placeholders)
       when "choice" then (art = @product.artwork.attachments.find_by(id: layer["artwork"])) && picture(art.download, width, height)
+      when "starmap" then (sky = Personalization::Sky.for(layer["when"], layer["place"])) && star_map(sky, layer, width, height)
       else text(layer, width, height)
       end
+    end
+
+    # The night sky, as large a disc as fits, centered (ImageMagick draws its SVG: libvips's SVG
+    # loader is blocked for buyers' files).
+    def star_map(sky, layer, width, height)
+      size = [ width, height ].min
+      disc = Vips::Image.new_from_buffer(magick("-background", "none", "svg:-", "png32:-", stdin: sky.svg(size, sky: layer["sky"], ink: layer["ink"], lines: layer["lines"])), "")
+      rgba(disc).embed((width - disc.width) / 2, (height - disc.height) / 2, width, height, extend: :background, background: [ 0, 0, 0, 0 ])
     end
 
     def fill(hex, width, height)

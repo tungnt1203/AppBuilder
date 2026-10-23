@@ -361,6 +361,7 @@ en:
           photo: Photo
           choice: Choice
           color: Background color
+          starmap: Star map
         options: Pictures the buyer picks from
         options_empty: Add pictures under "Pictures buyers pick from" above, then save.
         layout: Photos in the box
@@ -377,6 +378,12 @@ en:
           fills the box. Put this field first so text and photos sit on it.
         sample_choice: Picture
         sample_color: Background
+        sample_starmap: Star map
+        sky: Sky color
+        ink: Stars' color
+        no_lines: Hide the constellations' lines
+        starmap_hint: The buyer picks a date, a time and a city; the night sky over it then fills the
+          box as a disc. Draw the box square. Add a text field for a line under it ("The night we met").
         photo_hint: The buyer's photo fills the box; they move and zoom it to frame it. Draw the
           box the shape of the print area (a circle on a mug shows as its square).
         sample_photo: Photo

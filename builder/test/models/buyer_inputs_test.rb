@@ -97,4 +97,14 @@ class BuyerInputsTest < ActiveSupport::TestCase
     assert_equal [ "JDS", "sepia" ], properties.values_at("initials", "photo_filter")
     assert_equal "sepia", BuyerInputs.layers(fields, properties).second["filter"]
   end
+
+  test "a star map takes a day and one of the cities, and the lines can be hidden" do
+    field = BuyerInputs.definitions([ { "label" => "Our night", "kind" => "starmap", "preview" => { "x" => "0.2", "y" => "0.2", "w" => "0.5", "h" => "0.5", "sky" => "#000000", "no_lines" => "1" } } ]).sole
+    assert_equal [ "#000000", "#ffffff", false ], field["preview"].values_at("sky", "ink", "lines")
+
+    _, errors = BuyerInputs.accept([ field ], "our_night" => "2020-02-14", "our_night_place" => "atlantis")
+    assert_equal "needs a date and one of the places", errors["our_night"]
+    properties, = BuyerInputs.accept([ field ], "our_night" => "2020-02-14T21:30", "our_night_place" => "hanoi-vietnam")
+    assert_equal [ "starmap", "2020-02-14T21:30", "hanoi-vietnam", false ], BuyerInputs.layers([ field ], properties).sole.values_at("kind", "when", "place", "lines")
+  end
 end

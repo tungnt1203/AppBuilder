@@ -2,6 +2,12 @@
 # search engines read. The shop itself is current_shop (storefront_kit's StorefrontHelper has
 # money, price_range, product_image, theme_setting, shop_menu).
 module ShopHelper
+  # The cities a star map can be over (public/personalization/cities.json, the Platform's list):
+  # [[name, id]] for a select.
+  def star_map_cities
+    @star_map_cities ||= JSON.parse(Rails.public_path.join("personalization/cities.json").read).map { |city| [ city["name"], city["id"] ] }
+  end
+
   # Colors print-on-demand blanks come in, for swatches on the product page. Values the shop
   # writes otherwise ("Vintage wash") stay text.
   SWATCHES = {

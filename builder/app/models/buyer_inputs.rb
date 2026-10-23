@@ -13,13 +13,15 @@
 # "<key>_crop": "zoom,x,y" (zoom from 1, the point kept in view), and the look the buyer picks among
 # the shop's filters (black and white, sepia) as "<key>_filter". Text can bend along an arc ("curve",
 # in degrees: up for an arch, down for a smile) or be a monogram (three letters, the middle one big).
-# A picture fits its box. A color fills it, from the colors the shop offers.
+# A picture fits its box. A color fills it, from the colors the shop offers. A star map (kind
+# "starmap") is the night sky over a city on a day the buyer picks (the value "2014-06-21T22:00",
+# the city as "<key>_place": Personalization::Sky), in the shop's colors for the sky and the stars.
 #
 # Several photos (a collage) are several photo fields: drawing one box with a layout ("2x1": two
 # across) splits it into a field per cell.
 class BuyerInputs
   KEY = /\A[a-z][a-z0-9_]{0,40}\z/
-  KINDS = %w[ text photo choice color ].freeze
+  KINDS = %w[ text photo choice color starmap ].freeze
   LAYOUTS = { "1x1" => [ 1, 1 ], "2x1" => [ 2, 1 ], "1x2" => [ 1, 2 ], "3x1" => [ 3, 1 ], "2x2" => [ 2, 2 ], "3x2" => [ 3, 2 ] }.freeze
   MAX_FIELDS = 12
   MAX_LENGTH = 80
@@ -89,6 +91,11 @@ class BuyerInputs
       box.merge("filters" => filters.size > 1 ? FILTERS & filters : [])
     when "choice" then box
     when "color" then colors.any? ? box.merge("colors" => colors.first(MAX_OPTIONS)) : nil
+    when "starmap"
+      box.merge("sky" => raw["sky"].to_s.downcase.match?(COLOR) ? raw["sky"].to_s.downcase : "#0b1d3a",
+        "ink" => raw["ink"].to_s.downcase.match?(COLOR) ? raw["ink"].to_s.downcase : "#ffffff",
+        # The admin's box is "hide the lines" (an unticked box sends nothing); what's kept is "lines".
+        "lines" => raw.key?("lines") ? ActiveModel::Type::Boolean.new.cast(raw["lines"]) == true : ActiveModel::Type::Boolean.new.cast(raw["no_lines"]) != true)
     else
       font = FONTS.include?(raw["font"]) ? raw["font"] : FONTS.first
       color = raw["color"].to_s.downcase.match?(COLOR) ? raw["color"].to_s.downcase : "#111111"
@@ -139,6 +146,12 @@ class BuyerInputs
         next errors[key] = "isn't one of the colors" unless field.dig("preview", "colors").to_a.include?(value.downcase)
 
         properties[key] = value.downcase
+      when "starmap"
+        place = raw["#{key}_place"].to_s
+        next errors[key] = "needs a date and one of the places" unless Personalization::Sky.for(value, place)
+
+        properties[key] = value
+        properties["#{key}_place"] = place
       else
         if field.dig("preview", "style") == "monogram"
           value = value.gsub(/[^[:alpha:]]/, "").upcase
@@ -186,6 +199,7 @@ class BuyerInputs
           "filter" => properties["#{field["key"]}_filter"].presence_in(preview["filters"].to_a) || "original")
       when "choice" then box.merge("kind" => "choice", "artwork" => value.to_i)
       when "color" then box.merge("kind" => "color", "color" => value)
+      when "starmap" then box.merge(preview.slice("sky", "ink", "lines")).merge("kind" => "starmap", "when" => value, "place" => properties["#{field["key"]}_place"])
       else
         box.merge(preview.slice("align", "uppercase", "curve", "style")).merge("kind" => "text", "text" => value,
           "font" => properties["#{field["key"]}_font"].presence_in(preview["fonts"].to_a) || preview["font"],

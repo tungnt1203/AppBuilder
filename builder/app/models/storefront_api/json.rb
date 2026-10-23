@@ -183,10 +183,12 @@ class StorefrontApi::Json
         all[field["key"]] = field["label"]
         all["#{field["key"]}_font"] = "#{field["label"]} font"
         all["#{field["key"]}_color"] = "#{field["label"]} color"
+        all["#{field["key"]}_place"] = "#{field["label"]} place"
       end
       line[:properties] = record.properties.filter_map do |key, value|
         next if key.end_with?("_crop") && kinds[key.delete_suffix("_crop")] == "photo"
 
+        value = Personalization::Sky.cities.dig(value, "name") || value if key.end_with?("_place") && kinds[key.delete_suffix("_place")] == "starmap"
         entry = { key:, label: labels[key] || key, value: }
         case kinds[key]
         when "photo" then (upload = uploads[value]) ? entry.merge(value: "Added").merge(upload_urls(upload)) : entry

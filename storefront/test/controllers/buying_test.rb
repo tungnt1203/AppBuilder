@@ -170,6 +170,21 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_select "input[type=radio][name='properties[photo_filter]'][value=original][checked]"
   end
 
+  test "a star map asks for a day, a time and a city, and draws the sky on the product" do
+    @platform.products_data.first["buyer_inputs"] = [ { "key" => "night", "label" => "Our night", "kind" => "starmap", "required" => true,
+      "preview" => { "x" => 0.3, "y" => 0.3, "w" => 0.4, "h" => 0.4, "images" => [], "sky" => "#0b1d3a", "ink" => "#ffffff", "lines" => true } } ]
+    get product_path("cat-tee")
+    assert_select "input[type=date][required][data-personalize-starmap-date=night]"
+    assert_select "input[type=time][value='22:00'][data-personalize-starmap-time=night]"
+    assert_select "select[name='properties[night_place]'] option[value=hanoi-vietnam]", "Hanoi, Vietnam"
+    assert_select "input[type=hidden][name='properties[night]']"
+    assert_select "[data-personalize-target=layer][data-kind=starmap][data-key=night][data-sky='#0b1d3a']"
+
+    post cart_items_path, params: { variant_id: 101, properties: { night: "2020-02-14T21:30", night_place: "hanoi-vietnam" } }
+    get cart_path
+    assert_select "[data-personalize-target=layer][data-kind=starmap][data-when='2020-02-14T21:30'][data-place=hanoi-vietnam]"
+  end
+
   test "something that can't be bought isn't added" do
     post cart_items_path, params: { variant_id: 104 }
     follow_redirect!

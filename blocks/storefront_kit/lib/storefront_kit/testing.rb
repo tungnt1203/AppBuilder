@@ -270,6 +270,8 @@ module StorefrontKit
               box.merge("kind" => "choice", "picture" => option["large"])
             when "color"
               box.merge("kind" => "color", "color" => value)
+            when "starmap"
+              box.merge(preview.slice("sky", "ink", "lines")).merge("kind" => "starmap", "when" => value, "place" => properties["#{input["key"]}_place"])
             else
               picked = ->(kind, all) { properties["#{input["key"]}_#{kind}"].then { |pick| pick if all.to_a.include?(pick) } }
               box.merge(preview.slice("align", "uppercase", "curve", "style")).merge("kind" => "text", "text" => value,
