@@ -6,4 +6,4 @@
 <% if @store.contact_email.present? %>
   <p><%= t(".questions", email: @store.contact_email) %></p>
 <% end %>
-<p><%= link_to t(".view"), @order.storefront_url %></p>
+<p><%= email_button t(".view"), @order.storefront_url %></p>

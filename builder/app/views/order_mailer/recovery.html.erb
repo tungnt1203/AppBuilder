@@ -3,7 +3,7 @@
 
 <%= render "order_mailer/summary", order: @order %>
 
-<p><%= link_to t(".finish", total: money(@order.total_cents, @order.currency)), @order.storefront_url %></p>
+<p><%= email_button t(".finish", total: money(@order.total_cents, @order.currency)), @order.storefront_url %></p>
 <% if @store.contact_email.present? %>
   <p><%= t(".questions", email: @store.contact_email) %></p>
 <% end %>

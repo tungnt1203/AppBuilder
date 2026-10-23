@@ -1,7 +1,7 @@
-<table cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%; max-width: 560px;">
+<table cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%; margin: 20px 0;">
   <% order.line_items.each do |item| %>
-    <tr>
-      <td><%= item.quantity %> × <%= item.product_title %><% if item.variant_title %><br><small><%= item.variant_title %></small><% end %><% item.property_entries.each do |entry| %><br><small><%= entry[:label] %>: <% if entry[:value].match?(/\A#\h{6}\z/) %><span style="display: inline-block; width: 10px; height: 10px; border-radius: 5px; background-color: <%= entry[:value] %>; border: 1px solid #d1d5db;"></span> <% end %><%= entry[:value] %></small><% end %></td>
+    <tr style="border-bottom: 1px solid #e5e7eb;">
+      <td style="padding: 10px 6px 10px 0;"><%= item.quantity %> × <%= item.product_title %><% if item.variant_title %><br><small><%= item.variant_title %></small><% end %><% item.property_entries.each do |entry| %><br><small><%= entry[:label] %>: <% if entry[:value].match?(/\A#\h{6}\z/) %><span style="display: inline-block; width: 10px; height: 10px; border-radius: 5px; background-color: <%= entry[:value] %>; border: 1px solid #d1d5db;"></span> <% end %><%= entry[:value] %></small><% end %></td>
       <td align="right"><%= money(item.total_cents, order.currency) %></td>
     </tr>
   <% end %>
@@ -13,6 +13,6 @@
   <% if order.tax_cents.positive? %>
     <tr><td><%= t("order_mailer.summary.tax") %></td><td align="right"><%= money(order.tax_cents, order.currency) %></td></tr>
   <% end %>
-  <tr><td><strong><%= t("order_mailer.summary.total") %></strong></td><td align="right"><strong><%= money(order.total_cents, order.currency) %></strong></td></tr>
+  <tr style="border-top: 1px solid #e5e7eb;"><td><strong><%= t("order_mailer.summary.total") %></strong></td><td align="right"><strong><%= money(order.total_cents, order.currency) %></strong></td></tr>
 </table>
 <p><%= t("order_mailer.summary.ship_to") %>:<br><%= safe_join(order.shipping_address_lines, tag.br) %></p>

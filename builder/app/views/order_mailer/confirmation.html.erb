@@ -8,4 +8,4 @@
   <%= @store.payment_instructions.present? ? simple_format(@store.payment_instructions) : tag.p(t(".payment_by_email")) %>
 <% end %>
 
-<p><%= link_to t(".view"), @order.storefront_url %></p>
+<p><%= email_button t(".view"), @order.storefront_url %></p>

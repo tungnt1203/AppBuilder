@@ -4,19 +4,19 @@ class OrderMailer < ApplicationMailer
 
   def confirmation(order)
     @order, @store = order, Store.current
-    mail to: order.email, reply_to: @store.contact_email.presence,
+    mail to: order.email, from: from_shop(order.shop), reply_to: @store.contact_email.presence,
       subject: t(".subject", app: order.shop.name, number: order.name)
   end
 
   def shipped(order)
     @order, @store = order, Store.current
-    mail to: order.email, reply_to: @store.contact_email.presence,
+    mail to: order.email, from: from_shop(order.shop), reply_to: @store.contact_email.presence,
       subject: t(".subject", app: order.shop.name, number: order.name)
   end
 
   def cancelled(order)
     @order, @store = order, Store.current
-    mail to: order.email, reply_to: @store.contact_email.presence,
+    mail to: order.email, from: from_shop(order.shop), reply_to: @store.contact_email.presence,
       subject: t(".subject", app: order.shop.name, number: order.name)
   end
 
@@ -24,7 +24,7 @@ class OrderMailer < ApplicationMailer
   # order, where they can pay.
   def recovery(order)
     @order, @store = order, Store.current
-    mail to: order.email, reply_to: @store.contact_email.presence,
+    mail to: order.email, from: from_shop(order.shop), reply_to: @store.contact_email.presence,
       subject: t(".subject", app: order.shop.name)
   end
 
@@ -34,7 +34,7 @@ class OrderMailer < ApplicationMailer
     @order, @store = order, Store.current
     @products = order.reviewable_products.with_attached_images.to_a
     return if @products.empty? # reviewed from the order page in the meantime
-    mail to: order.email, reply_to: @store.contact_email.presence,
+    mail to: order.email, from: from_shop(order.shop), reply_to: @store.contact_email.presence,
       subject: t(".subject", app: order.shop.name)
   end
 
@@ -42,12 +42,12 @@ class OrderMailer < ApplicationMailer
   def lookup(shop, email, token)
     @shop, @store = shop, Store.current
     @url = shop.storefront_url("/orders/find/#{token}")
-    mail to: email, reply_to: @store.contact_email.presence, subject: t(".subject", app: shop.name)
+    mail to: email, from: from_shop(shop), reply_to: @store.contact_email.presence, subject: t(".subject", app: shop.name)
   end
 
   def refunded(order)
     @order, @store = order, Store.current
-    mail to: order.email, reply_to: @store.contact_email.presence,
+    mail to: order.email, from: from_shop(order.shop), reply_to: @store.contact_email.presence,
       subject: t(".subject", app: order.shop.name, number: order.name)
   end
 end
