@@ -63,12 +63,14 @@ class ShopAdmin::OrdersControllerTest < ActionDispatch::IntegrationTest
     assert order.reload.printify_order_id.present?
   end
 
-  test "a personalized line shows the print file that went to Printify" do
-    line_items(:pending_tee).print_file.attach(io: file_fixture("product.png").open, filename: "1001-1-front.png", content_type: "image/png")
+  test "a personalized line shows the print files that went to Printify, a side each" do
+    line_items(:pending_tee).print_files.attach(io: file_fixture("product.png").open, filename: "1001-1-front.png", content_type: "image/png")
+    line_items(:pending_tee).print_files.attach(io: file_fixture("product.png").open, filename: "1001-1-back.png", content_type: "image/png")
 
     get shop_admin_order_path(orders(:pending))
-    assert_select "img[alt='Print file']"
-    assert_select "a[href*='disposition=attachment']", "Download the print file"
+    assert_select "img[alt='Print file, Front']"
+    assert_select "img[alt='Print file, Back']"
+    assert_select "a[href*='disposition=attachment']", text: "Download the print file", count: 2
   end
 
   test "marks paid, then ships with tracking and emails the buyer" do

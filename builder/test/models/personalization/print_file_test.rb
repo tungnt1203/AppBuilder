@@ -4,7 +4,7 @@ class Personalization::PrintFileTest < ActiveSupport::TestCase
   setup do
     in_shop
     @product = products(:tee)
-    @product.update!(print_area: { "x" => 0.2, "y" => 0.2, "w" => 0.6, "h" => 0.6 }, buyer_inputs: [
+    @product.update!(print_areas: { "front" => { "x" => 0.2, "y" => 0.2, "w" => 0.6, "h" => 0.6 } }, buyer_inputs: [
       { "label" => "Background", "kind" => "color", "preview" => { "x" => 0.2, "y" => 0.2, "w" => 0.3, "h" => 0.3, "colors" => "#ff0000, #0000ff" } },
       { "label" => "Name", "preview" => { "x" => 0.2, "y" => 0.65, "w" => 0.6, "h" => 0.15, "font" => "Pacifico", "color" => "#00ff00" } }
     ])
@@ -25,7 +25,7 @@ class Personalization::PrintFileTest < ActiveSupport::TestCase
 
   test "nothing to print without a print area, or with nothing added" do
     assert_not Personalization::PrintFile.new(@product, {}).printable?
-    @product.update!(print_area: {})
+    @product.update!(print_areas: {})
     assert_not Personalization::PrintFile.new(@product, { "name" => "Ada" }).printable?
   end
 

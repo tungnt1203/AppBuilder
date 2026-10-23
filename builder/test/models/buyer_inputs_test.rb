@@ -65,7 +65,7 @@ class BuyerInputsTest < ActiveSupport::TestCase
     assert_not upload.sharp_for?([ 300, 300 ])
 
     field = { "key" => "photo", "label" => "Photo", "kind" => "photo", "preview" => { "x" => 0.3, "y" => 0.3, "w" => 0.2, "h" => 0.2 } }
-    product = products(:tee).tap { |tee| tee.update!(buyer_inputs: [ field ], print_area: { "x" => 0.2, "y" => 0.2, "w" => 0.4, "h" => 0.4, "pixels" => [ 160, 200 ] }) }
+    product = products(:tee).tap { |tee| tee.update!(buyer_inputs: [ field ], print_areas: { "front" => { "x" => 0.2, "y" => 0.2, "w" => 0.4, "h" => 0.4, "pixels" => [ 160, 200 ] } }) }
     assert_equal [ 80, 100 ], product.print_pixels(product.buyer_inputs.sole)
     item = LineItem.new(product_title: product.title, variant: product.variants.first, properties: { "photo" => upload.token, "photo_crop" => "1,0.5,0.5" })
     assert item.buyer_photos.sole[:sharp]

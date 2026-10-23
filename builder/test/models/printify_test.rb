@@ -334,7 +334,7 @@ class PrintifyTest < ActiveSupport::TestCase
 
   test "an order with what the buyer added goes by itself when the product's print area is drawn, its print file over the design" do
     product = Printify::Import.new.call("pf-tee")
-    product.update!(print_area: { "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.6, "position" => "front" },
+    product.update!(print_areas: { "front" => { "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.6 } },
       buyer_inputs: [ { "label" => "Name", "required" => "1", "preview" => { "x" => 0.3, "y" => 0.5, "w" => 0.4, "h" => 0.1, "font" => "Pacifico", "color" => "#ff0000" } } ])
     order = place_order(product.variant_for(%w[ Black S ]), status: "pending")
     item = order.line_items.sole.tap { |line| line.update!(properties: { "name" => "Ada" }) }
@@ -350,14 +350,39 @@ class PrintifyTest < ActiveSupport::TestCase
 
     print_file = Vips::Image.new_from_buffer(@printify.uploads.sole[:data], "")
     assert_equal [ 300, 400, 4 ], [ print_file.width, print_file.height, print_file.bands ]
-    assert item.reload.print_file.attached?
+    assert_equal [ "#{order.number}-#{item.id}-front.png" ], item.reload.print_files.map { |file| file.filename.to_s }
     assert order.reload.printify_order_id.present?
+  end
+
+  test "what the buyer adds on the back goes in the back's print file, over the back's design; a side without its print area waits for staff" do
+    product = Printify::Import.new.call("pf-tee")
+    product.update!(print_areas: { "front" => { "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.6 } },
+      buyer_inputs: [ { "label" => "Photo", "kind" => "color", "preview" => { "x" => 0.3, "y" => 0.3, "w" => 0.2, "h" => 0.2, "colors" => "#ff0000" } },
+                      { "label" => "Name", "preview" => { "x" => 0.3, "y" => 0.4, "w" => 0.4, "h" => 0.1, "font" => "Lora", "side" => "back" } } ])
+    assert_equal %w[ front back ], product.print_sides
+    assert_includes product.launch_problems, :no_print_area, "the back has no print area yet"
+    order = place_order(product.variant_for(%w[ Black S ]), status: "pending")
+    item = order.line_items.sole.tap { |line| line.update!(properties: { "photo" => "#ff0000", "name" => "Ada" }) }
+    assert Printify::Fulfillment.new(order).needs_personalizing?
+
+    product.update!(print_areas: product.print_areas.merge("back" => { "x" => 0.25, "y" => 0.25, "w" => 0.5, "h" => 0.5 }))
+    assert_not_includes product.launch_problems, :no_print_area
+    perform_enqueued_jobs(only: Order::FulfillJob) { order.mark_paid! }
+    line = @printify.orders.sole[:line_items].sole
+    assert_equal [ "https://images.example/back-design.png", "https://images.example/uploads/#{order.number}-#{item.id}-back.png" ], line[:print_areas]["back"].pluck(:src)
+    assert_equal "https://images.example/uploads/#{order.number}-#{item.id}-front.png", line[:print_areas]["front"].last[:src]
+    assert_equal %w[ front back ], item.reload.print_files.map { |file| file.filename.to_s[/(\w+)\.png/, 1] }
+
+    back = Vips::Image.new_from_buffer(@printify.uploads.last[:data], "")
+    assert back.extract_band(3).max.positive?, "the name is on the back"
+    front = Vips::Image.new_from_buffer(@printify.uploads.first[:data], "")
+    assert_equal [ 255, 0, 0, 255 ], front.getpoint(90, 130).map(&:round), "the color on the front, not the name"
   end
 
   test "a personalized order whose design is text made in Printify's editor waits, saying why" do
     product = Printify::Import.new.call("pf-tee")
     @printify.product_data["print_areas"].first["placeholders"].first["images"] = [ { "id" => "t-1", "layerType" => "text", "input_text" => "SARCASM", "x" => 0.5, "y" => 0.2, "scale" => 0.8 } ]
-    product.update!(print_area: { "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.6 },
+    product.update!(print_areas: { "front" => { "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.6 } },
       buyer_inputs: [ { "label" => "Name", "preview" => { "x" => 0.3, "y" => 0.5, "w" => 0.4, "h" => 0.1, "font" => "Lora" } } ])
     order = place_order(product.variant_for(%w[ Black S ]), status: "pending")
     order.line_items.sole.update!(properties: { "name" => "Ada" })

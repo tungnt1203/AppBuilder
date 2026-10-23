@@ -105,8 +105,11 @@ en:
         photo_crop: "framed at %{zoom}× around %{x}%, %{y}%"
         photo_small: Small for its print size, so it may print blurry. Check it before it's printed, or ask the buyer for a larger one.
         photo_download: Download the photo
-        print_file: Print file
-        print_file_sent: Print file made from what the buyer added, sent to Printify over the design.
+        print_file: Print file, %{side}
+        print_file_sent: "%{side}: print file made from what the buyer added, sent to Printify over the design."
+        sides:
+          front: Front
+          back: Back
         print_file_download: Download the print file
         printify:
           waiting: This order goes to Printify by itself in a moment. If it's still here, send it now.
@@ -252,7 +255,7 @@ en:
         price_not_above_cost_done: Every price covers its cost
         no_size_guide: Add a size guide; buyers can't exchange a printed size
         no_size_guide_done: Size guide
-        no_print_area: Draw the print area, or personalized orders wait for you in Printify
+        no_print_area: Draw the print area of each side fields print on, or personalized orders wait for you in Printify
         no_print_area_done: Print area (personalized orders print by themselves)
         publish: Put it on sale
         confirm_publish: Some checks above aren't done. Put it on sale anyway?
@@ -339,24 +342,27 @@ en:
         create: Add product
         save: Save
       print_area:
-        title: Print area
+        title: Print area · %{side}
+        sides:
+          front: Front
+          back: Back
         set: Drawn — personalized orders print by themselves
         not_set: Not drawn — personalized orders wait for you in Printify
-        hint: On the product's photo, draw the area Printify prints on (the design's area on the
-          front of the shirt, the wrap on the mug). What buyers add is placed on the print file
-          from there, over the product's own design, and the order goes to Printify by itself.
+        not_needed: Only needed when a field prints on the back
+        hint:
+          front: On the product's photo, draw the area Printify prints on (the design's area on the
+            front of the shirt, the wrap on the mug). What buyers add is placed on the print file
+            from there, over the product's own design, and the order goes to Printify by itself.
+          back: For fields that print on the back (a name and number on a jersey). On a photo of the
+            back, draw the area Printify prints on there.
         sample: Print area
         clear: Remove the print area
         sample_file: See a sample print file
         find: Find it from Printify
         find_hint: Works it out from where your design sits in Printify and where it shows on the
-          first photo. Check it on the photo, and adjust it if it's off.
-        position: Which side it is
-        positions:
-          front: Front
-          back: Back
+          photo of this side. Check it on the photo, and adjust it if it's off.
         photo: Draw on this photo
-        photo_hint: The one you drew the fields' boxes on.
+        photo_hint: The one you drew this side's fields' boxes on.
       buyer_input:
         label: Label
         kind: Kind
@@ -401,6 +407,11 @@ en:
         photos: Photos it shows on
         photos_hint: Tick the photos where this part of the product faces the buyer (not a back view).
           None ticked shows it on all of them.
+        side: Prints on
+        sides:
+          front: The front
+          back: The back
+        side_hint: Draw its box on a photo of that side; that side's print area takes it.
         font: Font
         color: Color
         align: Alignment

@@ -1,9 +1,10 @@
 # Where Printify's print area sits on a product's mockup photo, worked out instead of drawn: Printify
 # says where the product's design sits in the print area (its first image: center, width as a share
 # of the area, its pixels) and how big the area is; the design's ink is found on the photo (what
-# differs from the shirt's color around the chest); the two give the area's box on the photo, as
-# Product#print_area keeps it. Nil when the design can't be told apart on the photo (a lifestyle
-# shot, a patterned blank, a design without a clear edge): the owner draws the area then.
+# differs from the shirt's color around the chest); the two give the area's box on the product's
+# photo of that side, as Product#print_areas keeps it. Nil when the design can't be told apart on
+# the photo (a lifestyle shot, a patterned blank, a design without a clear edge, no photo of the
+# side): the owner draws the area then.
 class Personalization::PrintAreaGuess
   SEARCH = { x: 0.2..0.8, y: 0.12..0.85 }.freeze # where a front's design is on Printify's mockups
   SIZE = 300                                     # the photo is read at this width
@@ -13,7 +14,7 @@ class Personalization::PrintAreaGuess
     @product, @gateway, @shop_id = product, gateway, shop_id
   end
 
-  # { "x", "y", "w", "h", "position", "pixels" } or nil.
+  # { "x", "y", "w", "h", "pixels" } for that side, or nil.
   def call(position: "front")
     printify = @gateway.product(@shop_id, @product.printify_product_id)
     placeholder = Array(printify["print_areas"]).flat_map { |area| Array(area["placeholders"]) }.find { |candidate| candidate["position"] == position }
@@ -22,9 +23,9 @@ class Personalization::PrintAreaGuess
     area = @gateway.catalog_variants(printify["blueprint_id"], printify["print_provider_id"])["variants"].to_a
       .find { |variant| variant["id"] == variant_id }.to_h["placeholders"].to_a.find { |candidate| candidate["position"] == position } or return
     design = Vips::Image.new_from_buffer(@gateway.download(image["src"]).read, "")
-    photo = @product.images.attachments.first or return
+    photo = photo_of(printify, position) or return
     box = place(design, image, area, Vips::Image.new_from_buffer(photo.download, "")) or return
-    box.merge("position" => position, "pixels" => [ area["width"].to_i, area["height"].to_i ])
+    box.merge("pixels" => [ area["width"].to_i, area["height"].to_i ])
   rescue PrintifyGateway::Error, Vips::Error
     nil
   end
@@ -57,6 +58,14 @@ class Personalization::PrintAreaGuess
   end
 
   private
+    # The product's photo of that side: the Printify mockup imported from its picture of the side
+    # (Printify::Import keeps each one's src), or the first photo for the front.
+    def photo_of(printify, position)
+      sides = Array(printify["images"]).to_h { |image| [ image["src"], image["position"] ] }
+      photos = @product.images.attachments
+      photos.find { |photo| sides[photo.blob.metadata["printify_src"]] == position } || (photos.first if position == "front")
+    end
+
     # The design's ink inside its image: [left, top, width, height] as shares of it.
     def ink_box(design)
       alpha = design.bands == 4 || design.bands == 2 ? design.extract_band(design.bands - 1) : design.colourspace(:b_w).invert

@@ -24,7 +24,7 @@ class Printify::Fulfillment
   end
 
   # Whether the buyer added something to a Printify item that the shop can't print by itself (its
-  # product has no print area drawn: Personalization::PrintFile), for staff to do in Printify.
+  # product has no print area drawn on that side: Personalization::PrintFile), for staff to do in Printify.
   def needs_personalizing?
     printify_items.any? { |item| item.properties.present? && !printable?(item) }
   end
@@ -210,7 +210,7 @@ class Printify::Fulfillment
 
     # A personalized item the shop prints by itself: its print file goes with its line.
     def printable?(item)
-      item.properties.present? && Personalization::PrintFile.new(item.variant.product, item.properties).printable?
+      item.properties.present? && Personalization::PrintFile.printable?(item.variant.product, item.properties)
     end
 
     def printify_items

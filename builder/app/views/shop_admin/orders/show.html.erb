@@ -86,13 +86,14 @@
               <% item.property_lines.each do |line| %>
                 <p class="text-ink"><%= line %></p>
               <% end %>
-              <% if item.print_file.attached? %>
-                <%# The print file the shop made from what the buyer added, as it went to Printify. %>
+              <% item.print_files.each do |file| %>
+                <%# A print file the shop made from what the buyer added, a side each ("…-back.png"), as it went to Printify. %>
+                <% side = file.filename.base.split("-").last.presence_in(Product::PRINT_POSITIONS) || "front" %>
                 <div class="mt-2 flex items-center gap-3">
-                  <%= image_tag item.print_file, alt: t(".print_file"), class: "size-14 rounded-lg bg-[repeating-conic-gradient(#e5e7eb_0_25%,#fff_0_50%)] bg-[length:12px_12px] object-contain" %>
+                  <%= image_tag file, alt: t(".print_file", side: t(".sides.#{side}")), class: "size-14 rounded-lg bg-[repeating-conic-gradient(#e5e7eb_0_25%,#fff_0_50%)] bg-[length:12px_12px] object-contain" %>
                   <div class="text-xs text-muted">
-                    <p><%= t(".print_file_sent") %></p>
-                    <%= link_to t(".print_file_download"), rails_blob_path(item.print_file, disposition: "attachment"), class: "font-medium text-brand-700 underline" %>
+                    <p><%= t(".print_file_sent", side: t(".sides.#{side}")) %></p>
+                    <%= link_to t(".print_file_download"), rails_blob_path(file, disposition: "attachment"), class: "font-medium text-brand-700 underline" %>
                   </div>
                 </div>
               <% end %>

@@ -21,7 +21,19 @@ class Personalization::PrintAreaGuessTest < ActiveSupport::TestCase
 
     found = Personalization::PrintAreaGuess.new(@product, gateway: @printify, shop_id: 4242).call
     { "x" => 0.3, "y" => 0.25, "w" => 0.4, "h" => 0.5333 }.each { |side, value| assert_in_delta value, found[side], 0.01, side }
-    assert_equal "front", found["position"]
+    assert_equal [ 300, 400 ], found["pixels"], "Printify's print area in pixels"
+  end
+
+  test "the back's is found on the photo of the back, Printify's mockup of it" do
+    @printify.product_data["print_areas"].first["placeholders"] << @printify.product_data["print_areas"].first["placeholders"].first.merge("position" => "back")
+    blank = Vips::Image.black(600, 600).new_from_image([ 248, 248, 248 ]).copy(interpretation: :srgb)
+    back = blank.draw_rect([ 20, 20, 20 ], 252, 222, 96, 48, fill: true)
+    @product.images.attach(io: StringIO.new(blank.write_to_buffer(".jpg")), filename: "front.jpg", content_type: "image/jpeg", metadata: { printify_src: "https://images.example/black-front.jpg" })
+    assert_nil Personalization::PrintAreaGuess.new(@product, gateway: @printify, shop_id: 4242).call(position: "back"), "no photo of the back"
+
+    @product.images.attach(io: StringIO.new(back.write_to_buffer(".jpg")), filename: "back.jpg", content_type: "image/jpeg", metadata: { printify_src: "https://images.example/black-back.jpg" })
+    found = Personalization::PrintAreaGuess.new(@product, gateway: @printify, shop_id: 4242).call(position: "back")
+    assert_in_delta 0.3, found["x"], 0.01
   end
 
   test "nothing when the design can't be told apart on the photo" do

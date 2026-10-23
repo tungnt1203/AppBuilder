@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_22_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -397,7 +397,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_22_130000) do
     t.datetime "updated_at", null: false
     t.jsonb "custom_fields", default: {}, null: false
     t.jsonb "buyer_inputs", default: [], null: false
-    t.jsonb "print_area", default: {}, null: false
+    t.jsonb "print_areas", default: {}, null: false
     t.index ["shop_id", "printify_product_id"], name: "index_products_on_shop_id_and_printify_product_id", unique: true, where: "(printify_product_id IS NOT NULL)"
     t.index ["shop_id", "slug"], name: "index_products_on_shop_id_and_slug", unique: true
     t.index ["shop_id", "status", "published_at"], name: "index_products_on_shop_id_and_status_and_published_at"

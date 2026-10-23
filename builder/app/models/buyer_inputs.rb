@@ -17,6 +17,9 @@
 # "starmap") is the night sky over a city on a day the buyer picks (the value "2014-06-21T22:00",
 # the city as "<key>_place": Personalization::Sky), in the shop's colors for the sky and the stars.
 #
+# A field prints on the front unless the owner says the back ("side"), for a photo on the front and
+# a name on the back; each side has its print area (Product#print_areas).
+#
 # Several photos (a collage) are several photo fields: drawing one box with a layout ("2x1": two
 # across) splits it into a field per cell.
 class BuyerInputs
@@ -84,6 +87,7 @@ class BuyerInputs
     box["w"] = [ box["w"], 1 - box["x"] ].min.round(4)
     box["h"] = [ box["h"], 1 - box["y"] ].min.round(4)
     box["images"] = Array(raw["images"]).map(&:to_i).select(&:positive?).uniq
+    box["side"] = raw["side"] if raw["side"] != "front" && Product::PRINT_POSITIONS.include?(raw["side"]) # front unless said
     colors = Array(raw["colors"]).flat_map { |value| value.to_s.split(/[\s,]+/) }.map(&:downcase).grep(COLOR).uniq
     case kind
     when "photo"
@@ -111,6 +115,9 @@ class BuyerInputs
       )
     end
   end
+
+  # The side of the product a field prints on: "front", or "back" when the owner says so.
+  def self.side(field) = field.dig("preview", "side") || "front"
 
   # [properties, nil] when what the buyer added fits, or [nil, { "print_name" => "can't be blank" }].
   # The font and color they picked come along when the field lets them pick, and a photo's framing.

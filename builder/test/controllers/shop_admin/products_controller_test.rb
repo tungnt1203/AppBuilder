@@ -27,17 +27,19 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, Product.count
   end
 
-  test "the owner draws the print area and sees a sample print file in its shape" do
+  test "the owner draws a print area per side and sees each side's sample print file in its shape" do
     tee = products(:tee)
     tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")
     tee.update!(buyer_inputs: [ { "label" => "Name", "preview" => { "x" => 0.3, "y" => 0.5, "w" => 0.4, "h" => 0.1, "font" => "Lora" } } ])
     get shop_admin_product_print_file_path(tee)
     assert_response :not_found
 
-    patch shop_admin_product_path(tee), params: { product: { print_area: { x: "0.25", y: "0.2", w: "0.5", h: "0.25", position: "back" } } }
-    assert_equal({ "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.25, "position" => "back" }, tee.reload.print_area)
+    patch shop_admin_product_path(tee), params: { product: { print_areas: { front: { x: "0.25", y: "0.2", w: "0.5", h: "0.25" }, back: { x: "", y: "", w: "", h: "" } } } }
+    assert_equal({ "front" => { "x" => 0.25, "y" => 0.2, "w" => 0.5, "h" => 0.25 } }, tee.reload.print_areas)
     follow_redirect!
-    assert_select "a[href=?]", shop_admin_product_print_file_path(tee), "See a sample print file"
+    assert_select "a[href=?]", shop_admin_product_print_file_path(tee, side: "front"), "See a sample print file"
+    assert_select "input[name='product[print_areas][back][x]']"
+    assert_select "select[name='product[buyer_inputs][][preview][side]']"
 
     get shop_admin_product_print_file_path(tee)
     assert_equal "image/png", response.media_type
@@ -57,7 +59,7 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     post shop_admin_product_print_area_path(tee)
     assert_redirected_to edit_shop_admin_product_path(tee, anchor: "print-area")
     assert_match "Draw the print area yourself", flash[:alert]
-    assert_empty tee.reload.print_area
+    assert_empty tee.reload.print_areas
 
     design = Vips::Image.black(400, 200, bands: 4).copy(interpretation: :srgb).draw_rect([ 0, 0, 0, 255 ], 100, 50, 200, 100, fill: true)
     printify.product_data["print_areas"].first["placeholders"] = [
@@ -70,39 +72,39 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
 
     post shop_admin_product_print_area_path(tee)
     assert_match "Found the print area", flash[:notice]
-    assert_in_delta 0.3, tee.reload.print_area["x"], 0.01
-    assert_equal [ 300, 400 ], tee.print_area["pixels"], "Printify's print area in pixels"
+    assert_in_delta 0.3, tee.reload.print_areas.dig("front", "x"), 0.01
+    assert_equal [ 300, 400 ], tee.print_areas.dig("front", "pixels"), "Printify's print area in pixels"
   end
 
   test "a drawn print area learns its size in pixels from Printify, kept while the box moves" do
     connect_fake_printify
     tee = products(:tee).tap { |product| product.update!(printify_product_id: "pf-tee") }
     perform_enqueued_jobs(only: Product::PrintPixelsJob) do
-      patch shop_admin_product_path(tee), params: { product: { print_area: { x: "0.25", y: "0.2", w: "0.5", h: "0.25", position: "front" } } }
+      patch shop_admin_product_path(tee), params: { product: { print_areas: { front: { x: "0.25", y: "0.2", w: "0.5", h: "0.25" } } } }
     end
     in_shop
-    assert_equal [ 300, 400 ], tee.reload.print_area["pixels"]
+    assert_equal [ 300, 400 ], tee.reload.print_areas.dig("front", "pixels")
 
     assert_no_enqueued_jobs(only: Product::PrintPixelsJob) do
-      patch shop_admin_product_path(tee), params: { product: { print_area: { x: "0.3", y: "0.2", w: "0.5", h: "0.25", position: "front" } } }
+      patch shop_admin_product_path(tee), params: { product: { print_areas: { front: { x: "0.3", y: "0.2", w: "0.5", h: "0.25" } } } }
     end
     in_shop
-    assert_equal [ 0.3, [ 300, 400 ] ], tee.reload.print_area.values_at("x", "pixels")
+    assert_equal [ 0.3, [ 300, 400 ] ], tee.reload.print_areas["front"].values_at("x", "pixels")
 
     assert_enqueued_with(job: Product::PrintPixelsJob) do
-      patch shop_admin_product_path(tee), params: { product: { print_area: { x: "0.3", y: "0.2", w: "0.5", h: "0.25", position: "back" } } }
+      patch shop_admin_product_path(tee), params: { product: { print_areas: { front: { x: "0.3", y: "0.2", w: "0.5", h: "0.25" }, back: { x: "0.3", y: "0.2", w: "0.5", h: "0.25" } } } }
     end
     in_shop
-    assert_nil tee.reload.print_area["pixels"], "the back's size is asked for again"
+    assert_nil tee.reload.print_areas.dig("back", "pixels"), "the back's size is asked for"
   end
 
   test "print areas drawn before their size was known learn it in the daily sweep" do
     connect_fake_printify
     tee = products(:tee)
-    tee.update_columns(printify_product_id: "pf-tee", print_area: { "x" => 0.3, "y" => 0.2, "w" => 0.5, "h" => 0.25, "position" => "front" })
+    tee.update_columns(printify_product_id: "pf-tee", print_areas: { "front" => { "x" => 0.3, "y" => 0.2, "w" => 0.5, "h" => 0.25, "pixels" => [ 10, 10 ] }, "back" => { "x" => 0.3, "y" => 0.2, "w" => 0.5, "h" => 0.25 } })
     Product::PrintPixelsJob.perform_now
     in_shop
-    assert_equal [ 300, 400 ], tee.reload.print_area["pixels"]
+    assert_equal [ [ 10, 10 ], [ 300, 400 ] ], tee.reload.print_areas.values_at("front", "back").pluck("pixels"), "only the ones without it"
   end
 
   test "a personalized Printify product says to draw its print area, and is badged in the list" do
@@ -114,7 +116,7 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     get shop_admin_products_path
     assert_select "span", "Personalized"
 
-    tee.update!(print_area: { "x" => 0.2, "y" => 0.2, "w" => 0.5, "h" => 0.5 })
+    tee.update!(print_areas: { "front" => { "x" => 0.2, "y" => 0.2, "w" => 0.5, "h" => 0.5 } })
     assert_not_includes tee.launch_problems, :no_print_area
   end
 

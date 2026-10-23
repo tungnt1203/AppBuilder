@@ -71,6 +71,12 @@
             </div>
           </fieldset>
 
+          <div class="space-y-1.5">
+            <%= label_tag nil, t(".side"), class: "text-sm font-medium text-ink" %>
+            <%= select_tag "product[buyer_inputs][][preview][side]", options_for_select(Product::PRINT_POSITIONS.map { |side| [ t(".sides.#{side}"), side ] }, BuyerInputs.side(row)), id: nil, class: field_classes %>
+            <p class="text-xs text-muted"><%= t(".side_hint") %></p>
+          </div>
+
           <div class="space-y-1.5" data-for-kinds="photo">
             <%= label_tag nil, t(".layout"), class: "text-sm font-medium text-ink" %>
             <%= select_tag "product[buyer_inputs][][layout]", options_for_select(BuyerInputs::LAYOUTS.keys.map { |layout| [ t(".layouts.#{layout}"), layout ] }, "1x1"), id: nil, class: field_classes %>

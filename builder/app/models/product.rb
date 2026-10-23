@@ -13,7 +13,7 @@ class Product < ApplicationRecord
   has_many :collection_products, dependent: :destroy
   has_many :collections, through: :collection_products
   has_many :product_reviews, dependent: :destroy
-  # The print areas a personalized product's print area can be (Printify's placeholder positions).
+  # The sides a personalized product prints what buyers add on (Printify's placeholder positions).
   PRINT_POSITIONS = %w[ front back ].freeze
 
   has_many_attached :images do |image|
@@ -48,11 +48,11 @@ class Product < ApplicationRecord
     normalizes :"option#{slot}_values", with: ->(values) { Array(values).map { |value| value.to_s.squish }.compact_blank.uniq }
   end
 
-  before_validation :clean_buyer_inputs, :clean_print_area
+  before_validation :clean_buyer_inputs, :clean_print_areas
   before_validation :coerce_custom_fields
   before_save :stamp_published_at
   after_save :sync_variants
-  after_commit :find_print_pixels, if: -> { saved_change_to_print_area? && print_area.present? && print_area["pixels"].blank? && printify_product_id }
+  after_commit :find_print_pixels, if: -> { saved_change_to_print_areas? && print_areas.values.any? { |area| area["pixels"].blank? } && printify_product_id }
 
   scope :visible, -> { active }
   scope :ordered, -> { order(created_at: :desc, id: :desc) }
@@ -92,7 +92,7 @@ class Product < ApplicationRecord
     problems << :no_photos unless images.attached?
     problems << :price_not_above_cost if variants.any? { |variant| variant.available? && variant.cost_cents && variant.price_cents <= variant.cost_cents }
     problems << :no_size_guide if size_option_name && size_guide.blank?
-    problems << :no_print_area if prints_personalized? && print_area.blank?
+    problems << :no_print_area if prints_personalized? && (print_areas.empty? || (print_sides - print_areas.keys).any?)
     problems
   end
 
@@ -100,8 +100,11 @@ class Product < ApplicationRecord
     active? && variants.any?(&:sellable?)
   end
 
-  # Printify prints it with what the buyer adds (a name, a photo): the print area tells where.
+  # Printify prints it with what the buyer adds (a name, a photo): the print areas tell where.
   def prints_personalized? = printify_product_id.present? && buyer_inputs.any?
+
+  # The sides its fields print on ("front", "back"), each needing its print area.
+  def print_sides = buyer_inputs.filter_map { |field| BuyerInputs.side(field) if field["preview"] }.uniq
 
   def price_range
     prices = (available_variants.presence || variants).map(&:price_cents)
@@ -172,12 +175,12 @@ class Product < ApplicationRecord
   end
 
   # How many pixels a field's box prints at, [width, height] (Printify's 300 dots an inch), or nil
-  # until Printify's print area size is known.
+  # until the size of its side's print area is known.
   def print_pixels(field)
-    pixels, box = print_area["pixels"], field["preview"]
-    return unless pixels && box
+    area, box = print_areas[BuyerInputs.side(field)], field["preview"]
+    return unless area && area["pixels"] && box
 
-    [ (box["w"] / print_area["w"] * pixels[0]).round, (box["h"] / print_area["h"] * pixels[1]).round ]
+    [ (box["w"] / area["w"] * area["pixels"][0]).round, (box["h"] / area["h"] * area["pixels"][1]).round ]
   end
 
   private
@@ -192,17 +195,18 @@ class Product < ApplicationRecord
       self.published_at ||= Time.current if active?
     end
 
-    # Where Printify's print area sits on a photo of the product (BuyerInputs.preview's box), its
-    # position on the blank ("front") and, once Printify said (Product::PrintPixelsJob), its size in
-    # pixels; or {} until the owner draws it. Moving the box keeps the size; another position doesn't.
-    def clean_print_area
-      box = BuyerInputs.preview(print_area, kind: "photo") or return self.print_area = {}
-
-      area = print_area.to_h.stringify_keys
-      position = PRINT_POSITIONS.include?(area["position"]) ? area["position"] : "front"
-      pixels = area["pixels"].presence || (print_area_was.to_h["pixels"] if print_area_was.to_h["position"] == position)
-      pixels = Array(pixels).map(&:to_i)
-      self.print_area = box.slice("x", "y", "w", "h").merge("position" => position, "pixels" => (pixels if pixels.size == 2 && pixels.all?(&:positive?))).compact
+    # Where each side's print area sits on a photo of the product (BuyerInputs.preview's box, drawn
+    # on a photo of that side) and, once Printify said (Product::PrintPixelsJob), its size in pixels:
+    # { "front" => { x, y, w, h, pixels } }, a side only once the owner draws it. Moving a box keeps
+    # its size.
+    def clean_print_areas
+      given = print_areas.to_h.stringify_keys
+      self.print_areas = PRINT_POSITIONS.each_with_object({}) do |side, areas|
+        raw = given[side].to_h.stringify_keys
+        box = BuyerInputs.preview(raw, kind: "photo") or next
+        pixels = Array(raw["pixels"].presence || print_areas_was.to_h.dig(side, "pixels")).map(&:to_i)
+        areas[side] = box.slice("x", "y", "w", "h").merge("pixels" => (pixels if pixels.size == 2 && pixels.all?(&:positive?))).compact
+      end
     end
 
     def find_print_pixels

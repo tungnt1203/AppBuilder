@@ -156,7 +156,11 @@
         <p class="text-xs text-muted"><%= t(".artwork_hint") %></p>
       </div>
       <% if product.persisted? && product.images.attached? %>
-        <%= render "print_area", product: %>
+        <div id="print-area" class="space-y-3">
+          <% Product::PRINT_POSITIONS.each do |side| %>
+            <%= render "print_area", product:, side: %>
+          <% end %>
+        </div>
       <% end %>
       <% blanks = [ 2, BuyerInputs::MAX_FIELDS - product.buyer_inputs.size ].min.clamp(0, 2) %>
       <% (product.buyer_inputs + Array.new(blanks) { {} }).each do |row| %>
@@ -204,7 +208,7 @@
 
 <% if product.persisted? %>
   <% if product.printify_product_id %>
-    <%= form_with url: shop_admin_product_print_area_path(product), id: dom_id(product, :find_print_area), class: "hidden" do %><%= hidden_field_tag :position, product.print_area["position"] || "front" %><% end %>
+    <%= form_with url: shop_admin_product_print_area_path(product), id: dom_id(product, :find_print_area), class: "hidden" do %><% end %>
   <% end %>
   <% product.images.each do |image| %>
     <%= form_with url: shop_admin_product_image_path(product, image), method: :delete, id: dom_id(image, :remove), class: "hidden" do %><% end %>

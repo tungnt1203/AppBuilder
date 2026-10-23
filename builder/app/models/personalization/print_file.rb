@@ -1,24 +1,38 @@
 require "open3"
 
-# The print file of a personalized line: what the buyer added (BuyerInputs.layers), drawn where the
-# owner placed it on the product's photo and moved onto Printify's print area (the product's
-# print_area, drawn on that photo), at the print area's size, on a transparent canvas. Printify
-# prints it over the product's own design. In the fields' order, as the storefront shows them: a
-# background color fills its box, a photo fills it as the buyer framed it, a picture fits it, a
-# star map is the sky's disc in it, and text fits it in its font and color.
+# The print file of one side of a personalized line: what the buyer added in the fields of that side
+# (BuyerInputs.layers, BuyerInputs.side), drawn where the owner placed it on the product's photo and
+# moved onto Printify's print area of the side (Product#print_areas, drawn on that photo), at the
+# print area's size, on a transparent canvas. Printify prints it over the product's own design. In
+# the fields' order, as the storefront shows them: a background color fills its box, a photo fills
+# it as the buyer framed it, a picture fits it, a star map is the sky's disc in it, and text fits it
+# in its font and color.
 class Personalization::PrintFile
   FONTS = Rails.root.join("lib/personalization/fonts")
 
   Error = Class.new(StandardError)
 
   # placeholders: a gray box for a photo the buyer hasn't added (a sample print file).
-  def initialize(product, properties, placeholders: false)
-    @product, @properties, @placeholders = product, properties.to_h, placeholders
+  def initialize(product, properties, side: "front", placeholders: false)
+    @product, @properties, @side, @placeholders = product, properties.to_h, side, placeholders
+  end
+
+  attr_reader :side
+
+  # A print file per side with something on it ([] when nothing is).
+  def self.sides(product, properties)
+    Product::PRINT_POSITIONS.map { |side| new(product, properties, side:) }.select { |file| file.layers.any? }
+  end
+
+  # Whether the shop prints these by itself: something to print, and a print area on each side of it.
+  def self.printable?(product, properties)
+    files = sides(product, properties)
+    files.any? && files.all?(&:printable?)
   end
 
   # What a buyer could add, for the owner to see where it prints: each field's label as its text,
   # the first picture and color, a gray box for a photo.
-  def self.sample(product)
+  def self.sample(product, side: "front")
     properties = product.buyer_inputs.each_with_object({}) do |field, sample|
       sample[field["key"]] = case field["kind"]
       when "photo" then "sample"
@@ -27,12 +41,12 @@ class Personalization::PrintFile
       else field["label"]
       end
     end
-    new(product, properties.compact_blank, placeholders: true)
+    new(product, properties.compact_blank, side:, placeholders: true)
   end
 
-  # Whether there's anything to print and somewhere to put it.
+  # Whether there's anything to print on this side and somewhere to put it.
   def printable?
-    @product.print_area.present? && layers.any?
+    area.present? && layers.any?
   end
 
   # The PNG, width × height pixels (Printify's print area).
@@ -49,13 +63,17 @@ class Personalization::PrintFile
   end
 
   def layers
-    @layers ||= BuyerInputs.layers(@product.buyer_inputs, @properties)
+    @layers ||= BuyerInputs.layers(@product.buyer_inputs.select { |field| BuyerInputs.side(field) == @side }, @properties)
+  end
+
+  # The side's print area on the product's photo: { x, y, w, h, pixels }, or nil.
+  def area
+    @product.print_areas[@side]
   end
 
   private
     # The layer's box on the print area, in pixels: [left, top, width, height].
     def place(layer, width, height)
-      area = @product.print_area
       left = (layer["x"] - area["x"]) / area["w"] * width
       top = (layer["y"] - area["y"]) / area["h"] * height
       [ left.round, top.round, (layer["w"] / area["w"] * width).round, (layer["h"] / area["h"] * height).round ]
