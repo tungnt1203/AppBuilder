@@ -72,6 +72,7 @@ en:
     buyer_input:
       pick: Choose a photo
       uploading: Adding your photo…
+      missing: Add your photo first.
       ready: Photo added. Choose another to change it.
       small: This photo is small and may print blurry. A larger one prints sharper.
       zoom: Zoom

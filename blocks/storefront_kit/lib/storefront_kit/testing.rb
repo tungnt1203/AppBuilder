@@ -77,7 +77,7 @@ module StorefrontKit
         raise Unavailable.new("#{product["title"]} can't be bought right now", status: 409, code: "unavailable") unless variant["available"]
 
         missing = product["buyer_inputs"].to_a.select { |input| input["required"] && properties.to_h.stringify_keys[input["key"]].blank? }
-        raise Invalid.new("Some details need fixing", status: 422, code: "invalid", fields: missing.to_h { |input| [ input["key"], "can't be blank" ] }) if missing.any?
+        raise Invalid.new(missing.map { |input| "#{input["label"]} can't be blank" }.to_sentence, status: 422, code: "invalid", fields: missing.to_h { |input| [ input["key"], "can't be blank" ] }) if missing.any?
 
         properties = properties.to_h.stringify_keys.compact_blank
         line = data["lines"].find { |candidate| candidate["variant_id"] == variant["id"] && candidate["properties"] == properties }

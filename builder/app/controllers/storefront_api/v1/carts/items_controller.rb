@@ -6,7 +6,10 @@ class StorefrontApi::V1::Carts::ItemsController < StorefrontApi::V1::Carts::Base
     return error(:unavailable, "#{[ variant.product.title, variant.title ].compact.join(" – ")} can't be bought right now", status: :conflict) unless variant.buyable? && visible_products.exists?(variant.product_id)
 
     properties, problems = variant.product.buyer_properties(raw_properties)
-    return error(:invalid, "Some details need fixing", fields: problems, status: :unprocessable_entity) if problems
+    if problems
+      labels = variant.product.buyer_inputs.to_h { |field| [ field["key"], field["label"] ] }
+      return error(:invalid, problems.map { |key, problem| "#{labels[key] || key.humanize} #{problem}" }.to_sentence, fields: problems, status: :unprocessable_entity)
+    end
 
     @cart.add(variant, params.fetch(:quantity, 1).to_i.clamp(1, Cart::MAX_QUANTITY), properties:)
     render_cart status: :created

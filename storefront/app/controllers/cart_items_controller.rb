@@ -9,7 +9,7 @@ class CartItemsController < ApplicationController
     track :add_to_cart, items: [ tracked_item(item.variant.catalog_id, [ item.product.title, item.variant.title ].compact.join(" – "), item.variant.price_cents, quantity) ], redirect: true if item
     redirect_to cart_path, notice: t(".added", product: item&.product&.title)
   rescue StorefrontKit::Invalid => error
-    redirect_back_or_to products_path, alert: error.fields.any? ? error.fields.map { |_key, message| message }.to_sentence : error.message
+    redirect_back_or_to products_path, alert: error.message # "Name on the shirt can't be blank"
   rescue StorefrontKit::Unavailable, StorefrontKit::NotFound
     redirect_back_or_to products_path, alert: t(".unavailable")
   end

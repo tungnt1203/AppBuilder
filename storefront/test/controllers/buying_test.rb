@@ -89,7 +89,7 @@ class BuyingTest < ActionDispatch::IntegrationTest
     post cart_items_path, params: { variant_id: 101 }
     assert_redirected_to products_path
     follow_redirect!
-    assert_select "#alert", "can't be blank"
+    assert_select "#alert", "Name on the shirt can't be blank"
 
     post cart_items_path, params: { variant_id: 101, properties: { print_name: "Ada" } }
     follow_redirect!

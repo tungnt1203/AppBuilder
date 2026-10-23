@@ -30,12 +30,14 @@ export default class extends Controller {
       layer.addEventListener("pointerup", this.drop)
       layer.addEventListener("pointercancel", this.drop)
     })
+    this.element.addEventListener("submit", this.check, true)
     document.fonts.ready.then(this.render)
     if (this.layerTargets.some((layer) => layer.dataset.kind === "starmap")) sky.load().then(this.render)
     this.render()
   }
 
   disconnect() {
+    this.element.removeEventListener("submit", this.check, true)
     this.resize.disconnect()
     this.swap.disconnect()
     for (const photo of this.frames()) photo.removeEventListener("load", this.render)
@@ -99,6 +101,20 @@ export default class extends Controller {
     this.frame(key)
     this.sharpness(key)
     this.render()
+  }
+
+  // A required photo the buyer hasn't added stops adding to the cart there and then, said by the
+  // photo's field (a hidden field isn't checked by the browser, and the Platform's answer would
+  // come back at the top of the page).
+  check = (event) => {
+    const missing = [ ...event.target.querySelectorAll("[data-personalize-token][required]") ].find((token) => !token.value)
+    if (!missing) return
+
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    const key = missing.dataset.personalizeToken
+    if (!this.photos[key]) this.status(key, "missing")
+    this.element.querySelector(`[data-personalize-photo-field="${key}"]`).scrollIntoView({ behavior: "smooth", block: "center" })
   }
 
   // Whether the photo, as zoomed, has enough pixels for its box's print size (the field's
@@ -280,7 +296,7 @@ export default class extends Controller {
   status(key, state, message) {
     const status = this.element.querySelector(`[data-personalize-photo-field="${key}"] [data-personalize-status]`)
     status.textContent = state ? status.dataset[state] : message
-    status.classList.toggle("text-red-600", !state || state === "small")
+    status.classList.toggle("text-red-600", !state || state === "small" || state === "missing")
   }
 
   // Adding to the cart waits for the photo to reach the Platform (buttons already off stay off).

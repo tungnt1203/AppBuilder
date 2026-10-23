@@ -8,7 +8,7 @@
   <%= label_tag "photo_#{input["key"]}", input["label"] %>
   <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-line px-4 py-3 text-sm hover:border-ink">
     <%= icon "image-plus", size: 20, class: "text-muted" %>
-    <span data-personalize-status data-uploading="<%= t(".uploading") %>" data-small="<%= t(".small") %>" data-ready="<%= t(".ready") %>"><%= t(".pick") %></span>
+    <span data-personalize-status data-uploading="<%= t(".uploading") %>" data-small="<%= t(".small") %>" data-missing="<%= t(".missing") %>" data-ready="<%= t(".ready") %>"><%= t(".pick") %></span>
     <%= file_field_tag "photo_#{input["key"]}", accept: "image/jpeg,image/png,image/webp", class: "sr-only", data: { personalize_pick: input["key"], action: "change->personalize#pick" } %>
   </label>
   <%= hidden_field_tag "properties[#{input["key"]}]", nil, id: nil, required: input["required"], data: { personalize_token: input["key"] } %>

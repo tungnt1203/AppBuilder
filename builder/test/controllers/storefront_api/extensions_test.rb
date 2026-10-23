@@ -27,6 +27,7 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
     api :post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id }
     assert_response :unprocessable_entity
     assert_equal "can't be blank", response.parsed_body.dig("error", "fields", "print_name")
+    assert_equal "Name on the shirt can't be blank", response.parsed_body.dig("error", "message"), "worded with the field's label, for the buyer"
 
     cart = api(:post, storefront_api_cart_items_path(token), params: { variant_id: variants(:tee_black_s).id, properties: { print_name: "Ada" } })["cart"]
     assert_equal [ { "key" => "print_name", "label" => "Name on the shirt", "value" => "Ada" } ], cart["items"].sole["properties"]
