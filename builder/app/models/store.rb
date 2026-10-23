@@ -50,8 +50,10 @@ class Store < ApplicationRecord
 
   before_save -> { self.meta_error = nil }, if: :meta_access_token_changed?
 
+  # The shop's settings, made on its first request; two first requests at once (a new shop's ad
+  # bringing visitors) take the same one.
   def self.current
-    first || create!
+    first || create_or_find_by!(shop: ActsAsTenant.current_tenant)
   end
 
   # Flat-rate shipping: one price for the first item, another for each one after it, free above

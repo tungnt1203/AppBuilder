@@ -58,4 +58,12 @@ class StoreTest < ActiveSupport::TestCase
     @store.free_shipping_threshold_cents = nil
     assert_nil @store.free_shipping_remaining_cents(100)
   end
+
+  test "two first requests at once take the same settings" do
+    Store.singleton_class.alias_method :real_first, :first
+    Store.define_singleton_method(:first) { nil } # the other request made it after this one looked
+    assert_equal @store, Store.current
+  ensure
+    Store.singleton_class.alias_method :first, :real_first
+  end
 end
