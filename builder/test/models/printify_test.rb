@@ -37,6 +37,16 @@ class PrintifyTest < ActiveSupport::TestCase
     assert_equal %w[ Black White ], product.option_images.keys
   end
 
+  test "the products Printify made for the shop's personalized orders aren't listed to import" do
+    order = place_order(Printify::Import.new.call("pf-tee").variants.first)
+    made = [ @printify.product_data.merge("id" => "pf-made", "title" => "API #{order.name} - Robin Buyer"),
+      @printify.product_data.merge("id" => "pf-other", "title" => "API #99999 - Someone"), @printify.product_data ]
+    @printify.define_singleton_method(:products) { |_shop_id, page: 1| { "data" => made, "last_page" => 1 } }
+
+    items, = Printify::Import.new.list
+    assert_equal [ "pf-other", "pf-tee" ], items.pluck(:id), "only titles of this shop's own orders"
+  end
+
   test "the description reads for buyers: points as a list, without the lines about print providers" do
     @printify.product_data["description"] = "<p>Soft tee.</p><p>Disclaimer:<br>- Sleeve prints are made with DTF by the print providers OPT OnDemand and Shirt Monkey.<br></p>" \
       "<p>.: 100% cotton<br>.: Tear-away label &amp; no side seams</p>"

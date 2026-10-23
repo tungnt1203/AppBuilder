@@ -16,11 +16,16 @@ class Printify::Import
     @gateway = store.printify or raise PrintifyGateway::Error, "Printify isn't connected"
   end
 
-  # The owner's Printify products, page by page, with whether each is in the shop already.
+  # The owner's Printify products, page by page, with whether each is in the shop already. The
+  # products Printify made for the shop's personalized orders (one per line, titled "API #1007 -
+  # Robin Buyer": the order's label and the buyer) aren't the owner's to sell, so they're left out.
   def list(page: 1)
     result = @gateway.products(@store.printify_shop_id, page:)
-    imported = Product.where(printify_product_id: result["data"].map { |item| item["id"] }).index_by(&:printify_product_id)
-    items = result["data"].map do |item|
+    numbers = result["data"].to_h { |item| [ item["id"], item["title"].to_s[/\AAPI #(\d+) - /, 1]&.to_i ] }
+    ordered = Order.where(number: numbers.values.compact).pluck(:number)
+    data = result["data"].reject { |item| ordered.include?(numbers[item["id"]]) }
+    imported = Product.where(printify_product_id: data.map { |item| item["id"] }).index_by(&:printify_product_id)
+    items = data.map do |item|
       cheapest = Array(item["variants"]).select { |variant| variant["is_enabled"] }.min_by { |variant| variant["price"].to_i }
       { id: item["id"], title: item["title"], image: item["images"]&.find { |image| image["is_default"] }&.dig("src") || item.dig("images", 0, "src"),
         product: imported[item["id"]], price_cents: cheapest&.dig("price"), cost_cents: cheapest&.dig("cost") }
