@@ -10,10 +10,10 @@ import * as sky from "sky"
 // and color they pick, or the photo they choose, shown at once and sent to the Platform meanwhile
 // (its token goes in the field), which they move by dragging it and zoom with the slider. It shows
 // only on the photos the shop chose (data-photos, none: all). A smaller copy of the photo (a
-// "mirror", by the fields on phones, where the photo has scrolled away) shows the same.
+// "mirror", by the fields on phones once the photo has scrolled away) shows the same.
 // On a cart or order line a layer carries its text, font and color, or its photo and framing.
 export default class extends Controller {
-  static targets = [ "photo", "mirror", "layer" ]
+  static targets = [ "photo", "mirror", "layer", "beside" ]
 
   connect() {
     this.photos = {}
@@ -33,6 +33,13 @@ export default class extends Controller {
     this.element.addEventListener("submit", this.check, true)
     document.fonts.ready.then(this.render)
     if (this.layerTargets.some((layer) => layer.dataset.kind === "starmap")) sky.load().then(this.render)
+    // The mirror beside the fields only once most of the photo has scrolled away.
+    if (this.hasBesideTarget && this.hasPhotoTarget) {
+      this.away = new IntersectionObserver(([ entry ]) => {
+        this.besideTarget.classList.toggle("photo-away", entry.intersectionRatio < 0.3)
+      }, { threshold: [ 0, 0.3, 1 ] })
+      this.away.observe(this.photoTarget)
+    }
     this.render()
   }
 
@@ -40,6 +47,7 @@ export default class extends Controller {
     this.element.removeEventListener("submit", this.check, true)
     this.resize.disconnect()
     this.swap.disconnect()
+    this.away?.disconnect()
     for (const photo of this.frames()) photo.removeEventListener("load", this.render)
     Object.values(this.photos).forEach(({ url }) => URL.revokeObjectURL(url))
   }

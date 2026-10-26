@@ -15,6 +15,14 @@
   @media (width >= 48rem) { .page-width { padding-inline: 2.5rem; } }
 }
 
+/* A personalized product's fields on a phone (products/show): the small copy of the photo beside
+   them shows only once the photo has scrolled away (personalize controller, "photo-away"). */
+@layer components {
+  .personalize-beside > [data-personalize-frame] { display: none; }
+  .personalize-beside.photo-away { display: grid; grid-template-columns: minmax(0, 1fr) 5.5rem; align-items: start; gap: 0.75rem; }
+  .personalize-beside.photo-away > [data-personalize-frame] { display: block; }
+}
+
 /* Components and effects of the app's own design (a hero, a ticket stub, a grain
    overlay, keyframes) go below, named after what they are. */
 

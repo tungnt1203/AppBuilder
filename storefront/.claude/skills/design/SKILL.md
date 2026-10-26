@@ -24,6 +24,21 @@ request leaves little to choose; a one-line one leaves the choice of theme, colo
 words to you. When the owner shows a site (a link or a screenshot), that site is the look
 ("Copying a site the owner shows", below).
 
+The theme decides how things look, never what's there. Everything the owner asked for is built
+and visible where a buyer looks for it, in their words: a promise ("Ships in 5–9 business days",
+"Free reprint if the print is damaged") on the home page and the product page; a returns line
+linking the refund policy; a section for a bundle with its price; the collections they named in
+the header and on the home page (made in the admin: link them, and say in your reply what the owner
+must create). A theme is the starting point for those, not a reason to leave them out.
+
+**A feel the owner names** ("cute and cheerful", "bold, funny, comic book", "luxurious") must
+show at a glance. Pick the theme closest to it (soft for cute, bold for loud and funny, editorial
+for luxurious), then push it with what real shops use: stronger colors (a band of the brand color
+is fine then), a display font with that character (Baloo 2 or Bricolage Grotesque for playful,
+Bebas Neue for loud), photos full of that mood, and words in that voice. When they name a specific
+device ("halftone", "comic panels", "stickers"), do that one thing well, once (a halftone texture
+on the first screen's band), not everywhere. The list in section 3 is for what nobody asked for.
+
 ## 1. Pick the theme
 
 | Theme | After | For shops selling |
@@ -37,7 +52,7 @@ words to you. When the owner shows a site (a link or a screenshot), that site is
 `themes/<name>/README.md` (what it is, what to change, what to keep), look at its reference store
 with `bin/look <url>`, then put it in place with `bin/theme <name>` and `bin/rails tailwindcss:build`.
 Pick by who buys and what they buy, not by the shop's jokes or name: a cat-pun tee shop is a
-clean or soft shop with cat photos, not a comic book.
+clean or soft shop with cat photos, not a comic book (unless the owner asks for one).
 
 Write DESIGN.md before building anything else, in place of "Not decided yet":
 
@@ -57,7 +72,7 @@ shop until you've carried over what they need, then `--force`), and update DESIG
 
 ## 2. Make it the shop's
 
-Change these, and little else:
+Where the owner said nothing about the look, change these, and little else:
 
 - **Colors**, in `app/assets/tailwind/theme.css`: the brand scale 50–950 (600 is the button color,
   `--color-on-brand` the text on it: white on deep colors, dark on light ones like lime or butter
@@ -88,8 +103,8 @@ Change these, and little else:
   theme-setting defaults in `config/theme_settings.yml`, so the owner can change them.
 
 Leave the theme's layout, spacing, type sizes, corners, borders and the shared pages (product page,
-cart, checkout, order) as they are unless the owner asks for a change. They already follow the
-theme's colors, fonts and corners.
+cart, checkout, order) as they are unless the owner asks for a change or for something that needs
+a place (a section, a line, a link). They already follow the theme's colors, fonts and corners.
 
 ## 3. What makes a shop look AI-made: never do these
 
@@ -206,7 +221,9 @@ theme's reference store beside them:
 
 - Side by side with the reference, would a buyer believe both were made by the same designer? Is
   anything there the reference doesn't have?
-- Is any sign from section 3 on the page? Remove it.
+- Is any sign from section 3 on the page that the owner didn't ask for? Remove it.
+- Is every line under "Asked" in SPEC.md visible on the pages, in the owner's words, and the feel
+  they named obvious at a glance?
 - Does the first screen say what the shop sells and to whom, with one obvious next step, without
   scrolling on a phone?
 - Do the photos show people and the products' world, sharing one light and mood?

@@ -9,8 +9,8 @@
 <% if (hero_image = theme_setting(:hero_image).presence) %>
   <section class="relative isolate grid min-h-[28rem] place-items-center overflow-hidden bg-ink md:min-h-[45rem]">
     <%= image_tag hero_image, alt: "", class: "absolute inset-0 -z-10 size-full object-cover", fetchpriority: "high" %>
-    <div class="absolute inset-0 -z-10 bg-black/35"></div>
-    <div class="mx-auto max-w-3xl px-6 py-16 text-center">
+    <div class="absolute inset-0 -z-10 bg-black/40"></div>
+    <div class="mx-auto max-w-3xl px-6 py-16 text-center [text-shadow:0_1px_16px_rgb(0_0_0/0.35)]">
       <h1 class="text-[2.5rem] leading-tight text-balance text-white md:text-[3.25rem]"><%= hero_title %></h1>
       <p class="mt-4 text-white/90"><%= hero_text %></p>
       <%= link_to hero_button, products_path, class: "mt-8 inline-flex min-h-12 items-center px-8 text-[0.9375rem] tracking-[0.06em] text-white ring-1 ring-white transition hover:ring-2" %>

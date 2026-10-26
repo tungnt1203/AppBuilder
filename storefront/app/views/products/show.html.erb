@@ -104,16 +104,17 @@
       <%= hidden_field_tag :variant_id, @variant&.id, data: { variant_picker_target: "variantId" } %>
 
       <%# What the buyer types to have printed (a name on the shirt), when the product asks for it. %>
-      <%# On phones the photo has scrolled away by the time the buyer types: a small copy of it beside
-          the fields, staying in view as they go down them, so they take no more room. %>
-      <div class="<%= "grid grid-cols-[minmax(0,1fr)_5.5rem] items-start gap-3 md:block" if placed.any? %>">
+      <%# On phones, once the photo has scrolled away, a small copy of it shows beside the fields and
+          stays in view as the buyer goes down them (personalize-beside: while the photo is still in
+          view, the fields keep the whole width). %>
+      <div class="<%= "personalize-beside md:block" if placed.any? %>" <%= tag.attributes(data: { personalize_target: ("beside" if placed.any?) }) %>>
         <div class="min-w-0 space-y-4">
           <% @product.buyer_inputs.each do |input| %>
             <%= render "buyer_input", input: %>
           <% end %>
         </div>
         <% if placed.any? %>
-          <span class="sticky top-20 block aspect-4/5 overflow-hidden rounded-lg shadow-sm ring-1 ring-line md:hidden" data-personalize-frame aria-hidden="true">
+          <span class="sticky top-20 aspect-4/5 overflow-hidden rounded-lg shadow-sm ring-1 ring-line md:hidden" data-personalize-frame aria-hidden="true">
             <%= image_tag @product.image_for(@variant).url(:large), alt: "", class: "size-full bg-surface-muted object-cover", data: { personalize_target: "mirror" } %>
             <% placed.each do |input| %>
               <% photos = images.select { |image| input["preview"]["images"].to_a.include?(image.id) }.map { |image| image.url(:large) } %>
