@@ -1706,6 +1706,14 @@
   li:hover > .card-menu > summary, .card-menu > summary:focus-visible, .card-menu[open] > summary { opacity: 1; }
   @media (hover: none) { .card-menu > summary { opacity: 1; } }
 
+  /* A clipart set's pictures: the button to take one out shows on the one pointed at; pictures
+     dragged over the drop area light it up. */
+  .clipart-tile .clipart-remove { opacity: 0; transition: opacity 150ms; }
+  .clipart-tile:hover .clipart-remove, .clipart-tile:focus-within .clipart-remove { opacity: 1; }
+  @media (hover: none) { .clipart-tile .clipart-remove { opacity: 1; } }
+  .clipart-drop.is-dropping label { border-color: var(--color-brand-500); background: var(--color-brand-50); }
+  .clipart-drop[aria-busy] label { opacity: 0.6; pointer-events: none; }
+
   .menu-item {
     display: flex;
     width: 100%;

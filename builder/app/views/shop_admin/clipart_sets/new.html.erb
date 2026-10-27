@@ -1,0 +1,16 @@
+<%= page_header t(".title"), t(".description"), breadcrumbs: [ [ t("shop_admin.clipart_sets.index.title"), shop_admin_clipart_sets_path ], [ t(".title"), nil ] ] %>
+
+<%= form_with model: [ :shop_admin, @clipart_set ], class: "max-w-2xl space-y-6" do |form| %>
+  <%= card class: "space-y-5" do %>
+    <%= form.errors %>
+    <%= form.field :name, required: true, autofocus: true, placeholder: t(".name_placeholder"), hint: t(".name_hint") %>
+    <div class="space-y-2">
+      <%= form.label :pictures, t(".pictures"), class: "block text-sm font-medium text-ink" %>
+      <%= form.file_field :pictures, multiple: true, accept: ClipartSet::TYPES.join(","),
+            class: "block w-full rounded-lg border border-dashed border-line bg-surface-muted px-4 py-6 text-sm text-muted file:mr-4 file:rounded-md file:border-0 file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink file:shadow-xs file:ring-1 file:ring-line" %>
+      <p class="text-xs text-muted"><%= t(".pictures_hint", most: ClipartSet::MAX_PICTURES) %></p>
+    </div>
+  <% end %>
+
+  <%= form.submit t(".create") %>
+<% end %>

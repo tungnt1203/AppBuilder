@@ -1,0 +1,79 @@
+<% set = @clipart_set %>
+<% pictures = set.pictures.attachments.includes(:blob).sort_by(&:id) %>
+<% offering = set.products.order(:title).to_a %>
+<%= page_header set.name, breadcrumbs: [ [ t("shop_admin.clipart_sets.index.title"), shop_admin_clipart_sets_path ], [ set.name, nil ] ] do %>
+  <%= button_to t(".delete"), shop_admin_clipart_set_path(set), method: :delete, class: button_classes(:danger),
+        form: { data: { turbo_confirm: offering.any? ? t(".confirm_delete_offered", name: set.name, count: offering.size) : t(".confirm_delete", name: set.name) } } %>
+<% end %>
+
+<div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+  <%= card id: "pictures", class: "space-y-5" do %>
+    <div class="flex items-baseline justify-between gap-4">
+      <h2 class="text-sm font-semibold text-ink"><%= t(".pictures") %></h2>
+      <span class="text-xs text-muted tabular-nums"><%= t(".count", count: pictures.size, most: ClipartSet::MAX_PICTURES) %></span>
+    </div>
+
+    <% if set.room.positive? %>
+      <%# Choosing or dropping pictures sends them straight away. %>
+      <%= form_with url: shop_admin_clipart_set_pictures_path(set), multipart: true, class: "clipart-drop",
+            data: { controller: "auto-submit", action: "change->auto-submit#submit dragover->auto-submit#dragOver dragleave->auto-submit#dragLeave drop->auto-submit#drop" } do %>
+        <label class="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed border-line bg-surface-muted px-4 py-6 text-center transition hover:border-brand-500 hover:bg-brand-50">
+          <%= icon :upload, size: 20, class: "text-muted" %>
+          <span class="text-sm font-semibold text-ink"><%= t(".add") %></span>
+          <span class="text-xs text-muted"><%= t(".add_hint") %></span>
+          <%= file_field_tag "pictures[]", multiple: true, accept: ClipartSet::TYPES.join(","), class: "sr-only", aria: { label: t(".add") } %>
+        </label>
+      <% end %>
+    <% else %>
+      <%= alert t(".full", most: ClipartSet::MAX_PICTURES), tone: :warning %>
+    <% end %>
+
+    <% if pictures.any? %>
+      <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+        <% pictures.each do |picture| %>
+          <li class="clipart-tile group relative rounded-lg border border-line bg-surface p-2">
+            <%= image_tag picture.variant(:thumb), alt: picture.filename.base, loading: "lazy", class: "aspect-square w-full rounded-md bg-surface-muted object-contain p-2" %>
+            <%# The name buyers see under it: typed and left, it's saved. %>
+            <%= form_with url: shop_admin_clipart_set_picture_path(set, picture), method: :patch, class: "mt-2",
+                  data: { controller: "auto-submit", action: "change->auto-submit#submit" } do %>
+              <%= text_field_tag "picture[name]", picture.filename.base, maxlength: 80, required: true, autocomplete: "off",
+                    aria: { label: t(".name_of", name: picture.filename.base) },
+                    class: "block w-full rounded-md border border-transparent bg-transparent px-1.5 py-1 text-center text-xs font-medium text-ink hover:border-line focus:border-brand-500 focus:bg-surface focus:outline-2 focus:outline-brand-500/20" %>
+            <% end %>
+            <%= button_to shop_admin_clipart_set_picture_path(set, picture), method: :delete,
+                  class: "clipart-remove absolute top-1 right-1 grid size-7 place-items-center rounded-full bg-surface text-muted shadow-xs ring-1 ring-line hover:text-red-600 focus-visible:outline-2 focus-visible:outline-brand-600",
+                  aria: { label: t(".remove", name: picture.filename.base) }, title: t(".remove", name: picture.filename.base),
+                  form: { data: { turbo_confirm: (t(".confirm_remove", name: picture.filename.base, count: offering.size) if offering.any?) } } do %>
+              <%= icon :close, size: 14 %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-sm text-muted"><%= t(".no_pictures") %></p>
+    <% end %>
+  <% end %>
+
+  <div class="space-y-6">
+    <%= card do %>
+      <%= form_with model: [ :shop_admin, set ], class: "space-y-4" do |form| %>
+        <%= form.errors %>
+        <%= form.field :name, required: true %>
+        <%= form.submit t(".save"), class: button_classes(:secondary) %>
+      <% end %>
+    <% end %>
+
+    <%= card class: "space-y-3" do %>
+      <h2 class="text-sm font-semibold text-ink"><%= t(".offered_by") %></h2>
+      <% if offering.any? %>
+        <ul class="space-y-1">
+          <% offering.each do |product| %>
+            <li><%= link_to product.title, edit_shop_admin_product_path(product, anchor: "personalization"), class: "block truncate text-sm #{link_classes}" %></li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-sm text-muted"><%= t(".offered_by_none") %></p>
+      <% end %>
+    <% end %>
+  </div>
+</div>

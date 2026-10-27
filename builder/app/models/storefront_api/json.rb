@@ -164,7 +164,7 @@ class StorefrontApi::Json
     # A product's fields, with a choice field's pictures as { id, label, thumb, large } and the
     # pixels a photo field prints at ("print_pixels", when known).
     def buyer_inputs(product)
-      artwork = product.artwork.attachments.index_by(&:id)
+      artwork = product.choice_pictures
       product.buyer_inputs.map do |field|
         next field.merge("print_pixels" => product.print_pixels(field)).compact if field["kind"] == "photo"
         next field unless field["kind"] == "choice"
@@ -182,7 +182,7 @@ class StorefrontApi::Json
       fields = product&.buyer_inputs.to_a
       kinds = fields.to_h { |field| [ field["key"], field["kind"] ] }
       uploads = BuyerUpload.where(token: record.properties.select { |key, _| kinds[key] == "photo" }.values).index_by(&:token)
-      artwork = product ? product.artwork.attachments.index_by(&:id) : {}
+      artwork = product ? product.choice_pictures : {}
       line[:properties] = BuyerInputs.entries(fields, record.properties, artwork:).map do |entry|
         upload, art = uploads[entry[:raw]], artwork[entry[:raw].to_i]
         found = { "photo" => (upload_urls(upload) if upload), "choice" => (artwork_urls(art) if art) }[entry[:kind]]

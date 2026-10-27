@@ -1,0 +1,32 @@
+<%= page_header t(".title"), t(".description") do %>
+  <%= link_to t(".new"), new_shop_admin_clipart_set_path, class: button_classes %>
+<% end %>
+
+<% if @clipart_sets.any? %>
+  <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <% @clipart_sets.each do |set| %>
+      <% pictures = set.pictures.to_a %>
+      <li>
+        <%= link_to edit_shop_admin_clipart_set_path(set), class: "group block overflow-hidden rounded-xl border border-line bg-surface shadow-xs transition hover:border-brand-200 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600" do %>
+          <%# The first pictures as a strip, so a set reads at a glance. %>
+          <div class="grid grid-cols-4 gap-1.5 bg-surface-muted p-3">
+            <% pictures.first(8).each do |picture| %>
+              <%= image_tag picture.variant(:thumb), alt: "", loading: "lazy", class: "aspect-square w-full rounded-md bg-surface object-contain p-1" %>
+            <% end %>
+            <% (8 - [ pictures.size, 8 ].min).times do %>
+              <span class="aspect-square rounded-md border border-dashed border-line"></span>
+            <% end %>
+          </div>
+          <div class="flex items-baseline justify-between gap-3 px-4 py-3">
+            <span class="truncate text-sm font-semibold text-ink group-hover:text-brand-700"><%= set.name %></span>
+            <span class="shrink-0 text-xs text-muted"><%= t(".pictures", count: pictures.size) %></span>
+          </div>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") do %>
+    <%= link_to t(".new"), new_shop_admin_clipart_set_path, class: button_classes %>
+  <% end %>
+<% end %>

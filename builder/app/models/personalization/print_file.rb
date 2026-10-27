@@ -85,7 +85,7 @@ class Personalization::PrintFile
       when "photo"
         upload = BuyerUpload.find_by(token: layer["upload"])
         upload ? look(photo(upload.photo.download, layer["crop"], width, height), layer["filter"]) : (fill("#d1d5db", width, height) if @placeholders)
-      when "choice" then (art = @product.artwork.attachments.find_by(id: layer["artwork"])) && picture(art.download, width, height)
+      when "choice" then (art = @product.choice_pictures[layer["artwork"]]) && picture(art.download, width, height)
       when "starmap" then (sky = Personalization::Sky.for(layer["when"], layer["place"])) && star_map(sky, layer, width, height)
       else text(layer, width, height)
       end

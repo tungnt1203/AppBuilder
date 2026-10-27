@@ -1,0 +1,91 @@
+---
+en:
+  activerecord:
+    models:
+      clipart_set: Clipart set
+    attributes:
+      clipart_set:
+        name: Name
+        pictures: Pictures
+  shop_admin:
+    layout:
+      clipart: Clipart
+    clipart_sets:
+      index:
+        title: Clipart
+        description: Sets of pictures buyers pick from to have printed, like zodiac signs
+          or dog breeds. Make a set once, and any product can offer it.
+        new: New set
+        pictures:
+          zero: No pictures yet
+          one: 1 picture
+          other: "%{count} pictures"
+        empty_title: No clipart yet
+        empty_description: Make a set of pictures (zodiac signs, dog breeds, hair colors),
+          then offer it in a product's personalization, so buyers pick one to have printed.
+      new:
+        title: New clipart set
+        description: Name it for what buyers pick, and add its pictures. You can add more
+          later.
+        name_placeholder: Zodiac signs
+        name_hint: Only you see this name. Buyers see each picture's name.
+        pictures: Pictures
+        pictures_hint: PNG with a transparent background prints best. A picture's name is
+          its file's (Golden retriever.png), and you can change it. Up to %{most}.
+        create: Make set
+      create:
+        notice: "%{name} is ready. Offer it in a product's personalization."
+      edit:
+        delete: Delete set
+        confirm_delete: Delete %{name} and its pictures?
+        confirm_delete_offered:
+          one: Delete %{name} and its pictures? 1 product offers it, and will offer no
+            pictures until you pick others.
+          other: Delete %{name} and its pictures? %{count} products offer it, and will
+            offer no pictures until you pick others.
+        pictures: Pictures
+        count: "%{count} of %{most}"
+        add: Add pictures
+        add_hint: Choose or drop them here. PNG with a transparent background prints best.
+        full: This set has %{most} pictures, as many as buyers pick from. Remove one to
+          add another.
+        no_pictures: No pictures yet.
+        name_of: Name of %{name}
+        remove: Remove %{name}
+        confirm_remove:
+          one: Remove %{name}? Buyers stop seeing it on the product that offers this set.
+          other: Remove %{name}? Buyers stop seeing it on the %{count} products that offer
+            this set.
+        save: Save name
+        offered_by: Offered by
+        offered_by_none: No product offers it yet. In a product's Personalization, add a
+          Choice field and pick this set.
+      update:
+        notice: "%{name} is saved."
+      destroy:
+        notice: "%{name} is deleted."
+      pictures:
+        create:
+          notice:
+            one: 1 picture added.
+            other: "%{count} pictures added."
+          skipped:
+            one: 1 file wasn't added. Pictures are PNG, WebP or JPEG up to 20 MB, at most
+              %{most} in a set.
+            other: "%{count} files weren't added. Pictures are PNG, WebP or JPEG up to 20
+              MB, at most %{most} in a set."
+        update:
+          invalid: A picture's name can't be empty or longer than 80 characters.
+        destroy:
+          notice: "%{name} is removed."
+    products:
+      buyer_input:
+        source: Where the pictures come from
+        own_pictures: This product's pictures
+        set_option:
+          one: "%{name} (1 picture)"
+          other: "%{name} (%{count} pictures)"
+        manage_sets: Clipart sets
+        make_set: Make a clipart set
+        set_hint: Buyers pick from every picture in the set, as it is now and as it changes.
+        more: "+%{count}"

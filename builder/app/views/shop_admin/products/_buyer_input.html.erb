@@ -22,13 +22,39 @@
     </label>
   </div>
 
-  <fieldset data-for-kinds="choice">
+  <%# The pictures come from one of the shop's sets (ClipartSet), all of it and as it changes, or
+      from the product's own artwork, ticked one by one. %>
+  <% sets = ClipartSet.ordered.with_attached_pictures.to_a %>
+  <% picked_set = sets.find { |set| set.id == row["set"] } %>
+  <fieldset data-for-kinds="choice" data-controller="picture-source">
     <legend class="text-sm font-medium text-ink"><%= t(".options") %></legend>
+    <div class="mt-2 flex flex-wrap items-center gap-2">
+      <%= select_tag "product[buyer_inputs][][set]",
+            options_for_select([ [ t(".own_pictures"), "" ] ] + sets.map { |set| [ t(".set_option", name: set.name, count: set.pictures.size), set.id ] }, row["set"]),
+            id: nil, aria: { label: t(".source") }, class: "w-auto #{field_classes}",
+            data: { action: "picture-source#show", picture_source_target: "select" } %>
+      <%= link_to sets.any? ? t(".manage_sets") : t(".make_set"), shop_admin_clipart_sets_path, class: "text-sm #{link_classes}", target: "_blank" %>
+    </div>
+    <% sets.each do |set| %>
+      <div class="mt-3 flex flex-wrap gap-2" data-picture-source-target="set" data-set="<%= set.id %>" <%= "hidden" unless set == picked_set %>>
+        <% set.pictures.sort_by(&:id).first(16).each do |picture| %>
+          <span class="w-16 text-center">
+            <%= image_tag picture.variant(:thumb), alt: "", loading: "lazy", class: "size-16 rounded-md bg-surface-muted object-contain p-1" %>
+            <span class="block truncate text-xs text-muted"><%= picture.filename.base %></span>
+          </span>
+        <% end %>
+        <% if set.pictures.size > 16 %>
+          <span class="grid size-16 place-items-center rounded-md bg-surface-muted text-xs text-muted"><%= t(".more", count: set.pictures.size - 16) %></span>
+        <% end %>
+        <p class="w-full text-xs text-muted"><%= t(".set_hint") %></p>
+      </div>
+    <% end %>
+    <div data-picture-source-target="own" <%= "hidden" if picked_set %>>
     <% if product.artwork.attached? %>
       <div class="mt-2 flex flex-wrap gap-2">
         <% product.artwork.each do |art| %>
           <label class="relative w-16 cursor-pointer text-center">
-            <%= check_box_tag "product[buyer_inputs][][options][]", art.id, row["options"].nil? || row["options"].include?(art.id), id: nil, class: "peer absolute top-1 left-1 size-4 accent-brand-600" %>
+            <%= check_box_tag "product[buyer_inputs][][options][]", art.id, row["set"] || row["options"].nil? || row["options"].include?(art.id), id: nil, class: "peer absolute top-1 left-1 size-4 accent-brand-600" %>
             <%= image_tag art.variant(:thumb), alt: "", class: "size-16 rounded-md bg-surface-muted object-contain p-1 ring-2 ring-transparent peer-checked:ring-brand-500" %>
             <span class="block truncate text-xs text-muted"><%= art.filename.base.humanize %></span>
           </label>
@@ -37,6 +63,7 @@
     <% else %>
       <p class="mt-1 text-xs text-muted"><%= t(".options_empty") %></p>
     <% end %>
+    </div>
   </fieldset>
 
   <% if photos.any? %>

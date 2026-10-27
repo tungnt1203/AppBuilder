@@ -58,7 +58,7 @@ class ShopAdmin::ProductsController < ShopAdmin::BaseController
         :title, :slug, :description, :size_guide, :status, :base_price,
         :option1_name, :option1_values_text, :option2_name, :option2_values_text, :option3_name, :option3_values_text,
         collection_ids: [], photo_options: {}, custom_fields: {},
-        print_areas: { front: [ :x, :y, :w, :h ], back: [ :x, :y, :w, :h ] }, buyer_inputs: [ [ :key, :label, :kind, :max_length, :required, :layout, options: [], preview: [ :x, :y, :w, :h, :font, :color, :colors, :align, :uppercase, :curve, :style, :sky, :ink, :no_lines, :side, fonts: [], images: [], filters: [] ] ] ],
+        print_areas: { front: [ :x, :y, :w, :h ], back: [ :x, :y, :w, :h ] }, buyer_inputs: [ [ :key, :label, :kind, :max_length, :required, :layout, :set, options: [], preview: [ :x, :y, :w, :h, :font, :color, :colors, :align, :uppercase, :curve, :style, :sky, :ink, :no_lines, :side, fonts: [], images: [], filters: [] ] ] ],
         variants_attributes: [ [ :id, :price, :compare_at_price, :sku, :available, :cost, :track_inventory, :inventory_quantity ] ]
       ])
     end

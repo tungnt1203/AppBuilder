@@ -81,6 +81,25 @@ class Product < ApplicationRecord
     option_names.any?
   end
 
+  # The pictures buyers pick from in its choice fields, by id: its own artwork and the pictures
+  # of the shop's sets it offers (ClipartSet).
+  def choice_pictures
+    set_ids = buyer_inputs.to_a.filter_map { |field| field["set"] }
+    sets = set_ids.any? ? clipart_sets(set_ids).includes(pictures_attachments: :blob).flat_map { |set| set.pictures.attachments } : []
+    (artwork.attachments.to_a + sets).index_by(&:id)
+  end
+
+  # The shop's sets among these, wherever it's asked from (a job, the storefront's API).
+  def clipart_sets(ids)
+    ActsAsTenant.without_tenant { ClipartSet.where(shop_id:, id: ids) }
+  end
+
+  # Brings its choice fields up to date with the sets they offer, as they change or go.
+  def refresh_clipart
+    fields = with_choice_options(buyer_inputs.to_a)
+    update_column(:buyer_inputs, fields) if fields != buyer_inputs
+  end
+
   def available_variants
     variants.select(&:sellable?)
   end
@@ -213,11 +232,23 @@ class Product < ApplicationRecord
       Product::PrintPixelsJob.perform_later(self)
     end
 
-    # A choice field keeps only the product's own artwork.
     def clean_buyer_inputs
+      self.buyer_inputs = with_choice_options(BuyerInputs.definitions(buyer_inputs))
+    end
+
+    # A choice field offers the pictures of the shop's set it names, all of them in the set's
+    # order, or else only the product's own artwork it lists.
+    def with_choice_options(fields)
       artwork_ids = artwork.attachments.map(&:id)
-      self.buyer_inputs = BuyerInputs.definitions(buyer_inputs).map do |field|
-        field["options"] ? field.merge("options" => field["options"] & artwork_ids) : field
+      sets = clipart_sets(fields.filter_map { |field| field["set"] }).includes(:pictures_attachments).index_by(&:id)
+      fields.map do |field|
+        next field unless field["kind"] == "choice"
+
+        if field["set"] && (set = sets[field["set"]])
+          field.merge("options" => set.pictures.attachments.sort_by(&:id).map(&:id))
+        else
+          field.except("set").merge("options" => field["options"].to_a & artwork_ids)
+        end
       end
     end
 

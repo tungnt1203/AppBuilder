@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_27_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_27_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -128,6 +128,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_130000) do
     t.boolean "fork_session", default: false, null: false
     t.index ["forked_from_id"], name: "index_chats_on_forked_from_id"
     t.index ["project_id"], name: "index_chats_on_project_id"
+  end
+
+  create_table "clipart_sets", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id"], name: "index_clipart_sets_on_shop_id"
   end
 
   create_table "collection_products", force: :cascade do |t|
@@ -664,6 +672,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_130000) do
   add_foreign_key "carts", "shops"
   add_foreign_key "chats", "chats", column: "forked_from_id", on_delete: :nullify
   add_foreign_key "chats", "projects"
+  add_foreign_key "clipart_sets", "shops"
   add_foreign_key "collection_products", "collections"
   add_foreign_key "collection_products", "products"
   add_foreign_key "collection_products", "shops"

@@ -57,6 +57,9 @@ Rails.application.routes.draw do
       resource :print_area, only: :create, module: :products
     end
     resource :demo_products, only: %i[ create destroy ]
+    resources :clipart_sets, path: "clipart" do
+      resources :pictures, only: %i[ create update destroy ], module: :clipart_sets
+    end
     resources :collections
     resources :discounts, except: :show
     resources :product_reviews, only: %i[ index update ], path: "reviews"

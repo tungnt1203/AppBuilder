@@ -29,7 +29,7 @@ class LineItem < ApplicationRecord
   def property_entries
     return [] if properties.blank?
 
-    BuyerInputs.entries(product&.buyer_inputs, properties, artwork: product ? product.artwork.attachments.index_by(&:id) : {})
+    BuyerInputs.entries(product&.buyer_inputs, properties, artwork: product ? product.choice_pictures : {})
   end
 
   # The photos the buyer added, to print: [{ label, upload, crop: [zoom, x, y], sharp: whether it's

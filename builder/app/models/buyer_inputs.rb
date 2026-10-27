@@ -1,6 +1,7 @@
 # What the buyer adds to a product to have it printed, field by field: a line of text ("Name on
 # the shirt", at most 20 characters), a photo (kind "photo": a family photo on a mug), one of the
-# shop's pictures (kind "choice": their dog's breed, from the product's artwork) or a background
+# shop's pictures (kind "choice": their dog's breed, from the product's artwork or from one of the
+# shop's sets of pictures, ClipartSet, as "set") or a background
 # color (kind "color"). The product stores the definitions; the cart line stores what the buyer
 # added (a photo's BuyerUpload token, a picture's artwork id, a color), and the order carries it
 # to Printify.
@@ -58,6 +59,7 @@ class BuyerInputs
       { "key" => key, "label" => label.first(80), "kind" => kind,
         "required" => ActiveModel::Type::Boolean.new.cast(row["required"]) == true, "max_length" => (length if kind == "text"),
         "options" => (Array(row["options"]).map(&:to_i).select(&:positive?).uniq.first(MAX_OPTIONS) if kind == "choice"),
+        "set" => (row["set"].to_i if kind == "choice" && row["set"].to_i.positive?),
         "preview" => preview(row["preview"], kind:) }.compact
     }.first(MAX_FIELDS)
   end
