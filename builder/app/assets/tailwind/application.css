@@ -56,12 +56,33 @@
     --busy: #2563eb;
     --danger: #b42318;
     --danger-strong: #b42318;
+    --on-danger: #ffffff;
     --danger-bg: #fdecea;
     --danger-text: #8a1c12;
     --link: #18181b;
     --surface: #ffffff;
     --surface-solid: #ffffff;
     --device-rim: #27272a;
+    --admin-canvas: var(--canvas);
+    --admin-card: var(--surface-solid);
+    --admin-side: #18181b;
+    --admin-muted: #f4f4f5;
+    --admin-brand-50: #f4f4f5;
+    --admin-brand-100: #e4e4e7;
+    --admin-brand-200: #d4d4d8;
+    --admin-brand-700: #27272a;
+    --admin-brand-800: #18181b;
+    --admin-side-text: rgb(250 250 250 / 0.8);
+    --admin-side-ink: #fafafa;
+    --admin-side-hover: rgb(255 255 255 / 0.08);
+    --admin-side-current: rgb(255 255 255 / 0.12);
+    --admin-side-well: rgb(255 255 255 / 0.06);
+    --admin-side-line: rgb(255 255 255 / 0.1);
+    --admin-button: var(--accent);
+    --admin-on-button: var(--on-accent);
+    --preview-paper: #ffffff;
+    --monogram-ink: #ffffff;
+    --monogram-shade: rgb(0 0 0 / 0.15);
     --code-bg: rgb(250 252 251);
     --code-side: rgb(240 245 243);
     --code-text: #23383b;
@@ -87,7 +108,7 @@
       --glass-frost: var(--surface-solid);
       --glass-edge: var(--line);
       --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.6);
-      --shade: rgb(0 0 0 / 0.4);
+      --shade: var(--shade);
       --scrim: rgb(0 0 0 / 0.55);
       --chip: var(--surface-solid);
       --well: rgb(255 255 255 / 0.05);
@@ -98,12 +119,20 @@
       --busy: #60a5fa;
       --danger: #f87171;
       --danger-strong: #b42318;
+    --on-danger: #ffffff;
       --danger-bg: rgb(127 29 29 / 0.35);
       --danger-text: #fecaca;
       --link: #ededee;
       --surface: #18181a;
       --surface-solid: #18181a;
       --device-rim: rgb(255 255 255 / 0.16);
+      --admin-side: #0a0a0b;
+      --admin-muted: rgb(255 255 255 / 0.06);
+      --admin-brand-50: rgb(255 255 255 / 0.06);
+      --admin-brand-100: rgb(255 255 255 / 0.1);
+      --admin-brand-200: rgb(255 255 255 / 0.16);
+      --admin-brand-700: #d4d4d8;
+      --admin-brand-800: #e4e4e7;
       --code-bg: rgb(9 28 32);
       --code-side: rgb(12 34 39);
       --code-text: #d5e6e2;
@@ -141,12 +170,20 @@
     --busy: #60a5fa;
     --danger: #f87171;
     --danger-strong: #b42318;
+    --on-danger: #ffffff;
     --danger-bg: rgb(127 29 29 / 0.35);
     --danger-text: #fecaca;
     --link: #ededee;
     --surface: #18181a;
     --surface-solid: #18181a;
     --device-rim: rgb(255 255 255 / 0.16);
+    --admin-side: #0a0a0b;
+    --admin-muted: rgb(255 255 255 / 0.06);
+    --admin-brand-50: rgb(255 255 255 / 0.06);
+    --admin-brand-100: rgb(255 255 255 / 0.1);
+    --admin-brand-200: rgb(255 255 255 / 0.16);
+    --admin-brand-700: #d4d4d8;
+    --admin-brand-800: #e4e4e7;
     --code-bg: rgb(9 28 32);
     --code-side: rgb(12 34 39);
     --code-text: #d5e6e2;
@@ -306,7 +343,7 @@
 
     & p, & ul, & ol, & pre, & table { margin-bottom: 0.7rem; }
     & > :last-child { margin-bottom: 0; }
-    & h1, & h2, & h3 { font-weight: 600; margin: 0.9rem 0 0.35rem; }
+    & h1, & h2, & h3 { font-weight: 600; margin: 0.9rem 0 0.35rem; text-wrap: balance; }
     & ul { list-style: disc; padding-left: 1.2rem; }
     & ol { list-style: decimal; padding-left: 1.2rem; }
     & li { margin-bottom: 0.25rem; }
@@ -375,7 +412,7 @@
     border-radius: var(--radius-control);
     border: 1px solid var(--glass-edge);
     background: var(--surface);
-    box-shadow: 0 8px 20px -12px rgb(0 0 0 / 0.4);
+    box-shadow: 0 8px 20px -12px var(--shade);
   }
   .attachment-list img { width: 3.5rem; height: 3.5rem; object-fit: cover; border-radius: 6px; display: block; }
   .sent-attachments img { width: 6rem; height: 6rem; object-fit: cover; border-radius: var(--radius-control); display: block; }
@@ -556,7 +593,7 @@
   .bezel iframe {
     width: 100%;
     height: 100%;
-    background: white;
+    background: var(--preview-paper);
     transition: border-radius 320ms;
   }
 
@@ -569,7 +606,7 @@
   .stage[data-size="phone"] iframe { width: min(390px, 100% - 32px); height: min(844px, 100% - 32px); border-radius: 36px; }
 
   /* Full screen: the preview fills the display, with its controls floating at the bottom. */
-  .bezel:fullscreen { padding: 9px; border-radius: 0; background: var(--surface-solid); }
+  .bezel:fullscreen { padding: 8px; border-radius: 0; background: var(--surface-solid); }
   .fullscreen-bar {
     position: absolute;
     left: 50%;
@@ -826,10 +863,10 @@
   .blank-sketch {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 7px;
+    gap: 8px;
     width: min(100%, 17rem);
     margin-bottom: 0.6rem;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid var(--line);
     border-radius: var(--radius-panel);
     background: var(--surface-solid);
@@ -956,7 +993,7 @@
   .page-switch {
     display: inline-flex;
     gap: 2px;
-    padding: 3px;
+    padding: 4px;
 
     & a {
       padding: 0.3rem 0.85rem;
@@ -1260,7 +1297,7 @@
 
   .app-shot {
     aspect-ratio: 16 / 10;
-    margin: 7px 7px 0;
+    margin: 8px 8px 0;
     overflow: hidden;
     border-radius: var(--radius-control);
     background: var(--well);
@@ -1276,8 +1313,8 @@
     height: 100%;
     font-size: 3rem;
     font-weight: 600;
-    color: white;
-    text-shadow: 0 2px 12px rgb(0 0 0 / 0.15);
+    color: var(--monogram-ink);
+    text-shadow: 0 2px 12px var(--monogram-shade);
     background:
       radial-gradient(70% 90% at 20% 10%, hsl(var(--hue) 70% 72% / 0.9), transparent 70%),
       linear-gradient(140deg, hsl(var(--hue) 45% 52%), hsl(calc(var(--hue) + 40) 50% 34%));
@@ -1343,7 +1380,7 @@
   }
 
   .btn-danger {
-    color: var(--on-accent);
+    color: var(--on-danger);
     background: var(--danger-strong);
   }
   .btn-danger:hover:not(:disabled) { background: color-mix(in srgb, var(--danger-strong) 86%, black); }
@@ -1401,36 +1438,10 @@
   /* /admin: the owner's admin over all their shops. A working screen, not a showcase: a plain
      canvas, a sidebar, and cards, in the studio's colors and type, light and dark. */
   .admin-body {
-    --admin-canvas: var(--canvas);
-    --admin-card: var(--surface-solid);
-    --admin-side: #18181b;
-    --admin-muted: #f4f4f5;
-    --admin-brand-50: #f4f4f5;
-    --admin-brand-100: #e4e4e7;
-    --admin-brand-200: #d4d4d8;
-    --admin-brand-700: #27272a;
-    --admin-brand-800: #18181b;
-    --admin-side-text: rgb(228 241 238 / 0.85);
-    --admin-side-ink: #ffffff;
-    --admin-side-hover: rgb(255 255 255 / 0.08);
-    --admin-side-current: rgb(255 255 255 / 0.12);
-    --admin-side-well: rgb(255 255 255 / 0.06);
-    --admin-side-line: rgb(255 255 255 / 0.1);
-    --admin-button: var(--color-brand-600);
-    --admin-on-button: #ffffff;
     background: var(--admin-canvas);
     color: var(--text);
     min-height: 100%;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .admin-body { --admin-side: #0a0a0b;
-      --admin-muted: rgb(255 255 255 / 0.06); --admin-brand-50: rgb(255 255 255 / 0.06); --admin-brand-100: rgb(255 255 255 / 0.1);
-      --admin-brand-200: rgb(255 255 255 / 0.16); --admin-brand-700: #d4d4d8; --admin-brand-800: #e4e4e7; --admin-button: #ededee; --admin-on-button: #0f0f10; }
-  }
-  :root[data-theme="dark"] .admin-body { --admin-side: #0a0a0b;
-      --admin-muted: rgb(255 255 255 / 0.06); --admin-brand-50: rgb(255 255 255 / 0.06); --admin-brand-100: rgb(255 255 255 / 0.1);
-      --admin-brand-200: rgb(255 255 255 / 0.16); --admin-brand-700: #d4d4d8; --admin-brand-800: #e4e4e7; --admin-button: #ededee; --admin-on-button: #0f0f10; }
-
   .admin-shell { display: grid; min-height: 100vh; grid-template-columns: 15rem minmax(0, 1fr); }
   .admin-side {
     position: sticky; top: 0; height: 100vh; height: 100dvh;
