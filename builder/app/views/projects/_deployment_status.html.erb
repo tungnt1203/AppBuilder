@@ -7,7 +7,7 @@
 <% else %>
   <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true">
     <summary class="btn btn-ghost h-8 list-none px-2.5 whitespace-nowrap text-[var(--danger)]"><span class="hidden @min-[30rem]:inline">v<%= deployment.version %>&nbsp;</span>failed</summary>
-    <div class="popover glass glass-frost absolute right-0 z-10 mt-2 w-[min(34rem,90vw)] rounded-[20px] p-4">
+    <div class="popover glass glass-frost absolute right-0 z-10 mt-2 w-[min(34rem,90vw)] rounded-xl p-4">
       <p class="mb-2 text-sm font-medium">
         <% if live = project.live_deployment %>
           Version <%= live.version %> is still running at <%= link_to project.publish_host, project.publish_url, target: "_blank", class: "underline" %>.

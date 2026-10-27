@@ -15,7 +15,7 @@
         <%# The app shows its own name in the preview; the bar only says what's going on. %>
         <h1 class="sr-only"><%= @project.name %></h1>
         <div class="flex min-w-0 flex-1 items-center">
-          <span class="chip @max-[24rem]:hidden inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs"><%= status_label(@project) %></span>
+          <span class="chip @max-[24rem]:hidden inline-flex shrink-0 rounded-md px-2 py-0.5 text-xs"><%= status_label(@project) %></span>
         </div>
         <button type="button" class="btn btn-ghost btn-icon h-8 w-8 @max-[30rem]:hidden" data-action="tour#start" aria-label="Show the tour" title="Show the tour"><%= icon :help %></button>
         <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon h-8 w-8 @max-[30rem]:hidden" %>
@@ -23,19 +23,19 @@
           <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Version history" aria-label="Version history"
                    data-tour-step="5" data-tour-title="Nothing is lost"
                    data-tour-text="Every change is saved as a version. Open this to go back to any of them."><%= icon :history %></summary>
-          <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-[22px] p-2 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[26rem] lg:right-auto lg:left-0">
+          <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-xl p-2 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[26rem] lg:right-auto lg:left-0">
             <%= render "projects/versions", project: @project %>
           </div>
         </details>
         <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="instructions">
           <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Instructions for the agent" aria-label="Instructions for the agent"><%= icon :sliders %></summary>
-          <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-[22px] p-4 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[26rem] lg:right-auto lg:left-0">
+          <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-xl p-4 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[26rem] lg:right-auto lg:left-0">
             <%= render "projects/instructions", project: @project %>
           </div>
         </details>
         <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="share">
           <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Share" aria-label="Share"><%= icon :share %></summary>
-          <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-[22px] p-4 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[24rem] lg:right-auto lg:left-0">
+          <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-xl p-4 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[24rem] lg:right-auto lg:left-0">
             <%= render "projects/share", project: @project %>
           </div>
         </details>

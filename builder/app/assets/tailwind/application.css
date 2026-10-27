@@ -159,6 +159,9 @@
     --code-attr: #c7a8ff;
   }
 
+  /* Corners: small and few. Inner pieces sit inside controls, controls inside panels. */
+  :root { --radius-inner: 6px; --radius-control: 8px; --radius-panel: 12px; }
+
   html, body { height: 100%; }
 
   body {
@@ -206,8 +209,8 @@
     animation: grow 320ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .sheet { border-radius: 28px; }
-  .capsule { border-radius: 999px; }
+  .sheet { border-radius: var(--radius-panel); }
+  .capsule { border-radius: var(--radius-control); }
 
   /* Buttons */
   .btn {
@@ -217,7 +220,7 @@
     gap: 0.4rem;
     height: 2.25rem;
     padding: 0 1rem;
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text);
@@ -269,7 +272,7 @@
   /* Fields on glass */
   .field {
     width: 100%;
-    border-radius: 16px;
+    border-radius: var(--radius-control);
     border: 1px solid var(--line);
     background: var(--well);
     padding: 0.65rem 0.9rem;
@@ -284,7 +287,7 @@
   .bubble-user {
     margin-left: 2.5rem;
     padding: 0.7rem 1rem;
-    border-radius: 20px 20px 6px 20px;
+    border-radius: 12px 12px 4px 12px;
     background: var(--well-strong);
     color: var(--text);
     font-size: 0.9375rem;
@@ -369,13 +372,13 @@
   .sent-attachments { justify-content: flex-end; align-items: flex-start; margin-left: 2.5rem; }
   .attachment-list li, .sent-attachments li {
     position: relative;
-    border-radius: 14px;
+    border-radius: var(--radius-control);
     border: 1px solid var(--glass-edge);
     background: var(--surface);
     box-shadow: 0 8px 20px -12px rgb(0 0 0 / 0.4);
   }
-  .attachment-list img { width: 3.5rem; height: 3.5rem; object-fit: cover; border-radius: 13px; display: block; }
-  .sent-attachments img { width: 6rem; height: 6rem; object-fit: cover; border-radius: 13px; display: block; }
+  .attachment-list img { width: 3.5rem; height: 3.5rem; object-fit: cover; border-radius: 6px; display: block; }
+  .sent-attachments img { width: 6rem; height: 6rem; object-fit: cover; border-radius: var(--radius-control); display: block; }
   .attachment-file {
     display: inline-flex;
     align-items: center;
@@ -408,7 +411,7 @@
     gap: 0.5rem;
     margin-bottom: 0.5rem;
     padding: 0.3rem 0.35rem 0.3rem 0.75rem;
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     font-size: 0.8125rem;
     color: var(--text);
     &[hidden] { display: none; }
@@ -440,7 +443,7 @@
   .composer {
     display: flex;
     flex-direction: column;
-    border-radius: 22px;
+    border-radius: var(--radius-panel);
     transition: border-color 150ms;
   }
   .composer:focus-within { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
@@ -493,7 +496,7 @@
     width: fit-content;
     max-width: 88%;
     padding: 0.35rem 0.85rem;
-    border-radius: 14px;
+    border-radius: var(--radius-control);
     background: var(--well);
     font-size: 0.8125rem;
     line-height: 1.45;
@@ -503,7 +506,7 @@
   }
 
   .alert {
-    border-radius: 16px;
+    border-radius: var(--radius-control);
     padding: 0.75rem 0.9rem;
     background: var(--danger-bg);
     border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
@@ -528,7 +531,7 @@
     flex-direction: column;
     min-width: 0;
     min-height: 0;
-    border-radius: 24px;
+    border-radius: var(--radius-panel);
     background: var(--surface);
     box-shadow: 0 24px 60px -24px var(--shade), 0 0 0 1px var(--line);
   }
@@ -714,7 +717,7 @@
     gap: 0.75rem;
     width: min(40rem, 100% - 2rem);
     padding: 0.6rem 0.6rem 0.6rem 0.7rem;
-    border-radius: 22px;
+    border-radius: var(--radius-panel);
     transform: translateX(-50%);
     animation: appear 240ms ease-out;
 
@@ -736,7 +739,7 @@
     display: inline-flex;
     gap: 2px;
     padding: 2px;
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     background: var(--well);
 
     & button {
@@ -744,7 +747,7 @@
       place-items: center;
       width: 1.9rem;
       height: 1.6rem;
-      border-radius: 999px;
+      border-radius: var(--radius-inner);
       color: var(--text-muted);
       cursor: pointer;
       transition: background-color 150ms, color 150ms;
@@ -828,7 +831,7 @@
     margin-bottom: 0.6rem;
     padding: 10px;
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: var(--radius-panel);
     background: var(--surface-solid);
     box-shadow: 0 18px 40px -22px var(--shade);
     transform: rotate(-2deg);
@@ -853,7 +856,7 @@
     display: flex;
     gap: 0.35rem;
     padding: 0.25rem;
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     background: var(--well);
     font-size: 0.8125rem;
     font-weight: 500;
@@ -862,7 +865,7 @@
     & li {
       counter-increment: step;
       padding: 0.3rem 0.8rem;
-      border-radius: 999px;
+      border-radius: var(--radius-inner);
       color: var(--text-faint);
     }
     & li::before { content: counter(step) "  "; white-space: pre; opacity: 0.7; }
@@ -957,7 +960,7 @@
 
     & a {
       padding: 0.3rem 0.85rem;
-      border-radius: 999px;
+      border-radius: var(--radius-inner);
       font-size: 0.8125rem;
       font-weight: 600;
       color: var(--text-muted);
@@ -979,7 +982,7 @@
   }
 
   .flash {
-    border-radius: 16px;
+    border-radius: var(--radius-control);
     padding: 0.7rem 0.9rem;
     background: var(--well);
     font-size: 0.8125rem;
@@ -1016,11 +1019,11 @@
     max-height: min(60vh, 32rem);
     overflow-y: auto;
 
-    & li { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-radius: 14px; }
+    & li { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-radius: var(--radius-control); }
     & li:hover { background: var(--hover); }
     & .subject { font-size: 0.875rem; font-weight: 500; line-height: 1.35; }
     & .meta { font-size: 0.75rem; color: var(--text-faint); }
-    & .tag { font-size: 0.6875rem; font-weight: 600; padding: 0.1rem 0.5rem; border-radius: 999px; background: var(--well-strong); color: var(--text-muted); white-space: nowrap; }
+    & .tag { font-size: 0.6875rem; font-weight: 600; padding: 0.1rem 0.5rem; border-radius: 4px; background: var(--well-strong); color: var(--text-muted); white-space: nowrap; }
     & .tag-live { color: var(--ready); }
   }
 }
@@ -1053,7 +1056,7 @@
     gap: 0.5rem;
     height: 1.75rem;
     padding: 0 0.25rem 0 0.75rem;
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     background: var(--well);
     font-size: 0.75rem;
     font-weight: 500;
@@ -1067,7 +1070,7 @@
     min-height: 1.75rem;
     align-items: flex-start;
     padding-block: 0.25rem;
-    border-radius: 14px;
+    border-radius: var(--radius-control);
     & summary { line-height: 1.25rem; }
     & .activity-update-icon, & form { display: flex; align-items: center; min-height: 1.25rem; }
   }
@@ -1078,7 +1081,7 @@
     gap: 0.4rem;
     margin-top: 0.4rem;
     padding: 0.45rem 0.75rem;
-    border-radius: 12px;
+    border-radius: var(--radius-control);
     background: var(--danger-bg);
     font-size: 0.75rem;
     line-height: 1.45;
@@ -1102,7 +1105,7 @@
 
   /* The agent's plan, ticked off as it goes. */
   .plan {
-    border-radius: 18px;
+    border-radius: var(--radius-panel);
     background: var(--well);
     border: 1px solid var(--glass-edge);
     padding: 0.75rem 0.9rem;
@@ -1161,7 +1164,7 @@
   .questions {
     display: grid;
     gap: 0.9rem;
-    border-radius: 18px;
+    border-radius: var(--radius-panel);
     background: var(--well);
     border: 1px solid var(--glass-edge);
     padding: 0.9rem;
@@ -1170,7 +1173,7 @@
   }
   .chip-option {
     padding: 0.4rem 0.8rem;
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     border: 1px solid var(--line);
     background: var(--well-strong);
     font-size: 0.8125rem;
@@ -1198,7 +1201,7 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.3rem 0.6rem;
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--text-muted);
@@ -1212,7 +1215,7 @@
 
 @layer components {
   /* Home: one big box to describe the app. */
-  .prompt { border-radius: 28px; }
+  .prompt { border-radius: var(--radius-panel); }
   .prompt:focus-within { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
   .prompt-attachments { padding: 0 1.4rem 0.25rem; }
 
@@ -1249,7 +1252,7 @@
   .app-card {
     display: block;
     overflow: hidden;
-    border-radius: 22px;
+    border-radius: var(--radius-panel);
     color: var(--text);
     transition: transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 200ms;
   }
@@ -1259,7 +1262,7 @@
     aspect-ratio: 16 / 10;
     margin: 7px 7px 0;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: var(--radius-control);
     background: var(--well);
     box-shadow: 0 0 0 1px var(--line);
 
@@ -1293,7 +1296,7 @@
       width: 2.25rem;
       height: 2.25rem;
       list-style: none;
-      border-radius: 999px;
+      border-radius: var(--radius-control);
       color: var(--text);
       background: var(--surface-solid);
       box-shadow: 0 0 0 1px var(--line), 0 4px 12px -6px var(--shade);
@@ -1312,7 +1315,7 @@
     align-items: center;
     gap: 0.65rem;
     padding: 0.55rem 0.75rem;
-    border-radius: 13px;
+    border-radius: 6px;
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--text);
@@ -1329,7 +1332,7 @@
     width: min(26rem, calc(100% - 2rem));
     margin: auto;
     padding: 0;
-    border-radius: 28px;
+    border-radius: var(--radius-panel);
     border: 1px solid var(--glass-edge);
     background: var(--glass-frost);
     box-shadow: var(--glass-shadow);
@@ -1359,7 +1362,7 @@
   min-width: 17rem;
   max-width: min(21rem, calc(100vw - 2rem));
   padding: 1.1rem 1.15rem 0.9rem;
-  border-radius: 22px;
+  border-radius: var(--radius-panel);
   border: 1px solid var(--glass-edge);
   background: var(--glass-frost);
   box-shadow: var(--glass-shadow);
@@ -1367,7 +1370,7 @@
   .driver-popover-title { font-size: 1rem; font-weight: 600; line-height: 1.4; padding-right: 1.5rem; }
   .driver-popover-description { margin-top: 0.3rem; font-size: 0.875rem; line-height: 1.55; color: var(--text-muted); }
   .driver-popover-arrow { display: none; }
-  .driver-popover-close-btn { top: 0.55rem; right: 0.55rem; width: 1.75rem; height: 1.75rem; border-radius: 999px; color: var(--text-faint); }
+  .driver-popover-close-btn { top: 0.55rem; right: 0.55rem; width: 1.75rem; height: 1.75rem; border-radius: 6px; color: var(--text-faint); }
   .driver-popover-close-btn:hover { color: var(--text); background: var(--hover); }
   .driver-popover-footer { margin-top: 1rem; gap: 0.5rem; }
   .driver-popover-progress-text { font-size: 0.75rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
@@ -1378,7 +1381,7 @@
     height: 2rem;
     padding: 0 0.9rem;
     border: 0;
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     font-size: 0.8125rem;
     font-weight: 600;
     line-height: 2rem;
@@ -1440,12 +1443,12 @@
   .admin-brand { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem 1rem; font-weight: 600; color: var(--admin-side-ink); }
   .admin-link {
     display: flex; align-items: center; gap: 0.6rem;
-    padding: 0.5rem 0.75rem; border-radius: 10px;
+    padding: 0.5rem 0.75rem; border-radius: 6px;
     font-size: 0.9375rem; font-weight: 500;
     &:hover { background: var(--admin-side-hover); color: var(--admin-side-ink); }
     &[aria-current="page"] { background: var(--admin-side-current); color: var(--admin-side-ink); }
   }
-  .admin-switcher { margin: 0 0 0.75rem; border-radius: 10px; background: var(--admin-side-well); color: var(--admin-side-ink);
+  .admin-switcher { margin: 0 0 0.75rem; border-radius: var(--radius-control); background: var(--admin-side-well); color: var(--admin-side-ink);
     & > summary { cursor: pointer; list-style: none; &::-webkit-details-marker { display: none; } }
   }
   .admin-switcher-menu { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.25rem; border-top: 1px solid var(--admin-side-line);
@@ -1458,7 +1461,7 @@
   .admin-card {
     background: var(--admin-card);
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: var(--radius-panel);
     box-shadow: 0 1px 2px var(--line);
   }
   .admin-section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; }
@@ -1469,18 +1472,18 @@
   .admin-list > * + * { border-top: 1px solid var(--line); }
   .admin-field {
     display: block; width: 100%; height: 2.5rem; padding: 0 0.85rem;
-    border: 1px solid var(--line); border-radius: 10px; background: var(--admin-canvas); color: var(--text);
+    border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--admin-canvas); color: var(--text);
     &:focus { outline: 2px solid color-mix(in srgb, var(--accent) 25%, transparent); border-color: var(--accent); }
   }
   .admin-button {
     display: inline-flex; align-items: center; gap: 0.4rem; height: 2.25rem; padding: 0 1rem;
-    border-radius: 10px; font-size: 0.875rem; font-weight: 600;
+    border-radius: var(--radius-control); font-size: 0.875rem; font-weight: 600;
     background: var(--admin-button); color: var(--admin-on-button);
     &:hover { background: color-mix(in srgb, var(--admin-button) 85%, black); }
   }
   .admin-button-secondary { background: var(--admin-card); color: var(--text); border: 1px solid var(--line); &:hover { background: var(--well); } }
-  .admin-flash { border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.875rem; background: var(--admin-muted); }
-  .admin-alert { border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.875rem; background: var(--danger-bg); color: var(--danger-text); }
+  .admin-flash { border-radius: var(--radius-control); padding: 0.6rem 0.9rem; font-size: 0.875rem; background: var(--admin-muted); }
+  .admin-alert { border-radius: var(--radius-control); padding: 0.6rem 0.9rem; font-size: 0.875rem; background: var(--danger-bg); color: var(--danger-text); }
 
   @media (max-width: 48rem) {
     .admin-shell { grid-template-columns: minmax(0, 1fr); }

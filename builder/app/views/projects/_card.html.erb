@@ -19,7 +19,7 @@
   <% busy = project.busy? ? "Wait until #{project.setting_up? ? "it's set up" : "the current step finishes"}" : nil %>
   <details class="card-menu" data-controller="keep-open" data-keep-open-dismissible-value="true">
     <summary aria-label="Manage <%= project.name %>" title="Rename, duplicate or delete"><%= icon :more, size: 18 %></summary>
-    <div class="popover glass glass-frost absolute top-11 right-0 z-20 w-52 rounded-[20px] p-1.5" role="menu">
+    <div class="popover glass glass-frost absolute top-11 right-0 z-20 w-52 rounded-xl p-1.5" role="menu">
       <button type="button" class="menu-item" role="menuitem" <%= tag.attributes(disabled: busy.present?, title: busy) %>
               data-action="app-menu#open" data-app-menu-name-param="rename"><%= icon :pencil %> Rename</button>
       <% moving = busy || (project.latest_deployment&.in_progress? ? "Wait until publishing finishes" : nil) %>
