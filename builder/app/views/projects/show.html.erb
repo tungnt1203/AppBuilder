@@ -54,7 +54,8 @@
           <% if item.is_a?(Array) %>
             <%= render "projects/steps", actions: item, open: @project.working? && index == items.size - 1 %>
           <% else %>
-            <%= render item %>
+            <%# A reply followed by more steps is the agent thinking aloud, not its answer. %>
+            <%= render item, interim: items[index + 1].is_a?(Array) %>
           <% end %>
         <% end %>
 

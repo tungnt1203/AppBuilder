@@ -393,19 +393,39 @@
     & th, & td { border: 1px solid var(--line); padding: 0.25rem 0.5rem; text-align: left; }
   }
 
+  /* The agent's working thread: its steps and what it says between them hang on a thin rail at
+     the left, quieter than the answer that ends the turn. The rail runs through the 1rem gap to
+     the next item, so the thread reads as one line. */
+  .trail-item {
+    position: relative;
+    padding-left: 1.25rem;
+
+    &::before { content: ""; position: absolute; left: 0.3rem; top: 0; bottom: -1rem; width: 1px; background: var(--line); }
+  }
+
   .steps {
-    border-radius: 16px;
-    background: var(--well);
-    border: 1px solid var(--glass-edge);
     font-size: 0.8125rem;
     color: var(--text-muted);
 
-    & summary { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.8rem; cursor: pointer; list-style: none; }
+    &::after { content: ""; position: absolute; left: 0.05rem; top: 0.45rem; width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--surface-solid); border: 1.5px solid var(--text-faint); }
+    /* The chevron follows the last word, also when the line wraps. */
+    & summary { display: block; padding: 0.1rem 0; cursor: pointer; list-style: none; border-radius: 6px; }
+    & summary .chevron { display: inline; margin-left: 0.2rem; vertical-align: -0.15em; }
+    & summary:hover { color: var(--text); }
     & summary::-webkit-details-marker { display: none; }
-    & summary .chevron { margin-left: auto; transition: transform 200ms; }
+    & summary .chevron { transition: transform 200ms; }
     &[open] summary .chevron { transform: rotate(90deg); }
-    & ol { padding: 0 0.8rem 0.6rem 2.1rem; display: grid; gap: 0.3rem; }
-    & li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    & ol { display: grid; gap: 0.2rem; margin-top: 0.4rem; }
+    & li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-faint); }
+    & .step-verb { color: var(--text-muted); }
+    & .step-target { font-family: var(--font-mono); font-size: 0.75rem; }
+  }
+
+  /* What the agent says while it works: on the rail, a step smaller and muted. */
+  .reply-interim {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--text-muted);
   }
 
   .turn-done {
@@ -1411,7 +1431,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .idea, .app-card, .card-menu > summary, .bezel iframe, .code-tree .chevron { transition: none; }
+  .idea, .app-card, .card-menu > summary, .bezel iframe, .code-tree .chevron, .steps summary .chevron { transition: none; }
   .modal[open] { animation: none; }
 }
 

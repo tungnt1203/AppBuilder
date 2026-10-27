@@ -1,8 +1,10 @@
-<details class="steps" data-controller="keep-open" <%= "open" if open %>>
-  <summary><%= icon :steps, size: 14 %><span><%= steps_summary(actions) %></span><%= icon :chevron, size: 14 %></summary>
+<%# What the agent did between two replies, on the thread's rail: one quiet line, opening to each step. %>
+<details class="steps trail-item" data-controller="keep-open" <%= "open" if open %>>
+  <summary><%= steps_summary(actions) %><%= icon :chevron, size: 14 %></summary>
   <ol>
     <% actions.each do |action| %>
-      <li title="<%= action.body %>"><%= action.body %></li>
+      <% verb, target = action.body.to_s.split(" ", 2) %>
+      <li title="<%= action.body %>"><span class="step-verb"><%= verb %></span> <span class="step-target"><%= target %></span></li>
     <% end %>
   </ol>
 </details>

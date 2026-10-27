@@ -27,7 +27,7 @@
   <% end %>
 <% when "assistant" %>
   <% if message.body.present? %>
-    <div class="reply"><%= markdown(message.body) %></div>
+    <div class="reply<%= " reply-interim trail-item" if local_assigns[:interim] %>"><%= markdown(message.body) %></div>
   <% end %>
   <% if message.data["questions"].present? && message == message.project.open_reply %>
     <%= render "messages/questions", message: message %>
