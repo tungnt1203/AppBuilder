@@ -1,3 +1,6 @@
+/* Hallmark · v2.0.0 · shape: app screen · redesign: full (home, projects#index) · theme: brand (ink on paper) · signature: the request box beside the question, with starters that show what they ask for */
+/* critique: the old home was a centred chatbot template; now a left-aligned workbench, starters readable, apps under a hairline, monogram in ink */
+/* waive 2b, 7b · live-activity sweep, preview paper and danger ink are the studio, outside this redesign */
 @import "tailwindcss";
 @import "./personalize_fonts.css";
 
@@ -199,7 +202,7 @@
   /* Corners: small and few. Inner pieces sit inside controls, controls inside panels. */
   :root { --radius-inner: 6px; --radius-control: 8px; --radius-panel: 12px; }
 
-  html, body { height: 100%; }
+  html, body { height: 100%; overflow-x: clip; }
 
   body {
     font-family: var(--font-sans);
@@ -1322,15 +1325,66 @@
 }
 
 @layer components {
-  /* Home: one big box to describe the app. */
+  /* Home: a slim bar, then the question on the left and the box to answer it on the right,
+     the apps underneath. One container width for all of it. */
+  .home {
+    width: 100%;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+    @media (min-width: 40rem) { padding: 0 1.5rem; }
+  }
+  .home-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 4.5rem;
+  }
+  .wordmark {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    border-radius: var(--radius-inner);
+  }
+  .home-start {
+    display: grid;
+    gap: 2rem;
+    padding-top: clamp(1.5rem, 8vh, 5rem);
+    @media (min-width: 64rem) {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      gap: 3.5rem;
+    }
+  }
+  .home-intro { min-width: 0; }
+  @media (min-width: 64rem) { .home-intro { position: sticky; top: 2rem; align-self: start; padding-top: 0.5rem; } }
+  .home-title {
+    font-size: clamp(2.25rem, 1.6rem + 2.4vw, 3.25rem);
+    line-height: 1.04;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+
   .prompt { border-radius: var(--radius-panel); }
   .prompt:focus-within { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
   .prompt-attachments { padding: 0 1.4rem 0.25rem; }
 
+  .prompt-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-top: 1px solid var(--line);
+  }
+
   .prompt-input {
     display: block;
     width: 100%;
-    min-height: 7.5rem;
+    min-height: 9.5rem;
     max-height: 40vh;
     resize: none;
     padding: 1.25rem 1.4rem 0.75rem;
@@ -1343,20 +1397,67 @@
     &:focus { outline: none; }
   }
 
-  /* Ideas under the box: small clear glass capsules. */
-  .idea {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    text-decoration: underline;
-    text-decoration-color: var(--line);
-    text-underline-offset: 4px;
-    cursor: pointer;
-    transition: color 150ms, text-decoration-color 150ms;
+  /* Ideas under the box: each one shows the request it puts in the box. */
+  .starters {
+    display: grid;
+    gap: 0.5rem;
+    @media (min-width: 40rem) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (min-width: 64rem) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
-  .idea:hover { color: var(--text); text-decoration-color: var(--text); }
+  .starter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+    height: 100%;
+    padding: 0.85rem 1rem 0.95rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--line);
+    text-align: left;
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 150ms, border-color 150ms, transform 150ms;
 
-  /* The apps grid: content, so solid cards with a picture of the app. */
+    &:hover { background: var(--surface-solid); border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); }
+    &:active { transform: scale(0.98); }
+  }
+  .starter-name { font-size: 0.875rem; font-weight: 600; }
+  .starter-request {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+  }
+
+  /* The apps: under a hairline, solid cards with a picture of the app. */
+  .home-apps { padding-top: 2.5rem; border-top: 1px solid var(--line); }
+  .app-grid {
+    display: grid;
+    gap: 1rem;
+    @media (min-width: 40rem) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (min-width: 64rem) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    @media (min-width: 80rem) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+
+  /* This month's spend against the budget: the words, and a hairline that fills. */
+  .budget { display: flex; align-items: center; gap: 0.75rem; }
+  .budget-meter {
+    width: 6rem;
+    height: 4px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--well-strong);
+    appearance: none;
+
+    &::-webkit-meter-bar { background: var(--well-strong); border: 0; border-radius: 999px; height: 4px; }
+    &::-webkit-meter-optimum-value, &::-webkit-meter-suboptimum-value { background: var(--accent); border-radius: 999px; }
+    &::-webkit-meter-even-less-good-value { background: var(--danger); border-radius: 999px; }
+    &::-moz-meter-bar { background: var(--accent); border-radius: 999px; }
+  }
+  @media (max-width: 40rem) { .budget-meter { display: none; } }
   .app-card {
     display: block;
     overflow: hidden;
@@ -1382,13 +1483,11 @@
     place-items: center;
     width: 100%;
     height: 100%;
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 600;
-    color: var(--monogram-ink);
-    text-shadow: 0 2px 12px var(--monogram-shade);
-    background:
-      radial-gradient(70% 90% at 20% 10%, hsl(var(--hue) 70% 72% / 0.9), transparent 70%),
-      linear-gradient(140deg, hsl(var(--hue) 45% 52%), hsl(calc(var(--hue) + 40) 50% 34%));
+    letter-spacing: -0.04em;
+    color: var(--text-faint);
+    background: var(--well);
   }
 
   /* The menu on a card floats over its picture; on touch screens it always shows. */
@@ -1458,7 +1557,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .idea, .app-card, .card-menu > summary, .bezel iframe, .code-tree .chevron, .steps summary .chevron { transition: none; }
+  .starter, .app-card, .card-menu > summary, .bezel iframe, .code-tree .chevron, .steps summary .chevron { transition: none; }
   .modal[open] { animation: none; }
 }
 
