@@ -21,7 +21,7 @@
           it. A logo is the shop's own, never a stock photo. %>
       <% next if field.key.include?("logo") %>
       <div class="design-find">
-        <%= search_field_tag :q, nil, id: "photo_query_#{field.key}", form: "photo_search_#{field.key}", placeholder: "Or find a photo: “runners on a bridge”",
+        <%= search_field_tag :q, nil, id: "photo_query_#{field.key}", form: "photo_search_#{field.key}", placeholder: "Or find one on #{StockPhotos.source}: “runners on a bridge”",
               "aria-label": "Find a photo for #{field.label}", class: "field h-8 min-w-0 flex-1 py-0 text-sm" %>
         <button type="submit" form="photo_search_<%= field.key %>" class="btn btn-ghost h-8 px-3 text-sm">Find</button>
       </div>

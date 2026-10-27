@@ -7,8 +7,13 @@ class StockPhotos
   Photo = Data.define(:url, :thumb, :credit, :page, :download)
   REFERRAL = "utm_source=app_builder&utm_medium=referral"
 
-  def self.search(query, count: 9)
-    new.search(query, count:)
+  def self.search(query, count: 9, page: 1)
+    new.search(query, count:, page:)
+  end
+
+  # Where the photos come from, for the studio to say.
+  def self.source
+    keys["UNSPLASH_ACCESS_KEY"] ? "Unsplash" : "Openverse"
   end
 
   # Unsplash counts a photo as used when its download link is called.
@@ -33,15 +38,15 @@ class StockPhotos
     JSON.parse(response.body)
   end
 
-  def search(query, count:)
+  def search(query, count:, page: 1)
     return [] if query.to_s.strip.empty?
 
-    self.class.keys["UNSPLASH_ACCESS_KEY"] ? unsplash(query, count) : openverse(query, count)
+    self.class.keys["UNSPLASH_ACCESS_KEY"] ? unsplash(query, count, page) : openverse(query, count, page)
   end
 
   private
-    def unsplash(query, count)
-      params = URI.encode_www_form(query:, per_page: count, content_filter: "high", orientation: "landscape")
+    def unsplash(query, count, page)
+      params = URI.encode_www_form(query:, page:, per_page: count, content_filter: "high", orientation: "landscape")
       results = self.class.get(URI("https://api.unsplash.com/search/photos?#{params}"), "Authorization" => "Client-ID #{self.class.keys["UNSPLASH_ACCESS_KEY"]}")["results"]
       results.map do |photo|
         Photo.new(url: "#{photo.dig("urls", "raw")}&w=1600&q=80&fm=jpg&fit=max", thumb: photo.dig("urls", "small"),
@@ -50,8 +55,8 @@ class StockPhotos
       end
     end
 
-    def openverse(query, count)
-      params = URI.encode_www_form(q: query, license: "cc0,pdm,by", category: "photograph", mature: false, page_size: count, aspect_ratio: "wide")
+    def openverse(query, count, page)
+      params = URI.encode_www_form(q: query, page:, license: "cc0,pdm,by", category: "photograph", mature: false, page_size: count, aspect_ratio: "wide")
       self.class.get(URI("https://api.openverse.org/v1/images/?#{params}"))["results"].map do |result|
         license = [ "CC", result["license"].to_s.upcase, result["license_version"] ].compact.join(" ").sub("CC CC0", "CC0").sub("CC PDM", "Public domain")
         Photo.new(url: result["url"], thumb: result["thumbnail"].presence || result["url"],

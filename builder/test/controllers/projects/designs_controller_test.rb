@@ -129,6 +129,13 @@ class Projects::DesignsControllerTest < ActionDispatch::IntegrationTest
 
     get photos_project_design_path(@project, key: "hero_image", q: "runners")
     assert_select "turbo-frame#photos_hero_image button[form=photo_use] img[alt='Photo by Ana on Unsplash']"
+    assert_select "a", text: "More photos", count: 0 # fewer than a page
+
+    StockPhotos.define_singleton_method(:search) { |query, page: 1, **| page == 1 ? found * 9 : found }
+    get photos_project_design_path(@project, key: "hero_image", q: "runners")
+    assert_select "turbo-frame#photos_hero_image_page_2 a[href*='page=2']", "More photos"
+    get photos_project_design_path(@project, key: "hero_image", q: "runners", page: 2)
+    assert_select "turbo-frame#photos_hero_image_page_2 li button[form=photo_use]", 1
 
     choice = { key: "hero_image", url: found.first.url, credit: found.first.credit, page: found.first.page }.to_json
     post photo_project_design_path(@project), params: { choice: }

@@ -1292,6 +1292,7 @@
     & button:hover img { opacity: 0.85; }
     & button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     & img { width: 100%; height: 100%; object-fit: cover; transition: opacity 150ms; }
+    & .design-photos-more { grid-column: 1 / -1; display: flex; justify-content: center; }
   }
   .design-file { display: block; margin-top: 0.3rem; max-width: 100%; font-size: 0.75rem; color: var(--text-muted); }
   .design-file::file-selector-button { margin-right: 0.5rem; padding: 0.3rem 0.6rem; border: 1px solid var(--line); border-radius: var(--radius-inner); background: var(--surface-solid); color: var(--text); font: inherit; cursor: pointer; }

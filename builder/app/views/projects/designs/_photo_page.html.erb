@@ -1,0 +1,16 @@
+<%# One page of stock photos, then a frame that brings the next one into the same grid. %>
+<% @photos.each do |photo| %>
+  <li>
+    <button type="submit" form="photo_use" name="choice" title="<%= photo.credit %>"
+            value="<%= { key: @key, url: photo.url, credit: photo.credit, page: photo.page, download: photo.download }.to_json %>">
+      <%= image_tag photo.thumb, alt: photo.credit, loading: "lazy" %>
+    </button>
+  </li>
+<% end %>
+<% if @photos.size >= 9 && @page < 20 %>
+  <%= turbo_frame_tag "photos_#{@key}_page_#{@page + 1}", class: "contents" do %>
+    <li class="design-photos-more">
+      <%= link_to "More photos", photos_project_design_path(@project, key: @key, q: @query, page: @page + 1), class: "btn btn-ghost h-8 px-3 text-sm" %>
+    </li>
+  <% end %>
+<% end %>

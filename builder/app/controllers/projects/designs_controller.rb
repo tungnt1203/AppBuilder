@@ -61,12 +61,14 @@ class Projects::DesignsController < ApplicationController
     end
   end
 
-  # Stock photos for an image field (StockPhotos), in that field's frame.
+  # Stock photos for an image field (StockPhotos), in that field's frame; More photos brings the
+  # next page into the same grid.
   def photos
     @key = params.expect(:key)
     @query = params[:q].to_s.strip
+    @page = params[:page].to_i.clamp(1, 20)
     @photos = begin
-      StockPhotos.search(@query)
+      StockPhotos.search(@query, page: @page)
     rescue StandardError => error
       Rails.logger.warn("Stock photo search failed: #{error.message}")
       @search_error = "The photo search didn't answer. Try again in a moment."
