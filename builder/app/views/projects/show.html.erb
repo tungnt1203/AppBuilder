@@ -3,11 +3,11 @@
 
 <%# Two panels edge to edge on wide screens (chat, then the app), each with its own slim bar,
     so the preview gets as much of the window as it can. On phones they stack. %>
-<div class="studio" data-controller="preview tour"
+<div class="studio" data-controller="preview tour" data-action="design:saved->preview#reload"
      data-tour-auto-value="<%= !Current.user.toured_at? %>" data-tour-seen-url-value="<%= tour_path %>"
      data-preview-version-value="<%= @project.preview_version %>" data-preview-state-value="<%= @project.preview_state %>"
      data-preview-accepts-value="<%= @project.accepts_messages? || @project.accepts_messages_while_working? %>">
-    <aside class="studio-panel studio-chat" aria-label="Chat">
+    <aside class="studio-panel studio-chat" aria-label="Chat" data-preview-target="chat">
       <%# Narrow (the chat column on a laptop, a phone), the tour and theme buttons and the long
           labels make way, so the status never runs over the buttons. %>
       <header class="studio-bar @container">
@@ -24,7 +24,7 @@
                    data-tour-step="5" data-tour-title="Nothing is lost"
                    data-tour-text="Every change is saved as a version. Open this to go back to any of them."><%= icon :history %></summary>
           <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-xl p-2 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[26rem] lg:right-auto lg:left-0">
-            <%= render "projects/versions", project: @project %>
+            <div id="versions"><%= render "projects/versions", project: @project %></div>
           </div>
         </details>
         <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="instructions">
@@ -47,6 +47,9 @@
               form: { data: { tour_step: 6, tour_title: "Put it online",
                               tour_text: "Once the first build is done, Publish gives your app its own address. Publish again whenever you want the latest changes live." } } %>
       </header>
+
+      <%# The Design tab takes the chat's place, loaded the first time it's opened. %>
+      <turbo-frame id="design" class="design-frame" data-preview-target="design" data-src="<%= project_design_path(@project) %>" hidden></turbo-frame>
 
       <div id="messages" class="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pt-4 pb-4" data-controller="autoscroll">
         <% items = chat_items(@project.messages) %>
@@ -121,6 +124,8 @@
         <div class="segmented segmented-labels" role="tablist" aria-label="Show">
           <button type="button" role="tab" aria-selected="true" data-preview-target="tab" data-preview-tab-param="preview" data-action="preview#showTab"><%= icon :play, size: 13 %>Preview</button>
           <button type="button" role="tab" aria-selected="false" data-preview-target="tab" data-preview-tab-param="code" data-action="preview#showTab"><%= icon :code, size: 14 %>Code</button>
+          <button type="button" role="tab" aria-selected="false" data-preview-target="tab" data-preview-tab-param="design" data-action="preview#showTab"
+                  title="Colors, fonts and shape, without a turn of the agent"><%= icon :contrast, size: 14 %>Design</button>
         </div>
         <div class="hidden md:block"><%= render "projects/devices" %></div>
         <span class="url ml-1 hidden min-w-0 flex-1 truncate md:block"><%= @project.preview_url %></span>

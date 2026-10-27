@@ -1,7 +1,8 @@
 # Development only, for the builder's preview: tells the builder (the page around
 # the preview) about JavaScript errors and error pages while someone tries the app,
-# so it can offer to fix them, and lets the owner point at a part of a page to talk
-# about it. Never runs in production. Don't change or remove it.
+# so it can offer to fix them, lets the owner point at a part of a page to talk
+# about it, and tries on the colors and fonts the owner picks in the Design tab. Never runs
+# in production. Don't change or remove it.
 if Rails.env.development?
   class PreviewProbe
     PATH = "/_preview/probe.js"
@@ -78,6 +79,23 @@ if Rails.env.development?
             setPicking(false)
             window.parent.postMessage({ type: "preview:pick-ended" }, "*")
           }, true)
+          // The studio's Design tab tries colors, fonts and shape on: theme variables over the
+          // page's own, kept for this tab across pages until the studio clears them.
+          const designKey = "preview-design"
+          let designed = []
+          const design = (variables) => {
+            const style = document.documentElement.style
+            designed.forEach((name) => style.removeProperty(name))
+            designed = Object.keys(variables || {})
+            designed.forEach((name) => style.setProperty(name, variables[name]))
+          }
+          try { design(JSON.parse(sessionStorage.getItem(designKey))) } catch {}
+          window.addEventListener("message", (event) => {
+            if (event.source !== window.parent || event.data?.type !== "preview:design") return
+            design(event.data.variables)
+            try { event.data.variables ? sessionStorage.setItem(designKey, JSON.stringify(event.data.variables)) : sessionStorage.removeItem(designKey) } catch {}
+          })
+
           window.addEventListener("error", (event) => {
             if (!event.message) return // a resource that failed to load, not a script error
             send({ kind: "javascript", message: event.message, source: event.filename && `${event.filename.replace(location.origin, "")}:${event.lineno}:${event.colno}`, stack: event.error?.stack })

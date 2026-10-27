@@ -19,7 +19,7 @@ import { Controller } from "@hotwired/stimulus"
 // the agent to fix them. The same probe lets the owner point at a part of a page:
 // what they pick goes with their next message.
 export default class extends Controller {
-  static targets = [ "stage", "frame", "device", "bezel", "tab", "code", "codeFiles",
+  static targets = [ "stage", "frame", "device", "bezel", "tab", "code", "codeFiles", "chat", "design",
                      "errorBox", "errorTitle", "errorPage", "errorMessage", "errorRequest", "errorFix",
                      "pickButton", "pointed", "pointedChip", "pointedLabel" ]
   static values = { version: Number, state: String, accepts: Boolean }
@@ -28,7 +28,8 @@ export default class extends Controller {
 
   connect() {
     this.skipMorph = (event) => {
-      if (event.target === this.stageTarget || (this.hasCodeTarget && event.target === this.codeTarget)) event.preventDefault()
+      if (event.target === this.stageTarget || (this.hasCodeTarget && event.target === this.codeTarget) ||
+          (this.hasDesignTarget && event.target === this.designTarget)) event.preventDefault()
     }
     document.addEventListener("turbo:before-morph-element", this.skipMorph)
     this.restoreSize = () => { this.showSize(this.size); this.showTab({ params: { tab: this.tab } }) }
@@ -88,10 +89,17 @@ export default class extends Controller {
     this.stageTarget.removeAttribute("data-peek")
   }
 
+  // Design shows the app (preview) and puts the design form in the chat's place.
   showTab({ params: { tab } }) {
-    this.tab = tab === "code" ? "code" : "preview"
-    this.bezelTarget.dataset.tab = this.tab
+    this.tab = [ "code", "design" ].includes(tab) ? tab : "preview"
+    this.bezelTarget.dataset.tab = this.tab === "code" ? "code" : "preview"
     if (this.tab === "code" && !this.codeTarget.src) this.codeTarget.src = this.codeTarget.dataset.src
+    if (this.hasDesignTarget) {
+      const designing = this.tab === "design"
+      if (designing && !this.designTarget.src) this.designTarget.src = this.designTarget.dataset.src
+      this.designTarget.hidden = !designing
+      this.chatTarget.toggleAttribute("data-designing", designing)
+    }
     this.tabTargets.forEach((button) => button.setAttribute("aria-selected", button.dataset.previewTabParam === this.tab))
   }
 

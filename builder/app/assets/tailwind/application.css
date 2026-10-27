@@ -1224,6 +1224,41 @@
     color: var(--on-accent);
   }
 
+  /* The Design tab, in the chat's place: groups of controls that scroll, Save pinned below. */
+  .studio-chat[data-designing] > :not(.studio-bar, .design-frame) { display: none; }
+  .design-frame:not([hidden]) { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .design { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .design-body { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 1.25rem; padding: 1rem; }
+  .design-group {
+    display: grid;
+    gap: 0.6rem;
+
+    & legend { margin-bottom: 0.6rem; font-size: 0.875rem; font-weight: 600; }
+  }
+  .design-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.875rem; color: var(--text-muted); }
+  .design-color {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+
+    & input[type="color"] { width: 2rem; height: 2rem; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-inner); background: none; cursor: pointer; }
+    & input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+    & input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 4px; }
+    & output { width: 4.5rem; font-family: var(--font-mono); font-size: 0.75rem; }
+  }
+  .design-choice {
+    position: relative;
+    cursor: pointer;
+
+    & input { position: absolute; opacity: 0; pointer-events: none; }
+    & span { display: block; padding: 0.3rem 0.6rem; border-radius: var(--radius-inner); font-size: 0.8125rem; font-weight: 500; color: var(--text-muted); }
+    & input:checked + span { color: var(--text); background: var(--surface-solid); box-shadow: 0 1px 3px var(--shade); }
+    & input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+  }
+  .design-warning { font-size: 0.8125rem; color: var(--danger); }
+  .design-actions { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid var(--line); }
+
   /* What to ask for next, under the reply after a build. */
   .next-steps { display: grid; gap: 0.45rem; }
 
