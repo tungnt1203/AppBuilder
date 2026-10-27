@@ -31,7 +31,7 @@
   <div class="mt-6">
     <% if @products.any? %>
       <div class="grid grid-cols-2 gap-x-2 gap-y-8 md:grid-cols-4">
-        <%= render partial: "products/product", collection: @products.records %>
+        <%= render partial: "products/product", collection: @new_arrivals %>
       </div>
       <div class="mt-10 text-center">
         <%= link_to t(".view_all"), products_path, class: "#{button_classes} min-h-12 px-10 text-[0.9375rem]" %>

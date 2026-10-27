@@ -30,7 +30,7 @@
   <div class="mt-7">
     <% if @products.any? %>
       <div class="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-8">
-        <%= render partial: "products/product", collection: @products.records %>
+        <%= render partial: "products/product", collection: @new_arrivals %>
       </div>
     <% else %>
       <%= render "products/coming_soon" %>

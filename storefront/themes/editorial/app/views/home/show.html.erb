@@ -41,7 +41,7 @@
   <div class="mt-6">
     <% if @products.any? %>
       <div class="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
-        <%= render partial: "products/product", collection: @products.records.first(6) %>
+        <%= render partial: "products/product", collection: @new_arrivals.first(6) %>
       </div>
     <% else %>
       <%= render "products/coming_soon" %>

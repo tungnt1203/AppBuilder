@@ -164,6 +164,15 @@ class CatalogTest < ActionDispatch::IntegrationTest
     assert_select "li", text: "Personalize it before you buy", count: 0
   end
 
+  test "a product in Make it yours isn't repeated in the newest products, when there are enough others" do
+    tee = @platform.products_data.first
+    tee["buyer_inputs"] = [ { "key" => "name", "label" => "Name", "required" => false, "max_length" => 12 } ]
+    4.times { |index| @platform.products_data << tee.merge("slug" => "plain-tee-#{index}", "title" => "Plain Tee #{index}", "buyer_inputs" => []) }
+    get root_path
+    assert_select "a[href='/products/cat-tee']", 1
+    assert_select "a[href='/products/plain-tee-0']", 1
+  end
+
   test "made to order never says free shipping for want of a flat rate: Printify's is known at checkout" do
     @platform.shop_data["shipping"] = @platform.shop_data["shipping"].merge("free_over_cents" => nil, "first_item_cents" => 0)
     get product_path("cat-tee")
