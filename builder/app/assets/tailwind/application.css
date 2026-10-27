@@ -323,11 +323,24 @@
   .field::placeholder { color: var(--text-faint); }
   .field:focus, .field:focus-within { outline: none; border-color: var(--accent); background: var(--well-strong); }
 
-  /* Chat */
+  /* Chat: one centred column, like a chat app's, however wide the panel gets. The owner's
+     messages sit on the right in a bubble that fits them; the agent's replies are plain text
+     across the column. */
+  .thread {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem max(1rem, calc((100% - 46rem) / 2)) 1rem;
+  }
+  /* A new turn starts with a little more room above the owner's message. */
+  .thread > :not(.sent-attachments, .pointed-note, .bubble-user) + :is(.sent-attachments, .pointed-note, .bubble-user) { margin-top: 1rem; }
+
   .bubble-user {
-    margin-left: 2.5rem;
-    padding: 0.7rem 1rem;
-    border-radius: 12px 12px 4px 12px;
+    align-self: flex-end;
+    width: fit-content;
+    max-width: 85%;
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-panel);
     background: var(--well-strong);
     color: var(--text);
     font-size: 0.9375rem;
@@ -341,7 +354,7 @@
 
   .reply {
     font-size: 0.9375rem;
-    line-height: 1.65;
+    line-height: 1.7;
     color: var(--text);
 
     & p, & ul, & ol, & pre, & table { margin-bottom: 0.7rem; }
@@ -355,8 +368,52 @@
     & em { font-style: italic; }
     & code { font-family: var(--font-mono); font-size: 0.8em; background: var(--well); padding: 0.1rem 0.35rem; border-radius: 6px; }
     & a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+    & pre { overflow-x: auto; padding: 0.75rem 0.9rem; border-radius: var(--radius-control); background: var(--well); border: 1px solid var(--line); font-size: 0.8125rem; line-height: 1.55; }
+    & pre code { padding: 0; background: none; font-size: inherit; }
+    & hr { margin: 1rem 0; border-color: var(--line); }
     & table { font-size: 0.8125rem; border-collapse: collapse; }
     & th, & td { border: 1px solid var(--line); padding: 0.25rem 0.5rem; text-align: left; }
+  }
+
+  /* Under an answer: copy it. A tick shows for a moment once it's copied. */
+  .reply-actions { display: flex; gap: 0.125rem; margin: -0.6rem 0 0 -0.4rem; }
+  .reply-action {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--radius-inner);
+    color: var(--text-faint);
+    cursor: pointer;
+    transition: background-color 150ms, color 150ms;
+
+    &:hover { background: var(--hover); color: var(--text); }
+    & .when-copied { display: none; }
+    &[data-copied] { color: var(--ready); }
+    &[data-copied] .when-idle { display: none; }
+    &[data-copied] .when-copied { display: contents; }
+  }
+
+  /* Back to the newest message, when the owner has scrolled up to read. */
+  .jump-latest {
+    position: sticky;
+    bottom: 0.25rem;
+    align-self: center;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    color: var(--text);
+    background: var(--surface-solid);
+    box-shadow: 0 0 0 1px var(--line), 0 6px 16px -6px var(--shade);
+    cursor: pointer;
+    transition: background-color 150ms, transform 150ms;
+
+    &:hover { background: var(--admin-muted); }
+    &:active { transform: scale(0.95); }
+    &[hidden] { display: none; }
   }
 
   /* The agent's working thread: its steps and what it says between them hang on a thin rail at
@@ -409,7 +466,7 @@
     padding: 0;
   }
   .attachment-list { margin-bottom: 0.5rem; }
-  .sent-attachments { justify-content: flex-end; align-items: flex-start; margin-left: 2.5rem; }
+  .sent-attachments { justify-content: flex-end; align-items: flex-start; margin-left: 15%; }
   .attachment-list li, .sent-attachments li {
     position: relative;
     border-radius: var(--radius-control);
@@ -478,7 +535,7 @@
     flex-direction: column;
     gap: 0.5rem;
     flex-shrink: 0;
-    padding: 0 0.75rem 0.75rem;
+    padding: 0 max(0.75rem, calc((100% - 46rem) / 2)) 0.75rem;
   }
   .composer {
     display: flex;
@@ -487,10 +544,12 @@
     transition: border-color 150ms;
   }
   .composer:focus-within { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+  /* Send reads as off until there is something to send. */
+  form[data-empty] .composer-actions .btn-primary:not(:disabled) { opacity: 0.35; }
   .composer-input {
     display: block;
     width: 100%;
-    min-height: 2.75rem;
+    min-height: 3.25rem;
     max-height: min(40vh, 16rem);
     resize: none;
     overflow-y: hidden;
@@ -1301,7 +1360,27 @@
   .design-file::file-selector-button { margin-right: 0.5rem; padding: 0.3rem 0.6rem; border: 1px solid var(--line); border-radius: var(--radius-inner); background: var(--surface-solid); color: var(--text); font: inherit; cursor: pointer; }
 
   /* What to ask for next, under the reply after a build. */
-  .next-steps { display: grid; gap: 0.45rem; }
+  /* Suggestions under the last answer, one per row, each a sentence to send or change. */
+  .next-steps { display: grid; gap: 0.35rem; }
+  .suggestion {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--line);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    text-align: left;
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 150ms, border-color 150ms;
+
+    & svg { color: var(--text-faint); }
+    &:hover { background: var(--hover); border-color: color-mix(in srgb, var(--accent) 25%, var(--line)); }
+    &:hover svg { color: var(--text); }
+  }
 
   /* Approving a proposed plan. */
   .proposal { display: flex; align-items: center; gap: 0.75rem; }
@@ -1557,7 +1636,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .starter, .app-card, .card-menu > summary, .bezel iframe, .code-tree .chevron, .steps summary .chevron { transition: none; }
+  .starter, .suggestion, .reply-action, .jump-latest, .app-card, .card-menu > summary, .bezel iframe, .code-tree .chevron, .steps summary .chevron { transition: none; }
   .modal[open] { animation: none; }
 }
 

@@ -6,6 +6,7 @@ module ApplicationHelper
     reload: [ "M21 12a9 9 0 1 1-2.64-6.36L21 8", "M21 3v5h-5" ],
     external: [ "M14 4h6v6", "M20 4l-9 9", "M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" ],
     send: [ "M12 19V5", "M5 12l7-7 7 7" ],
+    down: [ "M12 5v14", "M5 12l7 7 7-7" ],
     chevron: [ "M9 6l6 6-6 6" ],
     steps: [ "M4 6h16", "M4 12h10", "M4 18h7" ],
     share: [ "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8", "M16 6l-4-4-4 4", "M12 2v13" ],

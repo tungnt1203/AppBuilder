@@ -52,7 +52,7 @@
       <turbo-frame id="design" class="design-frame" data-preview-target="design" data-src="<%= project_design_path(@project) %>"
                    data-action="turbo:submit-end->preview#designed" hidden></turbo-frame>
 
-      <div id="messages" class="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pt-4 pb-4" data-controller="autoscroll">
+      <div id="messages" class="thread min-h-0 flex-1 overflow-y-auto" data-controller="autoscroll">
         <% items = chat_items(@project.messages) %>
         <% items.each_with_index do |item, index| %>
           <% if item.is_a?(Array) %>
@@ -64,6 +64,7 @@
         <% end %>
 
         <div id="draft" class="reply draft" data-turbo-permanent></div>
+        <button type="button" class="jump-latest" data-autoscroll-target="jump" data-action="autoscroll#jump" aria-label="Go to the newest message" title="Go to the newest message" hidden><%= icon :down, size: 16 %></button>
       </div>
 
       <%# In the flow under the chat: as the message grows, the chat above gets shorter instead of hidden. %>

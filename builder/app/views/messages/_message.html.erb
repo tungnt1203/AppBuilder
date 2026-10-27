@@ -28,6 +28,13 @@
 <% when "assistant" %>
   <% if message.body.present? %>
     <div class="reply<%= " reply-interim trail-item" if local_assigns[:interim] %>"><%= markdown(message.body) %></div>
+    <% unless local_assigns[:interim] %>
+      <div class="reply-actions" data-controller="copy" data-copy-text-value="<%= message.body %>">
+        <button type="button" class="reply-action" data-action="copy#copy" aria-label="Copy reply" title="Copy">
+          <span class="when-idle"><%= icon :copy, size: 15 %></span><span class="when-copied"><%= icon :check, size: 15 %></span>
+        </button>
+      </div>
+    <% end %>
   <% end %>
   <% if message.data["questions"].present? && message == message.project.open_reply %>
     <%= render "messages/questions", message: message %>

@@ -17,6 +17,7 @@ export default class extends Controller {
 
   resize() {
     const input = this.inputTarget
+    this.element.toggleAttribute("data-empty", !input.value.trim())
     const width = input.clientWidth
     if (this.height && width === this.width && input.value === this.value) return
     this.width = width
