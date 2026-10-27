@@ -171,6 +171,10 @@ class CatalogTest < ActionDispatch::IntegrationTest
     get root_path
     assert_select "a[href='/products/cat-tee']", 1
     assert_select "a[href='/products/plain-tee-0']", 1
+
+    @platform.products_data << tee.merge("slug" => "plain-tee-4", "title" => "Plain Tee 4", "buyer_inputs" => [])
+    get root_path
+    assert_select "a[href^='/products/']", 5 # the tee in Make it yours, then whole rows of four: five would leave a gap
   end
 
   test "made to order never says free shipping for want of a flat rate: Printify's is known at checkout" do
