@@ -23,7 +23,7 @@
 <section class="page-width pt-14 md:pt-20">
   <div class="flex items-end justify-between gap-4">
     <h2 class="text-4xl md:text-5xl"><%= t(".new_arrivals") %></h2>
-    <%= link_to t(".view_all"), products_path, class: "pb-1 text-sm font-semibold tracking-[0.06em] text-ink uppercase underline underline-offset-8 hover:text-brand-600" if @products.any? %>
+    <%= link_to t(".view_all"), products_path, class: "pb-1 text-sm font-semibold tracking-[0.04em] text-ink uppercase underline underline-offset-8 hover:text-brand-600" if @products.any? %>
   </div>
   <div class="mt-8">
     <% if @products.any? %>

@@ -11,7 +11,7 @@ class Admin::DashboardsControllerTest < ActionDispatch::IntegrationTest
     get admin_root_path
     assert_select "h1", "Orders"
     assert_select "li", /Orders\s*\d+/
-    assert_select "a[href=?]", shop_admin_order_path(shops(:cats), paid.token), /#1002 · #{paid.shipping_name}/
+    assert_select "a[href=?]", shop_admin_order_path(shops(:cats), paid.token), /#1002\s+#{paid.shipping_name}/
     assert_select "a[href=?]", shop_admin_root_path(shops(:cats)), "Chubby Cat Tees"
     assert_select "a[href=?]", shop_admin_root_path(shops(:dogs)), "Good Boy Hoodies"
     assert_select "aside[aria-label=Admin] a", text: "Accounts", count: 0 # not an administrator of the builder

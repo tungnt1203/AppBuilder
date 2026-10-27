@@ -31,4 +31,4 @@ en:
   hello: "Hello world"
   mailer:
     app: Studio
-    footer: "%{app} · Questions? Just reply to this email."
+    footer: "%{app}. Questions? Just reply to this email."

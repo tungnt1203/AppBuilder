@@ -54,7 +54,7 @@ class ShopAdmin::PrintifyTest < ActionDispatch::IntegrationTest
 
     get shop_admin_printify_imports_path
     assert_select "li", /Sunset Tee/
-    assert_select "li", /From \$25\.00 · costs \$11\.50 · 54% margin/
+    assert_select "li", /From \$25\.00, costs \$11\.50\s*\(54% margin\)/
     assert_select "button", "Import"
 
     assert_difference -> { Product.count } do

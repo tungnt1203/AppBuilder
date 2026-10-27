@@ -9,8 +9,17 @@
 
 <% if @shops.empty? %>
   <p class="admin-card p-6 text-sm">You don't run a shop yet. <%= link_to "Open one", new_admin_shop_path, class: "underline" %>.</p>
-<% else %>
+<% elsif @totals.values.all? { |totals| totals["orders"].zero? && totals["needs_action"].zero? } %>
+  <div class="admin-card mb-8 flex flex-wrap items-center gap-4 p-5">
+    <p class="min-w-0 flex-1 text-sm">No sales in the last 30 days. Shops sell once they have products, and payments and Printify are set up.</p>
+    <%= link_to "Add products", admin_products_path, class: "admin-button" %>
+    <%= link_to "Settings", admin_settings_path, class: "admin-button admin-button-secondary" %>
+  </div>
+<% end %>
+
+<% if @shops.any? %>
   <% @totals.each do |currency, totals| %>
+    <% next if totals["orders"].zero? && totals["needs_action"].zero? %>
     <ul class="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Last 30 days<%= " in #{currency}" if @totals.many? %>">
       <% [ [ "Sales", shop_money(totals["sales_cents"], currency) ], [ "Orders", totals["orders"] ],
            [ "You keep", (shop_money(totals["margin_cents"], currency) if totals["margin_cents"].nonzero?) || "—" ],
@@ -33,14 +42,13 @@
             <li>
               <%= link_to shop_admin_order_path(shop, order["token"]), class: "admin-row" do %>
                 <div class="min-w-0 flex-1">
-                  <p class="truncate text-sm font-semibold">#<%= order["number"] %> · <%= order["name"] %></p>
-                  <p class="faint truncate text-[0.8125rem]">
-                    <%= shop.name %> ·
-                    <%= time_ago_in_words(Time.iso8601(order["placed_at"])) %> ago
-                  </p>
+                  <p class="truncate text-sm font-semibold"><span class="faint font-medium tabular-nums">#<%= order["number"] %></span> <%= order["name"] %></p>
+                  <p class="faint truncate text-[0.8125rem]"><%= shop.name %></p>
                   <% if order["problem"] %><p class="truncate text-[0.8125rem] text-[var(--danger)]"><%= order["problem"] %></p><% end %>
                 </div>
-                <span class="faint hidden text-[0.8125rem] sm:block"><%= order["status"].humanize %></span>
+                <span class="faint hidden text-right text-[0.8125rem] sm:block">
+                  <%= order["status"].humanize %><br><%= time_ago_in_words(Time.iso8601(order["placed_at"])) %> ago
+                </span>
                 <span class="w-24 text-right text-sm font-medium tabular-nums"><%= shop_money(order["total_cents"], order["currency"]) %></span>
               <% end %>
             </li>
@@ -59,9 +67,9 @@
             <div class="min-w-0 flex-1">
               <%= link_to shop.name, shop_admin_root_path(shop), class: "block truncate text-sm font-semibold" %>
               <p class="faint truncate text-[0.8125rem]">
-                <%= pluralize(summary["orders"], "order") %> · <%= shop_money(summary["sales_cents"], summary["currency"]) %>
-                <%= "· #{summary["needs_action"]} to handle" if summary["needs_action"].positive? %>
-                <%= "· #{pluralize(summary["problems"], "Printify problem")}" if summary["problems"].positive? %>
+                <%= [ "#{pluralize(summary["orders"], "order")} for #{shop_money(summary["sales_cents"], summary["currency"])}",
+                      ("#{summary["needs_action"]} to handle" if summary["needs_action"].positive?),
+                      (pluralize(summary["problems"], "Printify problem") if summary["problems"].positive?) ].compact.join(", ") %>
               </p>
             </div>
           </li>

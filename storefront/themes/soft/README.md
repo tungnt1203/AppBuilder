@@ -6,7 +6,7 @@ Reference: https://theme-sense-demo.myshopify.com (look at it with `bin/look <ur
 
 ## What it is
 
-- Cream canvas (#f6f4ee), dark plum-gray text (#2e2a39), Poppins at medium weight for headings
+- Cream canvas (#f6f4ee), dark plum-gray text (#2e2a39), Nunito at medium weight for headings
   and regular for text. Rounded corners (14px cards, 11px buttons). Cards on a soft shadow.
 - One pale two-color gradient (lime #e2f89c into blush #fbe3e1) behind the first screen's card,
   the announcement bar and the story band, nowhere else. A deep plum (#9b046f) for badges and
@@ -25,7 +25,7 @@ Reference: https://theme-sense-demo.myshopify.com (look at it with `bin/look <ur
   blush #fde2e4).
 - **Deep color**: `--color-brand-600` and its scale for links and badges (plum, deep teal #0f5e5a,
   cocoa #6b3f2a). The owner's `brand_color` setting replaces it.
-- **Font**: Poppins, or one rounded sans in its place (Quicksand, Nunito, Plus Jakarta Sans).
+- **Font**: Nunito, or one rounded sans in its place (Quicksand, Plus Jakarta Sans). Not Poppins: it reads as a template default.
 - **Photos**: `hero_image` (close and warm: hands, faces, pets, the product in use, soft light)
   and `story_image`, as theme-setting defaults from `bin/images`.
 - **Words**: `hero_title` is short and warm ("Made with their name on it"); `hero_text` says what

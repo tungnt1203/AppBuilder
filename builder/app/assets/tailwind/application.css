@@ -63,6 +63,13 @@
     --danger-bg: rgb(253 236 231 / 0.85);
     --danger-text: #8a3320;
     --link: #1f7a6f;
+    --on-jade: #ffffff;
+    --jade-from: rgb(63 168 154 / 0.95);
+    --jade-to: rgb(37 118 108 / 0.95);
+    --jade-hover-from: rgb(72 182 167);
+    --jade-hover-to: rgb(41 128 117);
+    --jade-rim: rgb(255 255 255 / 0.45);
+    --jade-drop: rgb(20 90 82 / 0.8);
     --dawn-glow: rgb(247 178 140 / 0.95);
     --lagoon-glow: rgb(110 205 196 / 0.85);
     --jade-glow: rgb(47 143 131 / 0.9);
@@ -267,7 +274,7 @@
   /* Menus grow out of the control that opened them. */
   details[open] > .popover {
     transform-origin: top right;
-    animation: grow 320ms cubic-bezier(0.2, 1.25, 0.35, 1);
+    animation: grow 320ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .sheet { border-radius: 28px; }
@@ -290,7 +297,7 @@
   }
 
   .btn:active:not(:disabled) { transform: scale(0.97); }
-  .btn:disabled { cursor: default; opacity: 0.45; }
+  .btn:disabled { cursor: not-allowed; opacity: 0.6; }
 
   .btn-ghost { background: transparent; }
   .btn-ghost:hover:not(:disabled) { background: var(--hover); }
@@ -305,12 +312,14 @@
 
   /* Jade-tinted glass for the one primary action on screen. */
   .btn-primary {
-    color: white;
-    background: linear-gradient(180deg, rgb(63 168 154 / 0.95), rgb(37 118 108 / 0.95));
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.45) inset, 0 8px 20px -8px rgb(20 90 82 / 0.8);
+    color: var(--on-jade);
+    background: linear-gradient(180deg, var(--jade-from), var(--jade-to));
+    box-shadow: 0 1px 0 var(--jade-rim) inset, 0 8px 20px -8px var(--jade-drop);
     text-shadow: 0 1px 0 rgb(0 0 0 / 0.15);
   }
-  .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, rgb(72 182 167), rgb(41 128 117)); }
+  .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, var(--jade-hover-from), var(--jade-hover-to)); }
+  /* Disabled reads by its fill, its ink and the cursor, not only by fading. */
+  .btn-primary:disabled { background: var(--well-strong); color: var(--text-faint); box-shadow: none; text-shadow: none; }
 
   /* Status: a colored dot and plain words. */
   .status {
@@ -352,11 +361,11 @@
     margin-left: 2.5rem;
     padding: 0.7rem 1rem;
     border-radius: 20px 20px 6px 20px;
-    background: linear-gradient(180deg, rgb(47 143 131 / 0.92), rgb(33 112 103 / 0.92));
-    color: white;
+    background: linear-gradient(180deg, var(--jade-from), var(--jade-to));
+    color: var(--on-jade);
     font-size: 0.9375rem;
     line-height: 1.55;
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset;
+    box-shadow: 0 1px 0 var(--jade-rim) inset;
 
     & .bubble-text { white-space: pre-line; }
     & .bubble-text.is-clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; overflow: hidden; }
@@ -602,7 +611,7 @@
     width: 100%;
     height: 100%;
     background: white;
-    transition: width 320ms cubic-bezier(0.2, 0.9, 0.3, 1), height 320ms cubic-bezier(0.2, 0.9, 0.3, 1), border-radius 320ms;
+    transition: border-radius 320ms;
   }
 
   /* The app, and what covers it while it can't be looked at. */
@@ -1276,15 +1285,16 @@
 
   /* Ideas under the box: small clear glass capsules. */
   .idea {
-    padding: 0.4rem 0.9rem;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 500;
-    color: white;
+    color: rgb(255 255 255 / 0.85);
+    text-decoration: underline;
+    text-decoration-color: rgb(255 255 255 / 0.35);
+    text-underline-offset: 4px;
     cursor: pointer;
-    transition: transform 150ms;
+    transition: color 150ms, text-decoration-color 150ms;
   }
-  .idea:hover { transform: translateY(-1px); }
-  .idea:active { transform: scale(0.97); }
+  .idea:hover { color: white; text-decoration-color: white; }
 
   /* The apps grid: content, so solid cards with a picture of the app. */
   .app-card {
@@ -1362,13 +1372,13 @@
     cursor: pointer;
 
     &:hover:not(:disabled) { background: var(--hover); }
-    &:disabled { cursor: default; opacity: 0.45; }
+    &:disabled { cursor: not-allowed; color: var(--text-faint); }
   }
   .menu-item-danger { color: var(--danger); }
 
   /* Dialogs: frosted glass over a dimmed page. Not .glass, which would undo the modal's fixed position. */
   .modal {
-    width: min(26rem, calc(100vw - 2rem));
+    width: min(26rem, calc(100% - 2rem));
     margin: auto;
     padding: 0;
     border-radius: 28px;
@@ -1378,7 +1388,7 @@
     box-shadow: var(--glass-shadow);
     color: var(--text);
 
-    &[open] { animation: grow 320ms cubic-bezier(0.2, 1.25, 0.35, 1); }
+    &[open] { animation: grow 320ms cubic-bezier(0.16, 1, 0.3, 1); }
     &::backdrop { background: rgb(6 30 34 / 0.35); backdrop-filter: blur(3px); }
   }
 
@@ -1453,6 +1463,14 @@
     --admin-brand-200: #9fd6cc;
     --admin-brand-700: #1f6159;
     --admin-brand-800: #1a4e48;
+    --admin-side-text: rgb(228 241 238 / 0.85);
+    --admin-side-ink: #ffffff;
+    --admin-side-hover: rgb(255 255 255 / 0.08);
+    --admin-side-current: rgb(124 198 192 / 0.18);
+    --admin-side-well: rgb(255 255 255 / 0.06);
+    --admin-side-line: rgb(255 255 255 / 0.1);
+    --admin-button: var(--color-brand-600);
+    --admin-on-button: #ffffff;
     background: var(--admin-canvas);
     color: var(--text);
     min-height: 100%;
@@ -1470,26 +1488,26 @@
   .admin-side {
     position: sticky; top: 0; height: 100vh; height: 100dvh;
     /* A shop's links outgrow a short window: the sidebar scrolls by itself instead of spilling out. */
-    overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+    overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--admin-side-line) transparent;
     display: flex; flex-direction: column; gap: 0.25rem;
     padding: 1.25rem 0.75rem;
-    background: var(--admin-side); color: rgb(228 241 238 / 0.85);
+    background: var(--admin-side); color: var(--admin-side-text);
   }
-  .admin-brand { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem 1rem; font-weight: 600; color: #fff; }
+  .admin-brand { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem 1rem; font-weight: 600; color: var(--admin-side-ink); }
   .admin-link {
     display: flex; align-items: center; gap: 0.6rem;
     padding: 0.5rem 0.75rem; border-radius: 10px;
     font-size: 0.9375rem; font-weight: 500;
-    &:hover { background: rgb(255 255 255 / 0.08); color: #fff; }
-    &[aria-current="page"] { background: rgb(124 198 192 / 0.18); color: #fff; }
+    &:hover { background: var(--admin-side-hover); color: var(--admin-side-ink); }
+    &[aria-current="page"] { background: var(--admin-side-current); color: var(--admin-side-ink); }
   }
-  .admin-switcher { margin: 0 0 0.75rem; border-radius: 10px; background: rgb(255 255 255 / 0.06); color: #fff;
+  .admin-switcher { margin: 0 0 0.75rem; border-radius: 10px; background: var(--admin-side-well); color: var(--admin-side-ink);
     & > summary { cursor: pointer; list-style: none; &::-webkit-details-marker { display: none; } }
   }
-  .admin-switcher-menu { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.25rem; border-top: 1px solid rgb(255 255 255 / 0.1);
-    & [aria-current] { color: #fff; font-weight: 600; }
+  .admin-switcher-menu { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.25rem; border-top: 1px solid var(--admin-side-line);
+    & [aria-current] { color: var(--admin-side-ink); font-weight: 600; }
   }
-  .admin-side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 0.25rem; border-top: 1px solid rgb(255 255 255 / 0.1); padding-top: 0.75rem; }
+  .admin-side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 0.25rem; border-top: 1px solid var(--admin-side-line); padding-top: 0.75rem; }
   .admin-main { padding: 2rem clamp(1rem, 4vw, 3rem) 4rem; max-width: 72rem; width: 100%; }
   .admin-header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
   .admin-title { font-size: 1.625rem; font-weight: 600; letter-spacing: -0.02em; }
@@ -1497,7 +1515,7 @@
     background: var(--admin-card);
     border: 1px solid var(--line);
     border-radius: 14px;
-    box-shadow: 0 1px 2px rgb(6 36 41 / 0.06);
+    box-shadow: 0 1px 2px var(--line);
   }
   .admin-section-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; }
   .admin-stat { display: flex; flex-direction: column; gap: 0.25rem; padding: 1rem 1.1rem; }
@@ -1513,8 +1531,8 @@
   .admin-button {
     display: inline-flex; align-items: center; gap: 0.4rem; height: 2.25rem; padding: 0 1rem;
     border-radius: 10px; font-size: 0.875rem; font-weight: 600;
-    background: var(--color-jade); color: #fff;
-    &:hover { background: color-mix(in srgb, var(--color-jade) 85%, black); }
+    background: var(--admin-button); color: var(--admin-on-button);
+    &:hover { background: color-mix(in srgb, var(--admin-button) 85%, black); }
   }
   .admin-button-secondary { background: var(--admin-card); color: var(--text); border: 1px solid var(--line); &:hover { background: var(--well); } }
   .admin-flash { border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.875rem; background: color-mix(in srgb, var(--color-jade) 14%, var(--admin-card)); }

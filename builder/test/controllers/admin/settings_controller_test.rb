@@ -42,7 +42,7 @@ class Admin::SettingsControllerTest < ActionDispatch::IntegrationTest
       patch admin_settings_path, params: { business_setting: { meta_pixel_id: "123456789012" } }
     end
     follow_redirect!
-    assert_select "li", /Chubby Cat Tees.*Applied 1 minute ago.*Stripe: Acme \(test mode\) · Printify: no such shop/m
+    assert_select "li", /Chubby Cat Tees.*Applied 1 minute ago.*Stripe: Acme \(test mode\); Printify: no such shop/m
   end
 
   test "a blank secret keeps the saved one, Disconnect clears it" do

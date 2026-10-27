@@ -52,6 +52,6 @@
 }
 
 @layer components {
-  /* Every button (button_classes): uppercase with room between the letters, as on Ride. */
-  .btn { font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  /* Every button (button_classes): uppercase like the headings, a little room between the letters. */
+  .btn { font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
 }

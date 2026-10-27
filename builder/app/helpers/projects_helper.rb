@@ -36,7 +36,7 @@ module ProjectsHelper
 
   def project_subtitle(project, everyone: false)
     if everyone && project.owner != Current.user
-      "By #{project.owner&.name || "nobody yet"} · edited #{time_ago_in_words(project.updated_at)} ago"
+      "By #{project.owner&.name || "nobody yet"}, edited #{time_ago_in_words(project.updated_at)} ago"
     elsif live = project.live_deployment
       "Live at #{project.publish_host}"
     else

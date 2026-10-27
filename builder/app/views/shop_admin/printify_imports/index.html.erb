@@ -16,7 +16,7 @@
               <p class="text-xs text-muted">
                 <%= t(".price_and_cost", price: money(item[:price_cents]), cost: money(item[:cost_cents])) %>
                 <% if (margin = margin_percent(item[:price_cents], item[:cost_cents])) %>
-                  · <span class="<%= margin <= 0 ? "font-medium text-red-600" : "text-ink" %>"><%= t(".margin", percent: margin) %></span>
+                  <span class="<%= margin <= 0 ? "font-medium text-red-600" : "text-ink" %>">(<%= t(".margin", percent: margin) %>)</span>
                 <% end %>
               </p>
             <% end %>

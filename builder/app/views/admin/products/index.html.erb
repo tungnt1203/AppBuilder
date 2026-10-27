@@ -35,10 +35,10 @@
                 <span class="block truncate text-sm font-semibold"><%= product["title"] %></span>
                 <% if product["price_cents"] %>
                   <span class="faint block text-[0.8125rem]">
-                    From <%= shop_money(product["price_cents"], "USD") %> · costs <%= shop_money(product["cost_cents"], "USD") %>
+                    From <%= shop_money(product["price_cents"], "USD") %>, costs <%= shop_money(product["cost_cents"], "USD") %>
                     <% if product["price_cents"].to_i.positive? && product["cost_cents"] %>
                       <% margin = ((product["price_cents"] - product["cost_cents"]) * 100.0 / product["price_cents"]).round %>
-                      · <span class="<%= margin <= 0 ? "text-[var(--danger)]" : "" %>"><%= margin %>% margin</span>
+                      <span class="<%= margin <= 0 ? "text-[var(--danger)]" : "" %>">(<%= margin %>% margin)</span>
                     <% end %>
                   </span>
                 <% end %>
@@ -68,10 +68,10 @@
           <% result = shop.printify_import_result || {} %>
           <li class="flex flex-col gap-1 px-4 py-3">
             <p class="text-sm"><%= link_to shop.name, shop_admin_products_path(shop), class: "font-semibold" %>
-              <span class="faint">· <%= time_ago_in_words(shop.printify_imported_at) %> ago</span></p>
+              <span class="faint">imported <%= time_ago_in_words(shop.printify_imported_at) %> ago</span></p>
             <% Array(result["imported"]).each do |product| %>
               <p class="muted text-[0.8125rem]">
-                <%= product["title"] %>: <%= product["status"] %><%= " · to check: #{product["to_check"].map(&:humanize).join(", ")}" if product["to_check"].present? %>
+                <%= product["title"] %>: <%= product["status"] %><%= ", to check: #{product["to_check"].map(&:humanize).join(", ")}" if product["to_check"].present? %>
               </p>
             <% end %>
             <% Array(result["errors"]).each do |error| %>

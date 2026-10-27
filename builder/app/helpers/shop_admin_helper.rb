@@ -96,7 +96,7 @@ module ShopAdminHelper
       (t("policies.shipping_summary.free_from", amount: money(free, store.currency)) if free) ].compact.join(" ")
   end
 
-  # "10% off · from $30 · until Oct 31" for the discounts list.
+  # "10% off, from $30, until Oct 31" for the discounts list.
   def discount_summary(discount)
     [ case discount.kind
       when "percentage" then t("shop_admin.discounts.summary.percentage", percent: discount.percent_off)
@@ -105,6 +105,6 @@ module ShopAdminHelper
       end,
       (t("shop_admin.discounts.summary.minimum", amount: money(discount.minimum_subtotal_cents)) if discount.minimum_subtotal_cents),
       (t("shop_admin.discounts.summary.until", date: l(discount.ends_at, format: :short)) if discount.ends_at),
-      (t("shop_admin.discounts.summary.limit", count: discount.usage_limit) if discount.usage_limit) ].compact.join(" · ")
+      (t("shop_admin.discounts.summary.limit", count: discount.usage_limit) if discount.usage_limit) ].compact.join(", ")
   end
 end

@@ -24,9 +24,9 @@ class Admin::ProductsControllerTest < ActionDispatch::IntegrationTest
     shops(:cats).update!(printify_imported_at: 1.hour.ago, printify_import_result: { "imported" => [ { "title" => "Old Tee", "status" => "draft", "to_check" => [ "no_size_guide" ] } ], "errors" => [] })
 
     get admin_products_path
-    assert_select "label", /Cat Tee.*From \$25.00 · costs \$11.50.*54% margin/m
+    assert_select "label", /Cat Tee.*From \$25.00, costs \$11.50.*\(54% margin\)/m
     assert_select "select[name=shop_id] option", 2
-    assert_select "p", /Old Tee: draft · to check: No size guide/
+    assert_select "p", /Old Tee: draft, to check: No size guide/
 
     assert_enqueued_with(job: PrintifyImportJob, args: [ shops(:cats), [ "pf-1" ] ]) do
       post admin_products_path, params: { shop_id: "chubby-cats", product_ids: [ "pf-1" ] }

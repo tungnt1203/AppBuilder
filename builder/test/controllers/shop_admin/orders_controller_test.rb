@@ -43,8 +43,8 @@ class ShopAdmin::OrdersControllerTest < ActionDispatch::IntegrationTest
     order.update!(printify_order_id: "pf-1", status: "cancelled")
 
     get shop_admin_order_path(order)
-    assert_select "li p.text-xs", text: /· Buyer/, minimum: 1
-    assert_select "li p.text-xs", text: /· Automatic/, minimum: 1
+    assert_select "li p.text-xs", text: /, Buyer/, minimum: 1
+    assert_select "li p.text-xs", text: /, Automatic/, minimum: 1
     assert_match "This order is in Printify too", response.body
     assert_no_match "Printify is making this order", response.body
   end

@@ -82,7 +82,7 @@
             <% end %>
             <div class="min-w-0 flex-1 text-sm">
               <p class="font-medium text-ink"><%= item.product_title %></p>
-              <p class="text-muted"><%= [ item.variant_title, (t(".sku", sku: item.sku) if item.sku) ].compact.join(" · ") %></p>
+              <p class="text-muted"><%= [ item.variant_title, (t(".sku", sku: item.sku) if item.sku) ].compact.join(", ") %></p>
               <% item.property_entries.each do |entry| %>
                 <p class="text-ink">
                   <%= entry[:label] %>:
@@ -106,7 +106,7 @@
                 <div class="mt-2 flex items-center gap-3">
                   <%= image_tag photo[:upload].photo.variant(:thumb), alt: photo[:label], class: "size-14 rounded-lg object-cover" %>
                   <div class="text-xs text-muted">
-                    <p><%= photo[:upload].width %> × <%= photo[:upload].height %> px · <%= t(".photo_crop", zoom: photo[:crop][0], x: (photo[:crop][1] * 100).round, y: (photo[:crop][2] * 100).round) %></p>
+                    <p><%= photo[:upload].width %> × <%= photo[:upload].height %> px, <%= t(".photo_crop", zoom: photo[:crop][0], x: (photo[:crop][1] * 100).round, y: (photo[:crop][2] * 100).round) %></p>
                     <% unless photo[:sharp] %>
                       <p class="font-medium text-yellow-800"><%= t(".photo_small") %></p>
                     <% end %>
@@ -166,7 +166,7 @@
             <span class="mt-1.5 size-2 shrink-0 rounded-full bg-brand-500"></span>
             <div>
               <p class="text-ink"><%= t(".events.#{event.action}", default: event.action.humanize) %><%= ": #{event.message}" if event.message %></p>
-              <p class="text-xs text-muted"><%= l(event.created_at, format: :short) %> · <%= event.user&.name || t(event.action == "placed" ? ".by_buyer" : ".by_shop") %></p>
+              <p class="text-xs text-muted"><%= l(event.created_at, format: :short) %>, <%= event.user&.name || t(event.action == "placed" ? ".by_buyer" : ".by_shop") %></p>
             </div>
           </li>
         <% end %>
@@ -188,7 +188,7 @@
       <% if @order.tracking_number.present? %>
         <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".tracking") %></h2>
         <p class="mt-2 text-sm text-muted">
-          <%= [ @order.carrier, @order.tracking_number ].compact_blank.join(" · ") %>
+          <%= [ @order.carrier, @order.tracking_number ].compact_blank.join(" ") %>
           <% if @order.tracking_url.present? %><br><%= link_to t(".track"), @order.tracking_url, class: link_classes, target: "_blank", rel: "noopener" %><% end %>
         </p>
       <% end %>

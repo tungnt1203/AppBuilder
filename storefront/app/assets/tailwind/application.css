@@ -7,6 +7,16 @@
    shop's own pieces go below. */
 @import "./theme.css";
 
+/* Every link, button and field shows where the keyboard is, in the theme's ink (a utility like
+   focus-visible:outline-brand-600 still wins), and a button gives a little when pressed. */
+@layer base {
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+}
+@layer components {
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  @media (prefers-reduced-motion: reduce) { .btn:active:not(:disabled) { transform: none; } }
+}
+
 /* The page's width: the header, the footer and every section line up on it. Each theme sets
    --page-width (the content's width on a wide screen); phones get a 1rem gutter, wider screens
    2.5rem. */

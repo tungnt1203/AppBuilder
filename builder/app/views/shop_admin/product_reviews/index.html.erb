@@ -19,7 +19,7 @@
               <p class="mt-2 text-sm text-ink/90"><%= review.body %></p>
             <% end %>
             <p class="mt-2 text-xs text-muted">
-              <%= review.author_name %> · <%= link_to review.order.name, shop_admin_order_path(review.order), class: link_classes %> · <%= l(review.created_at, format: :short) %>
+              <%= review.author_name %>, <%= link_to review.order.name, shop_admin_order_path(review.order), class: link_classes %>, <%= l(review.created_at, format: :short) %>
             </p>
           </div>
           <% if review.published? %>

@@ -9,7 +9,7 @@
             <p class="text-sm whitespace-pre-line text-ink"><%= request.body %></p>
             <p class="text-xs text-muted">
               <%= t(".asked", time: time_ago_in_words(request.updated_at)) %>
-              <% if request.times_asked > 1 %> · <%= t(".times", count: request.times_asked) %><% end %>
+              <% if request.times_asked > 1 %>(<%= t(".times", count: request.times_asked) %>)<% end %>
             </p>
           </div>
           <div class="flex shrink-0 items-center gap-2">

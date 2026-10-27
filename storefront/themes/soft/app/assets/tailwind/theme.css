@@ -1,5 +1,5 @@
 /* Theme "soft", after Shopify's Sense (https://theme-sense-demo.myshopify.com): a cream canvas,
-   one rounded sans (Poppins) at medium weight, rounded corners, cards lifted by a soft shadow,
+   one rounded sans (Nunito, softer than Sense's Poppins) at medium weight, rounded corners, cards lifted by a soft shadow,
    and a pale two-color gradient on the first screen's card, the announcement bar and the story
    band. Put by bin/theme; change the colors and fonts here, keep the rest of the theme's
    restraint (themes/soft/README.md).
@@ -12,8 +12,8 @@
    - font-display   headings; font-sans text (families from fonts.css)
    - --page-width   how wide the content runs on a wide screen (.page-width) */
 @theme {
-  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --radius-lg: 11px;

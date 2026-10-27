@@ -8,9 +8,9 @@
       <% @promotions.each do |promotion| %>
         <li class="flex items-center gap-4 px-6 py-3">
           <span class="min-w-0 flex-1">
-            <span class="block truncate text-sm font-medium text-ink"><%= promotion.name %> · <%= promotion.percent_off.positive? ? "-#{promotion.percent_off}%" : "+#{-promotion.percent_off}%" %></span>
+            <span class="block truncate text-sm font-medium text-ink"><%= promotion.name %> (<%= promotion.percent_off.positive? ? "-#{promotion.percent_off}%" : "+#{-promotion.percent_off}%" %>)</span>
             <span class="block truncate text-xs text-muted">
-              <%= l(promotion.starts_at, format: :short) %> – <%= l(promotion.ends_at, format: :short) %> ·
+              <%= l(promotion.starts_at, format: :short) %> – <%= l(promotion.ends_at, format: :short) %>,
               <%= promotion.variants.map(&:product).uniq.map(&:title).to_sentence %>
             </span>
           </span>

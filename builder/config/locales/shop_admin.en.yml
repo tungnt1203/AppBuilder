@@ -49,7 +49,7 @@ en:
         description: Your Printify products. Importing brings their options, prices,
           costs and mockups; updating again keeps your titles and prices.
         in_shop: In the shop
-        price_and_cost: From %{price} · costs %{cost}
+        price_and_cost: From %{price}, costs %{cost}
         margin: "%{percent}% margin"
         import: Import
         update: Update
@@ -347,7 +347,7 @@ en:
         create: Add product
         save: Save
       print_area:
-        title: Print area · %{side}
+        title: "Print area: %{side}"
         sides:
           front: Front
           back: Back

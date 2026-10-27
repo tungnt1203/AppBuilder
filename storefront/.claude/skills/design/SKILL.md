@@ -91,7 +91,7 @@ Where the owner said nothing about the look, change these, and little else:
   | Oswald | tall condensed display, uppercase (Ride's headings) |
   | Trirong | light, calm serif (Craft's headings) |
   | Quattrocento Sans | quiet humanist sans (Craft's text) |
-  | Poppins | rounded geometric sans (Sense) |
+  | Poppins | rounded geometric sans (Sense); reads as a template default, prefer Nunito |
   | Manrope, Be Vietnam Pro, Plus Jakarta Sans | neutral modern sans |
   | Quicksand, Nunito | soft, rounded |
   | Montserrat, Bebas Neue | heavy display |
@@ -109,6 +109,10 @@ a place (a section, a line, a link). They already follow the theme's colors, fon
 ## 3. What makes a shop look AI-made: never do these
 
 - A small pill or uppercase label above a headline ("NEW DROP", "MADE WITH LOVE"), or over a section.
+- Nav links, buttons, captions and labels in small tracked capitals (`uppercase tracking-[0.2em]`).
+  They take the text font in sentence case; only bold's uppercase headings carry caps into its
+  buttons and nav, at `tracking-[0.04em]` at most.
+- Meta joined with dots ("Linen · 5 days ago · Ships free"), and colored dots as decoration.
 - Tilted stickers, speech bubbles, "POW" bursts, stamps, starbursts, hand-drawn arrows.
 - 2px ink borders with hard offset shadows; pill buttons with shadows; every corner very round.
 - Polka dots, grain, halftone, grids of dots, glows, gradient blobs, more than one gradient.
