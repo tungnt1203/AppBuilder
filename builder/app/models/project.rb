@@ -426,6 +426,26 @@ class Project < ApplicationRecord
     update!(current_chat: chat) unless chat == current_chat
   end
 
+  # Chats something was said in, the latest first: what the chats menu lists.
+  def listed_chats
+    chats.where.associated(:messages).distinct.reorder(updated_at: :desc)
+  end
+
+  # Deletes a chat and its messages. Deleting the current one goes to the latest other chat,
+  # or to a new one when there's none.
+  def delete_chat(chat)
+    current = chat == current_chat
+    chat.destroy!
+    reload
+    return unless current
+
+    if latest = listed_chats.first
+      switch_chat(latest)
+    else
+      start_chat
+    end
+  end
+
   def record_request(request, files: [], pointed: nil)
     chat.name_after(request)
     message = messages.create!(role: :user, body: request, data: pointed ? { "pointed" => pointed.data } : {})

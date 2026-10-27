@@ -10,7 +10,9 @@ Rails.application.routes.draw do
 
   resources :projects, only: %i[ index create show update destroy ] do
     resources :messages, only: :create, module: :projects
-    resources :chats, only: %i[ create update ], module: :projects
+    resources :chats, only: %i[ create update destroy ], module: :projects do
+      post :open, on: :member
+    end
     resources :deployments, only: :create, module: :projects
     resources :restorations, only: :create, module: :projects
     resource :update, only: :create, module: :projects

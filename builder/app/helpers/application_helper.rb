@@ -105,6 +105,17 @@ module ApplicationHelper
   end
 
   # Consecutive agent actions collapse into one group so the chat reads as a conversation.
+  # How long ago, in a few letters for a narrow list: now, 5m, 3h, 2d, then the date.
+  def short_time_ago(time)
+    seconds = Time.current - time
+    if seconds < 1.minute then "now"
+    elsif seconds < 1.hour then "#{(seconds / 1.minute).floor}m"
+    elsif seconds < 1.day then "#{(seconds / 1.hour).floor}h"
+    elsif seconds < 1.week then "#{(seconds / 1.day).floor}d"
+    else l(time.to_date, format: :short)
+    end
+  end
+
   def chat_items(messages)
     messages.chunk_while { |a, b| a.action? && b.action? }.map { |group| group.first.action? ? group : group.first }
   end

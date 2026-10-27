@@ -1,27 +1,52 @@
-<%# The project's chats, newest first; opening one makes it the chat turns go to. %>
+<%# The project's chats, newest first. Opening one makes it the chat turns go to; each can be
+    renamed in place or deleted after a word of confirmation, right in its row. %>
 <% busy = project.busy? ? "Wait until the agent finishes" : nil %>
 <div class="chats-menu">
-  <%= button_to project_chats_path(project), class: "menu-item", disabled: busy.present?, title: busy, form: { class: "contents", data: { action: "submit->keep-open#close" } } do %>
+  <%= button_to project_chats_path(project), class: "menu-item", disabled: busy.present?, title: busy,
+        form: { class: "contents", data: { action: "submit->keep-open#close" } } do %>
     <%= icon :compose %> New chat
   <% end %>
-  <% chats = project.chats.where.associated(:messages).distinct.reorder(updated_at: :desc).to_a %>
+  <% chats = project.listed_chats.to_a %>
   <% if chats.any? %>
     <p class="faint px-3 pt-3 pb-1 text-xs">Chats</p>
     <ol class="chat-list">
       <% chats.each do |chat| %>
-        <li>
-          <% if chat == project.current_chat %>
-            <span class="chat-link" aria-current="true">
-              <span class="truncate"><%= chat.display_title %></span>
-              <span class="meta"><%= time_ago_in_words(chat.updated_at) %></span>
-            </span>
-          <% else %>
-            <%= button_to project_chat_path(project, chat), method: :patch, class: "chat-link", disabled: busy.present?, title: busy || chat.display_title,
-                  form: { class: "contents", data: { action: "submit->keep-open#close" } } do %>
-              <span class="truncate"><%= chat.display_title %></span>
-              <span class="meta"><%= time_ago_in_words(chat.updated_at) %></span>
+        <% current = chat == project.current_chat %>
+        <% title = chat.display_title %>
+        <li class="chat-row" data-controller="chat-row" data-action="keydown.esc->chat-row#cancel">
+          <div class="chat-row-view">
+            <% if current %>
+              <span class="chat-link" aria-current="true" title="<%= title %>">
+                <span class="truncate"><%= title %></span>
+                <time class="meta" datetime="<%= chat.updated_at.iso8601 %>" title="<%= l(chat.updated_at, format: :long) %>"><%= short_time_ago(chat.updated_at) %></time>
+              </span>
+            <% else %>
+              <%= button_to open_project_chat_path(project, chat), class: "chat-link", disabled: busy.present?, title: busy || title,
+                    form: { class: "contents", data: { action: "submit->keep-open#close" } } do %>
+                <span class="truncate"><%= title %></span>
+                <time class="meta" datetime="<%= chat.updated_at.iso8601 %>" title="<%= l(chat.updated_at, format: :long) %>"><%= short_time_ago(chat.updated_at) %></time>
+              <% end %>
             <% end %>
+            <div class="chat-row-tools">
+              <button type="button" class="chat-tool" data-action="chat-row#rename" aria-label="Rename “<%= title %>”" title="Rename"><%= icon :pencil, size: 14 %></button>
+              <button type="button" class="chat-tool chat-tool-danger" data-action="chat-row#confirm" aria-label="Delete “<%= title %>”"
+                      title="<%= busy || "Delete" %>" <%= "disabled" if busy %>><%= icon :trash, size: 14 %></button>
+            </div>
+          </div>
+
+          <%= form_with model: chat, url: project_chat_path(project, chat), method: :patch, class: "chat-row-rename",
+                data: { action: "submit->keep-open#close" } do |form| %>
+            <%= form.text_field :title, value: title, maxlength: 80, required: true, autocomplete: "off",
+                  "aria-label": "Chat name", class: "field h-8 py-0 text-sm", data: { chat_row_target: "input" } %>
+            <%= form.button "Save", class: "btn btn-primary h-8 px-3 text-xs" %>
           <% end %>
+
+          <div class="chat-row-confirm" role="alertdialog" aria-label="Delete this chat?">
+            <p class="min-w-0 flex-1 truncate text-sm font-medium" title="Its messages are deleted; the app stays as it is.">Delete this chat?</p>
+            <button type="button" class="btn btn-ghost h-8 px-2.5 text-xs" data-action="chat-row#cancel" data-chat-row-target="cancel">Cancel</button>
+            <%= button_to "Delete", project_chat_path(project, chat), method: :delete, class: "btn btn-danger h-8 px-3 text-xs",
+                  form: { class: "contents", data: { action: "submit->keep-open#close" } } %>
+          </div>
         </li>
       <% end %>
     </ol>
