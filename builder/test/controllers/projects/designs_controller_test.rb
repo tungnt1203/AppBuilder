@@ -110,6 +110,41 @@ class Projects::DesignsControllerTest < ActionDispatch::IntegrationTest
     assert_empty setting.reload.values
   end
 
+  test "finding a stock photo and using it: the theme's default, a credit and a version" do
+    @project.update!(shop: shops(:cats))
+    @project.path.join("config").mkpath
+    @project.path.join("config/theme_settings.yml").write(<<~YAML)
+      # The theme's settings.
+      - key: hero_image
+        type: image
+        label: Home page photo (wide)
+      - { key: story_image, type: image, label: Story photo, default: "https://images.unsplash.com/photo-1?w=1600" }
+    YAML
+    @project.shell.run("git", "add", "--all")
+    @project.shell.run("git", "-c", "user.name=T", "-c", "user.email=t@example.com", "commit", "--quiet", "-m", "Settings")
+    found = [ StockPhotos::Photo.new(url: "https://images.unsplash.com/photo-2?w=1600", thumb: "https://images.unsplash.com/photo-2?w=400",
+                                     credit: "Photo by Ana on Unsplash", page: "https://unsplash.com/photos/2", download: nil) ]
+    search = StockPhotos.method(:search)
+    StockPhotos.define_singleton_method(:search) { |query, **| query == "runners" ? found : [] }
+
+    get photos_project_design_path(@project, key: "hero_image", q: "runners")
+    assert_select "turbo-frame#photos_hero_image button[form=photo_use] img[alt='Photo by Ana on Unsplash']"
+
+    choice = { key: "hero_image", url: found.first.url, credit: found.first.credit, page: found.first.page }.to_json
+    post photo_project_design_path(@project), params: { choice: }
+    assert_response :success
+    settings = YAML.safe_load_file(@project.path.join("config/theme_settings.yml"))
+    assert_equal "https://images.unsplash.com/photo-2?w=1600", settings.first["default"]
+    assert_includes @project.path.join("config/theme_settings.yml").read, "# The theme's settings."
+    assert_includes @project.path.join("app/assets/images/stock/CREDITS.md").read, "Photo by Ana on Unsplash"
+    assert_equal "Photo: Home page photo", @project.shell.run("git", "log", "-1", "--format=%s").strip
+
+    post photo_project_design_path(@project), params: { choice: choice.sub("hero_image", "story_image") }
+    assert_equal "https://images.unsplash.com/photo-2?w=1600", YAML.safe_load_file(@project.path.join("config/theme_settings.yml")).last["default"]
+  ensure
+    StockPhotos.define_singleton_method(:search, search) if search
+  end
+
   private
     def use_themes
       themes = Rails.root.join("../storefront/themes")

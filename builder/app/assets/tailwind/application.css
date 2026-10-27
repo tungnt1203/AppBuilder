@@ -1278,6 +1278,21 @@
 
     & img, & .design-photo-empty { flex: none; width: 4rem; height: 3rem; object-fit: cover; border-radius: var(--radius-inner); background: var(--well-strong); }
   }
+  /* Found from the preview: a short ring around the field. */
+  .design-found { border-radius: var(--radius-control); animation: found 1.6s ease-out; }
+  @keyframes found { from { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); } to { box-shadow: 0 0 0 4px transparent; } }
+  @media (prefers-reduced-motion: reduce) { .design-found { animation: none; outline: 2px solid var(--accent); outline-offset: 4px; } }
+  .design-find { display: flex; gap: 0.5rem; }
+  .design-photos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+
+    & button { display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--radius-inner); background: var(--well-strong); cursor: pointer; }
+    & button:hover img { opacity: 0.85; }
+    & button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    & img { width: 100%; height: 100%; object-fit: cover; transition: opacity 150ms; }
+  }
   .design-file { display: block; margin-top: 0.3rem; max-width: 100%; font-size: 0.75rem; color: var(--text-muted); }
   .design-file::file-selector-button { margin-right: 0.5rem; padding: 0.3rem 0.6rem; border: 1px solid var(--line); border-radius: var(--radius-inner); background: var(--surface-solid); color: var(--text); font: inherit; cursor: pointer; }
 

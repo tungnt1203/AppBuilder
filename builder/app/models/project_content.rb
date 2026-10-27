@@ -65,7 +65,49 @@ class ProjectContent
     end
   end
 
+  # A stock photo for an image field: the theme's default becomes its address (a version, credited
+  # in the app's stock photo credits, as bin/images does), and an upload the owner made for it is
+  # dropped so the photo shows.
+  def use_photo(key, url:, credit:, page:)
+    field = fields.find { |candidate| candidate.key == key && candidate.type == "image" } or raise ActiveRecord::RecordNotFound, "No photo #{key}"
+    raise ArgumentError, "Not a photo address" unless url.to_s.match?(%r{\Ahttps://\S+\z})
+
+    file = @project.path.join(FILE)
+    file.write(with_default(file.read, key, url))
+    raise ArgumentError, "The theme settings didn't take the photo" unless YAML.safe_load_file(file).find { |raw| raw["key"] == key }&.dig("default") == url
+
+    credits = @project.path.join("app/assets/images/stock/CREDITS.md")
+    credits.dirname.mkpath
+    credits.write("# Stock photos\n\nWhere each photo in the app comes from.\n\n") unless credits.file?
+    credits.write("- #{url}: #{credit} (#{page})\n", mode: "a") unless credits.read.include?(url)
+
+    ActsAsTenant.with_tenant(@project.shop) { ThemeSetting.current.image_attachment(key)&.purge } if @project.shop
+    @setting = nil
+    @project.history.commit("Photo: #{field.label.sub(/\s*\(.*\)\z/, "")}")
+  end
+
   private
+    # The yaml with one field's default replaced or added, comments and order kept. Fields are
+    # either a block ("- key: hero_image" then indented lines) or one line ("- { key: …, … }").
+    def with_default(yaml, key, value)
+      quoted = value.to_json
+      lines = yaml.lines
+      start = lines.index { |line| line.match?(/\A-\s+(\{\s*)?key:\s*["']?#{Regexp.escape(key)}["']?\s*[,}\n]/) } or raise ArgumentError, "No #{key} in the theme settings"
+      if lines[start].include?("{")
+        line = lines[start]
+        lines[start] = line.match?(/\bdefault:/) ? line.sub(/default:\s*("(?:[^"\\]|\\.)*"|'[^']*'|[^,}]*)/, "default: #{quoted}") : line.sub(/\s*\}\s*$/, ", default: #{quoted} }\n")
+      else
+        finish = (start + 1...lines.size).find { |index| !lines[index].start_with?(" ") && lines[index].strip.present? } || lines.size
+        existing = (start + 1...finish).find { |index| lines[index].match?(/\A\s+default:/) }
+        if existing
+          lines[existing] = lines[existing].sub(/default:.*$/, "default: #{quoted}")
+        else
+          lines.insert(finish, "  default: #{quoted}\n")
+        end
+      end
+      lines.join
+    end
+
     def setting
       @setting ||= ActsAsTenant.with_tenant(@project.shop) { ThemeSetting.current }
     end

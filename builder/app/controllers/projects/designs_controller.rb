@@ -61,6 +61,31 @@ class Projects::DesignsController < ApplicationController
     end
   end
 
+  # Stock photos for an image field (StockPhotos), in that field's frame.
+  def photos
+    @key = params.expect(:key)
+    @query = params[:q].to_s.strip
+    @photos = begin
+      StockPhotos.search(@query)
+    rescue StandardError => error
+      Rails.logger.warn("Stock photo search failed: #{error.message}")
+      @search_error = "The photo search didn't answer. Try again in a moment."
+      []
+    end
+  end
+
+  # One of them becomes the field's photo (ProjectContent#use_photo), as a version.
+  def photo
+    load_panel
+    choice = JSON.parse(params.expect(:choice))
+    @content.use_photo(choice["key"].to_s, url: choice["url"], credit: choice["credit"].to_s.squish, page: choice["page"].to_s)
+    StockPhotos.used(choice["download"]) if choice["download"]
+    saved "Photo changed, as a version. Undo it from History.", section: :content
+  rescue JSON::ParserError, ArgumentError => error
+    @content.errors << error.message
+    render :show, status: :unprocessable_entity
+  end
+
   private
     def set_project
       @project = find_project(params[:project_id])

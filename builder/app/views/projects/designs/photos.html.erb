@@ -1,0 +1,19 @@
+<turbo-frame id="photos_<%= @key %>">
+  <% if @search_error %>
+    <p class="design-warning"><%= @search_error %></p>
+  <% elsif @photos.empty? %>
+    <p class="faint text-xs"><%= @query.present? ? "No photos for “#{@query}”. Try other words, in English." : "Type what the photo should show, in English." %></p>
+  <% else %>
+    <ul class="design-photos">
+      <% @photos.each do |photo| %>
+        <li>
+          <button type="submit" form="photo_use" name="choice" title="<%= photo.credit %>"
+                  value="<%= { key: @key, url: photo.url, credit: photo.credit, page: photo.page, download: photo.download }.to_json %>">
+            <%= image_tag photo.thumb, alt: photo.credit, loading: "lazy" %>
+          </button>
+        </li>
+      <% end %>
+    </ul>
+    <p class="faint text-xs">Free photos; each is credited in the app. Pick one to use it.</p>
+  <% end %>
+</turbo-frame>

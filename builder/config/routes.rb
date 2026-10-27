@@ -23,6 +23,8 @@ Rails.application.routes.draw do
     resource :design, only: %i[ show update ], module: :projects do
       post :theme
       patch :content
+      get :photos
+      post :photo
     end
     resource :address, only: :update, module: :projects
     resource :share, only: %i[ create destroy ], module: :projects

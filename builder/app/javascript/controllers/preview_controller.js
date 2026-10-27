@@ -196,7 +196,7 @@ export default class extends Controller {
 
   // Pointing at a part of the page, in the app: only while it's live and on screen.
   togglePick() {
-    this.setPicking(!this.picking && this.stateValue === "live" && this.tab === "preview")
+    this.setPicking(!this.picking && this.stateValue === "live" && this.tab !== "code")
   }
 
   setPicking(on) {
@@ -217,6 +217,9 @@ export default class extends Controller {
     const pointed = { page: clip(data.page, 300), selector: clip(data.selector, 500), tag: clip(data.tag, 40), text: clip(data.text, 200), html: clip(data.html, 800) }
     this.picking = false
     this.pickButtonTarget.setAttribute("aria-pressed", false)
+    // In the Design tab what was picked is looked up among the shop's words and photos instead.
+    if (this.tab === "design") return window.dispatchEvent(new CustomEvent("design:picked", { detail: pointed }))
+
     this.pointedTarget.value = JSON.stringify(pointed)
     this.pointedLabelTarget.textContent = `${pointed.text ? `“${pointed.text}”` : `<${pointed.tag}>`} on ${pointed.page || "/"}`
     this.pointedChipTarget.hidden = false

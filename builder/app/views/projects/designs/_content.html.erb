@@ -1,27 +1,41 @@
 <%# Words and photos: the shop's text and image settings, as Settings → Theme keeps them. %>
-<%= form_with scope: :content, url: content_project_design_path(@project), method: :patch, multipart: true, class: "design-group" do |form| %>
+<%= form_with scope: :content, url: content_project_design_path(@project), method: :patch, multipart: true, class: "design-group",
+      data: { controller: "design-content", action: "design:picked@window->design-content#find" } do |form| %>
   <h2 class="design-heading">Words and photos</h2>
+  <p class="faint text-xs">To find one, click <span class="inline-block align-[-2px]"><%= icon :target, size: 12 %></span> above the preview, then the words or the photo.</p>
+  <p class="design-warning" data-design-content-target="missing" hidden>That part isn't one of the words or photos here. Ask for it in the chat.</p>
   <% if local_assigns[:notice] %><p class="flash" role="status"><%= notice %></p><% end %>
   <% if @content.errors.any? %>
     <p class="alert" role="alert"><%= @content.errors.to_sentence %></p>
   <% end %>
   <% @content.fields.each do |field| %>
     <% if field.type == "image" %>
-      <div class="design-photo">
+      <div class="design-photo" data-design-content-target="photo" data-address="<%= field.default %>">
         <% if (src = @content.image(field)) %><%= image_tag src, alt: "", loading: "lazy" %><% else %><span class="design-photo-empty"></span><% end %>
         <label class="min-w-0 flex-1">
           <span class="design-label"><%= field.label %></span>
           <%= file_field_tag "content[photos][#{field.key}]", id: "content_photo_#{field.key}", accept: "image/png,image/jpeg,image/webp,image/gif", class: "design-file" %>
         </label>
       </div>
+      <%# The search is a form of its own after this one (forms can't nest); these fields belong to
+          it. A logo is the shop's own, never a stock photo. %>
+      <% next if field.key.include?("logo") %>
+      <div class="design-find">
+        <%= search_field_tag :q, nil, id: "photo_query_#{field.key}", form: "photo_search_#{field.key}", placeholder: "Or find a photo: “runners on a bridge”",
+              "aria-label": "Find a photo for #{field.label}", class: "field h-8 min-w-0 flex-1 py-0 text-sm" %>
+        <button type="submit" form="photo_search_<%= field.key %>" class="btn btn-ghost h-8 px-3 text-sm">Find</button>
+      </div>
+      <%= turbo_frame_tag "photos_#{field.key}" %>
     <% else %>
       <label class="design-field">
         <span class="design-label"><%= field.label %></span>
         <%# Sentences get a box to read them whole; a headline or a button stays one line. %>
         <% if field.type == "richtext" || @content.text(field).length > 60 %>
-          <%= text_area_tag "content[texts][#{field.key}]", @content.text(field), id: "content_text_#{field.key}", rows: field.type == "richtext" ? 4 : 3, class: "field text-sm" %>
+          <%= text_area_tag "content[texts][#{field.key}]", @content.text(field), id: "content_text_#{field.key}", rows: field.type == "richtext" ? 4 : 3, class: "field text-sm",
+                data: { design_content_target: "text" } %>
         <% else %>
-          <%= text_field_tag "content[texts][#{field.key}]", @content.text(field), id: "content_text_#{field.key}", class: "field h-9 text-sm" %>
+          <%= text_field_tag "content[texts][#{field.key}]", @content.text(field), id: "content_text_#{field.key}", class: "field h-9 text-sm",
+                data: { design_content_target: "text" } %>
         <% end %>
       </label>
     <% end %>
@@ -31,3 +45,9 @@
     <%= form.button "Save words and photos", class: "btn btn-primary ml-auto" %>
   </div>
 <% end %>
+<% @content.fields.select { |field| field.type == "image" && !field.key.include?("logo") }.each do |field| %>
+  <%= form_with url: photos_project_design_path(@project), method: :get, id: "photo_search_#{field.key}", data: { turbo_frame: "photos_#{field.key}" } do %>
+    <%= hidden_field_tag :key, field.key, id: nil %>
+  <% end %>
+<% end %>
+<%= form_with url: photo_project_design_path(@project), id: "photo_use" do %><% end %>
