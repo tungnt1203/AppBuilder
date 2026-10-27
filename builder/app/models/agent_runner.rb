@@ -7,6 +7,8 @@ require "json"
 # messages and Stop (AgentCommand) are delivered to it on stdin. The "cli"
 # backend can only be stopped, by ending its process.
 class AgentRunner
+  LANGUAGE_NAMES = { "en" => "English", "vi" => "Vietnamese" }
+
   COMMAND_POLL = 0.3 # seconds
   # mode "plan" reads and proposes without changing anything; "build" makes the changes.
   def initialize(project, mode: "build", backend: Rails.configuration.x.agent_backend, config: Rails.configuration.x.agent)
@@ -78,13 +80,19 @@ class AgentRunner
     @config[:allowed_tools].grep_v(/\ABash\(/) + [ "Bash" ]
   end
 
-  # The builder's instructions, then the owner's own for this app. Theirs are read every turn,
-  # so a change applies from the next one.
+  # The builder's instructions, the language the owner chats in, then the owner's own for this
+  # app. Theirs are read every turn, so a change applies from the next one.
   def system_prompt
-    return @config[:append_system_prompt] if @project.instructions.blank?
+    builder = <<~PROMPT
+      #{@config[:append_system_prompt].strip}
+
+      The owner chats in #{LANGUAGE_NAMES.fetch(@project.language)}: write every message they see in it, the short notes
+      between your steps too, even while you work in English files.
+    PROMPT
+    return builder if @project.instructions.blank?
 
     <<~PROMPT
-      #{@config[:append_system_prompt].strip}
+      #{builder.strip}
 
       The owner's standing instructions for this app follow. Follow them in every turn, over the
       skills' suggestions and the page blocks. They don't change the built-in rules in CLAUDE.md

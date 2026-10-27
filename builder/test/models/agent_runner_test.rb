@@ -61,13 +61,22 @@ class AgentRunnerTest < ActiveSupport::TestCase
 
   test "the owner's instructions for the app come after the builder's" do
     project = projects(:clinic)
-    assert_equal Rails.configuration.x.agent[:append_system_prompt], AgentRunner.new(project).system_prompt
+    assert AgentRunner.new(project).system_prompt.start_with?(Rails.configuration.x.agent[:append_system_prompt].strip)
+    assert_not_includes AgentRunner.new(project).system_prompt, "<owner_instructions>"
 
     project.instructions = "Never use pink."
     prompt = AgentRunner.new(project, backend: "cli").system_prompt
     assert prompt.start_with?(Rails.configuration.x.agent[:append_system_prompt].strip)
     assert_includes prompt, "<owner_instructions>\nNever use pink.\n</owner_instructions>"
     assert_includes AgentRunner.new(project, backend: "cli").command("Hi"), prompt
+  end
+
+  test "the agent is told the language the owner chats in" do
+    project = projects(:clinic)
+    project.language = "vi"
+    assert_includes AgentRunner.new(project).system_prompt, "The owner chats in Vietnamese"
+    project.language = "en"
+    assert_includes AgentRunner.new(project).system_prompt, "The owner chats in English"
   end
 
   test "unknown backends are rejected" do
