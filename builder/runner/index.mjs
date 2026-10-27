@@ -1,6 +1,6 @@
 // Runs one agent turn with the Claude Agent SDK, interactively.
 //
-//   node runner/index.mjs --cwd DIR --prompt TEXT --config FILE [--resume SESSION_ID] [--permission-mode plan]
+//   node runner/index.mjs --cwd DIR --prompt TEXT --config FILE [--resume SESSION_ID [--fork-session]] [--permission-mode plan]
 //
 // stdout: every SDK message as one JSON line (the same format as
 //   `claude -p --output-format stream-json`), plus builder events:
@@ -24,6 +24,7 @@ const { values: args } = parseArgs({
     prompt: { type: "string" },
     config: { type: "string" },
     resume: { type: "string" },
+    "fork-session": { type: "boolean", default: false },
     "permission-mode": { type: "string", default: "acceptEdits" }
   }
 })
@@ -86,6 +87,7 @@ const conversation = query({
   options: {
     cwd: args.cwd,
     resume: args.resume,
+    forkSession: args["fork-session"],
     permissionMode: args["permission-mode"],
     includePartialMessages: true,
     allowedTools: config.allowedTools,

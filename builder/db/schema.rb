@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_27_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_27_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -124,6 +124,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_120000) do
     t.decimal "session_cost_usd", precision: 10, scale: 4, default: "0.0", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "forked_from_id"
+    t.boolean "fork_session", default: false, null: false
+    t.index ["forked_from_id"], name: "index_chats_on_forked_from_id"
     t.index ["project_id"], name: "index_chats_on_project_id"
   end
 
@@ -659,6 +662,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_120000) do
   add_foreign_key "cart_items", "shops"
   add_foreign_key "cart_items", "variants"
   add_foreign_key "carts", "shops"
+  add_foreign_key "chats", "chats", column: "forked_from_id", on_delete: :nullify
   add_foreign_key "chats", "projects"
   add_foreign_key "collection_products", "collections"
   add_foreign_key "collection_products", "products"

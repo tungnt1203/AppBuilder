@@ -408,9 +408,15 @@ class Project < ApplicationRecord
   def session_id = current_chat&.session_id
   def session_cost_usd = current_chat&.session_cost_usd.to_d
 
-  # Remembers the agent's session in the current chat, so the next turn resumes it.
+  # Remembers the agent's session in the current chat, so the next turn resumes it. A fork's
+  # first session is a branch of the one it was copied from: what that one cost so far is
+  # already counted, so it's kept.
   def remember_session(session_id, cost_usd: 0)
-    chat.update!(session_id:, session_cost_usd: cost_usd)
+    if chat.fork_session? && session_id
+      chat.update!(session_id:, fork_session: false)
+    else
+      chat.update!(session_id:, session_cost_usd: cost_usd, fork_session: false)
+    end
   end
 
   # A new conversation with the agent, on the app as it is. A chat nothing was said in yet is
@@ -424,6 +430,11 @@ class Project < ApplicationRecord
   # Goes back to an earlier chat; its next turn resumes that chat's session.
   def switch_chat(chat)
     update!(current_chat: chat) unless chat == current_chat
+  end
+
+  # A copy of a chat to take somewhere else, made the current one; the original stays as it was.
+  def fork_chat(chat)
+    chat.fork.tap { |copy| switch_chat(copy) }
   end
 
   # Chats something was said in, the latest first: what the chats menu lists.

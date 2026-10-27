@@ -1,9 +1,9 @@
 # Chats with the agent: start a new one (a new Claude session, the app as it is), open an
-# earlier one (its next turn resumes its session), rename or delete one. Starting, opening
-# and deleting wait until the agent isn't busy.
+# earlier one (its next turn resumes its session), fork one (a copy that branches its session),
+# rename or delete one. All but renaming wait until the agent isn't busy.
 class Projects::ChatsController < ApplicationController
   before_action :set_project
-  before_action :set_chat, only: %i[ update destroy open ]
+  before_action :set_chat, only: %i[ update destroy open fork ]
 
   def create
     @project.start_chat unless @project.busy?
@@ -22,6 +22,11 @@ class Projects::ChatsController < ApplicationController
 
   def open
     @project.switch_chat(@chat) unless @project.busy?
+    redirect_to @project
+  end
+
+  def fork
+    @project.fork_chat(@chat) unless @project.busy?
     redirect_to @project
   end
 

@@ -13,21 +13,26 @@
       <% chats.each do |chat| %>
         <% current = chat == project.current_chat %>
         <% title = chat.display_title %>
+        <% hint = chat.forked_from ? "#{title}, forked from “#{chat.forked_from.display_title}”" : title %>
+        <% mark = chat.forked_from_id ? icon(:branch, size: 13, class: "fork-mark") : "".html_safe %>
         <li class="chat-row" data-controller="chat-row" data-action="keydown.esc->chat-row#cancel">
           <div class="chat-row-view">
             <% if current %>
-              <span class="chat-link" aria-current="true" title="<%= title %>">
-                <span class="truncate"><%= title %></span>
+              <span class="chat-link" aria-current="true" title="<%= hint %>">
+                <%= mark %><span class="truncate"><%= title %></span>
                 <time class="meta" datetime="<%= chat.updated_at.iso8601 %>" title="<%= l(chat.updated_at, format: :long) %>"><%= short_time_ago(chat.updated_at) %></time>
               </span>
             <% else %>
-              <%= button_to open_project_chat_path(project, chat), class: "chat-link", disabled: busy.present?, title: busy || title,
+              <%= button_to open_project_chat_path(project, chat), class: "chat-link", disabled: busy.present?, title: busy || hint,
                     form: { class: "contents", data: { action: "submit->keep-open#close" } } do %>
-                <span class="truncate"><%= title %></span>
+                <%= mark %><span class="truncate"><%= title %></span>
                 <time class="meta" datetime="<%= chat.updated_at.iso8601 %>" title="<%= l(chat.updated_at, format: :long) %>"><%= short_time_ago(chat.updated_at) %></time>
               <% end %>
             <% end %>
             <div class="chat-row-tools">
+              <%= button_to fork_project_chat_path(project, chat), class: "chat-tool", disabled: busy.present?,
+                    title: busy || "Fork: a copy to take somewhere else, this chat stays as it is", "aria-label": "Fork “#{title}”",
+                    form: { class: "contents", data: { action: "submit->keep-open#close" } } do %><%= icon :branch, size: 14 %><% end %>
               <button type="button" class="chat-tool" data-action="chat-row#rename" aria-label="Rename “<%= title %>”" title="Rename"><%= icon :pencil, size: 14 %></button>
               <button type="button" class="chat-tool chat-tool-danger" data-action="chat-row#confirm" aria-label="Delete “<%= title %>”"
                       title="<%= busy || "Delete" %>" <%= "disabled" if busy %>><%= icon :trash, size: 14 %></button>

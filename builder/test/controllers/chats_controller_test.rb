@@ -110,4 +110,49 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".chat-row-rename input[name='chat[title]'][value='Làm app đặt lịch']"
     assert_select ".chat-row-confirm form[action='#{project_chat_path(@project, chats(:clinic))}']"
   end
+
+  test "a fork copies the chat and branches its session, leaving the original as it was" do
+    original = chats(:clinic)
+
+    assert_difference -> { Message.count }, original.messages.count do
+      post fork_project_chat_path(@project, original)
+    end
+
+    assert_redirected_to @project
+    fork = @project.reload.current_chat
+    assert_not_equal original, fork
+    assert_equal original, fork.forked_from
+    assert_equal "Làm app đặt lịch", fork.title
+    assert_equal original.messages.map { [ _1.role, _1.body ] }, fork.messages.map { [ _1.role, _1.body ] }
+    assert_equal [ "session-123", true ], [ fork.session_id, fork.fork_session? ]
+    assert_equal 2, original.reload.messages.count
+  end
+
+  test "a fork's first session is its own, and the original's cost so far stays counted" do
+    original = chats(:clinic)
+    original.update!(session_cost_usd: 1.5)
+    @project.fork_chat(original)
+
+    @project.remember_session("forked-456")
+
+    assert_equal [ "forked-456", false, 1.5 ], [ @project.session_id, @project.chat.fork_session?, @project.session_cost_usd.to_f ]
+    assert_equal "session-123", original.reload.session_id
+  end
+
+  test "the bar names the chat and opens the others" do
+    get project_path(@project)
+
+    assert_select ".chat-title", text: /Làm app đặt lịch/
+    assert_select ".chat-row form[action='#{fork_project_chat_path(@project, chats(:clinic))}']"
+  end
+
+  test "while the agent works, the message box offers Stop" do
+    projects(:shop).update!(status: :working)
+
+    get project_path(projects(:shop))
+    assert_select ".composer-actions button.composer-stop[formaction='#{project_stop_path(projects(:shop))}'][formnovalidate]"
+
+    get project_path(@project)
+    assert_select ".composer-stop", 0
+  end
 end

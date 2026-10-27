@@ -9,6 +9,8 @@ module ApplicationHelper
     down: [ "M12 5v14", "M5 12l7 7 7-7" ],
     compose: [ "M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7", "M18.4 2.6a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z" ],
     chats: [ "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" ],
+    branch: [ "M6 3v12", "M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z", "M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z", "M18 9a9 9 0 0 1-9 9" ],
+    stop: [ "M8 7h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z" ],
     chevron: [ "M9 6l6 6-6 6" ],
     steps: [ "M4 6h16", "M4 12h10", "M4 18h7" ],
     share: [ "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8", "M16 6l-4-4-4 4", "M12 2v13" ],
@@ -57,7 +59,7 @@ module ApplicationHelper
     return lucide_icon(name, size:, stroke:, **options) if name.is_a?(String)
 
     tag.svg(width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": 2,
-            "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": true, class: "shrink-0 #{name == :chevron ? "chevron" : ""}") do
+            "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": true, class: [ "shrink-0", ("chevron" if name == :chevron), options[:class] ].compact.join(" ")) do
       safe_join(ICONS.fetch(name).map { |d| tag.path(d: d) })
     end
   end

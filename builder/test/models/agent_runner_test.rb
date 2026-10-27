@@ -32,6 +32,14 @@ class AgentRunnerTest < ActiveSupport::TestCase
     assert_not_includes AgentRunner.new(projects(:shop), backend: "cli").command("Hi"), "--resume"
   end
 
+  test "a forked chat's first turn branches the session it was copied from" do
+    project = projects(:clinic)
+    project.fork_chat(project.current_chat)
+
+    assert_equal [ "--resume", "session-123", "--fork-session" ], AgentRunner.new(project, backend: "cli").command("Hi").last(3)
+    assert_equal [ "--resume", "session-123", "--fork-session" ], AgentRunner.new(project, backend: "sdk").command("Hi", "/tmp/agent.json").last(3)
+  end
+
   test "sdk backend runs the node runner with a config file" do
     command = AgentRunner.new(projects(:clinic), backend: "sdk").command("Hi", "/tmp/agent.json")
 

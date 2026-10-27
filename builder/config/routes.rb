@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     resources :messages, only: :create, module: :projects
     resources :chats, only: %i[ create update destroy ], module: :projects do
       post :open, on: :member
+      post :fork, on: :member
     end
     resources :deployments, only: :create, module: :projects
     resources :restorations, only: :create, module: :projects

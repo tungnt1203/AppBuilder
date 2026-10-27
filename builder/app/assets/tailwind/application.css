@@ -620,8 +620,43 @@
     transition: border-color 150ms;
   }
   .composer:focus-within { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
-  /* Send reads as off until there is something to send. */
-  form[data-empty] .composer-actions .btn-primary:not(:disabled) { opacity: 0.35; }
+  /* Send reads as off until there is something to send. While the agent works, an empty box
+     shows Stop in Send's place, as chat apps do. */
+  form[data-empty] .composer-send:not(:disabled) { opacity: 0.35; }
+  form:not([data-empty]) .composer-stop { display: none; }
+  form[data-empty] .composer-actions:has(.composer-stop) .composer-send { display: none; }
+  .composer-stop svg { fill: currentColor; }
+
+  /* The chat's name in the studio's bar, opening the chats menu. */
+  .chat-title {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    min-width: 0;
+    max-width: 100%;
+    height: 2rem;
+    padding: 0 0.4rem 0 0.55rem;
+    border-radius: var(--radius-control);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+    list-style: none;
+    cursor: pointer;
+    transition: background-color 150ms;
+
+    &::-webkit-details-marker { display: none; }
+    &:hover { background: var(--hover); }
+    & .chevron { flex-shrink: 0; color: var(--text-faint); transform: rotate(90deg); transition: transform 150ms; }
+  }
+  /* In a narrow chat column the status keeps only its dot (its words still read aloud and on
+     hover), so the chat's name has room. */
+  @container (max-width: 32rem) {
+    .studio-bar .chip { padding-inline: 0.4rem; }
+    .studio-bar .chip .status { font-size: 0; gap: 0; }
+  }
+  .fork-mark { flex-shrink: 0; align-self: center; color: var(--text-faint); }
+  details[open] > .chat-title { background: var(--hover); }
+  details[open] > .chat-title .chevron { transform: rotate(-90deg); }
   .composer-input {
     display: block;
     width: 100%;
@@ -1712,7 +1747,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chat-row-tools, .chat-tool, .chat-row-confirm, .starter, .suggestion, .reply-action, .jump-latest, .app-card, .card-menu > summary, .bezel iframe, .code-tree .chevron, .steps summary .chevron { transition: none; }
+  .chat-title, .chat-title .chevron, .chat-row-tools, .chat-tool, .chat-row-confirm, .starter, .suggestion, .reply-action, .jump-latest, .app-card, .card-menu > summary, .bezel iframe, .code-tree .chevron, .steps summary .chevron { transition: none; }
   .chat-row[data-mode="confirm"] .chat-row-confirm { animation: none; }
   .modal[open] { animation: none; }
 }

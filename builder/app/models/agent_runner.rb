@@ -115,19 +115,25 @@ class AgentRunner
         "--disallowedTools", *@config[:disallowed_tools],
         "--append-system-prompt", system_prompt,
         "--max-budget-usd", @config[:max_budget_usd].to_s,
-        *([ "--resume", @project.session_id ] if @project.session_id) ]
+        *resume_args ]
     end
 
     def sdk_command(prompt, config_path)
       [ "node", @project.sandbox.runner_script,
         "--cwd", @project.path.to_s, "--prompt", prompt, "--config", config_path.to_s, "--permission-mode", permission_mode,
-        *([ "--resume", @project.session_id ] if @project.session_id) ]
+        *resume_args ]
     end
 
     # The end of what the agent printed, without the minified source Node quotes for an
     # exception, which would push the message itself out of view.
     def readable(stderr)
       stderr.to_s.lines.reject { |line| line.size > 500 }.join.strip.last(2000)
+    end
+
+    # The current chat's session, resumed; a forked chat's first turn branches it into a new one.
+    def resume_args
+      return [] unless @project.session_id
+      [ "--resume", @project.session_id, *("--fork-session" if @project.chat.fork_session?) ]
     end
 
     def permission_mode

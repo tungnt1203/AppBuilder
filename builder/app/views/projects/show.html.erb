@@ -12,20 +12,23 @@
           labels make way, so the status never runs over the buttons. %>
       <header class="studio-bar @container">
         <%= link_to root_path, class: "btn btn-ghost btn-icon h-8 w-8", "aria-label": "All apps", title: "All apps" do %><%= icon :back %><% end %>
-        <%# The app shows its own name in the preview; the bar only says what's going on. %>
+        <%# The app shows its own name in the preview; the bar says what's going on and which chat this is,
+            and the chat's name opens the others. %>
         <h1 class="sr-only"><%= @project.name %></h1>
-        <div class="flex min-w-0 flex-1 items-center">
-          <span class="chip @max-[24rem]:hidden inline-flex shrink-0 rounded-md px-2 py-0.5 text-xs"><%= status_label(@project) %></span>
+        <div class="flex min-w-0 flex-1 items-center gap-1">
+          <span class="chip inline-flex shrink-0 rounded-md px-2 py-1 text-xs" title="<%= strip_tags(status_label(@project)) %>"><%= status_label(@project) %></span>
+          <details class="relative min-w-0" data-controller="keep-open" data-keep-open-dismissible-value="true" id="chats">
+            <summary class="chat-title" title="Chats" aria-label="Chats: <%= @project.chat.display_title %>">
+              <%= icon :branch, size: 13, class: "fork-mark" if @project.chat.forked_from_id %><span class="truncate"><%= @project.chat.display_title %></span><%= icon :chevron, size: 14 %>
+            </summary>
+            <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-xl p-1.5 sm:absolute sm:inset-x-auto sm:top-auto sm:left-0 sm:mt-2 sm:w-[24rem]">
+              <%= render "projects/chats", project: @project %>
+            </div>
+          </details>
         </div>
         <% new_chat_off = @project.busy? ? "Wait until the agent finishes" : nil %>
         <%= button_to project_chats_path(@project), class: "btn btn-ghost btn-icon h-8 w-8", disabled: new_chat_off.present?,
               title: new_chat_off || "New chat", "aria-label": "New chat" do %><%= icon :compose %><% end %>
-        <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="chats">
-          <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Chats" aria-label="Chats"><%= icon :chats %></summary>
-          <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-xl p-1.5 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[22rem] lg:right-auto lg:left-0">
-            <%= render "projects/chats", project: @project %>
-          </div>
-        </details>
         <button type="button" class="btn btn-ghost btn-icon h-8 w-8 @max-[30rem]:hidden" data-action="tour#start" aria-label="Show the tour" title="Show the tour"><%= icon :help %></button>
         <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon h-8 w-8 @max-[30rem]:hidden" %>
         <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="history">
@@ -92,10 +95,6 @@
                data-controller="elapsed" data-elapsed-since-value="<%= (@project.working_since || @project.updated_at).to_i %>" aria-live="polite">
             <span id="activity-text" class="live-activity min-w-0 flex-1 truncate"><%= @project.setting_up? ? "Setting up the project" : (@project.activity || "Working") %></span>
             <span class="faint tabular-nums" data-elapsed-target="clock"></span>
-            <% if @project.working? %>
-              <%= button_to "Stop", project_stop_path(@project), class: "btn btn-ghost h-6 px-2 text-xs", title: "Stop the agent; what's done so far is kept",
-                    disabled: @project.stop_requested? %>
-            <% end %>
           </div>
           <%= turbo_frame_tag "worker-check", src: project_worker_check_path(@project), data: { controller: "poll" } %>
         <% end %>
@@ -128,7 +127,13 @@
                 <span>Plan first</span>
               </label>
               <span class="composer-hint">⌘↵</span>
-              <%= form.button disabled: !can_send, class: "btn btn-primary btn-icon h-9 w-9", "aria-label": "Send", title: "Send (⌘↵)" do %><%= icon :send %><% end %>
+              <%# While the agent works, Send turns into Stop until there's something to send. %>
+              <% if @project.working? %>
+                <%= form.button type: "submit", formaction: project_stop_path(@project), formmethod: "post", formnovalidate: true,
+                      disabled: @project.stop_requested?, class: "btn btn-primary btn-icon composer-stop h-9 w-9",
+                      "aria-label": "Stop", title: @project.stop_requested? ? "Stopping…" : "Stop the agent; what's done so far is kept" do %><%= icon :stop, size: 18 %><% end %>
+              <% end %>
+              <%= form.button disabled: !can_send, class: "btn btn-primary btn-icon composer-send h-9 w-9", "aria-label": "Send", title: "Send (⌘↵)" do %><%= icon :send %><% end %>
             </div>
           </div>
         <% end %>
