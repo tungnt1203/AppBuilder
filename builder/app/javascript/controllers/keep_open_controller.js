@@ -22,6 +22,11 @@ export default class extends Controller {
     }
   }
 
+  // A choice in the menu that takes the owner somewhere else closes it.
+  close() {
+    this.element.open = false
+  }
+
   disconnect() {
     this.element.removeEventListener("turbo:before-morph-attribute", this.keep)
     document.removeEventListener("click", this.dismiss)

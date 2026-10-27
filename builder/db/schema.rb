@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_27_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -115,6 +115,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
     t.index ["shop_id", "updated_at"], name: "index_carts_on_shop_id_and_updated_at"
     t.index ["shop_id"], name: "index_carts_on_shop_id"
     t.index ["token"], name: "index_carts_on_token", unique: true
+  end
+
+  create_table "chats", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "title"
+    t.string "session_id"
+    t.decimal "session_cost_usd", precision: 10, scale: 4, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_chats_on_project_id"
   end
 
   create_table "collection_products", force: :cascade do |t|
@@ -254,6 +264,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
     t.json "data", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "chat_id", null: false
+    t.index ["chat_id"], name: "index_messages_on_chat_id"
     t.index ["project_id"], name: "index_messages_on_project_id"
   end
 
@@ -410,7 +422,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
     t.string "language", default: "en", null: false
     t.integer "port", null: false
     t.string "status", default: "setting_up", null: false
-    t.string "session_id"
     t.integer "preview_version", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -430,12 +441,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
     t.integer "turn_worker_pid"
     t.integer "owner_id"
     t.string "share_token"
-    t.decimal "session_cost_usd", precision: 10, scale: 4, default: "0.0", null: false
     t.text "instructions"
     t.string "template_sha"
     t.bigint "shop_id"
     t.text "preview_shop_key"
     t.text "live_shop_key"
+    t.bigint "current_chat_id"
+    t.index ["current_chat_id"], name: "index_projects_on_current_chat_id"
     t.index ["eval_run"], name: "index_projects_on_eval_run"
     t.index ["owner_id"], name: "index_projects_on_owner_id"
     t.index ["port"], name: "index_projects_on_port", unique: true
@@ -647,6 +659,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
   add_foreign_key "cart_items", "shops"
   add_foreign_key "cart_items", "variants"
   add_foreign_key "carts", "shops"
+  add_foreign_key "chats", "projects"
   add_foreign_key "collection_products", "collections"
   add_foreign_key "collection_products", "products"
   add_foreign_key "collection_products", "shops"
@@ -662,6 +675,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
   add_foreign_key "line_items", "shops"
   add_foreign_key "line_items", "variants", on_delete: :nullify
   add_foreign_key "menus", "shops"
+  add_foreign_key "messages", "chats"
   add_foreign_key "messages", "projects"
   add_foreign_key "order_events", "orders"
   add_foreign_key "order_events", "shops"
@@ -677,6 +691,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_120000) do
   add_foreign_key "product_reviews", "products"
   add_foreign_key "product_reviews", "shops"
   add_foreign_key "products", "shops"
+  add_foreign_key "projects", "chats", column: "current_chat_id", on_delete: :nullify
   add_foreign_key "projects", "shops"
   add_foreign_key "projects", "users", column: "owner_id"
   add_foreign_key "promotion_items", "promotions"

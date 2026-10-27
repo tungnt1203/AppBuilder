@@ -5,7 +5,7 @@ clinic:
   language: vi
   port: 4001
   status: ready
-  session_id: session-123
+  current_chat: clinic
   owner: owner
 
 shop:
@@ -15,4 +15,5 @@ shop:
   language: en
   port: 4002
   status: working
+  current_chat: shop
   owner: owner

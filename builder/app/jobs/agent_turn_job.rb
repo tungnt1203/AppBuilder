@@ -11,6 +11,8 @@ class AgentTurnJob < ApplicationJob
                 "Check what is already done before you continue."
   LOST_SESSION_NOTE = "Your earlier conversation about this app isn't available any more. " \
                       "Read SPEC.md and look at the code to catch up before you continue."
+  NEW_CHAT_NOTE = "This is a new conversation about an app that's already built. " \
+                  "Read SPEC.md and look at the code to catch up before you change anything."
   HEARTBEAT = 15 # seconds
 
   around_perform :check_in
@@ -21,6 +23,8 @@ class AgentTurnJob < ApplicationJob
       request = [ RESUME_NOTE, request ].join("\n\n")
     end
 
+    # A new chat has no session yet: the agent starts without what was said before.
+    request = [ NEW_CHAT_NOTE, request ].join("\n\n") if project.session_id.nil? && project.built? && project.chats.many?
     prompt = [ project.agent_note, request ].compact.join("\n\n")
     project.update!(status: :working, planning: mode == "plan", agent_note: nil, working_since: Time.current, activity: "Starting", agent_job_id: job_id)
     project.agent_commands.pending.where.not(kind: :message).update_all(delivered_at: Time.current) # left from an earlier turn
@@ -78,7 +82,7 @@ class AgentTurnJob < ApplicationJob
     # The session to resume is gone, for example after the app moved into a container: the
     # turn starts over in a new one, on the app as it is.
     def start_new_session(project)
-      project.update!(session_id: nil, session_cost_usd: 0)
+      project.remember_session(nil)
       project.messages.create!(role: :notice, body: "Started a new conversation with the agent; your app is unchanged.")
     end
 

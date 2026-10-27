@@ -1,0 +1,29 @@
+<%# The project's chats, newest first; opening one makes it the chat turns go to. %>
+<% busy = project.busy? ? "Wait until the agent finishes" : nil %>
+<div class="chats-menu">
+  <%= button_to project_chats_path(project), class: "menu-item", disabled: busy.present?, title: busy, form: { class: "contents", data: { action: "submit->keep-open#close" } } do %>
+    <%= icon :compose %> New chat
+  <% end %>
+  <% chats = project.chats.where.associated(:messages).distinct.reorder(updated_at: :desc).to_a %>
+  <% if chats.any? %>
+    <p class="faint px-3 pt-3 pb-1 text-xs">Chats</p>
+    <ol class="chat-list">
+      <% chats.each do |chat| %>
+        <li>
+          <% if chat == project.current_chat %>
+            <span class="chat-link" aria-current="true">
+              <span class="truncate"><%= chat.display_title %></span>
+              <span class="meta"><%= time_ago_in_words(chat.updated_at) %></span>
+            </span>
+          <% else %>
+            <%= button_to project_chat_path(project, chat), method: :patch, class: "chat-link", disabled: busy.present?, title: busy || chat.display_title,
+                  form: { class: "contents", data: { action: "submit->keep-open#close" } } do %>
+              <span class="truncate"><%= chat.display_title %></span>
+              <span class="meta"><%= time_ago_in_words(chat.updated_at) %></span>
+            <% end %>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+</div>

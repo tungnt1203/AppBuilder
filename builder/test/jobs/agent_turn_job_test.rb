@@ -49,7 +49,7 @@ class AgentTurnJobTest < ActiveSupport::TestCase
   end
 
   test "a session that's gone starts over in a new one" do
-    @project.update!(session_id: "from-this-machine")
+    @project.remember_session("from-this-machine")
     lost = [ { "type" => "result", "is_error" => true, "result" => "", "errors" => [ "No conversation found with session ID: from-this-machine" ] } ]
     runner = FakeRunner.new
     runner.define_singleton_method(:run) do |prompt, &block|
@@ -70,6 +70,15 @@ class AgentTurnJobTest < ActiveSupport::TestCase
     assert @project.ready?
     assert_empty @project.messages.error
     assert_match "new conversation", @project.messages.notice.last.body
+  end
+
+  test "the first turn of a new chat on a built app tells the agent to catch up" do
+    @project.start_chat
+    @project.define_singleton_method(:built?) { true }
+
+    with_runner { AgentTurnJob.perform_now(@project, "Thêm ảnh", "plan") }
+
+    assert_equal [ AgentTurnJob::NEW_CHAT_NOTE, "Thêm ảnh" ].join("\n\n"), @runner.prompts.last
   end
 
   test "a turn cut off by a restart resumes where it left off" do

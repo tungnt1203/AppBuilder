@@ -6,7 +6,9 @@ class Project < ApplicationRecord
   # Optional only for apps made before there were accounts (see AddOwnerToProjects).
   belongs_to :owner, class_name: "User", optional: true
   belongs_to :shop, optional: true # the shop this storefront's code is for
-  has_many :messages, -> { order(:id) }, dependent: :destroy
+  # Chats with the agent, each its own Claude session; the current one is where turns go.
+  has_many :chats, -> { order(:id) }, dependent: :destroy
+  belongs_to :current_chat, class_name: "Chat", optional: true
   has_many :deployments, dependent: :destroy
   has_many :agent_commands, dependent: :delete_all
   has_many :usages, dependent: :nullify
@@ -393,7 +395,39 @@ class Project < ApplicationRecord
 
   # Puts the owner's message in the chat with the files they attached, and returns what the agent
   # is told: the message, what they pointed at, and where to find the files.
+  # The current chat's messages: what the studio shows and where each turn writes.
+  def messages
+    chat.messages
+  end
+
+  # The chat turns go to, started on first use.
+  def chat
+    current_chat || start_chat
+  end
+
+  def session_id = current_chat&.session_id
+  def session_cost_usd = current_chat&.session_cost_usd.to_d
+
+  # Remembers the agent's session in the current chat, so the next turn resumes it.
+  def remember_session(session_id, cost_usd: 0)
+    chat.update!(session_id:, session_cost_usd: cost_usd)
+  end
+
+  # A new conversation with the agent, on the app as it is. A chat nothing was said in yet is
+  # already one, so it's used again rather than left empty.
+  def start_chat
+    chat = chats.where.missing(:messages).last || chats.create!
+    update!(current_chat: chat) unless chat == current_chat
+    chat
+  end
+
+  # Goes back to an earlier chat; its next turn resumes that chat's session.
+  def switch_chat(chat)
+    update!(current_chat: chat) unless chat == current_chat
+  end
+
   def record_request(request, files: [], pointed: nil)
+    chat.name_after(request)
     message = messages.create!(role: :user, body: request, data: pointed ? { "pointed" => pointed.data } : {})
     attachments = Attachment.save(message, files)
     message.update!(data: message.data.merge("attachments" => attachments.map(&:to_h))) if attachments.any?

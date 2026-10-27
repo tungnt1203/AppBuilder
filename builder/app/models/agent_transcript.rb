@@ -84,7 +84,7 @@ class AgentTranscript
       return unless event["subtype"] == "init" && event["session_id"]
       return if event["session_id"] == @project.session_id
 
-      @project.update!(session_id: event["session_id"], session_cost_usd: 0)
+      @project.remember_session(event["session_id"])
     end
 
     # Partial events arrive while a block is being written.
@@ -246,7 +246,7 @@ class AgentTranscript
 
       counted = @project.session_cost_usd.to_f
       cost = session_total.to_f >= counted ? session_total.to_f - counted : session_total.to_f
-      @project.update!(session_cost_usd: session_total)
+      @project.chat.update!(session_cost_usd: session_total)
       @project.owner.usages.create!(project: @project, cost_usd: cost) if @project.owner && cost.positive?
       cost.round(4)
     end
