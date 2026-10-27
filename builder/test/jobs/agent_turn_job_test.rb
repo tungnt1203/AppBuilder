@@ -81,6 +81,31 @@ class AgentTurnJobTest < ActiveSupport::TestCase
     assert_equal [ AgentTurnJob::NEW_CHAT_NOTE, "Thêm ảnh" ].join("\n\n"), @runner.prompts.last
   end
 
+  test "a turn that fails some other way ends, rather than leaving the app working" do
+    runner = FakeRunner.new
+    runner.define_singleton_method(:run) { |*| raise ActiveModel::MissingAttributeError, "missing attribute 'session_id' for Project" }
+    @runner = runner
+    @project.update!(status: :working)
+
+    assert_raises(ActiveModel::MissingAttributeError) do
+      with_runner { AgentTurnJob.perform_now(@project, "Thêm ảnh", "build") }
+    end
+
+    assert @project.reload.failed?
+    assert_nil @project.activity
+    assert_match "Something went wrong in the builder", @project.messages.error.last.body
+  end
+
+  test "a turn stopped while it waited for a worker doesn't start" do
+    job = AgentTurnJob.new(@project, "Thêm ảnh", "build")
+    job.enqueued_at = 1.minute.ago
+    @project.agent_commands.create!(kind: :interrupt)
+
+    with_runner { job.perform_now }
+
+    assert_empty @runner.prompts
+  end
+
   test "a turn cut off by a restart resumes where it left off" do
     job = AgentTurnJob.new(@project, "Thêm trang báo cáo", "plan")
     @project.update!(status: :working, agent_job_id: job.job_id, working_since: 1.minute.ago, activity: "Thinking")

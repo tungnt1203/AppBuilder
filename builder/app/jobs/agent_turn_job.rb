@@ -18,6 +18,8 @@ class AgentTurnJob < ApplicationJob
   around_perform :check_in
 
   def perform(project, request, mode = "build")
+    return if stopped_before_start?(project)
+
     if project.agent_job_id == job_id
       return unless resume_interrupted(project, request, mode)
       request = [ RESUME_NOTE, request ].join("\n\n")
@@ -58,9 +60,28 @@ class AgentTurnJob < ApplicationJob
     # the raw error when it didn't.
     project.messages.create!(role: :error, body: error.message.truncate(4000)) unless project.messages.last&.error?
     mode == "plan" ? project.update!(status: :failed, activity: nil) : finish(project, "Unfinished: #{project.take_commit_message || request}", status: :failed)
+  rescue StandardError => error
+    # Anything else (the database, a bug in the builder) ends the turn too, rather than leaving
+    # the app "working" with nothing running. The error is raised again so the job shows it.
+    give_up(project, error)
+    raise
   end
 
   private
+    # The owner pressed Stop while this turn was still waiting for a worker.
+    def stopped_before_start?(project)
+      project.agent_job_id != job_id && enqueued_at && project.agent_commands.interrupt.where(created_at: enqueued_at..).exists?
+    end
+
+    def give_up(project, error)
+      Rails.logger.error "Turn of #{project.slug} failed: #{error.class}: #{error.message}"
+      project.messages.create!(role: :error, body: "Something went wrong in the builder and this step stopped (#{error.class}: #{error.message.truncate(300)}). " \
+                                                    "What the agent changed so far is kept. Send your message again to carry on.")
+      project.update!(status: :failed, planning: false, activity: nil)
+    rescue StandardError => failure
+      Rails.logger.error "Couldn't end the turn of #{project.slug}: #{failure.class}: #{failure.message}"
+    end
+
     def check_in
       project = arguments.first
       checks_in = Project.where(id: project.id)

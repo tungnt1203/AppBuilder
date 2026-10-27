@@ -373,6 +373,38 @@ class Project < ApplicationRecord
     working? && Rails.configuration.x.agent_backend == "sdk"
   end
 
+  # An agent turn checks in every few seconds while it runs.
+  def turn_running?
+    turn_heartbeat_at&.after?(1.minute.ago)
+  end
+
+  # Working, with no turn running and none of the builder's own jobs (moving the app, updating
+  # it, restoring a version) under way: the turn never started, or ended without saying so.
+  def stranded?
+    working? && !turn_running? && !chore_running?
+  end
+
+  # The builder's own jobs, which Stop doesn't cut short.
+  def chore_running?
+    working? && activity.to_s.match?(CHORES)
+  end
+  CHORES = /\A(Moving to|Updating the|Running the app's tests|Restoring)/
+
+  # Stops the agent. With nothing running, the app is just ready again; a turn still waiting
+  # for a worker sees the stop and doesn't start.
+  def stop
+    return unless working? && !chore_running?
+    return if stop_requested? && !stranded? # already stopping
+
+    AgentRunner.stop(self)
+    if stranded?
+      messages.create!(role: :notice, body: "Stopped. Nothing was running any more, so the app is ready again.")
+      update!(status: :ready, planning: false, activity: nil)
+    else
+      messages.create!(role: :notice, body: "Stopped. What's done so far is kept.")
+    end
+  end
+
   def stop_requested?
     working_since.present? && agent_commands.interrupt.where(created_at: working_since..).exists?
   end

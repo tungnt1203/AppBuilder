@@ -128,10 +128,10 @@
               </label>
               <span class="composer-hint">⌘↵</span>
               <%# While the agent works, Send turns into Stop until there's something to send. %>
-              <% if @project.working? %>
+              <% if @project.working? && !@project.chore_running? %>
                 <%= form.button type: "submit", formaction: project_stop_path(@project), formmethod: "post", formnovalidate: true,
-                      disabled: @project.stop_requested?, class: "btn btn-primary btn-icon composer-stop h-9 w-9",
-                      "aria-label": "Stop", title: @project.stop_requested? ? "Stopping…" : "Stop the agent; what's done so far is kept" do %><%= icon :stop, size: 18 %><% end %>
+                      disabled: @project.stop_requested? && !@project.stranded?, class: "btn btn-primary btn-icon composer-stop h-9 w-9",
+                      "aria-label": "Stop", title: @project.stop_requested? && !@project.stranded? ? "Stopping…" : "Stop the agent; what's done so far is kept" do %><%= icon :stop, size: 18 %><% end %>
               <% end %>
               <%= form.button disabled: !can_send, class: "btn btn-primary btn-icon composer-send h-9 w-9", "aria-label": "Send", title: "Send (⌘↵)" do %><%= icon :send %><% end %>
             </div>
