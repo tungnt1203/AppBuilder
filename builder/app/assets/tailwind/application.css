@@ -1062,7 +1062,6 @@
     font-weight: 500;
     color: var(--text-muted);
 
-    & .activity-dot { width: 0.4rem; height: 0.4rem; }
   }
   /* The update line grows when its changes are opened, instead of spilling over the chat. */
   .activity-update {
@@ -1090,13 +1089,13 @@
     & svg { flex-shrink: 0; margin-top: 0.1rem; }
     & code { font-size: 0.7rem; }
   }
-  .activity-dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 999px;
-    background: var(--busy);
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--busy) 60%, transparent);
-    animation: ripple 1.6s ease-out infinite;
+  /* What the agent is doing right now: its words, with a light passing over them. */
+  :is(p, span).live-activity {
+    background: linear-gradient(90deg, var(--text-muted) 35%, var(--text) 50%, var(--text-muted) 65%) 0 0 / 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: sweep 2.4s linear infinite;
   }
 
   /* The reply while it's being written. */
@@ -1136,9 +1135,9 @@
   .task-completed .task-mark { border-color: var(--ready); background: var(--ready); color: var(--surface-solid); }
 }
 
-@keyframes ripple {
-  70% { box-shadow: 0 0 0 7px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
+@keyframes sweep {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
 }
 
 @keyframes spin {
@@ -1155,7 +1154,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .activity-dot, .task-in_progress .task-mark, .stage-screen, .blank-sketch span { animation: none !important; }
+  .task-in_progress .task-mark, .stage-screen, .blank-sketch span { animation: none !important; }
+  :is(p, span).live-activity { animation: none; background: none; color: var(--text-muted); }
   .spinner { animation-duration: 2.4s !important; }
 }
 

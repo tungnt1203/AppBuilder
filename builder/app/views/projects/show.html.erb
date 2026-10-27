@@ -70,7 +70,6 @@
         <% if @project.setting_up? || @project.working? %>
           <div class="activity"
                data-controller="elapsed" data-elapsed-since-value="<%= (@project.working_since || @project.updated_at).to_i %>" aria-live="polite">
-            <span class="activity-dot"></span>
             <span id="activity-text" class="live-activity min-w-0 flex-1 truncate"><%= @project.setting_up? ? "Setting up the project" : (@project.activity || "Working") %></span>
             <span class="faint tabular-nums" data-elapsed-target="clock"></span>
             <% if @project.working? %>

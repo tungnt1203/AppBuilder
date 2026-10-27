@@ -68,7 +68,7 @@
           <% end %>
         </ol>
         <% if project.working? %>
-          <p class="blank-status"><span class="activity-dot"></span><span class="live-activity"><%= project.activity || "Planning" %></span></p>
+          <p class="blank-status"><span class="live-activity"><%= project.activity || "Planning" %></span></p>
         <% end %>
         <p class="blank-hint"><%= status %></p>
         <button type="button" class="btn btn-ghost on-card" data-action="preview#peek"><%= icon :eye %>See the starter app</button>
@@ -90,8 +90,7 @@
       </div>
     </div>
     <div class="peek-pill glass capsule" role="status">
-      <span class="activity-dot"></span>
-      <span>Still building, so this may look broken</span>
+      <span class="live-activity">Still building, so this may look broken</span>
       <button type="button" class="btn btn-ghost h-7 px-3 text-xs" data-action="preview#unpeek"><%= icon :eye_off, size: 14 %>Hide</button>
     </div>
   <% when "starting" %>
