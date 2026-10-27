@@ -1,0 +1,32 @@
+<%# The four themes; switching replaces the header, footer, home page and product card. %>
+<section class="design-group" aria-labelledby="design_theme">
+  <h2 id="design_theme" class="design-heading">Theme</h2>
+  <% if local_assigns[:notice] %><p class="flash" role="status"><%= notice %></p><% end %>
+  <% if @theme_error %>
+    <p class="alert" role="alert"><%= @theme_error %></p>
+  <% elsif @theme_conflict %>
+    <div class="design-conflict" role="alert">
+      <p>Switching to <%= @theme_conflict[:name].capitalize %> replaces these, which were changed for this shop:</p>
+      <ul class="mt-1 list-disc pl-5 font-mono text-xs"><% @theme_conflict[:files].each do |path| %><li><%= path %></li><% end %></ul>
+      <p class="mt-1">History keeps them, so you can go back.</p>
+      <%= button_to "Switch anyway", theme_project_design_path(@project), params: { theme: @theme_conflict[:name], force: "1" },
+            class: "btn btn-ghost mt-2", form: { class: "inline" } %>
+    </div>
+  <% end %>
+  <ul class="design-themes">
+    <% @themes.themes.each do |theme| %>
+      <li class="design-theme" <%= "aria-current=true" if theme.current %>>
+        <div class="min-w-0 flex-1">
+          <p class="font-semibold"><%= theme.name.capitalize %></p>
+          <p class="faint line-clamp-2 text-xs"><%= theme.summary %></p>
+        </div>
+        <% if theme.current %>
+          <span class="faint text-right text-xs"><%= theme.changed ? safe_join([ "In use,", tag.br, "changed for this shop" ]) : "In use" %></span>
+        <% else %>
+          <%= button_to "Use", theme_project_design_path(@project), params: { theme: theme.name }, class: "btn btn-ghost h-8 px-3 text-sm",
+                disabled: !@project.accepts_messages?, form: { data: { turbo_confirm: "Switch to #{theme.name.capitalize}? Its header, footer, home page, product card, colors and fonts replace this shop's. You can go back from History." } } %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</section>

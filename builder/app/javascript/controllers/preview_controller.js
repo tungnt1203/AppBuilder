@@ -89,6 +89,11 @@ export default class extends Controller {
     this.stageTarget.removeAttribute("data-peek")
   }
 
+  // Saved in the Design tab: the app shows the rebuilt styles or the new words.
+  designed(event) {
+    if (event.detail.success) this.reload()
+  }
+
   // Design shows the app (preview) and puts the design form in the chat's place.
   showTab({ params: { tab } }) {
     this.tab = [ "code", "design" ].includes(tab) ? tab : "preview"

@@ -17,7 +17,7 @@ class StorefrontApi::ExtensionsTest < ActionDispatch::IntegrationTest
     end
 
     shop = api(:get, storefront_api_shop_path)["shop"]
-    assert_equal({ "hero_title" => "Chubby cats", "accent_color" => "#e8743b" }, shop["theme_settings"])
+    assert_equal({ "hero_title" => "Chubby cats" }, shop["theme_settings"]) # the storefront has the defaults
 
     product = api(:get, storefront_api_product_path("cat-mom-tee"))["product"]
     assert_equal [ { "key" => "material", "label" => "Material", "type" => "text", "value" => "Cotton" } ], product["custom_fields"]

@@ -91,14 +91,64 @@ class ThemeSetting < ApplicationRecord
     transaction do
       save!
       Array(removals).each { |key| image_attachment(key)&.purge }
-      uploads.to_h.each do |key, file|
-        next if file.blank?
-
-        image_attachment(key)&.purge
-        images.attach(io: file, filename: file.original_filename.presence || "image", content_type: file.content_type, metadata: { "setting_key" => key })
-      end
+      attach_uploads(uploads)
     end
     true
+  end
+
+  # Some text fields and photos only, the others as they are (the studio's Design tab). A blank
+  # text goes back to the theme's default.
+  def change_values(changes, uploads: {})
+    errors.clear
+    proposed = values.stringify_keys
+    changes.to_h.each do |key, raw|
+      field = schema_field(key.to_s)
+      next unless field && %w[ text richtext ].include?(field["type"])
+
+      if raw.blank?
+        proposed.delete(key.to_s)
+      elsif (problem = value_problem(field, raw))
+        errors.add(:base, "#{field["label"]}: #{problem}")
+      else
+        proposed[key.to_s] = raw.to_s
+      end
+    end
+    check_uploads(uploads)
+    return false if errors.any?
+
+    self.values = proposed
+    transaction do
+      save!
+      attach_uploads(uploads)
+    end
+    true
+  end
+
+  # Adds the fields the storefront declares that the shop doesn't know yet (it hasn't been
+  # published since), keeping every other field and value as it is.
+  def self.extend_schema!(definitions)
+    record = current
+    known = record.schema.map { |field| field["key"] }
+    added = normalize_schema(definitions).reject { |field| known.include?(field["key"]) }
+    record.update!(schema: record.schema + added) if added.any? || record.new_record?
+    record
+  end
+
+  # What the owner set, without the theme's defaults (the Storefront API): the storefront falls
+  # back to its own config/theme_settings.yml, the one of the version it runs, so the builder's
+  # preview shows the defaults the agent just wrote.
+  def owner_values(image_url:)
+    schema.each_with_object({}) do |field, out|
+      key = field["key"]
+      if field["type"] == "image"
+        attachment = image_attachment(key)
+        out[key] = image_url.call(attachment) if attachment
+      elsif field["type"] == "boolean"
+        out[key] = values[key] == true if values.key?(key)
+      elsif values[key].present?
+        out[key] = values[key]
+      end
+    end
   end
 
   def self.field_from(raw)
@@ -137,6 +187,15 @@ class ThemeSetting < ApplicationRecord
       when "select" then "pick one of the choices" unless field["options"].include?(text)
       when "text" then "is too long" if text.length > 500
       when "richtext" then "is too long" if text.length > 5_000
+      end
+    end
+
+    def attach_uploads(uploads)
+      uploads.to_h.each do |key, file|
+        next if file.blank?
+
+        image_attachment(key)&.purge
+        images.attach(io: file, filename: file.original_filename.presence || "image", content_type: file.content_type, metadata: { "setting_key" => key })
       end
     end
 

@@ -3,7 +3,7 @@
 
 <%# Two panels edge to edge on wide screens (chat, then the app), each with its own slim bar,
     so the preview gets as much of the window as it can. On phones they stack. %>
-<div class="studio" data-controller="preview tour" data-action="design:saved->preview#reload"
+<div class="studio" data-controller="preview tour"
      data-tour-auto-value="<%= !Current.user.toured_at? %>" data-tour-seen-url-value="<%= tour_path %>"
      data-preview-version-value="<%= @project.preview_version %>" data-preview-state-value="<%= @project.preview_state %>"
      data-preview-accepts-value="<%= @project.accepts_messages? || @project.accepts_messages_while_working? %>">
@@ -49,7 +49,8 @@
       </header>
 
       <%# The Design tab takes the chat's place, loaded the first time it's opened. %>
-      <turbo-frame id="design" class="design-frame" data-preview-target="design" data-src="<%= project_design_path(@project) %>" hidden></turbo-frame>
+      <turbo-frame id="design" class="design-frame" data-preview-target="design" data-src="<%= project_design_path(@project) %>"
+                   data-action="turbo:submit-end->preview#designed" hidden></turbo-frame>
 
       <div id="messages" class="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pt-4 pb-4" data-controller="autoscroll">
         <% items = chat_items(@project.messages) %>

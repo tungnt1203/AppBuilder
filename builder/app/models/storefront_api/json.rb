@@ -158,7 +158,7 @@ class StorefrontApi::Json
       setting = ThemeSetting.first
       return {} unless setting
 
-      setting.resolved(image_url: ->(attachment) { url_helpers.rails_blob_url(attachment, **@url_options) })
+      setting.owner_values(image_url: ->(attachment) { url_helpers.rails_blob_url(attachment, **@url_options) })
     end
 
     # A product's fields, with a choice field's pictures as { id, label, thumb, large } and the

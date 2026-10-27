@@ -25,11 +25,6 @@ export default class extends Controller {
     this.send(null)
   }
 
-  // Saved: the preview reloads on the rebuilt styles (preview#reload, wired on the studio).
-  saved(event) {
-    if (event.detail.success) this.dispatch("saved")
-  }
-
   choice() {
     const value = (name) => this.element.elements[`design[${name}]`]?.value
     return { brand: value("brand"), background: value("background"), text: value("text"), accent: value("accent"),

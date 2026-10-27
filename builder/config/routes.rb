@@ -20,7 +20,10 @@ Rails.application.routes.draw do
     resource :thumbnail, only: :show, module: :projects
     resource :duplicate, only: :create, module: :projects
     resource :code, only: :show, module: :projects
-    resource :design, only: %i[ show update ], module: :projects
+    resource :design, only: %i[ show update ], module: :projects do
+      post :theme
+      patch :content
+    end
     resource :address, only: :update, module: :projects
     resource :share, only: %i[ create destroy ], module: :projects
     resource :instructions, only: :update, module: :projects

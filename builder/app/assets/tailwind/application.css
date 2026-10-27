@@ -1224,17 +1224,15 @@
     color: var(--on-accent);
   }
 
-  /* The Design tab, in the chat's place: groups of controls that scroll, Save pinned below. */
+  /* The Design tab, in the chat's place: its parts (theme, look, words and photos) scroll, each
+     with its own Save. */
   .studio-chat[data-designing] > :not(.studio-bar, .design-frame) { display: none; }
-  .design-frame:not([hidden]) { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-  .design { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-  .design-body { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 1.25rem; padding: 1rem; }
-  .design-group {
-    display: grid;
-    gap: 0.6rem;
-
-    & legend { margin-bottom: 0.6rem; font-size: 0.875rem; font-weight: 600; }
-  }
+  /* The frame scrolls, not its contents, so saving a part keeps the place. */
+  .design-frame:not([hidden]) { display: block; flex: 1; min-height: 0; overflow-y: auto; }
+  .design-body { display: grid; align-content: start; gap: 2rem; padding: 1rem 1rem 2rem; }
+  .design-group { display: grid; gap: 0.75rem; min-width: 0; }
+  .design-heading { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
+  fieldset.design-group > legend { margin-bottom: 0.75rem; }
   .design-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.875rem; color: var(--text-muted); }
   .design-color {
     display: inline-flex;
@@ -1257,7 +1255,31 @@
     & input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
   }
   .design-warning { font-size: 0.8125rem; color: var(--danger); }
-  .design-actions { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid var(--line); }
+  .design-actions { display: flex; gap: 0.5rem; }
+  .design-conflict { padding: 0.75rem 0.9rem; border-radius: var(--radius-control); background: var(--danger-bg); color: var(--danger-text); font-size: 0.8125rem; line-height: 1.5; }
+  .design-themes { display: grid; gap: 0.5rem; }
+  .design-theme {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    font-size: 0.875rem;
+
+    &[aria-current] { border-color: var(--accent); }
+  }
+  .design-field { display: grid; gap: 0.35rem; }
+  .design-label { display: block; font-size: 0.8125rem; color: var(--text-muted); }
+  .design-photo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    & img, & .design-photo-empty { flex: none; width: 4rem; height: 3rem; object-fit: cover; border-radius: var(--radius-inner); background: var(--well-strong); }
+  }
+  .design-file { display: block; margin-top: 0.3rem; max-width: 100%; font-size: 0.75rem; color: var(--text-muted); }
+  .design-file::file-selector-button { margin-right: 0.5rem; padding: 0.3rem 0.6rem; border: 1px solid var(--line); border-radius: var(--radius-inner); background: var(--surface-solid); color: var(--text); font: inherit; cursor: pointer; }
 
   /* What to ask for next, under the reply after a build. */
   .next-steps { display: grid; gap: 0.45rem; }

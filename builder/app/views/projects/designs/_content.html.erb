@@ -1,0 +1,33 @@
+<%# Words and photos: the shop's text and image settings, as Settings → Theme keeps them. %>
+<%= form_with scope: :content, url: content_project_design_path(@project), method: :patch, multipart: true, class: "design-group" do |form| %>
+  <h2 class="design-heading">Words and photos</h2>
+  <% if local_assigns[:notice] %><p class="flash" role="status"><%= notice %></p><% end %>
+  <% if @content.errors.any? %>
+    <p class="alert" role="alert"><%= @content.errors.to_sentence %></p>
+  <% end %>
+  <% @content.fields.each do |field| %>
+    <% if field.type == "image" %>
+      <div class="design-photo">
+        <% if (src = @content.image(field)) %><%= image_tag src, alt: "", loading: "lazy" %><% else %><span class="design-photo-empty"></span><% end %>
+        <label class="min-w-0 flex-1">
+          <span class="design-label"><%= field.label %></span>
+          <%= file_field_tag "content[photos][#{field.key}]", id: "content_photo_#{field.key}", accept: "image/png,image/jpeg,image/webp,image/gif", class: "design-file" %>
+        </label>
+      </div>
+    <% else %>
+      <label class="design-field">
+        <span class="design-label"><%= field.label %></span>
+        <%# Sentences get a box to read them whole; a headline or a button stays one line. %>
+        <% if field.type == "richtext" || @content.text(field).length > 60 %>
+          <%= text_area_tag "content[texts][#{field.key}]", @content.text(field), id: "content_text_#{field.key}", rows: field.type == "richtext" ? 4 : 3, class: "field text-sm" %>
+        <% else %>
+          <%= text_field_tag "content[texts][#{field.key}]", @content.text(field), id: "content_text_#{field.key}", class: "field h-9 text-sm" %>
+        <% end %>
+      </label>
+    <% end %>
+  <% end %>
+  <p class="faint text-xs">These change what the shop says right away, the live shop too, as Settings → Theme in the admin does. Leave one as it was to keep following the theme.</p>
+  <div class="design-actions">
+    <%= form.button "Save words and photos", class: "btn btn-primary ml-auto" %>
+  </div>
+<% end %>
