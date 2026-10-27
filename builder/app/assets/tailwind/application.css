@@ -1122,6 +1122,16 @@
 
     & .activity-dot { width: 0.4rem; height: 0.4rem; }
   }
+  /* The update line grows when its changes are opened, instead of spilling over the chat. */
+  .activity-update {
+    height: auto;
+    min-height: 1.75rem;
+    align-items: flex-start;
+    padding-block: 0.25rem;
+    border-radius: 14px;
+    & summary { line-height: 1.25rem; }
+    & .activity-update-icon, & form { display: flex; align-items: center; min-height: 1.25rem; }
+  }
   /* Under the activity line when no worker picks up the background jobs. */
   .worker-down {
     display: flex;
