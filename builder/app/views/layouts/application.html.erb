@@ -4,7 +4,8 @@
     <title><%= [ content_for(:title), "Studio" ].compact.join(" – ") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="application-name" content="Studio">
-    <meta name="theme-color" content="#0e3b43">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f0f10" media="(prefers-color-scheme: dark)">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= turbo_refresh_method_tag :morph %>
@@ -15,15 +16,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
 
-    <script>
-      if (navigator.userAgentData?.brands?.some(({ brand }) => brand === "Chromium")) document.documentElement.classList.add("lens")
-    </script>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body data-controller="glass">
-    <%= render "layouts/lens" %>
+  <body>
     <div class="backdrop" data-turbo-permanent id="backdrop"></div>
     <%= content_for?(:body) ? yield(:body) : yield %>
   </body>

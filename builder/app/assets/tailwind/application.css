@@ -2,28 +2,19 @@
 @import "./personalize_fonts.css";
 
 /*
-  Studio: Liquid Glass over a Ha Long dawn lagoon.
-  Glass needs something behind it to bend, so the backdrop carries the color
-  and every surface is a translucent layer above it.
+  Studio: ink on paper. White and near-white surfaces, near-black ink, and the ink itself as
+  the one accent, so the only color on screen is the app being built in the preview.
 */
 @theme {
   --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --color-abyss: #0e3b43;
-  --color-jade: #2f8f83;
-  --color-lagoon: #7cc6c0;
-  --color-dawn: #f2b79a;
-  --color-mist: #eef4f2;
-
-  /* A shop's admin (ShopAdmin::*) uses the shop template's UI kit (UiHelper), whose classes read
-     these names; they take the admin layout's colors, light and dark (.admin-body). */
-  --color-brand-300: #6fbfb2;
-  --color-brand-400: #44a597;
-  --color-brand-500: #2f8f83;
-  --color-brand-600: #26786e;
-  --color-brand-900: #163f3b;
-  --color-brand-950: #0b2523;
+  --color-brand-300: #d4d4d8;
+  --color-brand-400: #a1a1aa;
+  --color-brand-500: #52525b;
+  --color-brand-600: #18181b;
+  --color-brand-900: #09090b;
+  --color-brand-950: #050506;
 }
 
 @theme inline {
@@ -41,43 +32,36 @@
 }
 
 @layer base {
-  /* Day: dawn over the bay. Night: the same bay under moonlight. */
+  /* Day: ink on white. Night: the same, inverted onto near-black. */
   :root {
     color-scheme: light;
-    --text: #102a2e;
-    --text-muted: rgb(16 42 46 / 0.62);
-    --text-faint: rgb(16 42 46 / 0.45);
-    --glass-clear: linear-gradient(150deg, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0.08) 60%, rgb(255 255 255 / 0.14));
-    --glass-frost: linear-gradient(160deg, rgb(238 244 242 / 0.86), rgb(238 244 242 / 0.7));
-    --glass-edge: rgb(255 255 255 / 0.45);
-    --glass-shadow: 0 1px 0 rgb(255 255 255 / 0.65) inset, 0 -1px 0 rgb(255 255 255 / 0.12) inset, 0 24px 60px -20px rgb(6 36 41 / 0.55);
-    --sheen: rgb(255 255 255 / 0.55);
-    --chip: rgb(255 255 255 / 0.8);
-    --well: rgb(255 255 255 / 0.55);
-    --well-strong: rgb(255 255 255 / 0.8);
-    --hover: rgb(255 255 255 / 0.28);
-    --line: rgb(16 42 46 / 0.12);
-    --ready: #1f7a6f;
-    --busy: #2b6f8f;
-    --danger: #b4472f;
-    --danger-bg: rgb(253 236 231 / 0.85);
-    --danger-text: #8a3320;
-    --link: #1f7a6f;
-    --on-jade: #ffffff;
-    --jade-from: rgb(63 168 154 / 0.95);
-    --jade-to: rgb(37 118 108 / 0.95);
-    --jade-hover-from: rgb(72 182 167);
-    --jade-hover-to: rgb(41 128 117);
-    --jade-rim: rgb(255 255 255 / 0.45);
-    --jade-drop: rgb(20 90 82 / 0.8);
-    --dawn-glow: rgb(247 178 140 / 0.95);
-    --lagoon-glow: rgb(110 205 196 / 0.85);
-    --jade-glow: rgb(47 143 131 / 0.9);
-    --sea-top: #13505a;
-    --sea-bottom: var(--color-abyss);
-    --surface: color-mix(in srgb, var(--color-mist) 94%, transparent);
-    --surface-solid: var(--color-mist);
-    --device-rim: #1d3b40;
+    --canvas: #fafafa;
+    --text: #18181b;
+    --text-muted: rgb(24 24 27 / 0.64);
+    --text-faint: rgb(24 24 27 / 0.46);
+    --accent: #18181b;
+    --on-accent: #fafafa;
+    --glass-clear: var(--surface-solid);
+    --glass-frost: var(--surface-solid);
+    --glass-edge: var(--line);
+    --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -16px rgb(0 0 0 / 0.16);
+    --shade: rgb(0 0 0 / 0.08);
+    --scrim: rgb(0 0 0 / 0.32);
+    --chip: var(--surface-solid);
+    --well: rgb(24 24 27 / 0.04);
+    --well-strong: rgb(24 24 27 / 0.07);
+    --hover: rgb(24 24 27 / 0.05);
+    --line: rgb(24 24 27 / 0.1);
+    --ready: #15803d;
+    --busy: #2563eb;
+    --danger: #b42318;
+    --danger-strong: #b42318;
+    --danger-bg: #fdecea;
+    --danger-text: #8a1c12;
+    --link: #18181b;
+    --surface: #ffffff;
+    --surface-solid: #ffffff;
+    --device-rim: #27272a;
     --code-bg: rgb(250 252 251);
     --code-side: rgb(240 245 243);
     --code-text: #23383b;
@@ -93,32 +77,32 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --text: #e4f1ee;
-      --text-muted: rgb(228 241 238 / 0.66);
-      --text-faint: rgb(228 241 238 / 0.45);
-      --glass-clear: linear-gradient(150deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.03) 60%, rgb(255 255 255 / 0.07));
-      --glass-frost: linear-gradient(160deg, rgb(12 38 43 / 0.82), rgb(9 30 34 / 0.74));
-      --glass-edge: rgb(255 255 255 / 0.16);
-      --glass-shadow: 0 1px 0 rgb(255 255 255 / 0.18) inset, 0 -1px 0 rgb(255 255 255 / 0.04) inset, 0 24px 60px -20px rgb(0 0 0 / 0.7);
-      --sheen: rgb(255 255 255 / 0.16);
-      --chip: rgb(9 30 34 / 0.7);
-      --well: rgb(255 255 255 / 0.07);
-      --well-strong: rgb(255 255 255 / 0.12);
-      --hover: rgb(255 255 255 / 0.1);
+      --canvas: #0f0f10;
+      --text: #ededee;
+      --text-muted: rgb(237 237 238 / 0.66);
+      --text-faint: rgb(237 237 238 / 0.46);
+      --accent: #ededee;
+      --on-accent: #0f0f10;
+      --glass-clear: var(--surface-solid);
+      --glass-frost: var(--surface-solid);
+      --glass-edge: var(--line);
+      --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.6);
+      --shade: rgb(0 0 0 / 0.4);
+      --scrim: rgb(0 0 0 / 0.55);
+      --chip: var(--surface-solid);
+      --well: rgb(255 255 255 / 0.05);
+      --well-strong: rgb(255 255 255 / 0.09);
+      --hover: rgb(255 255 255 / 0.06);
       --line: rgb(255 255 255 / 0.1);
-      --ready: #7fe0c8;
-      --busy: #8cc8e8;
-      --danger: #ff9f86;
-      --danger-bg: rgb(120 38 22 / 0.4);
-      --danger-text: #ffcbbd;
-      --link: #7fe0c8;
-      --dawn-glow: rgb(214 186 214 / 0.35);
-      --lagoon-glow: rgb(47 143 131 / 0.55);
-      --jade-glow: rgb(20 90 82 / 0.7);
-      --sea-top: #082a31;
-      --sea-bottom: #04161a;
-      --surface: rgb(10 34 39 / 0.92);
-      --surface-solid: rgb(10 34 39);
+      --ready: #4ade80;
+      --busy: #60a5fa;
+      --danger: #f87171;
+      --danger-strong: #b42318;
+      --danger-bg: rgb(127 29 29 / 0.35);
+      --danger-text: #fecaca;
+      --link: #ededee;
+      --surface: #18181a;
+      --surface-solid: #18181a;
       --device-rim: rgb(255 255 255 / 0.16);
       --code-bg: rgb(9 28 32);
       --code-side: rgb(12 34 39);
@@ -136,32 +120,32 @@
   /* The same night palette when the theme is chosen explicitly. */
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --text: #e4f1ee;
-    --text-muted: rgb(228 241 238 / 0.66);
-    --text-faint: rgb(228 241 238 / 0.45);
-    --glass-clear: linear-gradient(150deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.03) 60%, rgb(255 255 255 / 0.07));
-    --glass-frost: linear-gradient(160deg, rgb(12 38 43 / 0.82), rgb(9 30 34 / 0.74));
-    --glass-edge: rgb(255 255 255 / 0.16);
-    --glass-shadow: 0 1px 0 rgb(255 255 255 / 0.18) inset, 0 -1px 0 rgb(255 255 255 / 0.04) inset, 0 24px 60px -20px rgb(0 0 0 / 0.7);
-    --sheen: rgb(255 255 255 / 0.16);
-    --chip: rgb(9 30 34 / 0.7);
-    --well: rgb(255 255 255 / 0.07);
-    --well-strong: rgb(255 255 255 / 0.12);
-    --hover: rgb(255 255 255 / 0.1);
+    --canvas: #0f0f10;
+    --text: #ededee;
+    --text-muted: rgb(237 237 238 / 0.66);
+    --text-faint: rgb(237 237 238 / 0.46);
+    --accent: #ededee;
+    --on-accent: #0f0f10;
+    --glass-clear: var(--surface-solid);
+    --glass-frost: var(--surface-solid);
+    --glass-edge: var(--line);
+    --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.6);
+    --shade: rgb(0 0 0 / 0.4);
+    --scrim: rgb(0 0 0 / 0.55);
+    --chip: var(--surface-solid);
+    --well: rgb(255 255 255 / 0.05);
+    --well-strong: rgb(255 255 255 / 0.09);
+    --hover: rgb(255 255 255 / 0.06);
     --line: rgb(255 255 255 / 0.1);
-    --ready: #7fe0c8;
-    --busy: #8cc8e8;
-    --danger: #ff9f86;
-    --danger-bg: rgb(120 38 22 / 0.4);
-    --danger-text: #ffcbbd;
-    --link: #7fe0c8;
-    --dawn-glow: rgb(214 186 214 / 0.35);
-    --lagoon-glow: rgb(47 143 131 / 0.55);
-    --jade-glow: rgb(20 90 82 / 0.7);
-    --sea-top: #082a31;
-    --sea-bottom: #04161a;
-    --surface: rgb(10 34 39 / 0.92);
-    --surface-solid: rgb(10 34 39);
+    --ready: #4ade80;
+    --busy: #60a5fa;
+    --danger: #f87171;
+    --danger-strong: #b42318;
+    --danger-bg: rgb(127 29 29 / 0.35);
+    --danger-text: #fecaca;
+    --link: #ededee;
+    --surface: #18181a;
+    --surface-solid: #18181a;
     --device-rim: rgb(255 255 255 / 0.16);
     --code-bg: rgb(9 28 32);
     --code-side: rgb(12 34 39);
@@ -180,95 +164,40 @@
   body {
     font-family: var(--font-sans);
     color: var(--text);
-    background: var(--sea-bottom);
+    background: var(--canvas);
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-dawn);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 }
 
 @layer components {
-  /* The lagoon behind everything. Drifts slowly; still for reduced motion. */
+  /* The page behind everything: plain canvas. */
   .backdrop {
     position: fixed;
-    inset: -10%;
-    z-index: -1;
-    background:
-      radial-gradient(40% 45% at 82% 12%, var(--dawn-glow), transparent 70%),
-      radial-gradient(45% 55% at 18% 85%, var(--jade-glow), transparent 70%),
-      radial-gradient(55% 50% at 55% 55%, var(--lagoon-glow), transparent 72%),
-      radial-gradient(35% 35% at 10% 15%, rgb(124 198 192 / 0.35), transparent 70%),
-      linear-gradient(180deg, var(--sea-top), var(--sea-bottom));
-    animation: drift 60s ease-in-out infinite alternate;
-  }
-
-  .backdrop::after {
-    content: "";
-    position: absolute;
     inset: 0;
-    opacity: 0.1;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: -1;
+    background: var(--canvas);
   }
 
-  /*
-    Liquid Glass, following Apple's rules: glass is only for controls that float
-    above content (dock, composer, menus, buttons); content sits on solid surfaces
-    underneath. The glass is mostly clear, bends what's behind it at the edges
-    (Chromium, see layouts/_lens), has a two-sided rim, and a highlight that
-    follows the pointer.
-  */
+  /* Controls that float over content (the composer, menus, the toolbar's buttons): a solid
+     raised surface with a hairline and a soft shadow. The class keeps its old name. */
   .glass {
-    --mx: 30%;
-    --my: -20%;
     position: relative;
     background: var(--glass-clear);
-    backdrop-filter: blur(10px) saturate(180%) brightness(1.04);
-    -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.04);
     border: 1px solid var(--glass-edge);
-    box-shadow:
-      inset 1px 1px 0 rgb(255 255 255 / 0.55),
-      inset -1px -1px 0 rgb(255 255 255 / 0.12),
-      inset 0 0 18px rgb(255 255 255 / 0.12),
-      0 18px 40px -18px rgb(6 36 41 / 0.5),
-      0 2px 6px -2px rgb(6 36 41 / 0.25);
-    isolation: isolate;
+    box-shadow: var(--glass-shadow);
   }
+  .glass-frost { background: var(--glass-frost); }
 
-  /* Specular highlight, positioned by the glass controller (pointer). */
-  .glass::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    pointer-events: none;
-    background: radial-gradient(90% 120% at var(--mx) var(--my), var(--sheen), transparent 60%);
-    opacity: 0.9;
-    transition: background-position 120ms;
-  }
-
-  /* Refraction where supported: the lens filter bends the backdrop at the rim. */
-  .lens .glass {
-    backdrop-filter: url(#lens) blur(8px) saturate(180%) brightness(1.04);
-  }
-
-  /* Denser glass for menus, where text has to stay readable over anything. */
-  .glass-frost {
-    background: var(--glass-frost);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-  }
-  .lens .glass-frost { backdrop-filter: url(#lens) blur(22px) saturate(160%); }
-
-  /* Solid surface for content you read and scroll, beneath the glass. */
+  /* Content you read and scroll. */
   .surface {
     background: var(--surface);
-    box-shadow: 0 24px 60px -24px rgb(6 36 41 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.5);
+    box-shadow: 0 0 0 1px var(--line);
   }
 
   /* Menus grow out of the control that opened them. */
@@ -310,14 +239,9 @@
   .theme-toggle[data-theme-choice="light"] [data-when="light"],
   .theme-toggle[data-theme-choice="dark"] [data-when="dark"] { display: contents; }
 
-  /* Jade-tinted glass for the one primary action on screen. */
-  .btn-primary {
-    color: var(--on-jade);
-    background: linear-gradient(180deg, var(--jade-from), var(--jade-to));
-    box-shadow: 0 1px 0 var(--jade-rim) inset, 0 8px 20px -8px var(--jade-drop);
-    text-shadow: 0 1px 0 rgb(0 0 0 / 0.15);
-  }
-  .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, var(--jade-hover-from), var(--jade-hover-to)); }
+  /* The one primary action on screen: flat ink. */
+  .btn-primary { color: var(--on-accent); background: var(--accent); }
+  .btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 86%, var(--canvas)); }
   /* Disabled reads by its fill, its ink and the cursor, not only by fading. */
   .btn-primary:disabled { background: var(--well-strong); color: var(--text-faint); box-shadow: none; text-shadow: none; }
 
@@ -354,23 +278,22 @@
     transition: border-color 150ms, background-color 150ms;
   }
   .field::placeholder { color: var(--text-faint); }
-  .field:focus, .field:focus-within { outline: none; border-color: var(--color-jade); background: var(--well-strong); }
+  .field:focus, .field:focus-within { outline: none; border-color: var(--accent); background: var(--well-strong); }
 
   /* Chat */
   .bubble-user {
     margin-left: 2.5rem;
     padding: 0.7rem 1rem;
     border-radius: 20px 20px 6px 20px;
-    background: linear-gradient(180deg, var(--jade-from), var(--jade-to));
-    color: var(--on-jade);
+    background: var(--well-strong);
+    color: var(--text);
     font-size: 0.9375rem;
     line-height: 1.55;
-    box-shadow: 0 1px 0 var(--jade-rim) inset;
 
     & .bubble-text { white-space: pre-line; }
     & .bubble-text.is-clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; overflow: hidden; }
-    & .bubble-more { margin-top: 0.35rem; font-size: 0.8125rem; font-weight: 600; color: rgb(255 255 255 / 0.85); text-decoration: underline; text-underline-offset: 3px; }
-    & .bubble-more:hover { color: white; }
+    & .bubble-more { margin-top: 0.35rem; font-size: 0.8125rem; font-weight: 600; color: var(--text-muted); text-decoration: underline; text-underline-offset: 3px; }
+    & .bubble-more:hover { color: var(--text); }
   }
 
   .reply {
@@ -384,7 +307,7 @@
     & ul { list-style: disc; padding-left: 1.2rem; }
     & ol { list-style: decimal; padding-left: 1.2rem; }
     & li { margin-bottom: 0.25rem; }
-    & li::marker { color: var(--color-jade); }
+    & li::marker { color: var(--text-faint); }
     & strong { font-weight: 600; }
     & em { font-style: italic; }
     & code { font-family: var(--font-mono); font-size: 0.8em; background: var(--well); padding: 0.1rem 0.35rem; border-radius: 6px; }
@@ -471,8 +394,8 @@
     width: 1.25rem;
     height: 1.25rem;
     border-radius: 999px;
-    background: var(--color-abyss, #0b2a30);
-    color: white;
+    background: var(--accent);
+    color: var(--on-accent);
     font-size: 0.875rem;
     line-height: 1;
     cursor: pointer;
@@ -500,7 +423,7 @@
     color: var(--text-muted);
     min-width: 0;
   }
-  [data-preview-target="pickButton"][aria-pressed="true"] { background: var(--color-jade, #2f8f83); color: white; }
+  [data-preview-target="pickButton"][aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
 
   form.dropping .composer { outline: 2px dashed var(--link); outline-offset: 3px; }
   form.prompt.dropping { outline: 2px dashed var(--link); outline-offset: 3px; }
@@ -520,7 +443,7 @@
     border-radius: 22px;
     transition: border-color 150ms;
   }
-  .composer:focus-within { border-color: color-mix(in srgb, var(--color-jade) 55%, var(--glass-edge)); }
+  .composer:focus-within { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
   .composer-input {
     display: block;
     width: 100%;
@@ -607,7 +530,7 @@
     min-height: 0;
     border-radius: 24px;
     background: var(--surface);
-    box-shadow: 0 24px 60px -24px rgb(6 36 41 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.5);
+    box-shadow: 0 24px 60px -24px var(--shade), 0 0 0 1px var(--line);
   }
   .studio-chat { height: 85vh; height: 85svh; }
   .studio-main { min-height: 80vh; overflow: hidden; }
@@ -638,7 +561,7 @@
   .stage { position: absolute; inset: 0; display: grid; place-items: center; }
 
   /* Tablet and phone sizes: the app at that width, centered, shrunk to fit if the window is smaller. */
-  .stage[data-size] iframe { box-shadow: 0 0 0 1px var(--line), 0 0 0 7px var(--device-rim), 0 24px 50px -20px rgb(6 36 41 / 0.5); }
+  .stage[data-size] iframe { box-shadow: 0 0 0 1px var(--line), 0 0 0 7px var(--device-rim), 0 24px 50px -20px var(--shade); }
   .stage[data-size="tablet"] iframe { width: min(820px, 100% - 32px); height: min(1180px, 100% - 32px); border-radius: 26px; }
   .stage[data-size="phone"] iframe { width: min(390px, 100% - 32px); height: min(844px, 100% - 32px); border-radius: 36px; }
 
@@ -827,7 +750,7 @@
       transition: background-color 150ms, color 150ms;
     }
     & button:hover { color: var(--text); }
-    & button:is([aria-pressed="true"], [aria-selected="true"]) { color: var(--text); background: var(--well-strong); box-shadow: 0 1px 3px rgb(6 36 41 / 0.18); }
+    & button:is([aria-pressed="true"], [aria-selected="true"]) { color: var(--text); background: var(--well-strong); box-shadow: 0 1px 3px var(--shade); }
   }
   .segmented-labels button {
     width: auto;
@@ -860,7 +783,6 @@
     padding: 1.5rem;
     overflow-y: auto;
     background: var(--surface);
-    backdrop-filter: blur(24px);
     animation: appear 240ms ease-out;
   }
   /* While building, the last version stays faintly visible underneath. */
@@ -889,8 +811,6 @@
      Describe, Plan, Build. */
   .stage-blank {
     background:
-      radial-gradient(60% 50% at 50% 0%, color-mix(in srgb, var(--color-lagoon) 22%, transparent), transparent 70%),
-      radial-gradient(50% 40% at 85% 100%, color-mix(in srgb, var(--color-dawn) 20%, transparent), transparent 70%),
       var(--surface);
   }
   .blank {
@@ -910,7 +830,7 @@
     border: 1px solid var(--line);
     border-radius: 14px;
     background: var(--surface-solid);
-    box-shadow: 0 18px 40px -22px rgb(6 36 41 / 0.45);
+    box-shadow: 0 18px 40px -22px var(--shade);
     transform: rotate(-2deg);
 
     & span {
@@ -948,7 +868,7 @@
     & li::before { content: counter(step) "  "; white-space: pre; opacity: 0.7; }
     & li.done { color: var(--ready); }
     & li.done::before { content: "✓  "; opacity: 1; }
-    & li.current { color: var(--text); background: var(--surface-solid); box-shadow: 0 1px 3px rgb(6 36 41 / 0.14); }
+    & li.current { color: var(--text); background: var(--surface-solid); box-shadow: 0 1px 3px var(--shade); }
   }
   .blank-status {
     display: flex;
@@ -1014,7 +934,7 @@
   .well { background: var(--well); }
   .muted { color: var(--text-muted); }
   .faint { color: var(--text-faint); }
-  .on-glass { color: white; }
+  .on-glass { color: var(--text); }
 
   /* The signed-in account's initial, opening its menu. */
   .account-button {
@@ -1040,15 +960,14 @@
       border-radius: 999px;
       font-size: 0.8125rem;
       font-weight: 600;
-      color: white;
-      opacity: 0.75;
-      transition: background-color 150ms, opacity 150ms;
+      color: var(--text-muted);
+      transition: background-color 150ms, color 150ms;
     }
-    & a:hover { opacity: 1; }
-    & a[aria-current="page"] { opacity: 1; background: rgb(255 255 255 / 0.22); }
+    & a:hover { color: var(--text); }
+    & a[aria-current="page"] { color: var(--text); background: var(--well-strong); }
   }
 
-  /* Sign-in and sign-up: one solid card over the lagoon. */
+  /* Sign-in and sign-up: one card on the canvas. */
   .auth-card {
     display: flex;
     flex-direction: column;
@@ -1211,7 +1130,7 @@
   .task-in_progress { font-weight: 600; }
   .task-in_progress .task-mark { border-color: var(--busy); border-top-color: transparent; animation: spin 0.9s linear infinite; }
   .task-completed { color: var(--text-muted); }
-  .task-completed .task-mark { border-color: var(--ready); background: var(--ready); color: white; }
+  .task-completed .task-mark { border-color: var(--ready); background: var(--ready); color: var(--surface-solid); }
 }
 
 @keyframes ripple {
@@ -1260,11 +1179,11 @@
     text-align: left;
     transition: background-color 150ms, border-color 150ms, color 150ms;
   }
-  .chip-option:hover { border-color: var(--color-jade); }
+  .chip-option:hover { border-color: var(--accent); }
   .chip-option[aria-pressed="true"] {
-    background: linear-gradient(180deg, rgb(63 168 154), rgb(37 118 108));
+    background: var(--accent);
     border-color: transparent;
-    color: white;
+    color: var(--on-accent);
   }
 
   /* What to ask for next, under the reply after a build. */
@@ -1286,7 +1205,7 @@
     cursor: pointer;
     white-space: nowrap;
 
-    & input { accent-color: var(--color-jade); }
+    & input { accent-color: var(--accent); }
     &:has(input:checked) { background: var(--well-strong); color: var(--text); }
   }
 }
@@ -1294,7 +1213,7 @@
 @layer components {
   /* Home: one big box to describe the app. */
   .prompt { border-radius: 28px; }
-  .prompt:focus-within { border-color: color-mix(in srgb, var(--color-jade) 55%, var(--glass-edge)); }
+  .prompt:focus-within { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
   .prompt-attachments { padding: 0 1.4rem 0.25rem; }
 
   .prompt-input {
@@ -1317,14 +1236,14 @@
   .idea {
     font-size: 0.875rem;
     font-weight: 500;
-    color: rgb(255 255 255 / 0.85);
+    color: var(--text-muted);
     text-decoration: underline;
-    text-decoration-color: rgb(255 255 255 / 0.35);
+    text-decoration-color: var(--line);
     text-underline-offset: 4px;
     cursor: pointer;
     transition: color 150ms, text-decoration-color 150ms;
   }
-  .idea:hover { color: white; text-decoration-color: white; }
+  .idea:hover { color: var(--text); text-decoration-color: var(--text); }
 
   /* The apps grid: content, so solid cards with a picture of the app. */
   .app-card {
@@ -1334,7 +1253,7 @@
     color: var(--text);
     transition: transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 200ms;
   }
-  .app-card:hover { transform: translateY(-3px); box-shadow: 0 30px 60px -24px rgb(6 36 41 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.6); }
+  .app-card:hover { transform: translateY(-3px); box-shadow: 0 24px 48px -24px var(--shade), 0 0 0 1px var(--line); }
 
   .app-shot {
     aspect-ratio: 16 / 10;
@@ -1375,10 +1294,9 @@
       height: 2.25rem;
       list-style: none;
       border-radius: 999px;
-      color: white;
-      background: rgb(8 34 39 / 0.5);
-      backdrop-filter: blur(12px) saturate(160%);
-      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 0 0 1px rgb(255 255 255 / 0.18), 0 6px 16px -6px rgb(0 0 0 / 0.5);
+      color: var(--text);
+      background: var(--surface-solid);
+      box-shadow: 0 0 0 1px var(--line), 0 4px 12px -6px var(--shade);
       cursor: pointer;
       opacity: 0;
       transition: opacity 150ms;
@@ -1414,20 +1332,18 @@
     border-radius: 28px;
     border: 1px solid var(--glass-edge);
     background: var(--glass-frost);
-    backdrop-filter: blur(24px) saturate(160%);
     box-shadow: var(--glass-shadow);
     color: var(--text);
 
     &[open] { animation: grow 320ms cubic-bezier(0.16, 1, 0.3, 1); }
-    &::backdrop { background: rgb(6 30 34 / 0.35); backdrop-filter: blur(3px); }
+    &::backdrop { background: var(--scrim); }
   }
 
   .btn-danger {
-    color: white;
-    background: linear-gradient(180deg, rgb(201 92 66), rgb(166 64 41));
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset, 0 8px 20px -8px rgb(140 50 30 / 0.8);
+    color: var(--on-accent);
+    background: var(--danger-strong);
   }
-  .btn-danger:hover:not(:disabled) { background: linear-gradient(180deg, rgb(214 102 75), rgb(176 70 46)); }
+  .btn-danger:hover:not(:disabled) { background: color-mix(in srgb, var(--danger-strong) 86%, black); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1446,8 +1362,7 @@
   border-radius: 22px;
   border: 1px solid var(--glass-edge);
   background: var(--glass-frost);
-  backdrop-filter: blur(24px) saturate(160%);
-  box-shadow: var(--glass-shadow), 0 24px 60px -24px rgb(6 36 41 / 0.55);
+  box-shadow: var(--glass-shadow);
 
   .driver-popover-title { font-size: 1rem; font-weight: 600; line-height: 1.4; padding-right: 1.5rem; }
   .driver-popover-description { margin-top: 0.3rem; font-size: 0.875rem; line-height: 1.55; color: var(--text-muted); }
@@ -1473,30 +1388,29 @@
   }
   .driver-popover-footer-btn:hover { background: var(--well-strong); }
   .driver-popover-next-btn, .driver-popover-done-btn {
-    color: white;
-    background: linear-gradient(180deg, rgb(63 168 154 / 0.95), rgb(37 118 108 / 0.95));
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.45) inset, 0 8px 20px -8px rgb(20 90 82 / 0.8);
+    color: var(--on-accent);
+    background: var(--accent);
   }
-  .driver-popover-next-btn:hover, .driver-popover-done-btn:hover { background: linear-gradient(180deg, rgb(72 182 167), rgb(41 128 117)); }
+  .driver-popover-next-btn:hover, .driver-popover-done-btn:hover { background: color-mix(in srgb, var(--accent) 86%, var(--canvas)); }
 }
 
 @layer components {
   /* /admin: the owner's admin over all their shops. A working screen, not a showcase: a plain
      canvas, a sidebar, and cards, in the studio's colors and type, light and dark. */
   .admin-body {
-    --admin-canvas: #f3f6f5;
-    --admin-card: #ffffff;
-    --admin-side: var(--color-abyss);
-    --admin-muted: #e9f0ee;
-    --admin-brand-50: #e6f4f1;
-    --admin-brand-100: #c9e8e2;
-    --admin-brand-200: #9fd6cc;
-    --admin-brand-700: #1f6159;
-    --admin-brand-800: #1a4e48;
+    --admin-canvas: var(--canvas);
+    --admin-card: var(--surface-solid);
+    --admin-side: #18181b;
+    --admin-muted: #f4f4f5;
+    --admin-brand-50: #f4f4f5;
+    --admin-brand-100: #e4e4e7;
+    --admin-brand-200: #d4d4d8;
+    --admin-brand-700: #27272a;
+    --admin-brand-800: #18181b;
     --admin-side-text: rgb(228 241 238 / 0.85);
     --admin-side-ink: #ffffff;
     --admin-side-hover: rgb(255 255 255 / 0.08);
-    --admin-side-current: rgb(124 198 192 / 0.18);
+    --admin-side-current: rgb(255 255 255 / 0.12);
     --admin-side-well: rgb(255 255 255 / 0.06);
     --admin-side-line: rgb(255 255 255 / 0.1);
     --admin-button: var(--color-brand-600);
@@ -1506,13 +1420,13 @@
     min-height: 100%;
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .admin-body { --admin-canvas: #081d21; --admin-card: rgb(14 40 46); --admin-side: #05161a;
-      --admin-muted: rgb(255 255 255 / 0.06); --admin-brand-50: rgb(47 143 131 / 0.2); --admin-brand-100: rgb(47 143 131 / 0.3);
-      --admin-brand-200: rgb(47 143 131 / 0.45); --admin-brand-700: #9fd6cc; --admin-brand-800: #c9e8e2; }
+    :root:not([data-theme="light"]) .admin-body { --admin-side: #0a0a0b;
+      --admin-muted: rgb(255 255 255 / 0.06); --admin-brand-50: rgb(255 255 255 / 0.06); --admin-brand-100: rgb(255 255 255 / 0.1);
+      --admin-brand-200: rgb(255 255 255 / 0.16); --admin-brand-700: #d4d4d8; --admin-brand-800: #e4e4e7; --admin-button: #ededee; --admin-on-button: #0f0f10; }
   }
-  :root[data-theme="dark"] .admin-body { --admin-canvas: #081d21; --admin-card: rgb(14 40 46); --admin-side: #05161a;
-      --admin-muted: rgb(255 255 255 / 0.06); --admin-brand-50: rgb(47 143 131 / 0.2); --admin-brand-100: rgb(47 143 131 / 0.3);
-      --admin-brand-200: rgb(47 143 131 / 0.45); --admin-brand-700: #9fd6cc; --admin-brand-800: #c9e8e2; }
+  :root[data-theme="dark"] .admin-body { --admin-side: #0a0a0b;
+      --admin-muted: rgb(255 255 255 / 0.06); --admin-brand-50: rgb(255 255 255 / 0.06); --admin-brand-100: rgb(255 255 255 / 0.1);
+      --admin-brand-200: rgb(255 255 255 / 0.16); --admin-brand-700: #d4d4d8; --admin-brand-800: #e4e4e7; --admin-button: #ededee; --admin-on-button: #0f0f10; }
 
   .admin-shell { display: grid; min-height: 100vh; grid-template-columns: 15rem minmax(0, 1fr); }
   .admin-side {
@@ -1556,7 +1470,7 @@
   .admin-field {
     display: block; width: 100%; height: 2.5rem; padding: 0 0.85rem;
     border: 1px solid var(--line); border-radius: 10px; background: var(--admin-canvas); color: var(--text);
-    &:focus { outline: 2px solid color-mix(in srgb, var(--color-jade) 40%, transparent); border-color: var(--color-jade); }
+    &:focus { outline: 2px solid color-mix(in srgb, var(--accent) 25%, transparent); border-color: var(--accent); }
   }
   .admin-button {
     display: inline-flex; align-items: center; gap: 0.4rem; height: 2.25rem; padding: 0 1rem;
@@ -1565,7 +1479,7 @@
     &:hover { background: color-mix(in srgb, var(--admin-button) 85%, black); }
   }
   .admin-button-secondary { background: var(--admin-card); color: var(--text); border: 1px solid var(--line); &:hover { background: var(--well); } }
-  .admin-flash { border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.875rem; background: color-mix(in srgb, var(--color-jade) 14%, var(--admin-card)); }
+  .admin-flash { border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.875rem; background: var(--admin-muted); }
   .admin-alert { border-radius: 10px; padding: 0.6rem 0.9rem; font-size: 0.875rem; background: var(--danger-bg); color: var(--danger-text); }
 
   @media (max-width: 48rem) {
