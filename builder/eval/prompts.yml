@@ -1,57 +1,88 @@
 # Requests bin/eval builds: print-on-demand shops selling from ads, the apps AppBuilder makes.
 # Keep this file fixed: runs are only comparable on the same prompts. To change the set, write a
 # new one (by hand, or `bin/eval generate --force`) and start a new baseline. The ids continue
-# from an older, general set (p001–p060), removed when the product became POD shops only.
-- id: p061
-  name: Mèo Mập Tees
-  language: vi
-  request: 'Mình bán áo thun in hình mèo béo cho khách Mỹ, sản phẩm làm trên Printify rồi,
-    tên shop là Mèo Mập Tees (Chubby Cat Tees cũng được). Mình sẽ chạy ads Facebook nên trang
-    sản phẩm phải chốt đơn tốt trên điện thoại, có bảng size, free ship cho đơn từ $50. Màu chủ
-    đạo cam đào, vui vẻ dễ thương.'
-- id: p062
+# from older sets (p001–p060 general apps, p061–p068 the first POD set, partly in Vietnamese);
+# since 2026-10-28 every shop is English and each request says plainly what it wants.
+- id: p069
+  name: Chubby Cat Tees
+  language: en
+  request: |-
+    I'm opening Chubby Cat Tees: t-shirts and sweatshirts with drawings of fat, happy cats, made on Printify and sold to cat owners in the US.
+    Almost every buyer will come from a Facebook ad on their phone, so the product page has to sell on its own.
+    Look: cute and cheerful, peach-orange as the main color on a warm cream background, rounded corners.
+    Must have:
+    - A home page headline that says what we sell in plain words, with a photo of a cat.
+    - A size guide on the product page for the unisex tee.
+    - Free shipping on orders over $50, shown near the add to cart button.
+- id: p070
   name: Dad Joke Depot
   language: en
-  request: 'I sell dad joke t-shirts and coffee mugs, all print on demand through Printify, and
-    I run TikTok ads to them. I need a store that loads fast and makes people buy on their phone:
-    a bold, funny look (think comic book), a Father''s Day collection, and a 15% off code
-    DADJOKE15 shown at the top of every page.'
-- id: p063
+  request: |-
+    Dad Joke Depot sells dad joke t-shirts and coffee mugs, printed on demand through Printify. I send TikTok ads straight to product pages.
+    Look: bold and funny like a comic book: thick black outlines, bright yellow and red, big heavy headings.
+    Must have:
+    - The code DADJOKE15 (15% off) mentioned on the home page.
+    - A "Gifts for Dad" section on the home page with the mugs and tees.
+    - Product pages that load fast and keep the add to cart button in reach on a phone.
+- id: p071
   name: Nurse Life Co.
   language: en
-  request: 'Apparel for nurses: scrub-friendly tees, sweatshirts and tote bags with nurse humor.
-    Collections by specialty (ER, NICU, ICU, L&D). Shipping is 5 to 9 business days, free over
-    $60. Make it clean and trustworthy, soft teal and white, with a returns page that says we
-    reprint for free if the print is damaged.'
-- id: p064
-  name: Tranh Treo Tường Lặng
-  language: vi
-  request: 'Shop tranh poster và canvas tối giản (đường nét, phong cảnh, chữ), in qua Printify,
-    bán cho khách Úc và Mỹ. Muốn web nhìn như một gallery: nền trắng ngà, chữ serif, nhiều khoảng
-    trống. Khách chọn kích thước thì giá đổi theo. Có mục "Bộ 3 tranh" giá ưu đãi.'
-- id: p065
+  request: |-
+    Nurse Life Co. sells tees, sweatshirts and tote bags with nurse humor, made on Printify, for nurses in the US.
+    Look: clean and trustworthy, soft teal and white, simple sans-serif type, nothing childish.
+    Must have:
+    - A line on the home page and product pages: "Ships in 5–9 business days, free over $60".
+    - A short "Our promise" section on the home page: if the print arrives damaged, we reprint it for free.
+    - Shopping by specialty (ER, ICU, NICU, L&D) from the home page, using the shop's collections.
+- id: p072
+  name: Quiet Walls
+  language: en
+  request: |-
+    Quiet Walls sells minimalist posters and canvas prints (line art, landscapes, typography), printed through Printify, to buyers in the US and Australia.
+    Look: like an art gallery: ivory background, an elegant serif for headings, lots of white space, large photos, no loud colors.
+    Must have:
+    - When the buyer picks a size, the price updates right away.
+    - A home page section that explains the sizes and how the prints are framed and shipped.
+    - An "About the artist" story on the home page beside a photo.
+- id: p073
   name: Good Boy Hoodies
   language: en
-  request: 'Hoodies and tees with illustrated dog breeds (golden retriever, corgi, dachshund,
-    frenchie, husky...). Each breed should be its own collection so I can send ads for corgis
-    straight to the corgi page. Colorful and playful look. When someone picks a color I want the
-    photo to show that color.'
-- id: p066
-  name: Hội Chạy Bộ Sông Hàn
-  language: vi
-  request: 'CLB chạy bộ của mình muốn bán áo và mũ kỷ niệm giải chạy Sông Hàn 2026 qua Printify
-    cho thành viên và người thân ở nước ngoài. Chỉ bán đến hết 30/11, có đếm ngược ngày đóng
-    đơn. Giao diện năng động, xanh biển và vàng chanh. Có trang giới thiệu CLB.'
-- id: p067
+  request: |-
+    Good Boy Hoodies sells hoodies and tees with illustrated dog breeds (golden retriever, corgi, dachshund, frenchie, husky), made on Printify.
+    I run a separate ad for each breed and send it to that breed's collection page.
+    Look: colorful and playful, but still easy to read on a phone.
+    Must have:
+    - The breeds' collections shown as big photo tiles on the home page.
+    - When a buyer picks a color, the product photo switches to that color.
+    - A friendly line on each collection page saying the designs are drawn in-house.
+- id: p074
+  name: Han River Run Club
+  language: en
+  request: |-
+    Han River Run Club is a running club. We want to sell t-shirts and caps for our 2026 race, made on Printify, to members and their families abroad.
+    Orders close on November 30, 2026.
+    Look: sporty and energetic: ocean blue with lime yellow accents, bold condensed headings.
+    Must have:
+    - A clear banner on the home page saying orders close November 30, 2026 (a real date, no fake countdown).
+    - An "About the club" page linked from the header: who we are, when we run, how to join.
+    - Race photos of runners on the home page.
+- id: p075
   name: Grace & Thread
   language: en
-  request: 'Faith-based apparel for women: soft tees and sweatshirts with scripture and
-    encouraging words. Gentle, warm look with a handwritten feel. New customers get WELCOME10 for
-    10% off. I want a short story about why I started this on the home page, and a size guide
-    for the women''s relaxed fit.'
-- id: p068
+  request: |-
+    Grace & Thread sells faith-based apparel for women: soft tees and sweatshirts with scripture and encouraging words, made on Printify.
+    Look: gentle and warm: blush pink, cream and soft brown, a script or handwritten font for headings only, rounded shapes.
+    Must have:
+    - New customers get the code WELCOME10 for 10% off, shown at the top of the home page.
+    - A short story on the home page about why I started the shop, beside a photo.
+    - A size guide for the women's relaxed fit on the product page.
+- id: p076
   name: Stack Overflowing
   language: en
-  request: 'Programmer humor shop: tees, mugs and stickers. Dark mode look, monospace headings,
-    neon green accents. I already connected Meta Pixel ads so tracking must work. Bundle idea:
-    any 3 stickers for $10.'
+  request: |-
+    Stack Overflowing sells programmer humor tees, mugs and stickers, made on Printify. I already connected my Meta Pixel in the shop's settings.
+    Look: dark mode: near-black background, monospace headings, neon green accents, but body text easy to read.
+    Must have:
+    - Ad tracking keeps working: views, add to cart and purchases reach the pixel.
+    - A home page section that groups the stickers so buyers can grab several at once.
+    - Product cards that show the price clearly on a dark background.

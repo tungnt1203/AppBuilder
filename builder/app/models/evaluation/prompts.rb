@@ -19,16 +19,14 @@ module Evaluation
 
       - What they sell: a niche each (a hobby, a job, a pet, a city, a fandom-free joke, a cause,
         a family event), never two the same; avoid the obvious examples.
-      - How much they say: about a third one sentence, a third a short paragraph, a third
-        detailed, with specifics (the shop's name, products, prices, colors, free shipping, sizes,
-        collections, the look they want). Some ask for a look that is unusual for their niche.
-      - Language: about three quarters Vietnamese, written the way Vietnamese sellers type
-        (sometimes casual, short, with abbreviations or missing diacritics); the rest English.
-        Their buyers are in the US or Europe, so the shop is in English either way.
+      - Clear about what they want: the shop's name, what it sells and to whom, the look (colors,
+        type, feel) and a short "Must have:" list of 2 or 3 things a judge can check in the
+        finished shop. Some ask for a look that is unusual for their niche.
+      - Language: English, with an English shop name; their buyers are in the US or Europe.
       - Only what the builder's shop can do: no marketplaces, no native mobile apps, no paid
         outside services beyond Stripe, Printify and their ad pixels.
 
-      Each: {"name": "the shop's name, as the owner would say it", "language": "vi" or "en",
+      Each: {"name": "the shop's name, as the owner would say it", "language": "en",
       "request": "the message"}. Reply with only the JSON array.
     TEXT
 
