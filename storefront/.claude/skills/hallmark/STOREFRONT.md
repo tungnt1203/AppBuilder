@@ -17,9 +17,14 @@ page's composition; the storefront fixes only what makes a shop sell and work.
     remove a part.
   - On a phone, the first screen of the home page says what the shop sells and to whom, with one
     obvious action; real products with their prices are within the first two screens.
-  - The home page shows the shop's own products from the API (never invented ones), "Make it
-    yours" (`blocks/_personalized`) when the shop has personalized products, a way into the
-    collections, and the promises a buyer checks (shipping, returns, secure checkout) as facts.
+  - The home page shows the shop's own products from the API (never invented ones), what buyers
+    can personalize (the products from `blocks/_personalized`'s query) when the shop has any, a
+    way into the collections, and the promises a buyer checks (shipping, returns, secure
+    checkout) as facts. These are **content to place**, not sections to keep: the layout's
+    benefits strip, "New arrivals" grid, "Make it yours" block and collection tiles are its
+    starting markup, and the draw decides what each becomes (a bento cell, a pinned run, a poster
+    line, a ruled list) and where it goes. A home page that still reads hero, strip, grid, "Make
+    it yours", tiles, story in that order hasn't been composed.
   - The header: logo or name, the collections, search (`layouts/site/_search`) and the cart, the
     menu button on phones; checkout keeps its focused header. The footer: the policies, contact,
     "Find my order", the social links.
@@ -41,9 +46,14 @@ page's composition; the storefront fixes only what makes a shop sell and work.
   | **soft** | photo with a card over its edge, lifted cards | a stage, cards, a bento |
 
 - **The signature** is owed on every shop (SKILL.md, Signature): the one thing a buyer remembers,
-  made from this shop's real material (its products, its promise, its city, the buyer's own
-  name on the product), built once where it does the most work. Name it in the stamp and in
-  DESIGN.md. "Clean product grid" is not a signature; neither is a texture or a sticker.
+  made from this shop's real material and built **once**, where it does the most work. It is a
+  thing, not a style: a treatment applied to every card (borders, shadows, a texture, rounded
+  corners, die-cut edges) is the material, never the signature. Shapes it can take: the
+  personalization shown working in the hero (a product photo with a sample name or pet already
+  on it, through `personalization/_layer`); the price set huge as the offer; the promise made
+  concrete (the days from order to door drawn as a strip from the shop's delivery estimate); the
+  catalogue as an index the buyer scans (sizes, colors, materials from the API); one product
+  staged large with its options laid out around it. Name it in the stamp and DESIGN.md.
 
 ## The flow, step by step
 
@@ -65,7 +75,8 @@ shape, the hero's posture, the nav, the footer, the first section after the hero
 sits, what to leave out, and the sections to build. Take it, read the shape's file in
 `references/macrostructures/` and the postures in `references/layout.md`, and build the home page
 (`app/views/home/show.html.erb`), the header and the footer (`app/views/layouts/site/`) to it,
-inside the shop contract above: a section the draw asks for is made from the shop's real
+inside the shop contract above, starting from the layout's markup and changing what the draw
+changes (not only the hero): a section the draw asks for is made from the shop's real
 material (its products, collections, promises, the owner's words), never invented; the draw's
 "leave out" is honored. When the draw refuses the shop (a shape for words with a shop of
 pictures), redraw once (`--reroll 1`) and say why in the Picks. The blocks in

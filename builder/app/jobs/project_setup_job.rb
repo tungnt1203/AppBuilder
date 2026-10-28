@@ -5,6 +5,7 @@ class ProjectSetupJob < ApplicationJob
   def perform(project, first_request = nil, mode = "plan")
     name(project)
     copy_template(project)
+    remember_other_looks(project)
     project.ensure_shop!
     configure(project)
     project.sandbox.run("bundle", "install", "--quiet")
@@ -50,6 +51,26 @@ class ProjectSetupJob < ApplicationJob
       project.shell.run("git", "init", "--quiet", "--initial-branch=main")
       project.shell.run("git", "add", "--all")
       project.shell.run("git", "commit", "--quiet", "-m", "Start from the template")
+    end
+
+    # Hallmark deals and draws away from what its log says was built lately; each app has its
+    # own log, so it's seeded with the owner's other shops (their theme.css stamps, newest
+    # first): a new shop doesn't come out in the same material and shape as the last ones.
+    def remember_other_looks(project)
+      log = project.path.join(".hallmark/log.json")
+      return if log.exist?
+
+      entries = project.owner.projects.where.not(id: project.id).order(updated_at: :desc).limit(20).filter_map do |other|
+        stamp = other.path.join("app/assets/tailwind/theme.css").then { |css| css.file? ? css.read.lines.first(3).join : "" }
+        theme = stamp[/theme: ([\w-]+(?: [\w-]+)*?) \(/, 1]
+        next unless theme
+
+        %w[ shape hero nav footer axes ].to_h { |key| [ key, stamp[/\b#{key}: ([^·*\n]+?)\s*(?:·|\*\/|\n)/, 1] ] }.merge("theme" => theme).compact
+      end
+      return if entries.empty?
+
+      log.dirname.mkpath
+      log.write(JSON.pretty_generate(entries) + "\n")
     end
 
     # The template uses the blocks (blocks/storefront_kit) through symlinks in vendor/blocks/; the app gets a

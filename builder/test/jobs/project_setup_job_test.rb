@@ -58,4 +58,22 @@ class ProjectSetupJobTest < ActiveSupport::TestCase
     assert_match %(\n    config.time_zone = "#{projects(:clinic).time_zone}"), result
     assert_match %(# config.time_zone = "Central Time (US & Canada)"), result
   end
+
+  test "a new app's Hallmark log remembers the owner's other shops, so its look isn't theirs" do
+    Rails.configuration.x.projects_root.mkpath
+    other, project = projects(:shop), projects(:clinic)
+    other.path.join("app/assets/tailwind").mkpath
+    other.path.join("app/assets/tailwind/theme.css").write(<<~CSS)
+      /* Hallmark · shape: Split Studio · layout: soft · genre: playful · theme: Sticker (deal 1/3, seed x) · job: buy · draw: eabf0e
+       * hero: Corridor · nav: banner over a retracting bar · footer: index columns · signature: the pet on the canvas
+       * axes: light 95.7 82 / display-heavy Bowlby One SC / chromatic-magenta 2 · posture: full-palette · contrast: pass */
+    CSS
+    other.update_columns(owner_id: project.owner_id)
+
+    ProjectSetupJob.new.send(:remember_other_looks, project)
+
+    entry = JSON.parse(project.path.join(".hallmark/log.json").read).first
+    assert_equal({ "theme" => "Sticker", "shape" => "Split Studio", "hero" => "Corridor", "nav" => "banner over a retracting bar", "footer" => "index columns" },
+      entry.slice("theme", "shape", "hero", "nav", "footer"))
+  end
 end
