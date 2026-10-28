@@ -18,7 +18,7 @@
    motion stops for visitors who turn it off. */
 @layer base {
   html, body { overflow-x: clip; }
-  h1, h2, h3 { overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+  h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; min-width: 0; text-wrap: balance; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }

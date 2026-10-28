@@ -1,10 +1,13 @@
-# The storefront's themes (themes/<name>/ in the template, close copies of Shopify themes that
-# sell) and switching between them from the studio's Design tab, the way the template's
+# The storefront's layouts (themes/<name>/ in the template, close copies of Shopify themes that
+# sell), the Hallmark material over them, and switching layouts from the studio's Design tab, the way the template's
 # bin/theme does: the theme's header, footer, home page, product card and theme.css over the
 # app's. A file changed for this shop since a theme put it there is listed first, since the
 # switch replaces it (History still has it).
 class ProjectTheme
   Theme = Data.define(:name, :summary, :current, :changed)
+  Material = Data.define(:slug, :name, :summary)
+  CSS = "app/assets/tailwind/theme.css"
+  FONTS = "app/views/layouts/_fonts.html.erb"
 
   def initialize(project)
     @project = project
@@ -42,14 +45,35 @@ class ProjectTheme
     end
   end
 
+  # The Hallmark theme the storefront's look is made of (bin/theme material), named in theme.css.
+  def material
+    slug = css.file? && css.read[/bin\/theme material ([\w-]+)/, 1]
+    file = slug && @project.path.join(".claude/skills/hallmark/references/themes/#{slug}.md")
+    return unless file&.file?
+
+    header = file.read[/\A---\n(.*?)\n---/m, 1].to_s.lines.to_h { |line| line.chomp.split(": ", 2) }
+    Material.new(slug:, name: header.fetch("name", slug.titleize), summary: header["material"].to_s)
+  end
+
+  # Another layout. A storefront with a material keeps it (its theme.css, with what the agent
+  # added, and its fonts): only the new layout's page width comes along.
   def switch(name)
     folder(name) # an unknown theme is not found
+    kept = [ css.read, fonts.read ] if material && fonts.file?
     @project.sandbox.run("bin/theme", name, "--force")
-    @project.history.commit("Theme: #{name}")
+    if kept
+      width = css.read[/--page-width:\s*([^;]+);/, 1]
+      css.write(kept.first.sub(/--page-width:\s*[^;]+;/) { "--page-width: #{width};" }.sub(/shape: \w+ layout/, "shape: #{name} layout"))
+      fonts.write(kept.last)
+    end
+    @project.history.commit("Layout: #{name}")
     @project.sandbox.run("bin/rails", "tailwindcss:build")
   end
 
   private
+    def css = @project.path.join(CSS)
+    def fonts = @project.path.join(FONTS)
+
     def root
       @project.path.join("themes")
     end

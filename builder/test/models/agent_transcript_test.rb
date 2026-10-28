@@ -23,7 +23,7 @@ class AgentTranscriptTest < ActiveSupport::TestCase
       ] }
     end
 
-    assert_equal [ "Read app/models/user.rb", "Created app/models/patient.rb", "Ran bin/rails test" ], @project.messages.action.last(3).map(&:body)
+    assert_equal [ "Read app/models/user.rb", "Created app/models/patient.rb", "Ran the tests" ], @project.messages.action.last(3).map(&:body)
     assert_equal "Running the tests", @project.reload.activity
   end
 
@@ -236,4 +236,12 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     def stream(event)
       record "type" => "stream_event", "event" => event
     end
+
+  test "a shell command reads as what it does, without the app's folder" do
+    assert_equal "Put the Sticker material in place", AgentTranscript.command("cd /home/dev/projects/ab12cd34 && bin/theme material sticker").first
+    assert_equal "Looked at / and /products", AgentTranscript.command("bin/look / /products --screens 3").first
+    assert_equal "Searched photos of “retro cat lover”", AgentTranscript.command(%q(bin/images --count 5 "retro cat lover")).first
+    assert_equal [ "Ran the tests", "Running the tests" ], AgentTranscript.command("bin/rails test test/controllers")
+    assert_equal "Ran ls app/views", AgentTranscript.command("cd \"/srv/projects/ab12cd34\"; ls /srv/projects/ab12cd34/app/views").first
+  end
 end

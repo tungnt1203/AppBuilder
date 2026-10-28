@@ -50,6 +50,21 @@ class ProjectTest < ActiveSupport::TestCase
     assert_not projects(:shop).accepts_messages?
   end
 
+  test "the app's first chat is named after the app, and takes its real name; later chats after their request" do
+    project = Project.new(language: "en", owner: users(:owner))
+    project.name_after("A print-on-demand shop for funny retro cat T-shirts")
+    project.save!
+    project.record_request("A print-on-demand shop for funny retro cat T-shirts")
+    assert_equal project.name, project.chat.reload.title
+
+    project.adopt_name("Retro Cat Tees")
+    assert_equal "Retro Cat Tees", project.chat.reload.title
+
+    project.start_chat
+    project.record_request("Add a size guide")
+    assert_equal "Add a size guide", project.chat.reload.title
+  end
+
   test "adopting a suggested name leaves the app's address alone" do
     project = Project.new(language: "vi", owner: users(:owner))
     project.name_after("Quản lý hội viên phòng gym quận 3")

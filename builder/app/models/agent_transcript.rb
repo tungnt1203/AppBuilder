@@ -18,7 +18,7 @@ class AgentTranscript
     "Edit" => ->(input) { "Edited #{relative(input["file_path"])}" },
     "Grep" => ->(input) { "Searched for “#{input["pattern"].to_s.truncate(60)}”" },
     "Glob" => ->(input) { "Looked for #{input["pattern"]}" },
-    "Bash" => ->(input) { "Ran #{input["command"].to_s.truncate(120)}" },
+    "Bash" => ->(input) { command(input["command"]).first },
     "Skill" => ->(input) { "Followed the #{input["skill"] || input["name"]} guide" },
     "mcp__builder__look" => ->(input) { "Looked at #{Array(input["paths"]).presence&.to_sentence || "/"}" },
     "Agent" => ->(input) { input["subagent_type"] == "design-reviewer" ? "Asked the design reviewer to look at the app" : "Asked a helper: #{input["description"].to_s.truncate(80)}" }
@@ -30,7 +30,7 @@ class AgentTranscript
     "Edit" => ->(input) { "Editing #{relative(input["file_path"])}" },
     "Grep" => ->(_) { "Searching the code" },
     "Glob" => ->(_) { "Looking through files" },
-    "Bash" => ->(input) { input["command"].to_s.start_with?("bin/rails test") ? "Running the tests" : "Running #{input["command"].to_s.truncate(60)}" },
+    "Bash" => ->(input) { command(input["command"]).last },
     "TaskCreate" => ->(_) { "Planning" },
     "TaskUpdate" => ->(_) { "Updating the plan" },
     "mcp__builder__look" => ->(_) { "Looking at the app" },
@@ -38,8 +38,34 @@ class AgentTranscript
     "Agent" => ->(input) { input["subagent_type"] == "design-reviewer" ? "The design reviewer is looking at the app" : "A helper is working" }
   }
 
+  # The app's own commands, said as what they do: [ step, activity ] by the command's start.
+  COMMANDS = [
+    [ /\Abin\/rails test/, ->(_) { [ "Ran the tests", "Running the tests" ] } ],
+    [ /\Abin\/rails tailwindcss:build/, ->(_) { [ "Rebuilt the styles", "Rebuilding the styles" ] } ],
+    [ /\Abin\/rubocop/, ->(_) { [ "Checked the code's style", "Checking the code's style" ] } ],
+    [ /\Abin\/look\s*(.*)/, ->(m) { pages = m[1].split.grep(%r{\A(/|https?://)}).presence&.to_sentence || "/"; [ "Looked at #{pages}", "Looking at the app" ] } ],
+    [ /\Abin\/sloplint/, ->(_) { [ "Checked the pages against Hallmark", "Checking the pages against Hallmark" ] } ],
+    [ /\Abin\/theme material ([\w-]+)/, ->(m) { [ "Put the #{m[1].titleize} material in place", "Putting the #{m[1].titleize} material in place" ] } ],
+    [ /\Abin\/theme ([\w-]+)/, ->(m) { [ "Put the #{m[1]} layout in place", "Putting the #{m[1]} layout in place" ] } ],
+    [ /\Abin\/images\s+(?:--\S+\s+\S+\s+)*["']?([^"'-][^"']*)/, ->(m) { [ "Searched photos of “#{m[1].strip.truncate(60)}”", "Looking for photos" ] } ],
+    [ /\Abin\/icons\s+(.*)/, ->(m) { [ "Looked for icons: #{m[1].delete(%q("')).truncate(40)}", "Looking for icons" ] } ],
+    [ /\Abin\/request\s+["']?(.*?)["']?\z/, ->(m) { [ "Asked the Platform: #{m[1].truncate(80)}", "Asking the Platform" ] } ],
+    [ /\Anode \S*hallmark\/scripts\/theme\.mjs deal/, ->(_) { [ "Dealt three Hallmark materials to choose from", "Choosing a material" ] } ],
+    [ /\Anode \S*hallmark\/scripts\/theme\.mjs draw/, ->(_) { [ "Drew the page's hero, menu and footer", "Planning the page" ] } ],
+    [ /\Anode \S*hallmark\/scripts\/theme\.mjs log/, ->(_) { [ "Noted the design in Hallmark's log", "Noting the design" ] } ],
+    [ /\Anode \S*hallmark\/scripts\/sloplint/, ->(_) { [ "Checked the pages against Hallmark", "Checking the pages against Hallmark" ] } ]
+  ].freeze
+
   def self.relative(path)
     path.to_s.sub(%r{\A.*?/projects/[^/]+/}, "")
+  end
+
+  # What the owner reads for a shell command: without the "cd <the app's folder> &&" in front or
+  # the app's folder in paths, in words for the app's own commands. [ step, activity ]
+  def self.command(text)
+    text = text.to_s.strip.sub(/\Acd\s+("[^"]*"|\S+)\s*(&&|;)\s*/, "").gsub(%r{\S*/projects/[^/\s]+/}, "")
+    pattern, words = COMMANDS.find { |pattern, _| text.match?(pattern) }
+    pattern ? words.(text.match(pattern)) : [ "Ran #{text.truncate(120)}", "Running #{text.truncate(60)}" ]
   end
 
   def initialize(project, clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) })

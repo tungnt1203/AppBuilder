@@ -41,7 +41,7 @@ class Projects::DesignsController < ApplicationController
       render :show, status: :unprocessable_entity
     else
       @themes.switch(name)
-      saved "Now on #{name.capitalize}, as a version. Undo it from History.", section: :theme
+      saved "Now on the #{name.capitalize} layout, as a version. Undo it from History.", section: :theme
     end
   rescue ProjectShell::Error => error
     @theme_error = "The theme didn't switch: #{error.message.lines.first}"

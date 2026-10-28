@@ -9,9 +9,15 @@ class ProjectSetupJob < ApplicationJob
     configure(project)
     project.sandbox.run("bundle", "install", "--quiet")
     project.restart_preview(restart: false)
-    project.update!(status: :ready)
 
-    AgentTurnJob.perform_later(project, first_request, mode) if first_request.present?
+    # With the owner's first request waiting, the app goes straight to working: "ready" in the
+    # seconds before the turn's worker picks it up would ask them to describe what they just did.
+    if first_request.present?
+      project.update!(status: :working, activity: "Starting", working_since: Time.current)
+      AgentTurnJob.perform_later(project, first_request, mode)
+    else
+      project.update!(status: :ready)
+    end
   rescue ProjectShell::Error => error
     project.messages.create!(role: :error, body: error.message.truncate(4000))
     project.update!(status: :failed)

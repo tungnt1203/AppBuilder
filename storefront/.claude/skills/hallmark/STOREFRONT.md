@@ -91,6 +91,10 @@ of your reply for the owner.
   `theme_setting(:key)` and given the class `photo` (the theme's photo treatment). Never a stock
   photo as a product, never a product drawn or invented, never Hallmark's stand-in slots in a
   shop.
+- **Display sizes** fit the longest word: a wide face in capitals (Bowlby, Anton, Ultra) at the
+  layout's size can break a word across lines in a narrow column ("QUESTIONA / BLE"). Look at the
+  hero and section heads at 390 and 1280 with the real words, and set the head smaller in that
+  view (or the line shorter) until every word stays whole.
 - **Words** are theme settings (`hero_title`, `hero_text`, `story_title`, `story_text`,
   `hero_button`) in the theme's voice: what the shop sells and to whom, plainly, in English.
 - **Motion** only within the theme's Motion section, with its reduced-motion fallback.

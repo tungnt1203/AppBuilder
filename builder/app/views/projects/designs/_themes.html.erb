@@ -1,6 +1,18 @@
-<%# The four themes; switching replaces the header, footer, home page and product card. %>
+<%# The look: the Hallmark material the agent chose, then the four layouts; switching a layout
+    replaces the header, footer, home page and product card and keeps the material. %>
+<% material = @themes.material %>
 <section class="design-group" aria-labelledby="design_theme">
-  <h2 id="design_theme" class="design-heading">Theme</h2>
+  <% if material %>
+    <h2 class="design-heading">Look</h2>
+    <div class="design-theme mb-4" aria-current="true">
+      <div class="min-w-0 flex-1">
+        <p class="font-semibold"><%= material.name %></p>
+        <p class="faint line-clamp-3 text-xs"><%= material.summary.upcase_first %>.</p>
+      </div>
+      <span class="faint text-right text-xs">Ask the agent<br>for another look</span>
+    </div>
+  <% end %>
+  <h2 id="design_theme" class="design-heading">Layout</h2>
   <% if local_assigns[:notice] %><p class="flash" role="status"><%= notice %></p><% end %>
   <% if @theme_error %>
     <p class="alert" role="alert"><%= @theme_error %></p>
@@ -24,7 +36,7 @@
           <span class="faint text-right text-xs"><%= theme.changed ? safe_join([ "In use,", tag.br, "changed for this shop" ]) : "In use" %></span>
         <% else %>
           <%= button_to "Use", theme_project_design_path(@project), params: { theme: theme.name }, class: "btn btn-ghost h-8 px-3 text-sm",
-                disabled: !@project.accepts_messages?, form: { data: { turbo_confirm: "Switch to #{theme.name.capitalize}? Its header, footer, home page, product card, colors and fonts replace this shop's. You can go back from History." } } %>
+                disabled: !@project.accepts_messages?, form: { data: { turbo_confirm: material ? "Switch to the #{theme.name.capitalize} layout? Its header, footer, home page and product card replace this shop's; the #{material.name} look stays. You can go back from History." : "Switch to #{theme.name.capitalize}? Its header, footer, home page, product card, colors and fonts replace this shop's. You can go back from History." } } %>
         <% end %>
       </li>
     <% end %>

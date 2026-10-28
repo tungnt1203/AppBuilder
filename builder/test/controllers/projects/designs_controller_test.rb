@@ -64,9 +64,27 @@ class Projects::DesignsControllerTest < ActionDispatch::IntegrationTest
     post theme_project_design_path(@project), params: { theme: "bold" }
 
     assert_response :success
-    assert_match "Now on Bold", response.body
+    assert_match "Now on the Bold layout", response.body
     assert_includes @commands, [ "bin/theme", "bold", "--force" ]
     assert_includes @commands, [ "bin/rails", "tailwindcss:build" ]
+  end
+
+  test "the Hallmark material shows as the look, and switching the layout keeps it" do
+    use_themes
+    require Rails.root.join("../storefront/lib/hallmark_material").to_s
+    @project.path.join(".claude/skills").mkpath
+    FileUtils.ln_s(Rails.root.join("../storefront/.claude/skills/hallmark"), @project.path.join(".claude/skills/hallmark"))
+    HallmarkMaterial.new(@project.path, "sticker").apply!
+
+    get project_design_path(@project)
+    assert_select ".design-group .design-theme[aria-current] p", "Sticker"
+
+    post theme_project_design_path(@project), params: { theme: "bold", force: "1" }
+    assert_includes @commands, [ "bin/theme", "bold", "--force" ]
+    css = @project.path.join(ProjectDesign::FILE).read
+    assert_includes css, "bin/theme material sticker"
+    assert_includes css, "shape: bold layout"
+    assert_includes @project.path.join("app/views/layouts/_fonts.html.erb").read, "Bowlby One SC"
   end
 
   test "a file changed for this shop is listed before a switch replaces it" do

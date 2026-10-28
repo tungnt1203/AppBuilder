@@ -11,9 +11,13 @@ class Chat < ApplicationRecord
   # The files sent in it go with it; the session's transcript stays where the agent keeps it.
   before_destroy { messages.user.each { |message| FileUtils.rm_rf(Attachment.folder(message)) } }
 
-  # Named after what the owner first asked for in it.
+  # Named after what the owner first asked for in it; the app's first chat is the app's own name
+  # (the request that started the app reads badly cut short in the studio's bar).
   def name_after(request)
-    update!(title: request.to_s.squish.truncate(80, separator: " ")) if title.blank? && request.present?
+    return unless title.blank? && request.present?
+
+    first = project.chats.where.not(id:).none?
+    update!(title: first && project.name.present? ? project.name : request.to_s.squish.truncate(80, separator: " "))
   end
 
   # A new chat with this one's messages (and the files sent with them) whose first turn

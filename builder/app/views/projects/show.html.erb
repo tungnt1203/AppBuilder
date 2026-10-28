@@ -27,7 +27,8 @@
           </details>
         </div>
         <% new_chat_off = @project.busy? ? "Wait until the agent finishes" : nil %>
-        <%= button_to project_chats_path(@project), class: "btn btn-ghost btn-icon h-8 w-8", disabled: new_chat_off.present?,
+        <%# Narrow, "New chat" stays in the chats menu (the chat's name) and the name gets the room. %>
+        <%= button_to project_chats_path(@project), class: "btn btn-ghost btn-icon h-8 w-8", form_class: "@max-[30rem]:hidden", disabled: new_chat_off.present?,
               title: new_chat_off || "New chat", "aria-label": "New chat" do %><%= icon :compose %><% end %>
         <button type="button" class="btn btn-ghost btn-icon h-8 w-8 @max-[30rem]:hidden" data-action="tour#start" aria-label="Show the tour" title="Show the tour"><%= icon :help %></button>
         <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon h-8 w-8 @max-[30rem]:hidden" %>

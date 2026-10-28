@@ -35,7 +35,7 @@ class HallmarkMaterial
   end
 
   def initialize(root, slug)
-    @root, @slug = Pathname(root), slug.to_s
+    @root, @slug = Pathname(root).expand_path, slug.to_s
     raise ArgumentError, "No Hallmark theme named #{slug}. See #{SKILL}/references/themes/." unless file.file?
   end
 
@@ -61,7 +61,7 @@ class HallmarkMaterial
 
   def font_links = block(:html, after: "## Build hint").to_s.scan(/<link\b[^>]*>/)
   def build_hint = block(:css, after: "## Build hint").to_s.strip
-  def photo_filter = scaffold[:base][/\[data-slot\] > img \{ (filter:[^}]*)\}/, 1]&.strip
+  def photo_filter = scaffold[:base][/\[data-slot\] > img \{ (filter:[^}]*)\}/, 1]&.strip&.delete_suffix(";")
 
   def families
     font_links.flat_map do |link|

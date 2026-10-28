@@ -64,8 +64,11 @@ class Project < ApplicationRecord
     self.name_pending = true
   end
 
+  # The first chat, named after the app, takes its real name too.
   def adopt_name(new_name)
+    old_name = name
     update!(name: new_name.presence || name.delete_suffix("…"), name_pending: false)
+    chats.where(title: old_name).update_all(title: name) if chats.one?
   end
 
   def path
