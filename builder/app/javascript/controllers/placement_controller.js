@@ -7,8 +7,17 @@ export default class extends Controller {
   static targets = [ "stage", "photo", "box", "sample", "x", "y", "w", "h", "font", "color", "align", "uppercase", "kind" ]
 
   connect() {
+    // A page refreshed by morphing (after Save) brings back the server's HTML, with every kind's
+    // parts showing; this controller stays connected, so it shows only its kind's again.
+    this.rerender = () => this.render()
+    document.addEventListener("turbo:morph", this.rerender)
+
     if (!this.hasPhotoTarget) return this.render()
     this.photoTarget.complete ? this.render() : this.photoTarget.addEventListener("load", () => this.render(), { once: true })
+  }
+
+  disconnect() {
+    document.removeEventListener("turbo:morph", this.rerender)
   }
 
   start(event) {

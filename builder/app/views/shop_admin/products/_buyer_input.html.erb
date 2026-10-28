@@ -28,12 +28,14 @@
   <% picked_set = sets.find { |set| set.id == row["set"] } %>
   <fieldset data-for-kinds="choice" data-controller="picture-source">
     <legend class="text-sm font-medium text-ink"><%= t(".options") %></legend>
-    <div class="mt-2 flex flex-wrap items-center gap-2">
-      <%= select_tag "product[buyer_inputs][][set]",
-            options_for_select([ [ t(".own_pictures"), "" ] ] + sets.map { |set| [ t(".set_option", name: set.name, count: set.pictures.size), set.id ] }, row["set"]),
-            id: nil, aria: { label: t(".source") }, class: "w-auto #{field_classes}",
-            data: { action: "picture-source#show", picture_source_target: "select" } %>
-      <%= link_to sets.any? ? t(".manage_sets") : t(".make_set"), shop_admin_clipart_sets_path, class: "text-sm #{link_classes}", target: "_blank" %>
+    <div class="mt-2 flex items-center gap-3">
+      <div class="min-w-0 flex-1 sm:max-w-sm">
+        <%= select_tag "product[buyer_inputs][][set]",
+              options_for_select([ [ t(".own_pictures"), "" ] ] + sets.map { |set| [ t(".set_option", name: set.name, count: set.pictures.size), set.id ] }, row["set"]),
+              id: nil, aria: { label: t(".source") }, class: field_classes,
+              data: { action: "picture-source#show", picture_source_target: "select" } %>
+      </div>
+      <%= link_to sets.any? ? t(".manage_sets") : t(".make_set"), shop_admin_clipart_sets_path, class: "shrink-0 text-sm #{link_classes}", target: "_blank" %>
     </div>
     <% sets.each do |set| %>
       <div class="mt-3 flex flex-wrap gap-2" data-picture-source-target="set" data-set="<%= set.id %>" <%= "hidden" unless set == picked_set %>>

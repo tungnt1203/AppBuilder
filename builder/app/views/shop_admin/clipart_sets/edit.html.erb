@@ -59,7 +59,7 @@
       <%= form_with model: [ :shop_admin, set ], class: "space-y-4" do |form| %>
         <%= form.errors %>
         <%= form.field :name, required: true %>
-        <%= form.submit t(".save"), class: button_classes(:secondary) %>
+        <%= form.button t(".save"), class: button_classes(:secondary) %>
       <% end %>
     <% end %>
 
