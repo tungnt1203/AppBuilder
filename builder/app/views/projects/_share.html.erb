@@ -7,11 +7,16 @@
            data-clipboard-target="source" aria-label="Preview link" data-action="focus->clipboard#select">
     <button type="button" class="btn btn-primary h-9 px-3.5" data-clipboard-target="button" data-action="clipboard#copy">Copy</button>
   </div>
+  <%# Phones: most buyers come from an ad on one, so the owner looks at it there too. %>
+  <div class="share-qr">
+    <%= qr_code shared_preview_url(project.share_token), class: "share-qr-code" %>
+    <p class="muted text-xs"><span class="flex items-center gap-1.5 font-semibold text-[var(--text)]"><%= icon "smartphone", size: 14, stroke: 1.75 %>Open it on your phone</span>Point the phone's camera at the code: the app opens as your buyers see it.</p>
+  </div>
   <%= button_to "Stop sharing", project_share_path(project), method: :delete, class: "btn btn-ghost mt-2 h-7 px-2.5 text-xs text-[var(--danger)]",
         title: "The link stops working, and people who opened it lose the preview",
         form: { data: { turbo_confirm: "Stop sharing? The link stops working, and people who opened it lose the preview." } } %>
 <% else %>
-  <p class="muted mt-1 text-xs">Let someone try the app before it's published: they get a link, no account needed.</p>
+  <p class="muted mt-1 text-xs">Let someone try the app before it's published, or open it on your phone: you get a link and a QR code, no account needed.</p>
   <%= button_to project_share_path(project), class: "btn btn-ghost well mt-2 h-8 px-3 text-sm" do %><%= icon :link, size: 14 %>Create a link<% end %>
 <% end %>
 

@@ -79,6 +79,7 @@ class AgentTranscript
     @draft_flushed_at = 0
     @pending_tasks = {}
     @viewable = {}
+    @materials = {}
   end
 
   def record(event)
@@ -242,6 +243,9 @@ class AgentTranscript
 
     def record_tool_use(block)
       @viewable[block["id"]] = true if viewable?(block["name"], block["input"] || {})
+      if block["name"] == "Bash" && (slug = self.class.command_text(block.dig("input", "command"))[/\Abin\/theme material ([\w-]+)/, 1])
+        @materials[block["id"]] = slug
+      end
       input = block["input"] || {}
       name = block["name"]
 
@@ -265,6 +269,17 @@ class AgentTranscript
       end
     end
 
+    # The shop just took a Hallmark material: a card in the chat with its picture, the colors and
+    # the faces it gave the shop, as they are at this moment.
+    def record_look(slug)
+      theme = ProjectTheme.new(@project)
+      material = theme.material
+      return unless material&.slug == slug
+
+      @project.messages.create!(role: :notice, body: "The look: #{material.name}",
+        data: { "look" => { "slug" => slug, "name" => material.name, "summary" => material.summary }.merge(theme.palette) })
+    end
+
     VIEWABLE_COMMANDS = /\A(bin\/look|bin\/rails tailwindcss:build|bin\/sloplint|bin\/theme)/
 
     def viewable?(name, input)
@@ -279,6 +294,10 @@ class AgentTranscript
       # The agent just looked at the app or rebuilt its styles: the app is in a state to see, so
       # the studio shows it as it is now instead of a "building" screen.
       @project.show_work_in_progress if Array(content).any? { |block| block["type"] == "tool_result" && @viewable.delete(block["tool_use_id"]) }
+      Array(content).each do |block|
+        slug = block["type"] == "tool_result" && @materials.delete(block["tool_use_id"])
+        record_look(slug) if slug && !block["is_error"]
+      end
 
       Array(content).each do |block|
         next unless block["type"] == "tool_result" && (subject = @pending_tasks.delete(block["tool_use_id"]))

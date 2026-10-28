@@ -23,6 +23,7 @@ class SharesControllerTest < ActionDispatch::IntegrationTest
     assert token
     get project_path(@project)
     assert_select "input[value='#{shared_preview_url(token)}']"
+    assert_select ".share-qr svg[aria-label=?] path[fill=currentColor]", "QR code of #{shared_preview_url(token)}"
 
     assert_changes -> { @project.reload.preview_version } do
       delete project_share_path(@project)

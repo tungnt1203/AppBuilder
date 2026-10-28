@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   resource :session
+  resources :looks, only: :show
   resource :registration, only: %i[ new create ]
   resource :tour, only: :create
   get "business", to: redirect("/admin/settings")

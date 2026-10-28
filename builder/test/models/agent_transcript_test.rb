@@ -254,4 +254,28 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     transcript.record("type" => "user", "message" => { "content" => [ { "type" => "tool_result", "tool_use_id" => "look-1", "content" => "No problems found." } ] })
     assert @project.reload.showing_progress?
   end
+
+  test "a Hallmark material put in place shows in the chat with its colors and faces" do
+    Dir.mktmpdir do |root|
+      original, Rails.configuration.x.projects_root = Rails.configuration.x.projects_root, Pathname(root)
+      storefront = Rails.root.join("../storefront")
+      @project.path.join("app/assets/tailwind").mkpath
+      @project.path.join("app/views/layouts").mkpath
+      @project.path.join(".claude/skills").mkpath
+      FileUtils.ln_s(storefront.join(".claude/skills/hallmark"), @project.path.join(".claude/skills/hallmark"))
+      FileUtils.cp(storefront.join("themes/clean/app/assets/tailwind/theme.css"), @project.path.join("app/assets/tailwind/theme.css"))
+      require storefront.join("lib/hallmark_material").to_s
+      HallmarkMaterial.new(@project.path, "sticker").apply!
+
+      transcript = AgentTranscript.new(@project)
+      transcript.record("type" => "assistant", "message" => { "content" => [ { "type" => "tool_use", "id" => "m-1", "name" => "Bash", "input" => { "command" => "bin/theme material sticker" } } ] })
+      transcript.record("type" => "user", "message" => { "content" => [ { "type" => "tool_result", "tool_use_id" => "m-1", "content" => "Sticker is the material" } ] })
+
+      look = @project.messages.notice.last.data["look"]
+      assert_equal [ "sticker", "Sticker", "Bowlby One SC" ], look.values_at("slug", "name", "display")
+      assert look["colors"].all? { |color| color.match?(/\A#\h{6}\z/) }
+    ensure
+      Rails.configuration.x.projects_root = original
+    end
+  end
 end

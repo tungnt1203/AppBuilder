@@ -55,6 +55,15 @@ class ProjectTheme
     Material.new(slug:, name: header.fetch("name", slug.titleize), summary: header["material"].to_s)
   end
 
+  # The colors and faces theme.css has now, for the chat's look card: { "colors" => [ hex… ],
+  # "display" => face, "text" => face }.
+  def palette
+    source = css.file? ? css.read : ""
+    colors = %w[ canvas surface-muted ink brand-600 accent line ].filter_map { |name| source[/--color-#{name}:\s*(#\h{6})/, 1] }.uniq
+    face = ->(token) { source[/--font-#{token}:\s*"([^"]+)"/, 1] }
+    { "colors" => colors, "display" => face.("display"), "text" => face.("sans") }.compact
+  end
+
   # Other materials Hallmark deals for this shop (from its first request, in the genre of the one
   # in use): what the Design tab offers to try. [ { "slug", "name", "summary" } ]
   def other_looks

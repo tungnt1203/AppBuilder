@@ -1,0 +1,17 @@
+<%# The Hallmark material the shop just took: its picture, and the colors and faces it gave the
+    shop, as they were then (AgentTranscript#record_look). %>
+<figure class="look-note stock">
+  <%= image_tag look_project_design_path(project, look["slug"]), alt: "", loading: "lazy", class: "look-note-art" %>
+  <figcaption class="min-w-0">
+    <p class="faint text-xs">The look</p>
+    <p class="look-note-name"><%= look["name"] %></p>
+    <% if look["colors"].present? %>
+      <ul class="look-note-swatches" aria-label="Its colors">
+        <% look["colors"].each do |color| %>
+          <li style="--swatch: <%= color %>" title="<%= color %>"></li>
+        <% end %>
+      </ul>
+    <% end %>
+    <p class="faint text-xs"><%= [ look["display"], (look["text"] unless look["text"] == look["display"]) ].compact.join(" and ") %></p>
+  </figcaption>
+</figure>

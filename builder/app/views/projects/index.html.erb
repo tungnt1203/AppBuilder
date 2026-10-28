@@ -67,6 +67,27 @@
             </li>
           <% end %>
         </ul>
+
+        <%# Looks: Hallmark materials to start the shop in. The radios belong to the form above (form=). %>
+        <p id="looks_label" class="mt-8 mb-3 text-sm muted">Pick a look, or let it be chosen for your shop:</p>
+        <ul class="looks" aria-labelledby="looks_label">
+          <li>
+            <label class="look-pick look-pick-auto">
+              <input type="radio" name="project[look]" value="" form="new_project" class="sr-only" checked>
+              <span class="look-pick-art" aria-hidden="true"><%= icon "sparkles", size: 22, stroke: 1.5 %></span>
+              <span class="look-pick-name">Chosen for you</span>
+            </label>
+          </li>
+          <% HallmarkLook.all.each do |look| %>
+            <li>
+              <label class="look-pick" title="<%= look.material.upcase_first %>">
+                <input type="radio" name="project[look]" value="<%= look.slug %>" form="new_project" class="sr-only">
+                <%= image_tag look_path(look), alt: "", loading: "lazy", class: "look-pick-art" %>
+                <span class="look-pick-name"><%= look.name %></span>
+              </label>
+            </li>
+          <% end %>
+        </ul>
       </div>
     </section>
 

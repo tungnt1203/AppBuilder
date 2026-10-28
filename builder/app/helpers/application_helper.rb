@@ -120,6 +120,13 @@ module ApplicationHelper
     end
   end
 
+  # A QR code of the link, drawn in the text's color, for a phone's camera.
+  def qr_code(url, **options)
+    svg = RQRCode::QRCode.new(url, level: :m).as_svg(use_path: true, viewbox: true, module_size: 4, standalone: true, offset: 8)
+    svg = svg.sub(/\A<\?xml[^>]*>/, "").sub("<svg ", %(<svg role="img" aria-label="QR code of #{ERB::Util.h(url)}" class="#{options[:class]}" ))
+    svg.gsub(/fill="#?0{3,6}"/, %(fill="currentColor")).gsub(/<rect[^>]*fill="#?f{3,6}"[^>]*\/>/i, "").html_safe
+  end
+
   def chat_items(messages)
     messages.chunk_while { |a, b| a.action? && b.action? }.map { |group| group.first.action? ? group : group.first }
   end

@@ -49,6 +49,8 @@ pages' parts (CLAUDE.md, "What's built in").
 **3. Direction.** Deal: `node .claude/skills/hallmark/scripts/theme.mjs deal --genre <genre>
 --prompt "<the owner's request, in English>" --log .hallmark/log.json`. Read the three pictures
 (`references/themes/<slug>.jpg`), pick the material that can carry this shop, say which and why.
+A look the owner picked in the studio ("Use the Sticker look (Hallmark's sticker material)") is a
+theme they named: skip the deal and put that material in place (stamp `theme: Sticker (by request)`).
 A look the owner named ("dark and techy", "like a gallery") routes the deal through its keywords;
 a site the owner showed is the brand (SKILL.md § 0, `references/brand-truth.md`), built on the
 nearest material. Then:

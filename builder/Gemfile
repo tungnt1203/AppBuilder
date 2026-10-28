@@ -73,3 +73,6 @@ end
 
 gem "redcarpet", "~> 3.6"
 gem "rouge", "~> 4.6"
+
+# The preview link as a QR code, to open the app on a phone (Share).
+gem "rqrcode", "~> 3.2"

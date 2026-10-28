@@ -53,6 +53,22 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".app-card .monogram", "N"
   end
 
+  test "a look picked on the home goes with the first request, and its picture is served" do
+    get root_path
+    assert_select "input[type=radio][name='project[look]'][value=sticker][form=new_project]"
+    get look_path("sticker")
+    assert_equal "image/jpeg", response.media_type
+    get look_path("../../etc")
+    assert_response :not_found
+
+    post projects_path, params: { project: { name: "Cat Tees", language: "en", request: "Funny cat tees", look: "sticker" } }
+    project = Project.find_by!(name: "Cat Tees")
+    assert_equal "Funny cat tees\n\nUse the Sticker look (Hallmark's sticker material).", project.messages.first.body
+
+    post projects_path, params: { project: { name: "Dog Tees", language: "en", request: "Dog tees", look: "nope" } }
+    assert_equal "Dog tees", Project.find_by!(name: "Dog Tees").messages.first.body
+  end
+
   test "creating an app puts the request in the chat and starts setup" do
     assert_enqueued_with(job: ProjectSetupJob) do
       post projects_path, params: { project: { name: "Phòng gym", language: "vi", request: "Quản lý hội viên", plan: "1" } }
