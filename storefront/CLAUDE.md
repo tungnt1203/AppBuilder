@@ -56,7 +56,9 @@ in, but build the storefront in English (see "Language").
   `- { key: hero_title, type: text, label: Home page headline, default: "…" }`. Types: `text`,
   `richtext`, `image`, `color`, `url`, `boolean`, `select` (with `options`). Read them with
   `theme_setting(:hero_title)`. Give every one a sensible default (the preview shows the defaults
-  until the storefront is published); a key you rename loses what the owner set.
+  until the storefront is published); a key you rename loses what the owner set. When you tell
+  the owner where to change them, say the studio's **Design tab** (it works before publishing;
+  the admin's Settings → Theme lists them only once the storefront is live).
 - `config/forms.yml` declares the forms the storefront sends to the shop (contact, a wholesale
   enquiry): `key`, `title`, `fields` (`text`, `email`, `textarea`, `boolean`). Post them to
   `form_submissions_path(key)` with `answers[<field>]`; messages land in the admin's inbox and the

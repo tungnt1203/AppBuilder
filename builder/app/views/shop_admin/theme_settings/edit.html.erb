@@ -3,7 +3,11 @@
 <%= render "shop_admin/settings/tabs" %>
 
 <% if @theme_setting.schema.blank? %>
-  <%= empty_state t(".empty_title"), t(".empty_description") %>
+  <%# Before the storefront is published, its words and photos are changed in the studio's Design tab. %>
+  <% project = current_shop.project %>
+  <%= empty_state t(".empty_title"), t(project ? ".empty_description_studio" : ".empty_description") do %>
+    <%= link_to t(".open_design"), project_path(project, anchor: "design"), class: button_classes(:secondary) if project %>
+  <% end %>
 <% else %>
   <%= form_with url: shop_admin_theme_setting_path, method: :patch, scope: :theme_setting, multipart: true, class: "max-w-2xl space-y-6" do |form| %>
     <%= @theme_setting.errors.full_messages.to_sentence if @theme_setting.errors.any? %>

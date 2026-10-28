@@ -260,7 +260,8 @@ class Store < ApplicationRecord
   # to be paid (Stripe, or instructions for buyers who pay otherwise: without them a buyer is left
   # not knowing how) and the policies Stripe and ad networks look for; Printify when it prints.
   def setup_steps
-    { product: Product.active.exists?, payments: card_payments? || payment_instructions.present?,
+    # The builder's demo products never show in the published shop: only the owner's count.
+    { product: Product.active.where(demo: false).exists?, payments: card_payments? || payment_instructions.present?,
       policies: (%w[ refund shipping privacy ] - published_policies).empty?, printify: printify_connected? }
   end
 

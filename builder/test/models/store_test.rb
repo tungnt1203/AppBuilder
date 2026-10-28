@@ -66,4 +66,12 @@ class StoreTest < ActiveSupport::TestCase
   ensure
     Store.singleton_class.alias_method :first, :real_first
   end
+
+  test "demo products don't count as the shop's first product on sale" do
+    Product.update_all(demo: true)
+    assert_not @store.setup_steps[:product]
+
+    Product.first.update_columns(demo: false, status: "active")
+    assert @store.setup_steps[:product]
+  end
 end

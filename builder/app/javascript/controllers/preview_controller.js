@@ -42,6 +42,8 @@ export default class extends Controller {
     this.onMessage = (event) => { this.previewError(event); this.previewPick(event) }
     window.addEventListener("message", this.onMessage)
     this.waitForLoad()
+    // A link from the admin (/projects/…#design) opens the Design tab.
+    if (location.hash === "#design" && this.hasDesignTarget) this.showTab({ params: { tab: "design" } })
   }
 
   disconnect() {

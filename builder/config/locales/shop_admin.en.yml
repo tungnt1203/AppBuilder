@@ -714,7 +714,9 @@ en:
         title: Theme
         description: Words, colors and pictures the storefront asks you to set.
         empty_title: No theme settings yet
-        empty_description: They show up here when the storefront is published. It declares them in config/theme_settings.yml.
+        empty_description: They show up here when the storefront is published.
+        empty_description_studio: Until the storefront is published, change its words, colors and photos in the studio's Design tab. They show up here once it's live.
+        open_design: Open the Design tab
         save: Save
         remove_image: Remove this picture
         default_image: The storefront's own photo. Upload yours to replace it.
