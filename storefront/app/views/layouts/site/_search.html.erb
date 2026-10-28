@@ -1,0 +1,18 @@
+<%# The header's search: the magnifier opens a field across the top of the page (menu controller),
+    which searches the whole catalog on Enter. Without JavaScript the button is a link to the
+    catalog's own search. `class` places the button in the header (hidden md:block…). %>
+<div class="<%= local_assigns[:class] %>" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape turbo:before-cache@document->menu#hide">
+  <%= link_to products_path, class: "grid size-10 place-items-center text-ink", role: "button", aria: { label: t("products.index.search"), expanded: false },
+        data: { menu_target: "button", action: "menu#toggle:prevent" } do %>
+    <%= icon "search", size: 22, stroke: local_assigns.fetch(:stroke, 1.5) %>
+  <% end %>
+  <div data-menu-target="panel" class="absolute inset-x-0 top-full z-30 hidden border-b border-line bg-canvas shadow-[0_12px_24px_-16px_rgb(0_0_0/0.25)]">
+    <%= form_with url: products_path, method: :get, class: "page-width flex items-center gap-3 py-4" do |form| %>
+      <%= icon "search", size: 20, stroke: 1.5, class: "text-muted" %>
+      <%# search_field_tag, not the form builder's: no field box, the panel is the box. %>
+      <%= search_field_tag :q, params[:q], id: nil, placeholder: t("products.index.search"), aria: { label: t("products.index.search") }, autocomplete: "off", enterkeyhint: "search",
+            class: "h-11 min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-muted focus:outline-none", data: { menu_focus: true } %>
+      <button type="button" class="grid size-10 shrink-0 place-items-center text-muted hover:text-ink" data-action="menu#hide" aria-label="<%= t("ui.close") %>"><%= icon "x", size: 20, stroke: 1.5 %></button>
+    <% end %>
+  </div>
+</div>

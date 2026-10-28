@@ -1,0 +1,23 @@
+<% content_for :title, t(".title") %>
+<% content_for :head do %>
+  <meta name="robots" content="noindex">
+<% end %>
+
+<div class="page-width py-14 md:py-20">
+  <div class="mx-auto max-w-xl text-center">
+    <h1 class="text-3xl md:text-4xl"><%= t(".title") %></h1>
+    <p class="mt-4 leading-relaxed text-muted"><%= t(".body") %></p>
+    <%= form_with url: products_path, method: :get, class: "mx-auto mt-8 flex max-w-md gap-2" do |form| %>
+      <%= form.search_field :q, placeholder: t(".search"), aria: { label: t(".search") }, class: "h-12" %>
+      <%= form.button t(".search_button"), class: "#{button_classes} h-12 shrink-0 px-6", name: nil %>
+    <% end %>
+    <%= link_to t(".shop_all"), products_path, class: "mt-4 inline-block text-sm text-ink underline underline-offset-4 hover:no-underline" %>
+  </div>
+
+  <% if @products.any? %>
+    <section class="mt-16 md:mt-20">
+      <h2 class="text-2xl"><%= t(".newest") %></h2>
+      <div class="mt-6"><%= render "products/grid", products: @products %></div>
+    </section>
+  <% end %>
+</div>

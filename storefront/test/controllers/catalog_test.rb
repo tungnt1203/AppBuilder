@@ -146,10 +146,19 @@ class CatalogTest < ActionDispatch::IntegrationTest
     assert_select "p", "Returns within 30 days."
   end
 
-  test "what isn't there is a 404" do
+  test "what isn't there is a 404, on the shop's own page with its header and newest products" do
     get product_path("nope")
     assert_response :not_found
+    assert_select "h1", "Page not found"
+    assert_select "header a#cart-link"
+    assert_select "form[action='/products'] input[name=q]"
+    assert_select "a[href='/products/cat-tee']"
     get page_path("nope")
+    assert_response :not_found
+    get "/an-old-ad-link"
+    assert_response :not_found
+    assert_select "h1", "Page not found"
+    get "/feeds/nope.xml"
     assert_response :not_found
   end
 

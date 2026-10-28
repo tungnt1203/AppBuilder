@@ -169,6 +169,14 @@ en:
         total: 'Total: %{total}'
         pay: Pay %{total}
         test_mode: 'This is a test payment: use Stripe''s test card 4242 4242 4242 4242, any future date and any CVC.'
+  errors:
+    not_found:
+      title: Page not found
+      body: This page may have moved, or the product is no longer available. Try a search, or see what's new.
+      search: Search products
+      search_button: Search
+      shop_all: Shop all
+      newest: New arrivals
   home:
     benefits:
       personalize: Personalize it before you buy

@@ -6,6 +6,7 @@ export default class extends Controller {
   toggle() {
     const open = this.panelTarget.classList.toggle("hidden") === false
     this.buttonTarget.setAttribute("aria-expanded", String(open))
+    if (open) this.panelTarget.querySelector("[data-menu-focus]")?.focus() // a search opens ready to type
   }
 
   close(event) {

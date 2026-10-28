@@ -34,4 +34,7 @@ Rails.application.routes.draw do
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # ONCE uses it to decide whether a new version is healthy before switching traffic to it.
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # Last: any other address is the shop's own "not found" page (Rails' own paths excepted).
+  match "*path", to: "errors#not_found", via: :all, constraints: ->(request) { !request.path.start_with?("/rails/") }
 end

@@ -25,11 +25,13 @@
               <li><%= shop_menu_link item, class: "block py-3 text-lg font-medium text-ink" %></li>
             <% end %>
           </ul>
+          <ul class="mt-4 space-y-1 border-t border-line pt-4 text-sm text-muted">
+            <li><%= link_to t("order_lookups.new.title"), new_order_lookup_path, class: "block py-2 hover:text-ink" %></li>
+            <li><%= link_to t("contacts.show.title"), contact_path, class: "block py-2 hover:text-ink" %></li>
+          </ul>
         </nav>
       </div>
-      <%= link_to products_path, class: "-ml-2 hidden size-10 place-items-center text-ink md:grid", aria: { label: t("products.index.search") } do %>
-        <%= icon "search", size: 22, stroke: 1.5 %>
-      <% end %>
+      <%= render "layouts/site/search", class: "-ml-2 hidden md:block", stroke: 1.5 %>
       <% end %>
     </div>
 
@@ -44,9 +46,7 @@
 
     <div class="flex items-center justify-end">
       <% unless content_for?(:focused) %>
-        <%= link_to products_path, class: "grid size-10 place-items-center text-ink md:hidden", aria: { label: t("products.index.search") } do %>
-          <%= icon "search", size: 22, stroke: 1.5 %>
-        <% end %>
+        <%= render "layouts/site/search", class: "md:hidden", stroke: 1.5 %>
       <% end %>
       <%= link_to cart_path, class: "relative -mr-2 grid size-10 place-items-center text-ink", id: "cart-link", aria: { label: t("layouts.site.cart_with_count", count: cart_item_count) } do %>
         <%= icon "shopping-bag", size: 22, stroke: 1.5 %>
