@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_27_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_28_035038) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -458,6 +458,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_140000) do
     t.text "preview_shop_key"
     t.text "live_shop_key"
     t.bigint "current_chat_id"
+    t.boolean "showing_progress", default: false, null: false
     t.index ["current_chat_id"], name: "index_projects_on_current_chat_id"
     t.index ["eval_run"], name: "index_projects_on_eval_run"
     t.index ["owner_id"], name: "index_projects_on_owner_id"

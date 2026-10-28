@@ -4,13 +4,31 @@
 <section class="design-group" aria-labelledby="design_theme">
   <% if material %>
     <h2 class="design-heading">Look</h2>
-    <div class="design-theme mb-4" aria-current="true">
-      <div class="min-w-0 flex-1">
-        <p class="font-semibold"><%= material.name %></p>
+    <div class="look-card" aria-current="true">
+      <%= image_tag look_project_design_path(@project, material.slug), alt: "", class: "look-picture", loading: "lazy" %>
+      <div class="min-w-0">
+        <p class="font-semibold"><%= material.name %> <span class="faint text-xs font-normal">in use</span></p>
         <p class="faint line-clamp-3 text-xs"><%= material.summary.upcase_first %>.</p>
       </div>
-      <span class="faint text-right text-xs">Ask the agent<br>for another look</span>
     </div>
+    <% if (looks = @themes.other_looks).any? %>
+      <p class="faint mt-4 mb-2 text-xs">Other looks Hallmark picked for this shop. The agent rebuilds the shop in the one you choose and keeps everything you asked for.</p>
+      <ul class="look-grid">
+        <% looks.each do |look| %>
+          <li class="look-card look-card-small">
+            <%= image_tag look_project_design_path(@project, look["slug"]), alt: "", class: "look-picture", loading: "lazy" %>
+            <p class="font-semibold"><%= look["name"] %></p>
+            <p class="faint line-clamp-3 text-xs" title="<%= look["summary"].upcase_first %>"><%= look["summary"].upcase_first %>.</p>
+            <%= form_with model: [ @project, Message.new ], data: { turbo_frame: "_top" } do |form| %>
+              <%= form.hidden_field :body, id: nil, value: "Switch the shop's look to Hallmark's #{look["name"]} material (bin/theme material #{look["slug"]}). Keep the layout, the words and everything I asked for, and update DESIGN.md." %>
+              <%= hidden_field_tag "message[plan]", "0", id: nil %>
+              <%= form.button "Try this look", class: "btn btn-ghost h-8 w-full text-xs", disabled: !@project.accepts_messages? %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+    <div class="mb-4"></div>
   <% end %>
   <h2 id="design_theme" class="design-heading">Layout</h2>
   <% if local_assigns[:notice] %><p class="flash" role="status"><%= notice %></p><% end %>

@@ -1134,6 +1134,42 @@
   }
   .stage[data-peek] ~ .peek-pill { display: flex; }
 
+  /* The Design tab's looks (Hallmark materials): each one's finished page, cropped to its first screen. */
+  .look-card {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    &[aria-current] { border-color: var(--text); }
+  }
+  .look-card-small { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; }
+  .look-picture { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 0.4rem; background: var(--well); }
+  .look-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.5rem; }
+
+  /* Building, with the app in view: what the agent is doing, floating over it. */
+  .progress-pill {
+    position: absolute;
+    left: 50%;
+    bottom: 1.5rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: calc(100% - 2rem);
+    padding: 0.45rem 1rem;
+    transform: translateX(-50%);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    & .live-activity { overflow: hidden; text-overflow: ellipsis; }
+    & .faint { overflow: hidden; text-overflow: ellipsis; }
+  }
+  .bezel[data-tab="code"] .progress-pill { display: none; }
+  .bezel:fullscreen .progress-pill { bottom: 4.75rem; }
+
   .url {
     font-family: var(--font-mono);
     font-size: 0.75rem;

@@ -77,7 +77,13 @@ class Projects::DesignsControllerTest < ActionDispatch::IntegrationTest
     HallmarkMaterial.new(@project.path, "sticker").apply!
 
     get project_design_path(@project)
-    assert_select ".design-group .design-theme[aria-current] p", "Sticker"
+    assert_select ".look-card[aria-current] p", /\ASticker/
+    assert_select ".look-card[aria-current] img[src=?]", look_project_design_path(@project, "sticker")
+
+    get look_project_design_path(@project, "sticker")
+    assert_equal "image/jpeg", response.media_type
+    get look_project_design_path(@project, "nope")
+    assert_response :not_found
 
     post theme_project_design_path(@project), params: { theme: "bold", force: "1" }
     assert_includes @commands, [ "bin/theme", "bold", "--force" ]

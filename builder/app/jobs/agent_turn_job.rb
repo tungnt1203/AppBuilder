@@ -28,7 +28,7 @@ class AgentTurnJob < ApplicationJob
     # A new chat has no session yet: the agent starts without what was said before.
     request = [ NEW_CHAT_NOTE, request ].join("\n\n") if project.session_id.nil? && project.built? && project.chats.many?
     prompt = [ project.agent_note, request ].compact.join("\n\n")
-    project.update!(status: :working, planning: mode == "plan", agent_note: nil, working_since: Time.current, activity: "Starting", agent_job_id: job_id)
+    project.update!(status: :working, planning: mode == "plan", agent_note: nil, working_since: Time.current, showing_progress: false, activity: "Starting", agent_job_id: job_id)
     project.agent_commands.pending.where.not(kind: :message).update_all(delivered_at: Time.current) # left from an earlier turn
     transcript = AgentTranscript.new(project)
 

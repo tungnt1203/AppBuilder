@@ -27,6 +27,13 @@ class Projects::DesignsController < ApplicationController
     render :show, status: :unprocessable_entity
   end
 
+  # A Hallmark material's picture, for the looks the Design tab offers.
+  def look
+    picture = ProjectTheme.new(@project).picture(params[:slug]) or raise ActiveRecord::RecordNotFound
+    expires_in 1.day
+    send_file picture, type: "image/jpeg", disposition: "inline"
+  end
+
   # Another theme (ProjectTheme); files changed for this shop are listed before they're replaced.
   def theme
     load_panel

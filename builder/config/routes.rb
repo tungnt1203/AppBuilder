@@ -26,6 +26,7 @@ Rails.application.routes.draw do
     resource :code, only: :show, module: :projects
     resource :design, only: %i[ show update ], module: :projects do
       post :theme
+      get "looks/:slug", action: :look, as: :look
       patch :content
       get :photos
       post :photo

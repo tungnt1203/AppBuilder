@@ -55,6 +55,28 @@ class ProjectTheme
     Material.new(slug:, name: header.fetch("name", slug.titleize), summary: header["material"].to_s)
   end
 
+  # Other materials Hallmark deals for this shop (from its first request, in the genre of the one
+  # in use): what the Design tab offers to try. [ { "slug", "name", "summary" } ]
+  def other_looks
+    current, prompt = material, first_request
+    genre = css.read[/genre: ([\w-]+)/, 1] if css.file?
+    return [] unless current && prompt && genre
+
+    looks = Rails.cache.fetch([ "hallmark-looks", @project.id, genre, Digest::SHA256.hexdigest(prompt), Date.current ], expires_in: 1.day) do
+      output = @project.sandbox.run("node", ".claude/skills/hallmark/scripts/theme.mjs", "deal", "--genre", genre, "--prompt", prompt, "--json", "--n", "4")
+      JSON.parse(output[/\{.*\}/m].to_s).fetch("deal").map { |look| { "slug" => look["slug"], "name" => look["name"], "summary" => look["material"] } }
+    end
+    looks.reject { |look| look["slug"] == current.slug }.first(3)
+  rescue ProjectShell::Error, JSON::ParserError, KeyError
+    []
+  end
+
+  # A Hallmark material's picture (its finished page, two screens stacked), or nil.
+  def picture(slug)
+    file = @project.path.join(".claude/skills/hallmark/references/themes/#{slug}.jpg") if slug.to_s.match?(/\A[\w-]+\z/)
+    file if file&.file?
+  end
+
   # Another layout. A storefront with a material keeps it (its theme.css, with what the agent
   # added, and its fonts): only the new layout's page width comes along.
   def switch(name)
@@ -71,6 +93,8 @@ class ProjectTheme
   end
 
   private
+    def first_request = @project.chats.order(:id).first&.messages&.user&.first&.body.presence
+
     def css = @project.path.join(CSS)
     def fonts = @project.path.join(FONTS)
 

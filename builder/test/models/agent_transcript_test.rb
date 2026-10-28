@@ -244,4 +244,14 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_equal [ "Ran the tests", "Running the tests" ], AgentTranscript.command("bin/rails test test/controllers")
     assert_equal "Ran ls app/views", AgentTranscript.command("cd \"/srv/projects/ab12cd34\"; ls /srv/projects/ab12cd34/app/views").first
   end
+
+  test "once the agent has looked at the app, the studio shows it while it's being built" do
+    @project.update!(status: :working)
+    transcript = AgentTranscript.new(@project)
+    transcript.record("type" => "assistant", "message" => { "content" => [ { "type" => "tool_use", "id" => "look-1", "name" => "Bash", "input" => { "command" => "bin/look / /products" } } ] })
+    assert_not @project.reload.showing_progress?
+
+    transcript.record("type" => "user", "message" => { "content" => [ { "type" => "tool_result", "tool_use_id" => "look-1", "content" => "No problems found." } ] })
+    assert @project.reload.showing_progress?
+  end
 end

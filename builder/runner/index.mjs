@@ -132,8 +132,6 @@ Answer with at most 6 problems, the worst first. For each: the page and width, w
 one sentence, and the concrete fix (which file, what to change). No praise, no summary.
 If nothing worth fixing is left, say so in one line.`,
   tools: [ "mcp__builder__look", "Read", "Glob", "Grep" ],
-  // The agent waits for the review: in the background, the turn ended before the answer came,
-  // with "still waiting" as its reply and the work picked up again after "Finished".
   background: false,
   model: "sonnet",
   maxTurns: 12
@@ -253,15 +251,11 @@ const conversation = query({
     ...(config.effort && { effort: config.effort }),
     mcpServers: { builder: builderTools },
     agents: { "design-reviewer": DESIGN_REVIEWER },
-    hooks: {
-      Stop: [ { hooks: [ async () => (interrupted ? {} : checkBeforeStopping()) ], timeout: 660 } ],
-      // A helper asked to run in the background still runs in front: the turn waits for it.
-      PreToolUse: [ { matcher: "Agent|Task", hooks: [ async ({ tool_input: input }) => (input?.run_in_background
-        ? { hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "allow", updatedInput: { ...input, run_in_background: false } } }
-        : {}) ] } ]
-    },
-    // One reviewer at a time, and reviewers don't spawn agents of their own.
-    env: { ...process.env, CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH: "1", CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS: "1" },
+    hooks: { Stop: [ { hooks: [ async () => (interrupted ? {} : checkBeforeStopping()) ], timeout: 660 } ] },
+    // One reviewer at a time, and reviewers don't spawn agents of their own. Nothing runs in the
+    // background: the SDK starts subagents async by default, and the turn then ended before the
+    // reviewer answered ("still waiting"), finishing twice.
+    env: { ...process.env, CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH: "1", CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS: "1", CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1" },
     canUseTool
   }
 })

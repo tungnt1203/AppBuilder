@@ -93,6 +93,13 @@
       <span class="live-activity">Still building, so this may look broken</span>
       <button type="button" class="btn btn-ghost h-7 px-3 text-xs" data-action="preview#unpeek"><%= icon :eye_off, size: 14 %>Hide</button>
     </div>
+  <% when "progress" %>
+    <%# The app as the agent leaves it between steps: shown, with what's going on over it. %>
+    <div class="progress-pill glass capsule" role="status">
+      <span class="spinner"></span>
+      <span class="live-activity"><%= project.activity || "Working" %></span>
+      <span class="faint">· the app updates as it's built</span>
+    </div>
   <% when "starting" %>
     <div class="stage-screen" role="status">
       <div class="stage-card">

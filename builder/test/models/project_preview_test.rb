@@ -55,7 +55,7 @@ class ProjectPreviewTest < ActiveSupport::TestCase
     [ @project, projects(:shop) ].each { |project| project.define_singleton_method(:built?) { true } }
 
     assert_equal "live", @project.preview_state
-    assert_equal "building", projects(:shop).preview_state
+    assert_equal "progress", projects(:shop).preview_state, "an app built before shows as it's changed"
 
     projects(:shop).update!(planning: true)
     assert_equal "live", projects(:shop).preview_state, "planning doesn't change the app"
@@ -76,6 +76,10 @@ class ProjectPreviewTest < ActiveSupport::TestCase
     assert_equal "blank", project.preview_state
     project.update!(planning: false)
     assert_equal "building", project.preview_state
+
+    version = project.preview_version
+    project.show_work_in_progress
+    assert_equal [ "progress", version + 1 ], [ project.preview_state, project.preview_version ], "once the agent has looked at it"
   end
 
   private

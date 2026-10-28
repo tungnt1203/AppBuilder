@@ -155,8 +155,15 @@ class Project < ApplicationRecord
 
   # What the preview pane shows: the app, or a screen saying why not. Before the first
   # build there's only the starter app (its sign-up screen), so it stays covered.
+  # Mid-turn, once the agent has looked at the app: the preview reloads and the studio shows the
+  # app as it is, with the work going on in a pill over it, instead of a "building" screen.
+  def show_work_in_progress
+    update!(preview_version: preview_version + 1, showing_progress: true) if working?
+  end
+
   def preview_state
     if setting_up? then "setup"
+    elsif working? && !planning? && (showing_progress? || built?) then "progress"
     elsif working? && !planning? then "building"
     elsif preview_broken? then "broken"
     elsif !built? then "blank"
@@ -423,7 +430,8 @@ class Project < ApplicationRecord
     if working?
       agent_commands.create!(kind: :message, payload: { "text" => request })
     else
-      update!(status: :working)
+      # The clock starts now, not when the last turn did; the turn's own start resets it again.
+      update!(status: :working, working_since: Time.current, activity: "Starting", showing_progress: false)
       AgentTurnJob.perform_later(self, request, mode)
     end
   end

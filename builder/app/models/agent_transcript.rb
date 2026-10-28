@@ -62,8 +62,12 @@ class AgentTranscript
 
   # What the owner reads for a shell command: without the "cd <the app's folder> &&" in front or
   # the app's folder in paths, in words for the app's own commands. [ step, activity ]
+  def self.command_text(text)
+    text.to_s.strip.sub(/\Acd\s+("[^"]*"|\S+)\s*(&&|;)\s*/, "").gsub(%r{\S*/projects/[^/\s]+/}, "")
+  end
+
   def self.command(text)
-    text = text.to_s.strip.sub(/\Acd\s+("[^"]*"|\S+)\s*(&&|;)\s*/, "").gsub(%r{\S*/projects/[^/\s]+/}, "")
+    text = command_text(text)
     pattern, words = COMMANDS.find { |pattern, _| text.match?(pattern) }
     pattern ? words.(text.match(pattern)) : [ "Ran #{text.truncate(120)}", "Running #{text.truncate(60)}" ]
   end
@@ -74,6 +78,7 @@ class AgentTranscript
     @draft = +""
     @draft_flushed_at = 0
     @pending_tasks = {}
+    @viewable = {}
   end
 
   def record(event)
@@ -236,6 +241,7 @@ class AgentTranscript
     end
 
     def record_tool_use(block)
+      @viewable[block["id"]] = true if viewable?(block["name"], block["input"] || {})
       input = block["input"] || {}
       name = block["name"]
 
@@ -259,11 +265,21 @@ class AgentTranscript
       end
     end
 
+    VIEWABLE_COMMANDS = /\A(bin\/look|bin\/rails tailwindcss:build|bin\/sloplint|bin\/theme)/
+
+    def viewable?(name, input)
+      name == "mcp__builder__look" || (name == "Bash" && self.class.command_text(input["command"]).match?(VIEWABLE_COMMANDS))
+    end
+
     def inside_project?(path)
       path.to_s.start_with?("#{@project.path}/")
     end
 
     def record_tool_results(content)
+      # The agent just looked at the app or rebuilt its styles: the app is in a state to see, so
+      # the studio shows it as it is now instead of a "building" screen.
+      @project.show_work_in_progress if Array(content).any? { |block| block["type"] == "tool_result" && @viewable.delete(block["tool_use_id"]) }
+
       Array(content).each do |block|
         next unless block["type"] == "tool_result" && (subject = @pending_tasks.delete(block["tool_use_id"]))
 
