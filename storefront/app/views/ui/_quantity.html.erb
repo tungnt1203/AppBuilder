@@ -1,0 +1,12 @@
+<%# A quantity field between − and + (quantity controller), in one bordered box. The field still
+    takes typing; the buttons fire its "change" (a cart line saves itself on it). %>
+<% min = local_assigns.fetch(:min, 1) %>
+<% field_data = local_assigns.fetch(:data, {}).merge(quantity_target: "field") %>
+<% step = "grid h-full w-10 shrink-0 place-items-center text-ink transition hover:bg-surface-muted disabled:opacity-40" %>
+<div class="inline-flex h-12 items-stretch overflow-hidden rounded-lg border border-line bg-surface" data-controller="quantity">
+  <button type="button" class="<%= step %>" data-action="quantity#decrease" aria-label="<%= t("ui.quantity.decrease") %>"><%= icon "minus", size: 16, stroke: 1.5 %></button>
+  <%= number_field_tag name, value, id:, min:, max: 99, inputmode: "numeric", aria: { label: t("ui.quantity.label") },
+        class: "w-10 border-0 bg-transparent p-0 text-center text-sm text-ink [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+        data: field_data %>
+  <button type="button" class="<%= step %>" data-action="quantity#increase" aria-label="<%= t("ui.quantity.increase") %>"><%= icon "plus", size: 16, stroke: 1.5 %></button>
+</div>

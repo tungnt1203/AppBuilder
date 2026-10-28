@@ -1,8 +1,11 @@
 <% content_for :title, t(".title") %>
 
-<div class="page-width py-12">
+<div class="page-width py-10 md:py-14">
   <div class="flex flex-wrap items-end justify-between gap-4">
-    <h1 class="text-3xl"><%= t(".title") %></h1>
+    <div>
+      <h1 class="text-3xl md:text-4xl"><%= t(".title") %></h1>
+      <p class="mt-2 text-sm text-muted"><%= t(".count", count: @page.total) %></p>
+    </div>
     <%= form_with url: products_path, method: :get, class: "flex w-full items-center gap-2 sm:w-auto", data: { controller: "autosubmit", turbo_action: "replace" } do |form| %>
       <%# Fields are full width by default (field_classes): the wrappers size them, side by side. %>
       <div class="min-w-0 flex-1 sm:w-52 sm:flex-none">
@@ -17,9 +20,9 @@
 
   <%# Buyers browse by the shop's themes (a breed, a specialty, a design line): its collections. %>
   <% if @collections.any? %>
-    <nav class="mt-6 flex gap-2 overflow-x-auto pb-1" aria-label="<%= t(".collections") %>">
+    <nav class="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0" aria-label="<%= t(".collections") %>">
       <% @collections.each do |collection| %>
-        <%= link_to collection.title, collection_path(collection), class: "shrink-0 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium hover:border-ink" %>
+        <%= link_to collection.title, collection_path(collection), class: "shrink-0 rounded-lg border border-line bg-surface px-4 py-2 text-sm text-ink transition hover:border-ink" %>
       <% end %>
     </nav>
   <% end %>

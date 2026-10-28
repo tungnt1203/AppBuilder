@@ -1,0 +1,8 @@
+<%# The first screen's photo until the owner picks one (hero_image): the newest products' own
+    photos, the first large and two stacked beside it, so a new shop looks like itself from the
+    first second. `photos` are three of the products' images; `class` sizes and places the whole. %>
+<div class="grid grid-cols-[3fr_2fr] grid-rows-2 gap-2 <%= local_assigns[:class] %>">
+  <% photos.each_with_index do |photo, index| %>
+    <%= image_tag photo.url(:large), alt: "", fetchpriority: ("high" if index.zero?), class: "size-full min-h-0 rounded-xl bg-surface-muted object-cover #{"row-span-2" if index.zero?}" %>
+  <% end %>
+</div>

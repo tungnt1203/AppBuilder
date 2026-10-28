@@ -29,10 +29,18 @@ en:
         price_asc: Price, low to high
         price_desc: Price, high to low
         title: Name
+      count:
+        zero: No products
+        one: 1 product
+        other: "%{count} products"
       no_results: Nothing matches "%{query}".
       see_all: See all products
     show:
       photo: Photo %{number}
+      previous_photo: Previous photo
+      next_photo: Next photo
+      home: Home
+      shop: Shop
       quantity: Quantity
       add_to_cart: Add to cart
       unavailable: This color and size isn't available.
@@ -173,6 +181,7 @@ en:
       collections: Collections
       new_arrivals: New arrivals
       view_all: View all
+      shop_collection: Shop %{name}
   collections:
     show:
       empty: Nothing in this collection yet.
@@ -306,6 +315,10 @@ en:
     skip: Skip to content
     navigation: Navigation
     breadcrumbs: Breadcrumb
+    quantity:
+      label: Quantity
+      decrease: One fewer
+      increase: One more
     form_errors:
       heading:
         one: '1 problem to fix:'

@@ -9,7 +9,8 @@ Reference: https://theme-dawn-demo.myshopify.com (look at it with `bin/look <url
 - White canvas, near-black text (#121212), one font (Assistant) at its regular weight, headings
   never bold. Square corners everywhere. Thin gray lines, no shadows, no gradients.
 - Header: logo or name on the left, the collections beside it, search and cart on the right.
-- Home: a full-width photo with a centered line and an outlined button, the shop's promises, the
+- Home: a full-width photo with a centered line and an outlined button (until there's a
+  `hero_image`, the line beside the newest products' own photos: `home/_product_collage`), the shop's promises, the
   newest products in 4 columns (2 on phones) with an 8px gap, "Make it yours", the collections
   with "Title →" under each photo, the shop's story beside a photo.
 - Product cards: square photo on #f3f3f3, small pill badges at its bottom left, the title small,

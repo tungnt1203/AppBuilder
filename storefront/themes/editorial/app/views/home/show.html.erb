@@ -9,9 +9,16 @@
   <p class="mx-auto mt-4 max-w-xl leading-relaxed text-muted"><%= theme_setting(:hero_text).presence || t(".tagline") %></p>
 </section>
 
-<% if (hero_image = theme_setting(:hero_image).presence) %>
+<% hero_image = theme_setting(:hero_image).presence %>
+<% collage = @products.records.filter_map(&:cover_image).first(3) unless hero_image %>
+<% collage = nil unless collage&.size == 3 %>
+<% if hero_image %>
   <div class="<%= container %>">
     <%= image_tag hero_image, alt: "", fetchpriority: "high", class: "aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover md:aspect-[21/9]" %>
+  </div>
+<% elsif collage %>
+  <div class="<%= container %>">
+    <%= render "home/product_collage", photos: collage, class: "aspect-[4/3] md:aspect-[2/1]" %>
   </div>
 <% end %>
 

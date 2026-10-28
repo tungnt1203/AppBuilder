@@ -6,13 +6,17 @@
     the photos, the cards, one soft gradient. %>
 <% hero_button = theme_setting(:hero_button).presence || t(".shop_all") %>
 <% hero_image = theme_setting(:hero_image).presence %>
+<% collage = @products.records.filter_map(&:cover_image).first(3) unless hero_image %>
+<% collage = nil unless collage&.size == 3 %>
 <% container = "page-width" %>
 <section class="<%= container %> pt-3 md:pt-4">
   <div class="relative md:grid md:min-h-[38rem] md:grid-cols-12 md:items-center">
     <% if hero_image %>
       <%= image_tag hero_image, alt: "", fetchpriority: "high", class: "aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover shadow-[0_10px_40px_-16px_rgb(46_42_57/0.35)] md:absolute md:inset-y-0 md:right-0 md:aspect-auto md:h-full md:w-[63%]" %>
+    <% elsif collage %>
+      <%= render "home/product_collage", photos: collage, class: "aspect-[4/3] md:absolute md:inset-y-0 md:right-0 md:aspect-auto md:h-full md:w-[63%]" %>
     <% end %>
-    <div class="soft-gradient relative rounded-[1.5rem] px-8 py-10 md:col-span-5 md:px-14 md:py-16 <%= "-mt-14 mx-3 md:m-0" if hero_image %> <%= "md:col-span-12 md:text-center" unless hero_image %>">
+    <div class="soft-gradient relative rounded-[1.5rem] px-8 py-10 md:col-span-5 md:px-14 md:py-16 <%= "-mt-14 mx-3 md:m-0" if hero_image || collage %> <%= "md:col-span-12 md:text-center" unless hero_image || collage %>">
       <h1 class="text-[2.5rem] leading-[1.15] text-balance md:text-5xl"><%= theme_setting(:hero_title).presence || current_shop.name %></h1>
       <p class="mt-5 leading-relaxed text-muted"><%= theme_setting(:hero_text).presence || t(".tagline") %></p>
       <%= link_to hero_button, products_path, class: "mt-8 inline-flex min-h-12 items-center rounded-lg bg-ink px-8 text-[0.9375rem] tracking-[0.04em] text-accent transition hover:bg-ink/90" %>

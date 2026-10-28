@@ -28,6 +28,33 @@ class CatalogTest < ActionDispatch::IntegrationTest
     assert_select "img[src=?]", "https://images.unsplash.com/photo-1", count: 0
   end
 
+  test "until the owner picks a home page photo, the newest products' own photos fill the first screen" do
+    tee = @platform.products_data.first
+    @platform.products_data = 3.times.map do |index|
+      tee.merge("slug" => "tee-#{index}", "image" => tee["image"].merge("id" => index, "large" => "https://cdn.example/tee-#{index}.webp"))
+    end
+    get root_path
+    assert_select "section:first-of-type h1", "Tees for people who love a chubby cat"
+    assert_select "section:first-of-type img[src=?]", "https://cdn.example/tee-0.webp"
+    assert_select "section:first-of-type img[src=?]", "https://cdn.example/tee-2.webp"
+
+    @platform.products_data = @platform.products_data.first(2)
+    get root_path
+    assert_select "section:first-of-type img", count: 0
+  end
+
+  test "a product page says where it is in the shop and pages through its photos" do
+    get product_path("cat-tee")
+    assert_select "nav[aria-label=Breadcrumb]" do
+      assert_select "a[href='/']", "Home"
+      assert_select "a[href='/collections/cats']", "Cats"
+      assert_select "li[aria-current=page]", "Cat Tee"
+    end
+    assert_select "button[data-action='gallery#next'][aria-label=?]", "Next photo"
+    assert_select "[data-gallery-target=counter]", "1 / 2"
+    assert_select "#buy [data-controller=quantity] input[name=quantity][value='1'][min='1']"
+  end
+
   test "what the owner sets in the theme: logo, brand color, button, socials; benefits they can turn off" do
     @platform.shop_data["theme_settings"] = { "logo" => "https://cdn.example/logo.png", "brand_color" => "#7a1f2b", "hero_button" => "See the cats",
       "instagram_url" => "https://instagram.com/chubbycat", "show_benefits" => false }

@@ -7,11 +7,15 @@
 <% hero_title = theme_setting(:hero_title).presence || current_shop.name %>
 <% hero_text = theme_setting(:hero_text).presence || t(".tagline") %>
 <% hero_image = theme_setting(:hero_image).presence %>
+<% collage = @products.records.filter_map(&:cover_image).first(3) unless hero_image %>
+<% collage = nil unless collage&.size == 3 %>
 <section class="page-width max-md:px-0 grid items-center gap-8 pb-12 md:grid-cols-2 md:gap-14 md:pt-6 md:pb-20">
   <% if hero_image %>
     <%= image_tag hero_image, alt: "", class: "aspect-4/5 w-full bg-surface-muted object-cover max-md:max-h-[44svh] md:order-last", fetchpriority: "high" %>
+  <% elsif collage %>
+    <%= render "home/product_collage", photos: collage, class: "aspect-[6/5] px-4 md:order-last md:aspect-square md:px-0" %>
   <% end %>
-  <div class="px-4 md:px-0 <%= "md:col-span-2 md:py-16" unless hero_image %>">
+  <div class="px-4 md:px-0 <%= "md:col-span-2 md:py-16" unless hero_image || collage %>">
     <h1 class="text-[3.25rem] leading-[1.02] text-balance md:text-[4.5rem]"><%= hero_title %></h1>
     <p class="mt-5 max-w-md text-lg leading-relaxed text-muted"><%= hero_text %></p>
     <%= link_to hero_button, products_path, class: "#{button_classes} mt-8 min-h-12 px-8 text-[0.9375rem]" %>

@@ -23,9 +23,13 @@
       <% end %>
     </div>
   </div>
-  <h3 class="mt-3 font-sans text-[0.8125rem] leading-snug text-ink group-hover:underline"><%= product.title %></h3>
-  <p class="mt-1.5 flex flex-wrap items-baseline gap-x-3 text-base text-ink">
+  <h3 class="mt-3 font-sans text-sm leading-snug text-ink underline-offset-4 group-hover:underline"><%= product.title %></h3>
+  <%# Real buyers' stars only, from the shop's reviews. %>
+  <% if (rating = product.rating) %>
+    <p class="mt-1 flex items-center gap-1.5 text-xs text-muted"><%= rating_stars rating.average, size: 12 %> <span>(<%= rating.count %>)</span></p>
+  <% end %>
+  <p class="mt-1.5 flex flex-wrap items-baseline gap-x-2.5 text-[0.9375rem] text-ink">
+    <span class="<%= "text-accent" if on_sale %>"><%= low == high ? money(low) : t("products.product.from", price: money(low)) %></span>
     <% if on_sale %><s class="text-[0.8125rem] text-muted"><%= money(was) %></s><% end %>
-    <span><%= low == high ? money(low) : t("products.product.from", price: money(low)) %></span>
   </p>
 <% end %>

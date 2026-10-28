@@ -11,6 +11,8 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_select "#notice", /Cat Tee was added/
     assert_select "a", "Check out"
     assert_select "header span", "2"
+    assert_select "[data-controller=quantity] input[name=quantity][value='2'][min='0']"
+    assert_select "aside a[href='/checkout/new']", /Check out/
 
     item = @platform.carts.values.sole["lines"].sole
     patch cart_item_path(item["id"]), params: { quantity: 3 }

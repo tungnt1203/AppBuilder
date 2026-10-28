@@ -25,6 +25,10 @@
   </div>
   <div class="px-3 pt-4 pb-5 text-center md:px-5">
     <h3 class="text-sm leading-snug text-ink md:text-base"><%= product.title %></h3>
+    <%# Real buyers' stars only, from the shop's reviews. %>
+    <% if (rating = product.rating) %>
+      <p class="mt-1 flex items-center gap-1.5 text-xs text-muted"><%= rating_stars rating.average, size: 12 %> <span>(<%= rating.count %>)</span></p>
+    <% end %>
     <p class="mt-1.5 flex flex-wrap items-baseline justify-center gap-x-2.5 text-sm text-ink md:text-base">
       <% if saves&.positive? %><s class="text-xs text-muted md:text-sm"><%= money(was) %></s><% end %>
       <span><%= low == high ? money(low) : t("products.product.from", price: money(low)) %></span>
