@@ -91,14 +91,14 @@ class HallmarkMaterial
   # first line keeps the name.
   def layout
     css = root.join(THEME_CSS)
-    (css.read[/\A\/\* Theme "(\w+)"/, 1] || css.read[/shape: (\w+) layout/, 1] if css.file?) || "clean"
+    (css.read[/\A\/\* Theme "(\w+)"/, 1] || css.read[/layout: (\w+)/, 1] if css.file?) || "clean"
   end
 
   def theme_css(page_width)
     brand_color, on_brand = brand
     <<~CSS
-      /* Hallmark · shape: #{layout} layout · genre: #{header["genre"]} · theme: #{name} (deal) · job: buy · draw: <seed>
-       * hero: <posture> · nav: <shape> · footer: <shape> · imagery: <photographs, the product, or none> · signature: <the one move>
+      /* Hallmark · shape: <the draw's shape> · layout: #{layout} · genre: #{header["genre"]} · theme: #{name} (deal) · job: buy · draw: <seed>
+       * hero: <the draw's posture> · nav: <the draw's nav> · footer: <the draw's footer> · imagery: <photographs, the product, or none> · signature: <the one thing a buyer remembers, made from this shop's products>
        * axes: #{header.values_at("paper", "display", "accent").compact.join(" / ")} · posture: #{header["posture"]} · contrast: pass · fold: pass */
       /* Hallmark · pre-emit critique: P_ H_ E_ S_ R_ V_ · weakest: _, <what you did about it> */
 

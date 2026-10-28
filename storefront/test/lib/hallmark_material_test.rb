@@ -18,7 +18,7 @@ class HallmarkMaterialTest < ActiveSupport::TestCase
     material.apply!
     css = @root.join(HallmarkMaterial::THEME_CSS).read
 
-    assert css.start_with?("/* Hallmark · shape: bold layout · genre: modern-minimal · theme: Coral")
+    assert css.start_with?("/* Hallmark · shape: <the draw's shape> · layout: bold · genre: modern-minimal · theme: Coral")
     assert_match(/--color-canvas: #\h{6};/, css)
     assert_match(/--color-brand-600: #\h{6};/, css)
     assert_includes css, %(--font-display: "General Sans")

@@ -124,7 +124,10 @@ Look for, in order of how much it hurts the shop:
   SKILL.md, the gates in references/gates.md, and the material named in the first line of
   app/assets/tailwind/theme.css, references/themes/<slug>.md): eyebrows, labels in tracked
   capitals, middle-dot meta, invented reviews or numbers, emoji as icons, stock phrases, a page
-  that strays from its material's faces, surfaces and controls, every section the same shape;
+  that strays from its material's faces, surfaces and controls, every section the same shape, a
+  home page that isn't the composition the stamp names (draw, shape, hero, nav, footer) or looks
+  like the template's untouched layout, a signature that is missing, generic or not made from
+  this shop's own products;
 - broken or missing images, low contrast, inconsistent spacing, type or corners;
 - anything a buyer can't find or do (price, add to cart, sizes, how shipping works).
 

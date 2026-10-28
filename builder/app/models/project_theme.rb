@@ -94,7 +94,7 @@ class ProjectTheme
     @project.sandbox.run("bin/theme", name, "--force")
     if kept
       width = css.read[/--page-width:\s*([^;]+);/, 1]
-      css.write(kept.first.sub(/--page-width:\s*[^;]+;/) { "--page-width: #{width};" }.sub(/shape: \w+ layout/, "shape: #{name} layout"))
+      css.write(kept.first.sub(/--page-width:\s*[^;]+;/) { "--page-width: #{width};" }.sub(/layout: \w+/, "layout: #{name}"))
       fonts.write(kept.last)
     end
     @project.history.commit("Layout: #{name}")

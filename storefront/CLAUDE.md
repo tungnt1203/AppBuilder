@@ -159,11 +159,13 @@ request stays unticked; say so. The owner's words outrank everything else here.
 ## Design
 
 Every look is a **Hallmark** build: use the `hallmark` skill (`.claude/skills/hallmark`), and read
-its `STOREFRONT.md` first. A storefront is a **layout** (clean, bold, editorial, soft in
-`themes/`: the shop's structure, after Shopify themes that sell, put in place with
-`bin/theme <layout>`) under a **material** (a Hallmark theme, dealt by Hallmark's `theme.mjs` and
-put in place with `bin/theme material <slug>`: colors, faces, corners, depth, controls, voice).
-A new storefront has **clean** and no material. Read `DESIGN.md` before touching views; on a new
+its `STOREFRONT.md` first. A storefront is a **material** (a Hallmark theme, dealt by Hallmark's
+`theme.mjs` and put in place with `bin/theme material <slug>`: colors, faces, corners, depth,
+controls, voice) and a **composition** drawn by `theme.mjs draw` (the home page's shape and
+sections, the hero, the nav, the footer), built from the nearest **layout** (clean, bold,
+editorial, soft in `themes/`, put in place with `bin/theme <layout>`) inside the shop contract,
+with a signature of its own: no two shops built from the same page. A new storefront has
+**clean** and no material. Read `DESIGN.md` before touching views; on a new
 storefront it says "Not decided yet": deal the material and write the direction there first.
 Hallmark's Floor binds every page (no eyebrows, no labels in tracked capitals, no invented
 numbers or reviews, every color a token). Icons are Lucide via `icon "name"` (`bin/icons

@@ -7,24 +7,43 @@ structure, the data rules, how the builder works); SKILL.md wins on everything a
 
 ## What is fixed, and what Hallmark decides
 
-- **The layout** is one of four shop structures, each after a Shopify theme that sells, put in
-  place with `bin/theme <layout>`: the header, the footer, the home page's sections, the product
-  card. The shared pages (product page, collection, cart, checkout, order, policies, contact, 404)
-  keep their structure in every layout. A layout is the shop's anatomy, the "buy" job already read
-  (`references/anatomy.md`): don't replace it with a macrostructure.
+No two shops should look built from the same page. Hallmark decides the look **and** the home
+page's composition; the storefront fixes only what makes a shop sell and work.
 
-  | Layout | Structure | Suits |
-  |---|---|---|
-  | **clean** | full-width photo (or the newest products' photos), a dense square grid, collections, story | almost anything; the default |
-  | **bold** | split first screen with a huge line, wide-spaced grid, story, collections | loud, sport, streetwear, gaming, attitude |
-  | **editorial** | centered line, wide photo, hairline collection cards, story statement | art, home goods, considered gifts |
-  | **soft** | photo with a card over its edge, lifted cards, story band | gifts, family, pets, cozy, keepsakes |
-
+- **Fixed, every shop (the shop contract):**
+  - The shared pages keep their parts: product page (photos, price, options, the buyer's
+    personalization, add to cart, delivery and returns, reviews, related), collection, cart,
+    checkout, order, policies, contact, 404 (CLAUDE.md, "What's built in"). Restyle them, don't
+    remove a part.
+  - On a phone, the first screen of the home page says what the shop sells and to whom, with one
+    obvious action; real products with their prices are within the first two screens.
+  - The home page shows the shop's own products from the API (never invented ones), "Make it
+    yours" (`blocks/_personalized`) when the shop has personalized products, a way into the
+    collections, and the promises a buyer checks (shipping, returns, secure checkout) as facts.
+  - The header: logo or name, the collections, search (`layouts/site/_search`) and the cart, the
+    menu button on phones; checkout keeps its focused header. The footer: the policies, contact,
+    "Find my order", the social links.
+  - Everything the owner can change stays a theme setting (words, photos, button, brand color).
 - **The material** is a Hallmark theme, dealt and put in place with `bin/theme material <slug>`:
-  paper, ink, faces, corners, depth, controls, motion, voice, photo treatment. It goes over the
-  layout and every shared page follows it (they read the same tokens).
-- **Everything about the look** inside that: type, color, surfaces, the hero's posture, the
-  sections' composition on the home page, words, pictures, states. That is Hallmark, in full.
+  paper, ink, faces, corners, depth, controls, motion, voice, photo treatment. Every page follows
+  it (they read the same tokens).
+- **The composition is the draw's:** the home page's shape and sections, the hero's posture, the
+  nav and the footer come from `theme.mjs draw` (step 2), built in the shop's views. A **layout**
+  (`bin/theme <layout>`: clean, bold, editorial, soft, after Shopify themes that sell) is only the
+  starting files: pick the one nearest the draw, then rebuild its home page, header and footer
+  to the draw.
+
+  | Layout | Its starting files | Nearest to draws with |
+  |---|---|---|
+  | **clean** | full-width photo, dense square grid, collections, story | a full-bleed or product-led hero, a grid |
+  | **bold** | split first screen with a huge line, wide grid | a poster or type-led hero, condensed heads |
+  | **editorial** | centered line, wide photo, hairline cards | a statement, a long read, a gallery |
+  | **soft** | photo with a card over its edge, lifted cards | a stage, cards, a bento |
+
+- **The signature** is owed on every shop (SKILL.md, Signature): the one thing a buyer remembers,
+  made from this shop's real material (its products, its promise, its city, the buyer's own
+  name on the product), built once where it does the most work. Name it in the stamp and in
+  DESIGN.md. "Clean product grid" is not a signature; neither is a texture or a sticker.
 
 ## The flow, step by step
 
@@ -39,12 +58,19 @@ material, audience, use and tone from the request, state the inferences in one l
 and in DESIGN.md, and build. The use is always **buy**. Facts are never inferred (SKILL.md § 1):
 no invented reviews, counts, quotes, logos or founders.
 
-**2. Shape.** Pick the layout by the shop's structure (table above). Within it, design the home
-page as SKILL.md § 2 says: the material inventory, the anatomy of a shop that sells from ads
-(the product and its price within the first screens, the promises a buyer checks, the
-collections), each section's composition from `references/layout.md`, the hero's posture, the
-signature. Add, drop or reorder home page sections in the layout's views; keep the shared
-pages' parts (CLAUDE.md, "What's built in").
+**2. Shape: the draw.** After the material is in place (step 3), draw the composition:
+`node .claude/skills/hallmark/scripts/theme.mjs draw --material product --job buy --theme <slug>
+--log .hallmark/log.json` (`--material photo` when the owner gave lifestyle photos). It deals the
+shape, the hero's posture, the nav, the footer, the first section after the hero, where the action
+sits, what to leave out, and the sections to build. Take it, read the shape's file in
+`references/macrostructures/` and the postures in `references/layout.md`, and build the home page
+(`app/views/home/show.html.erb`), the header and the footer (`app/views/layouts/site/`) to it,
+inside the shop contract above: a section the draw asks for is made from the shop's real
+material (its products, collections, promises, the owner's words), never invented; the draw's
+"leave out" is honored. When the draw refuses the shop (a shape for words with a shop of
+pictures), redraw once (`--reroll 1`) and say why in the Picks. The blocks in
+`app/views/blocks/` (seen at `/_blocks`) are starting markup for common sections. Mirror test
+(SKILL.md): if a neighbouring shop would get this exact home page, change one decision.
 
 **3. Direction.** Deal: `node .claude/skills/hallmark/scripts/theme.mjs deal --genre <genre>
 --prompt "<the owner's request, in English>" --log .hallmark/log.json`. Read the three pictures
@@ -62,7 +88,8 @@ bin/rails tailwindcss:build
 ```
 
 Where the deal says `theme.mjs scaffold`, run `bin/theme material` instead, and put its seed in
-the stamp (`theme: Squeeze (deal 1/3, seed …)`). Run `theme.mjs draw` as SKILL.md says for the hero posture, nav and footer within the layout.
+the stamp (`theme: Squeeze (deal 1/3, seed …)`). Then draw (step 2) and stamp `draw: <seed>`,
+the shape, hero, nav, footer and signature you built; never `n/a`.
 
 **4. Load** what SKILL.md § 4 lists: layout, anatomy (buy), imagery, craft, the genre, the
 theme's file, `gates.md` § 1 to § 4.

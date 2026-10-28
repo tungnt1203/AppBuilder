@@ -89,7 +89,7 @@ class Projects::DesignsControllerTest < ActionDispatch::IntegrationTest
     assert_includes @commands, [ "bin/theme", "bold", "--force" ]
     css = @project.path.join(ProjectDesign::FILE).read
     assert_includes css, "bin/theme material sticker"
-    assert_includes css, "shape: bold layout"
+    assert_includes css, "layout: bold"
     assert_includes @project.path.join("app/views/layouts/_fonts.html.erb").read, "Bowlby One SC"
   end
 
