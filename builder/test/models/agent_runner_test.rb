@@ -87,7 +87,32 @@ class AgentRunnerTest < ActiveSupport::TestCase
     assert_includes AgentRunner.new(project).system_prompt, "The owner chats in English"
   end
 
+  test "the sdk agent gets the builder's tools and reviewer, a backup model, and its tests checked when it builds" do
+    build = sdk_config(AgentRunner.new(projects(:clinic), mode: "build", backend: "sdk"))
+    assert_empty AgentRunner::SDK_TOOLS - build["allowedTools"]
+    assert_equal [ "sonnet", nil, true ], build.values_at("fallbackModel", "effort", "check")
+
+    plan = sdk_config(AgentRunner.new(projects(:clinic), mode: "plan", backend: "sdk"))
+    assert_equal [ "medium", false ], plan.values_at("effort", "check")
+  end
+
+  test "each backend is told how to finish its turn" do
+    sdk = AgentRunner.new(projects(:clinic), backend: "sdk").system_prompt
+    assert_includes sdk, "call finish_turn once"
+    assert_includes sdk, "design-reviewer"
+    assert_not_includes sdk, "```next"
+
+    cli = AgentRunner.new(projects(:clinic), backend: "cli").system_prompt
+    assert_includes cli, "```next"
+    assert_not_includes cli, "finish_turn"
+  end
+
   test "unknown backends are rejected" do
     assert_raises(ArgumentError) { AgentRunner.new(projects(:clinic), backend: "nope").command("Hi") }
   end
+
+  private
+    def sdk_config(runner)
+      runner.send(:with_config_file) { |path| JSON.parse(File.read(path)) }
+    end
 end

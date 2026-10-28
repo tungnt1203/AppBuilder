@@ -19,7 +19,9 @@ class AgentTranscript
     "Grep" => ->(input) { "Searched for “#{input["pattern"].to_s.truncate(60)}”" },
     "Glob" => ->(input) { "Looked for #{input["pattern"]}" },
     "Bash" => ->(input) { "Ran #{input["command"].to_s.truncate(120)}" },
-    "Skill" => ->(input) { "Followed the #{input["skill"] || input["name"]} guide" }
+    "Skill" => ->(input) { "Followed the #{input["skill"] || input["name"]} guide" },
+    "mcp__builder__look" => ->(input) { "Looked at #{Array(input["paths"]).presence&.to_sentence || "/"}" },
+    "Agent" => ->(input) { input["subagent_type"] == "design-reviewer" ? "Asked the design reviewer to look at the app" : "Asked a helper: #{input["description"].to_s.truncate(80)}" }
   }
 
   ACTIVITIES = {
@@ -30,7 +32,10 @@ class AgentTranscript
     "Glob" => ->(_) { "Looking through files" },
     "Bash" => ->(input) { input["command"].to_s.start_with?("bin/rails test") ? "Running the tests" : "Running #{input["command"].to_s.truncate(60)}" },
     "TaskCreate" => ->(_) { "Planning" },
-    "TaskUpdate" => ->(_) { "Updating the plan" }
+    "TaskUpdate" => ->(_) { "Updating the plan" },
+    "mcp__builder__look" => ->(_) { "Looking at the app" },
+    "mcp__builder__finish_turn" => ->(_) { "Wrapping up" },
+    "Agent" => ->(input) { input["subagent_type"] == "design-reviewer" ? "The design reviewer is looking at the app" : "A helper is working" }
   }
 
   def self.relative(path)
@@ -55,12 +60,15 @@ class AgentTranscript
     when "user" then record_tool_results(event.dig("message", "content"))
     when "result" then record_result(event)
     when "builder_ask" then record_ask(event)
+    when "builder_activity" then show_activity(event["text"].to_s.presence)
+    when "builder_check" then record_check(event)
     end
   end
 
   def finish
     show_activity(nil)
     clear_draft
+    offer_next_steps
   end
 
   # The agent asked the owner something, which ends the turn until they answer.
@@ -163,6 +171,25 @@ class AgentTranscript
       @project.messages.create!(role: :assistant, body: data.any? ? text.strip : text, data: data)
     end
 
+    # The interactive agent names what to ask for next with finish_turn, just before its reply;
+    # they go on the turn's last reply as buttons, unless it has questions or steps already.
+    def offer_next_steps
+      return unless @next_steps
+
+      reply = @project.messages.assistant.last
+      return unless reply && reply.data["questions"].blank? && reply.data["next_steps"].blank?
+
+      reply.update!(data: reply.data.merge("next_steps" => @next_steps))
+      @next_steps = nil
+    end
+
+    # The builder ran the app's tests before letting the turn end.
+    def record_check(event)
+      summary = event["summary"].to_s.presence
+      body = event["passed"] ? "Checked the app's tests: they pass#{" (#{summary})" if summary}" : "The app's tests failed; fixing them"
+      @project.messages.create!(role: :action, body:, data: { tool: "Check", passed: event["passed"] == true })
+    end
+
     def parse_next_steps(json)
       return unless json
 
@@ -196,6 +223,7 @@ class AgentTranscript
       end
 
       case name
+      when "mcp__builder__finish_turn" then @next_steps = parse_next_steps(Array(input["next_steps"]).to_json)
       when "TaskCreate" then @pending_tasks[block["id"]] = input["subject"].to_s
       when "TaskUpdate" then update_task(input["taskId"].to_s, input["status"])
       else

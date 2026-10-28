@@ -10,6 +10,8 @@ class AgentRunner
   LANGUAGE_NAMES = { "en" => "English", "vi" => "Vietnamese" }
 
   COMMAND_POLL = 0.3 # seconds
+  # The runner's own tools and its design reviewer (runner/index.mjs), for the SDK backend.
+  SDK_TOOLS = %w[ mcp__builder__look mcp__builder__finish_turn Agent ].freeze
   # mode "plan" reads and proposes without changing anything; "build" makes the changes.
   def initialize(project, mode: "build", backend: Rails.configuration.x.agent_backend, config: Rails.configuration.x.agent)
     @project, @mode, @backend, @config = project, mode, backend, config
@@ -85,6 +87,8 @@ class AgentRunner
   def system_prompt
     builder = <<~PROMPT
       #{@config[:append_system_prompt].strip}
+
+      #{@config[interactive? ? :finish_sdk : :finish_cli].to_s.strip}
 
       The owner chats in #{LANGUAGE_NAMES.fetch(@project.language)}: write every message they see in it, the short notes
       between your steps too, even while you work in English files.
@@ -172,8 +176,10 @@ class AgentRunner
 
       file = @project.path.join("tmp/agent-config.json")
       file.dirname.mkpath
-      file.write({ allowedTools: allowed_tools, disallowedTools: @config[:disallowed_tools],
-                   appendSystemPrompt: system_prompt, maxBudgetUsd: @config[:max_budget_usd] }.to_json)
+      file.write({ allowedTools: allowed_tools + SDK_TOOLS, disallowedTools: @config[:disallowed_tools],
+                   appendSystemPrompt: system_prompt, maxBudgetUsd: @config[:max_budget_usd],
+                   fallbackModel: @config[:fallback_model], effort: (@config[:plan_effort] if @mode == "plan"),
+                   check: @mode == "build" }.compact.to_json)
       yield file.to_s
     end
 

@@ -96,6 +96,34 @@ class AgentTranscriptTest < ActiveSupport::TestCase
     assert_equal [ "Thêm trang báo cáo doanh thu", "Cho khách đặt lịch online", "Gửi nhắc lịch qua Zalo" ], reply.data["next_steps"]
   end
 
+  test "next steps from finish_turn go on the turn's last reply" do
+    record "type" => "assistant", "message" => { "content" => [
+      { "type" => "tool_use", "id" => "toolu_9", "name" => "mcp__builder__finish_turn",
+        "input" => { "commit_message" => "Add booking", "next_steps" => [ "Add a price list", "Send reminders", "Take deposits", "One too many" ] } } ] }
+    record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => "Đã thêm trang đặt lịch." } ] }
+    @transcript.finish
+
+    assert_equal [ "Add a price list", "Send reminders", "Take deposits" ], @project.messages.assistant.last.data["next_steps"]
+  end
+
+  test "the builder's check of the app's tests shows as a step, and while it runs" do
+    record "type" => "builder_activity", "text" => "Running the app's tests"
+    assert_equal "Running the app's tests", @project.reload.activity
+
+    record "type" => "builder_check", "passed" => false, "summary" => "39 runs, 2 failures"
+    record "type" => "builder_check", "passed" => true, "summary" => "39 runs, 0 failures"
+
+    assert_equal [ "The app's tests failed; fixing them", "Checked the app's tests: they pass (39 runs, 0 failures)" ], @project.messages.action.last(2).map(&:body)
+  end
+
+  test "looking at the app and asking the design reviewer are steps" do
+    record "type" => "assistant", "message" => { "content" => [
+      { "type" => "tool_use", "id" => "toolu_1", "name" => "mcp__builder__look", "input" => { "paths" => [ "/", "/products" ] } },
+      { "type" => "tool_use", "id" => "toolu_2", "name" => "Agent", "input" => { "subagent_type" => "design-reviewer", "description" => "Review" } } ] }
+
+    assert_equal [ "Looked at / and /products", "Asked the design reviewer to look at the app" ], @project.messages.action.last(2).map(&:body)
+  end
+
   test "keeps a malformed next block as plain text" do
     record "type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => "Xong.\n```next\n[oops\n```" } ] }
 

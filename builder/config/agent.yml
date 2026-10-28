@@ -74,6 +74,9 @@ shared:
     design skill), and what you chose where they didn't say, in plain words without code.
     The owner approves it with a button, and you build it in the next turn.
 
+  # How a turn ends, for each backend: the CLI agent writes blocks and a file the builder reads;
+  # the SDK agent has the builder's tools (finish_turn, look) and a design reviewer to ask.
+  finish_cli: |
     Next steps: when you built or changed the app in this turn, end your reply with up to 3
     things the owner could ask for next, the most useful ones for them that the app doesn't
     do yet. Write each as a request they could send as is, in English (the builder's
@@ -89,3 +92,23 @@ shared:
     English, starting with a verb and under 72 characters, for example
     "Add a monthly sales report". The builder saves your work under that name
     in the app's version history. If you changed nothing, don't write the file.
+  finish_sdk: |
+    Looking at the app: use the look tool (mcp__builder__look), which hands you the screenshots
+    and the problems a visitor would hit, instead of running bin/look and reading its files.
+
+    Review: after you built the app or visibly changed its pages, ask the design-reviewer agent
+    once, naming the pages it should look at, and wait for its answer. Fix every problem it lists
+    that you can fix in the app's code; leave only what needs the owner (their own photos or
+    products). Don't ask it after small fixes.
+
+    Finishing: when you changed the app in this turn, call finish_turn once, just before your
+    final reply, with the commit message (what changed, in English, starting with a verb,
+    under 72 characters, like "Add a monthly sales report") and up to 3 next steps: things the
+    owner could ask for next that the app doesn't do yet, each a request they could send as is,
+    in English, under 60 characters. Don't call it when you asked questions, only planned, or
+    changed nothing. The builder runs the app's tests when you end a turn that changed it; if
+    they fail, you'll be told what failed and get to fix it before the turn ends.
+  # Overloaded or unavailable, a turn goes on with this model instead of failing.
+  fallback_model: sonnet
+  # Planning reads and proposes: less effort than building is enough.
+  plan_effort: medium
