@@ -1,23 +1,25 @@
-/* Hallmark · v2.0.0 · shape: app screen · redesign: full (home, projects#index) · theme: brand (ink on paper) · signature: the request box beside the question, with starters that show what they ask for */
-/* critique: the old home was a centred chatbot template; now a left-aligned workbench, starters readable, apps under a hairline, monogram in ink */
-/* waive 2b, 7b · live-activity sweep, preview paper and danger ink are the studio, outside this redesign */
+/* Hallmark · v2.0.0 · shape: app screen · redesign: full (studio, admin chrome) · genre: modern-minimal · theme: Coral (deal 2/3, seed app-builder-studio-print-on-demand-2e7a·d6d6dde1·2026-10-28·r0) · signature: the agent's work as a pressed sheet beside the live app
+ * axes: light 97 55 / grotesk-sans Hanken Grotesk (General Sans has no Vietnamese) / warm 30 · posture: restrained · contrast: pass */
+/* critique: ink on cold white read as a template; now warm paper and cotton stationery, controls pressed like cards, coral only where something is settled (ready, saved) */
+/* waive 2b, 7b · live-activity sweep, preview paper and danger ink are the studio's own */
 @import "tailwindcss";
 @import "./personalize_fonts.css";
 
 /*
-  Studio: ink on paper. White and near-white surfaces, near-black ink, and the ink itself as
-  the one accent, so the only color on screen is the app being built in the preview.
+  Studio: Hallmark's Coral. Warm grey paper, cotton surfaces with a lit edge and a shadow cast to
+  the right, warm charcoal ink as the one action color, and coral only for what is settled
+  (an app that's ready, a version saved), so the app being built keeps the color on screen.
 */
 @theme {
-  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Hanken Grotesk", "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --color-brand-300: #d4d4d8;
-  --color-brand-400: #a1a1aa;
-  --color-brand-500: #52525b;
-  --color-brand-600: #18181b;
-  --color-brand-900: #09090b;
-  --color-brand-950: #050506;
+  --color-brand-300: #d9d3cf;
+  --color-brand-400: #aba39e;
+  --color-brand-500: #615955;
+  --color-brand-600: #1d1614;
+  --color-brand-900: #130e0c;
+  --color-brand-950: #0b0807;
 }
 
 @theme inline {
@@ -38,49 +40,55 @@
   /* Day: ink on white. Night: the same, inverted onto near-black. */
   :root {
     color-scheme: light;
-    --canvas: #fafafa;
-    --text: #18181b;
-    --text-muted: rgb(24 24 27 / 0.64);
-    --text-faint: rgb(24 24 27 / 0.46);
-    --accent: #18181b;
-    --on-accent: #fafafa;
+    --canvas: #f8f4f1;
+    --text: #1d1614;
+    --text-muted: rgb(29 22 20 / 0.68);
+    --text-faint: rgb(29 22 20 / 0.48);
+    --accent: #1d1614;
+    --on-accent: #f6f3ef;
+    --focus: #bd3a2b;
+    --settled: #ba4a34;
     --glass-clear: var(--surface-solid);
     --glass-frost: var(--surface-solid);
-    --glass-edge: var(--line);
-    --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -16px rgb(0 0 0 / 0.16);
-    --shade: rgb(0 0 0 / 0.08);
-    --scrim: rgb(0 0 0 / 0.32);
+    --glass-edge: rgb(74 52 40 / 0.14);
+    /* Cotton stock lit from the left: a lit top edge, a hairline, and a shadow falling right. */
+    --glass-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(74 52 40 / 0.06), 6px 5px 14px -8px rgb(74 52 40 / 0.3);
+    --press-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 4px 4px 10px -6px rgb(29 22 20 / 0.5);
+    --press-ink: rgb(0 0 0 / 0.35);
+    --lit-edge: rgb(255 255 255 / 0.9);
+    --shade: rgb(74 52 40 / 0.1);
+    --scrim: rgb(29 22 20 / 0.32);
     --chip: var(--surface-solid);
-    --well: rgb(24 24 27 / 0.04);
-    --well-strong: rgb(24 24 27 / 0.07);
-    --hover: rgb(24 24 27 / 0.05);
-    --line: rgb(24 24 27 / 0.1);
-    --ready: #15803d;
-    --busy: #2563eb;
+    --well: #f1ece8;
+    --well-strong: #e8e1dd;
+    --hover: rgb(29 22 20 / 0.05);
+    --line: rgb(29 22 20 / 0.11);
+    --ready: #ba4a34;
+    --busy: #615955;
     --danger: #b42318;
     --danger-strong: #b42318;
     --on-danger: #ffffff;
-    --danger-bg: #fdecea;
+    --danger-bg: #fbe9e5;
     --danger-text: #8a1c12;
-    --link: #18181b;
-    --surface: #ffffff;
-    --surface-solid: #ffffff;
-    --device-rim: #27272a;
+    --link: #1d1614;
+    --surface: #fdfbf8;
+    --surface-solid: #fdfbf8;
+    --device-rim: #312926;
     --admin-canvas: var(--canvas);
     --admin-card: var(--surface-solid);
-    --admin-side: #18181b;
-    --admin-muted: #f4f4f5;
-    --admin-brand-50: #f4f4f5;
-    --admin-brand-100: #e4e4e7;
-    --admin-brand-200: #d4d4d8;
-    --admin-brand-700: #27272a;
-    --admin-brand-800: #18181b;
-    --admin-side-text: rgb(250 250 250 / 0.8);
-    --admin-side-ink: #fafafa;
-    --admin-side-hover: rgb(255 255 255 / 0.08);
-    --admin-side-current: rgb(255 255 255 / 0.12);
-    --admin-side-well: rgb(255 255 255 / 0.06);
-    --admin-side-line: rgb(255 255 255 / 0.1);
+    --admin-side: #1d1614;
+    --admin-muted: #f1ece8;
+    --admin-brand-50: #f1ece8;
+    --admin-brand-100: #e8e1dd;
+    --admin-brand-200: #d9d3cf;
+    --admin-brand-700: #312926;
+    --admin-brand-800: #1d1614;
+    --admin-side-text: rgb(246 243 239 / 0.78);
+    --admin-side-ink: #f6f3ef;
+    --admin-side-hover: rgb(255 245 235 / 0.08);
+    --admin-side-current: rgb(255 245 235 / 0.12);
+    --admin-side-well: rgb(255 245 235 / 0.06);
+    --admin-side-line: rgb(255 245 235 / 0.1);
     --admin-button: var(--accent);
     --admin-on-button: var(--on-accent);
     --preview-paper: #ffffff;
@@ -101,41 +109,46 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --canvas: #0f0f10;
-      --text: #ededee;
-      --text-muted: rgb(237 237 238 / 0.66);
-      --text-faint: rgb(237 237 238 / 0.46);
-      --accent: #ededee;
-      --on-accent: #0f0f10;
+      --canvas: #130e0c;
+      --text: #eeeae6;
+      --text-muted: rgb(238 234 230 / 0.68);
+      --text-faint: rgb(238 234 230 / 0.48);
+      --accent: #eeeae6;
+      --on-accent: #130e0c;
+      --focus: #f69c8d;
+      --settled: #f69c8d;
+      --press-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 4px 4px 10px -6px rgb(0 0 0 / 0.6);
+      --press-ink: rgb(255 255 255 / 0.4);
+      --lit-edge: rgb(255 245 235 / 0.06);
       --glass-clear: var(--surface-solid);
       --glass-frost: var(--surface-solid);
       --glass-edge: var(--line);
-      --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.6);
+      --glass-shadow: inset 0 1px 0 rgb(255 245 235 / 0.06), 6px 5px 16px -8px rgb(0 0 0 / 0.6);
       --shade: var(--shade);
       --scrim: rgb(0 0 0 / 0.55);
       --chip: var(--surface-solid);
-      --well: rgb(255 255 255 / 0.05);
-      --well-strong: rgb(255 255 255 / 0.09);
-      --hover: rgb(255 255 255 / 0.06);
-      --line: rgb(255 255 255 / 0.1);
-      --ready: #4ade80;
-      --busy: #60a5fa;
+      --well: rgb(255 245 235 / 0.05);
+      --well-strong: rgb(255 245 235 / 0.09);
+      --hover: rgb(255 245 235 / 0.06);
+      --line: rgb(255 240 230 / 0.1);
+      --ready: #f69c8d;
+      --busy: #aba39e;
       --danger: #f87171;
       --danger-strong: #b42318;
     --on-danger: #ffffff;
       --danger-bg: rgb(127 29 29 / 0.35);
       --danger-text: #fecaca;
-      --link: #ededee;
-      --surface: #18181a;
-      --surface-solid: #18181a;
+      --link: #eeeae6;
+      --surface: #1d1714;
+      --surface-solid: #1d1714;
       --device-rim: rgb(255 255 255 / 0.16);
-      --admin-side: #0a0a0b;
-      --admin-muted: rgb(255 255 255 / 0.06);
-      --admin-brand-50: rgb(255 255 255 / 0.06);
-      --admin-brand-100: rgb(255 255 255 / 0.1);
-      --admin-brand-200: rgb(255 255 255 / 0.16);
-      --admin-brand-700: #d4d4d8;
-      --admin-brand-800: #e4e4e7;
+      --admin-side: #0d0908;
+      --admin-muted: rgb(255 245 235 / 0.06);
+      --admin-brand-50: rgb(255 245 235 / 0.06);
+      --admin-brand-100: rgb(255 245 235 / 0.1);
+      --admin-brand-200: rgb(255 245 235 / 0.16);
+      --admin-brand-700: #d9d3cf;
+      --admin-brand-800: #eeeae6;
       --code-bg: rgb(9 28 32);
       --code-side: rgb(12 34 39);
       --code-text: #d5e6e2;
@@ -152,41 +165,46 @@
   /* The same night palette when the theme is chosen explicitly. */
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --canvas: #0f0f10;
-    --text: #ededee;
-    --text-muted: rgb(237 237 238 / 0.66);
-    --text-faint: rgb(237 237 238 / 0.46);
-    --accent: #ededee;
-    --on-accent: #0f0f10;
+    --canvas: #130e0c;
+    --text: #eeeae6;
+    --text-muted: rgb(238 234 230 / 0.68);
+    --text-faint: rgb(238 234 230 / 0.48);
+    --accent: #eeeae6;
+    --on-accent: #130e0c;
+      --focus: #f69c8d;
+      --settled: #f69c8d;
+      --press-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 4px 4px 10px -6px rgb(0 0 0 / 0.6);
+      --press-ink: rgb(255 255 255 / 0.4);
+      --lit-edge: rgb(255 245 235 / 0.06);
     --glass-clear: var(--surface-solid);
     --glass-frost: var(--surface-solid);
     --glass-edge: var(--line);
-    --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.6);
+    --glass-shadow: inset 0 1px 0 rgb(255 245 235 / 0.06), 6px 5px 16px -8px rgb(0 0 0 / 0.6);
     --shade: rgb(0 0 0 / 0.4);
     --scrim: rgb(0 0 0 / 0.55);
     --chip: var(--surface-solid);
-    --well: rgb(255 255 255 / 0.05);
-    --well-strong: rgb(255 255 255 / 0.09);
-    --hover: rgb(255 255 255 / 0.06);
-    --line: rgb(255 255 255 / 0.1);
-    --ready: #4ade80;
-    --busy: #60a5fa;
+    --well: rgb(255 245 235 / 0.05);
+    --well-strong: rgb(255 245 235 / 0.09);
+    --hover: rgb(255 245 235 / 0.06);
+    --line: rgb(255 240 230 / 0.1);
+    --ready: #f69c8d;
+    --busy: #aba39e;
     --danger: #f87171;
     --danger-strong: #b42318;
     --on-danger: #ffffff;
     --danger-bg: rgb(127 29 29 / 0.35);
     --danger-text: #fecaca;
-    --link: #ededee;
-    --surface: #18181a;
-    --surface-solid: #18181a;
+    --link: #eeeae6;
+    --surface: #1d1714;
+    --surface-solid: #1d1714;
     --device-rim: rgb(255 255 255 / 0.16);
-    --admin-side: #0a0a0b;
-    --admin-muted: rgb(255 255 255 / 0.06);
-    --admin-brand-50: rgb(255 255 255 / 0.06);
-    --admin-brand-100: rgb(255 255 255 / 0.1);
-    --admin-brand-200: rgb(255 255 255 / 0.16);
-    --admin-brand-700: #d4d4d8;
-    --admin-brand-800: #e4e4e7;
+    --admin-side: #0d0908;
+    --admin-muted: rgb(255 245 235 / 0.06);
+    --admin-brand-50: rgb(255 245 235 / 0.06);
+    --admin-brand-100: rgb(255 245 235 / 0.1);
+    --admin-brand-200: rgb(255 245 235 / 0.16);
+    --admin-brand-700: #d9d3cf;
+    --admin-brand-800: #eeeae6;
     --code-bg: rgb(9 28 32);
     --code-side: rgb(12 34 39);
     --code-text: #d5e6e2;
@@ -213,7 +231,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--focus);
     outline-offset: 2px;
   }
 }
@@ -243,6 +261,12 @@
     box-shadow: 0 0 0 1px var(--line);
   }
 
+  /* Coral's stock: a cotton card lit from the left, its shadow falling right. */
+  .stock {
+    background: var(--surface-solid);
+    box-shadow: var(--glass-shadow), 0 0 0 1px var(--glass-edge);
+  }
+
   /* Menus grow out of the control that opened them. */
   details[open] > .popover {
     transform-origin: top right;
@@ -265,10 +289,10 @@
     font-weight: 600;
     color: var(--text);
     cursor: pointer;
-    transition: background-color 150ms, transform 150ms, opacity 150ms;
+    transition: background-color 150ms, transform 150ms, box-shadow 150ms, opacity 150ms;
   }
 
-  .btn:active:not(:disabled) { transform: scale(0.97); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
   .btn:disabled { cursor: not-allowed; opacity: 0.6; }
 
   .btn-ghost { background: transparent; }
@@ -282,9 +306,10 @@
   .theme-toggle[data-theme-choice="light"] [data-when="light"],
   .theme-toggle[data-theme-choice="dark"] [data-when="dark"] { display: contents; }
 
-  /* The one primary action on screen: flat ink. */
-  .btn-primary { color: var(--on-accent); background: var(--accent); }
-  .btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 86%, var(--canvas)); }
+  /* The one primary action on screen: an ink card, its label pressed in, lifting a little on hover. */
+  .btn-primary { color: var(--on-accent); background: var(--accent); box-shadow: var(--press-shadow); text-shadow: 0 -0.75px 0 var(--press-ink); }
+  .btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 90%, var(--canvas)); transform: translateY(-1px); }
+  .btn-primary:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
   /* Disabled reads by its fill, its ink and the cursor, not only by fading. */
   .btn-primary:disabled { background: var(--well-strong); color: var(--text-faint); box-shadow: none; text-shadow: none; }
 
@@ -321,7 +346,7 @@
     transition: border-color 150ms, background-color 150ms;
   }
   .field::placeholder { color: var(--text-faint); }
-  .field:focus, .field:focus-within { outline: none; border-color: var(--accent); background: var(--well-strong); }
+  .field:focus, .field:focus-within { outline: none; border-color: var(--focus); background: var(--surface-solid); }
 
   /* Chat: one centred column, like a chat app's, however wide the panel gets. The owner's
      messages sit on the right in a bubble that fits them; the agent's replies are plain text
@@ -622,7 +647,7 @@
   .composer:focus-within { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
   /* Send reads as off until there is something to send. While the agent works, an empty box
      shows Stop in Send's place, as chat apps do. */
-  form[data-empty] .composer-send:not(:disabled) { opacity: 0.35; }
+  form[data-empty] .composer-send:not(:disabled) { background: var(--well-strong); color: var(--text-faint); box-shadow: none; text-shadow: none; cursor: default; }
   form:not([data-empty]) .composer-stop { display: none; }
   form[data-empty] .composer-actions:has(.composer-stop) .composer-send { display: none; }
   .composer-stop svg { fill: currentColor; }
@@ -1642,10 +1667,12 @@
     text-align: left;
     color: var(--text);
     cursor: pointer;
-    transition: background-color 150ms, border-color 150ms, transform 150ms;
+    background: color-mix(in srgb, var(--surface-solid) 60%, transparent);
+    transition: background-color 150ms, border-color 150ms, transform 150ms, box-shadow 150ms;
 
-    &:hover { background: var(--surface-solid); border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); }
-    &:active { transform: scale(0.98); }
+    /* Picked up like an index card: cotton, lit from the left, lifted a little. */
+    &:hover { background: var(--surface-solid); border-color: var(--glass-edge); box-shadow: var(--glass-shadow); transform: translateY(-1px); }
+    &:active { transform: translateY(1px); box-shadow: none; }
   }
   .starter-name { font-size: 0.875rem; font-weight: 600; }
   .starter-request {
@@ -1691,7 +1718,8 @@
     color: var(--text);
     transition: transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 200ms;
   }
-  .app-card:hover { transform: translateY(-3px); box-shadow: 0 24px 48px -24px var(--shade), 0 0 0 1px var(--line); }
+  .app-card { box-shadow: var(--glass-shadow), 0 0 0 1px var(--glass-edge); }
+  .app-card:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 var(--lit-edge), 12px 10px 22px -10px var(--shade), 0 0 0 1px var(--glass-edge); }
 
   .app-shot {
     aspect-ratio: 16 / 10;
