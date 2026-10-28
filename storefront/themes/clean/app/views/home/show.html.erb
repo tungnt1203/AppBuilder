@@ -9,9 +9,9 @@
 <% hero_text = theme_setting(:hero_text).presence || t(".tagline") %>
 <% if (hero_image = theme_setting(:hero_image).presence) %>
   <section class="relative isolate grid min-h-[28rem] place-items-center overflow-hidden bg-ink md:min-h-[45rem]">
-    <%= image_tag hero_image, alt: "", class: "absolute inset-0 -z-10 size-full object-cover", fetchpriority: "high" %>
+    <%= image_tag hero_image, alt: "", class: "photo absolute inset-0 -z-10 size-full object-cover", fetchpriority: "high" %>
     <div class="absolute inset-0 -z-10 bg-black/40"></div>
-    <div class="mx-auto max-w-3xl px-6 py-16 text-center [text-shadow:0_1px_16px_rgb(0_0_0/0.35)]">
+    <div class="mx-auto max-w-3xl px-6 py-16 text-center text-shadow-photo">
       <h1 class="text-[2.5rem] leading-tight text-balance text-white md:text-[3.25rem]"><%= hero_title %></h1>
       <p class="mt-4 text-white/90"><%= hero_text %></p>
       <%= link_to hero_button, products_path, class: "mt-8 inline-flex min-h-12 items-center px-8 text-[0.9375rem] tracking-[0.06em] text-white ring-1 ring-white transition hover:ring-2" %>
@@ -76,7 +76,7 @@
         <li class="w-[72%] shrink-0 snap-start md:w-auto">
           <%= link_to collection_path(collection), class: "group block" do %>
             <span class="relative block aspect-[4/5] overflow-hidden rounded-xl bg-surface-muted">
-              <%= collection_image collection, class: "size-full transition duration-700 group-hover:scale-[1.03]" %>
+              <%= collection_image collection, class: "size-full" %>
               <span class="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-lg bg-canvas/95 px-4 py-3 text-ink shadow-sm backdrop-blur">
                 <span class="min-w-0 truncate"><%= collection.title %></span>
                 <%= icon "arrow-right", size: 16, stroke: 1.5, class: "transition group-hover:translate-x-0.5" %>
@@ -91,7 +91,7 @@
 
 <% if (story_image = theme_setting(:story_image).presence) %>
   <section class="page-width max-md:px-0 mt-16 grid md:mt-24 md:grid-cols-2">
-    <%= image_tag story_image, alt: "", loading: "lazy", class: "aspect-[4/3] size-full bg-surface-muted object-cover md:aspect-auto md:min-h-[30rem]" %>
+    <%= image_tag story_image, alt: "", loading: "lazy", class: "photo aspect-[4/3] size-full bg-surface-muted object-cover md:aspect-auto md:min-h-[30rem]" %>
     <div class="flex flex-col justify-center bg-surface-muted px-6 py-12 md:px-14">
       <h2 class="text-3xl leading-tight text-balance md:text-[2.5rem]"><%= theme_setting(:story_title) %></h2>
       <% if (story_text = theme_setting(:story_text).presence) %>

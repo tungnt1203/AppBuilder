@@ -8,6 +8,7 @@ class ProjectDesign
 
   FILE = "app/assets/tailwind/theme.css"
   FONTS_FILE = "app/assets/tailwind/fonts.css"
+  WEB_FONTS_FILE = "app/views/layouts/_fonts.html.erb"
   HEX = /\A#\h{6}\z/
   CORNERS = { "square" => [ "0px", "0px" ], "slight" => [ "6px", "6px" ], "soft" => [ "10px", "14px" ], "round" => [ "16px", "22px" ] }
   WIDTHS = { "narrow" => "1100px", "standard" => "1200px", "wide" => "1400px" }
@@ -45,11 +46,14 @@ class ProjectDesign
     file.file? && %w[ --color-brand-600 --color-canvas --color-ink --font-display --font-sans ].all? { |name| source.include?("#{name}:") }
   end
 
-  # The families the storefront ships (fonts.css), the monospace one aside.
+  # The families the storefront ships (fonts.css), the monospace one aside, and the ones its
+  # Hallmark material loads from the web (layouts/_fonts, written by bin/theme material).
   def fonts
     @fonts ||= begin
-      css = project.path.join(FONTS_FILE)
-      css.file? ? css.read.scan(/font-family:\s*"([^"]+)"/).flatten.uniq.sort - [ "JetBrains Mono" ] : []
+      css, web = project.path.join(FONTS_FILE), project.path.join(WEB_FONTS_FILE)
+      shipped = css.file? ? css.read.scan(/font-family:\s*"([^"]+)"/).flatten - [ "JetBrains Mono" ] : []
+      material = web.file? ? web.read[/fonts \(bin\/theme material [\w-]+\): ([^.]+)\./, 1].to_s.split(", ") : []
+      (shipped + material).uniq.sort
     end
   end
 

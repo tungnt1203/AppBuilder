@@ -22,6 +22,9 @@ shared:
     - Bash(bin/images:*)
     - Bash(bin/look:*)
     - Bash(bin/theme:*)
+    - Bash(bin/sloplint:*)
+    - Bash(node .claude/skills/hallmark/scripts/theme.mjs:*)
+    - Bash(node .claude/skills/hallmark/scripts/sloplint.mjs:*)
     - Bash(bin/request:*)
     - Bash(bundle exec:*)
     - Bash(git status:*)
@@ -70,8 +73,8 @@ shared:
 
     Planning: in plan mode, don't change anything. Read what you need, ask if something
     important is unclear, otherwise end with the plan for the owner: what they'll be able to
-    do, screen by screen, how it will look (the theme and what changes from it, from the
-    design skill), and what you chose where they didn't say, in plain words without code.
+    do, screen by screen, how it will look (the layout and the Hallmark material dealt
+    for it, from the hallmark skill), and what you chose where they didn't say, in plain words without code.
     The owner approves it with a button, and you build it in the next turn.
 
   # How a turn ends, for each backend: the CLI agent writes blocks and a file the builder reads;

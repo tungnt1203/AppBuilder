@@ -12,7 +12,7 @@
 <section class="<%= container %> pt-3 md:pt-4">
   <div class="relative md:grid md:min-h-[38rem] md:grid-cols-12 md:items-center">
     <% if hero_image %>
-      <%= image_tag hero_image, alt: "", fetchpriority: "high", class: "aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover shadow-[0_10px_40px_-16px_rgb(46_42_57/0.35)] md:absolute md:inset-y-0 md:right-0 md:aspect-auto md:h-full md:w-[63%]" %>
+      <%= image_tag hero_image, alt: "", fetchpriority: "high", class: "photo aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover shadow-photo md:absolute md:inset-y-0 md:right-0 md:aspect-auto md:h-full md:w-[63%]" %>
     <% elsif collage %>
       <%= render "home/product_collage", photos: collage, class: "aspect-[4/3] md:absolute md:inset-y-0 md:right-0 md:aspect-auto md:h-full md:w-[63%]" %>
     <% end %>
@@ -47,7 +47,7 @@
 <% if (story_image = theme_setting(:story_image).presence) %>
   <section class="soft-gradient">
     <div class="<%= container %> grid items-center gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-20">
-      <%= image_tag story_image, alt: "", loading: "lazy", class: "aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover" %>
+      <%= image_tag story_image, alt: "", loading: "lazy", class: "photo aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover" %>
       <div>
         <h2 class="text-[1.75rem] text-balance md:text-[2.25rem]"><%= theme_setting(:story_title) %></h2>
         <% if (story_text = theme_setting(:story_text).presence) %>
@@ -66,9 +66,9 @@
     <ul class="-mx-4 mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:px-0">
       <% @collections.each do |collection| %>
         <li class="w-[70%] shrink-0 snap-start md:w-auto">
-          <%= link_to collection_path(collection), class: "group block overflow-hidden rounded-xl bg-surface shadow-[0_6px_24px_-10px_rgb(46_42_57/0.18)]" do %>
+          <%= link_to collection_path(collection), class: "group block overflow-hidden rounded-xl bg-surface shadow-card" do %>
             <span class="block aspect-square overflow-hidden bg-surface-muted">
-              <%= collection_image collection, class: "size-full transition duration-700 group-hover:scale-[1.03]" %>
+              <%= collection_image collection, class: "size-full" %>
             </span>
             <span class="block px-5 py-4 text-center font-medium text-ink"><%= collection.title %></span>
           <% end %>

@@ -5,7 +5,7 @@
 
    Names every page reads:
    - brand-50…950   buttons, links, badges (600 is the button; on-brand is the text on it)
-   - accent         the sale badge
+   - accent         the sale badge (on-accent is the text on it)
    - canvas, surface, surface-muted (photo backgrounds, hovers), ink, muted, line
    - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
    - font-display   headings; font-sans text (families from fonts.css)
@@ -25,6 +25,7 @@
   --color-muted: #5f5f5f;
   --color-line: #e8e8e8;
   --color-accent: #334fb4;
+  --color-on-accent: #fdfdfb;
   --color-on-brand: #fdfdfb;
 
   --color-brand-50: #f3f3f3;

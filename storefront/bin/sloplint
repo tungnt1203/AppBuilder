@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+# Hallmark's sloplint on the running preview: the pages as a visitor gets them (their markup and
+# words) and the storefront's own CSS (theme.css, application.css), never Tailwind's built file.
+# Fix every FAIL; fix or waive every REFLEX (the waiver goes in theme.css under the stamp).
+#
+#   bin/sloplint                    the home page, all products, the first product, the cart
+#   bin/sloplint / /collections/x   these pages
+#   bin/sloplint --stage hero       any of sloplint's own options pass through
+#
+# The genre is the one in theme.css's stamp, unless you pass --genre.
+require "net/http"
+require "openssl"
+require "fileutils"
+
+root = File.expand_path("..", __dir__)
+skill = File.join(root, ".claude/skills/hallmark/scripts/sloplint.mjs")
+abort "Hallmark isn't in .claude/skills/hallmark." unless File.exist?(skill)
+
+# sloplint's options that take a value; the rest of what isn't a path is a flag.
+valued = %w[ --genre --scope --stage --tier ]
+options, paths, args = [], [], ARGV.dup
+while (arg = args.shift)
+  if arg.start_with?("-")
+    options << arg
+    options << args.shift if valued.include?(arg)
+  else
+    paths << (arg.start_with?("/") ? arg : "/#{arg}")
+  end
+end
+base = File.read(File.join(root, "tmp/preview_url")).strip rescue "http://127.0.0.1:3000"
+secret_path = File.join(root, "tmp/preview_secret")
+pass = OpenSSL::HMAC.hexdigest("SHA256", File.read(secret_path).strip, "preview-pass") if File.exist?(secret_path)
+
+fetch = lambda do |path|
+  uri = URI(base + path)
+  Net::HTTP.start(uri.host, uri.port, open_timeout: 5, read_timeout: 60) { |http| http.get(uri.request_uri, { "X-Preview-Pass" => pass }.compact) }
+rescue SystemCallError, IOError, Net::OpenTimeout
+  abort "The app isn't running at #{base}. The builder runs the preview; wait for it to come back, never start a server yourself."
+end
+
+if paths.empty?
+  first = fetch.("/products").body[%r{href="(/products/[^"?#]+)"}, 1]
+  paths = [ "/", "/products", first, "/cart" ].compact
+end
+
+out = File.join(root, "tmp/sloplint")
+FileUtils.rm_rf(out)
+FileUtils.mkdir_p(out)
+paths.each do |path|
+  response = fetch.(path)
+  warn "#{path} answered #{response.code}" unless response.code.start_with?("2")
+  name = path == "/" ? "home" : path.delete_prefix("/").tr("/", "_")
+  # Tailwind's built stylesheet is every utility the app has ever used: the page links the
+  # storefront's own CSS instead.
+  html = response.body.to_s.sub(%r{<link[^>]*href="/assets/[^"]+\.css"[^>]*>}, %(<link rel="stylesheet" href="application.css"><link rel="stylesheet" href="theme.css">))
+  File.write(File.join(out, "#{name}.html"), html)
+end
+%w[ theme.css application.css ].each { |file| FileUtils.cp(File.join(root, "app/assets/tailwind", file), out) }
+
+genre = File.read(File.join(root, "app/assets/tailwind/theme.css"))[/genre: ([\w-]+)/, 1]
+options += [ "--genre", genre ] if genre && !options.include?("--genre")
+exec "node", skill, out, *options

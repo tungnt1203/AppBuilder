@@ -50,7 +50,7 @@
           <p class="pointer-events-none absolute right-3 bottom-3 rounded-full bg-canvas/90 px-2.5 py-1 text-xs text-ink tabular-nums ring-1 ring-line" data-gallery-target="counter" aria-hidden="true">1 / <%= images.size %></p>
         <% end %>
         <dialog class="m-auto max-h-[92vh] max-w-[92vw] overflow-hidden rounded-xl bg-canvas p-0 backdrop:bg-black/70" data-gallery-target="zoom" data-action="click->gallery#closeZoom">
-          <img alt="<%= @product.title %>" class="max-h-[92vh] w-auto object-contain" data-gallery-target="zoomImage">
+          <%= image_tag @product.image_for(@variant).url(:large), alt: @product.title, loading: "lazy", class: "max-h-[92vh] w-auto object-contain", data: { gallery_target: "zoomImage" } %>
           <button type="button" class="absolute top-3 right-3 grid size-9 place-items-center rounded-full bg-surface/90 text-ink" aria-label="<%= t(".close") %>"><%= icon "x", size: 18 %></button>
         </dialog>
       <% else %>
@@ -80,7 +80,7 @@
     <p class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xl text-ink">
       <span data-variant-picker-target="price"><%= money(@variant&.price_cents) %></span>
       <s class="text-base text-muted" data-variant-picker-target="compareAtPrice" <%= "hidden" unless @variant&.on_sale? %>><%= money(@variant.compare_at_price_cents) if @variant&.on_sale? %></s>
-      <span class="rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-white" data-variant-picker-target="saving" <%= "hidden" unless @variant&.on_sale? %>><%= t(".save", percent: @variant.sale_percent) if @variant&.on_sale? %></span>
+      <span class="rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-on-accent" data-variant-picker-target="saving" <%= "hidden" unless @variant&.on_sale? %>><%= t(".save", percent: @variant.sale_percent) if @variant&.on_sale? %></span>
     </p>
 
     <%= form_with url: cart_items_path, id: "buy", class: "mt-8 space-y-6 border-t border-line pt-6" do |form| %>

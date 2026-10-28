@@ -8,7 +8,7 @@
    - brand-50…950   buttons, links, badges (600 is the button; on-brand is the text on it). On this
                     dark canvas 50–200 are dark tints (quiet backgrounds) and 700–950 light ones
                     (text and links), so badges and alerts stay readable.
-   - accent         a second color; unused here, as on Ride
+   - accent         a second color; unused here, as on Ride (on-accent is the text on it)
    - canvas, surface (fields, cards), surface-muted (photo backgrounds, hovers), ink, muted, line
    - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
    - font-display   headings; font-sans text (families from fonts.css)
@@ -28,6 +28,7 @@
   --color-muted: #b8b8bb;
   --color-line: #3a3a3e;
   --color-accent: #ffffff;
+  --color-on-accent: #121212;
   --color-on-brand: #1f1f21;
 
   --color-brand-50: #2b2e14;
@@ -52,6 +53,6 @@
 }
 
 @layer components {
-  /* Every button (button_classes): uppercase like the headings, a little room between the letters. */
-  .btn { font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  /* Every button (button_classes): the text face, heavier; caps stay with the headings. */
+  .btn { font-weight: 600; }
 }

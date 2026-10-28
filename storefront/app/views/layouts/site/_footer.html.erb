@@ -11,7 +11,7 @@
         <% if (logo = theme_setting(:logo).presence) %>
           <%= image_tag logo, alt: current_shop.name, class: "h-9 w-auto max-w-44 object-contain" %>
         <% else %>
-          <span class="text-lg font-semibold tracking-[0.12em] uppercase"><%= current_shop.name %></span>
+          <span class="font-display text-xl"><%= current_shop.name %></span>
         <% end %>
       <% end %>
       <p class="mt-4 max-w-sm leading-relaxed text-muted"><%= theme_setting(:hero_text).presence || t("home.show.tagline") %></p>
@@ -25,7 +25,7 @@
     </div>
 
     <nav aria-label="<%= t("layouts.site.shop") %>">
-      <p class="text-xs font-semibold tracking-[0.12em] text-ink uppercase"><%= t("layouts.site.shop") %></p>
+      <p class="text-sm font-medium text-ink"><%= t("layouts.site.shop") %></p>
       <ul class="mt-4 space-y-3 text-muted">
         <li><%= link_to t("layouts.site.shop_all"), products_path, class: "hover:text-ink hover:underline" %></li>
         <% collections.select { |collection| collection.product_count.to_i.positive? }.first(5).each do |collection| %>
@@ -35,7 +35,7 @@
     </nav>
 
     <nav aria-label="<%= t("layouts.site.footer_navigation") %>">
-      <p class="text-xs font-semibold tracking-[0.12em] text-ink uppercase"><%= t("layouts.site.help") %></p>
+      <p class="text-sm font-medium text-ink"><%= t("layouts.site.help") %></p>
       <ul class="mt-4 space-y-3 text-muted">
         <li><%= link_to t("order_lookups.new.title"), new_order_lookup_path, class: "hover:text-ink hover:underline" %></li>
         <li><%= link_to t("contacts.show.title"), contact_path, class: "hover:text-ink hover:underline" %></li>
@@ -47,7 +47,7 @@
 
     <% if footer_menu&.items.present? %>
       <nav aria-label="<%= footer_menu.title %>">
-        <p class="text-xs font-semibold tracking-[0.12em] text-ink uppercase"><%= footer_menu.title %></p>
+        <p class="text-sm font-medium text-ink"><%= footer_menu.title %></p>
         <ul class="mt-4 space-y-3 text-muted">
           <% footer_menu.items.each do |item| %>
             <li><%= shop_menu_link item, class: "hover:text-ink hover:underline" %></li>

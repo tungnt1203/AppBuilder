@@ -6,12 +6,15 @@
 
    Names every page reads:
    - brand-50…950   buttons, links, badges (600 is the button; on-brand is the text on it)
-   - accent         the gradient's first color; --soft-to (below) its second
+   - accent         the gradient's first color; --soft-to (below) its second (on-accent is the text on it)
    - canvas, surface (cards, fields), surface-muted (photo backgrounds, hovers), ink, muted, line
    - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
    - font-display   headings; font-sans text (families from fonts.css)
    - --page-width   how wide the content runs on a wide screen (.page-width) */
 @theme {
+  --shadow-photo: 0 10px 40px -16px rgb(46 42 57 / 0.35);
+  --shadow-card: 0 6px 24px -10px rgb(46 42 57 / 0.18);
+  --shadow-card-hover: 0 10px 30px -10px rgb(46 42 57 / 0.28);
   --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -26,6 +29,7 @@
   --color-muted: #66616f;
   --color-line: #e4ded3;
   --color-accent: #e2f89c;
+  --color-on-accent: #2e2a39;
   --color-on-brand: #fdfbf7;
 
   --color-brand-50: #f7eef4;

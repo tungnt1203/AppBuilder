@@ -8,11 +8,16 @@
 <%= csp_meta_tag %>
 
 <%= yield :head %>
+<%# A page without its own (a product has one) is described by the shop's line. %>
+<% unless content_for(:head).to_s.include?('name="description"') %>
+  <meta name="description" content="<%= theme_setting(:hero_text).presence || t("home.show.tagline") %>">
+<% end %>
 
 <link rel="icon" href="/icon.png" type="image/png">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon.png">
 
+<%= render "layouts/fonts" %>
 <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
 <%= render "layouts/theme_colors" %>
 <%= javascript_importmap_tags %>

@@ -1,11 +1,11 @@
 <%# The site's header, as Ride has it: on the dark canvas, the logo (a theme setting the owner
-    uploads) or the name in the headings' uppercase on the left, the collections in small uppercase
+    uploads) or the name in the headings' uppercase on the left, the collections in the text face
     beside it, search and the cart on the right. On phones: the menu button, the name in the
     middle, search and the cart. Pages can add links with content_for :site_nav, or show only the
     logo and the cart with content_for :focused (checkout: nothing to wander off to). %>
 <% menu_items = shop_menu(:header)&.items.to_a %>
 <% shop_collections = collections.select { |collection| collection.product_count.to_i.positive? }.first(6) %>
-<% nav_link = "py-2 text-sm font-semibold tracking-[0.04em] whitespace-nowrap text-muted uppercase hover:text-ink aria-[current=page]:text-ink" %>
+<% nav_link = "py-2 text-sm font-medium whitespace-nowrap text-muted hover:text-ink aria-[current=page]:text-ink" %>
 <header class="sticky top-0 z-20 bg-canvas">
   <div class="page-width flex h-16 items-center gap-7 md:h-[104px]">
     <% unless content_for?(:focused) %>

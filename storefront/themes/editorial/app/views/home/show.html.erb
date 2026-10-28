@@ -14,7 +14,7 @@
 <% collage = nil unless collage&.size == 3 %>
 <% if hero_image %>
   <div class="<%= container %>">
-    <%= image_tag hero_image, alt: "", fetchpriority: "high", class: "aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover md:aspect-[21/9]" %>
+    <%= image_tag hero_image, alt: "", fetchpriority: "high", class: "photo aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover md:aspect-[21/9]" %>
   </div>
 <% elsif collage %>
   <div class="<%= container %>">
@@ -30,7 +30,7 @@
         <li class="md:w-[calc((100%-2.5rem)/3)]">
           <%= link_to collection_path(collection), class: "group block overflow-hidden rounded-xl border border-line bg-surface" do %>
             <span class="block aspect-[4/3] overflow-hidden bg-surface-muted md:aspect-4/5">
-              <%= collection_image collection, class: "size-full transition duration-700 group-hover:scale-[1.03]" %>
+              <%= collection_image collection, class: "size-full" %>
             </span>
             <span class="flex items-center gap-2 px-5 py-5 font-display text-xl font-light text-ink"><%= collection.title %> <%= icon "arrow-right", size: 18, stroke: 1.5, class: "transition group-hover:translate-x-1" %></span>
           <% end %>
@@ -61,7 +61,7 @@
 <% if (story_image = theme_setting(:story_image).presence) %>
   <section class="<%= container %> pt-6">
     <h2 class="text-[1.75rem]"><%= theme_setting(:story_title) %></h2>
-    <%= image_tag story_image, alt: "", loading: "lazy", class: "mt-6 aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover md:aspect-[16/8]" %>
+    <%= image_tag story_image, alt: "", loading: "lazy", class: "photo mt-6 aspect-[4/3] w-full rounded-xl bg-surface-muted object-cover md:aspect-[16/8]" %>
     <% if (story_text = theme_setting(:story_text).presence) %>
       <p class="mx-auto mt-14 max-w-3xl text-center font-display text-2xl leading-snug font-light text-balance text-ink md:text-[1.75rem]"><%= story_text %></p>
     <% end %>

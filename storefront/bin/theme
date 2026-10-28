@@ -7,10 +7,27 @@
 #   bin/theme              the themes, and which one is in place
 #   bin/theme bold         put "bold" in place
 #   bin/theme bold --force also over files changed since a theme put them there (the changes are lost)
+#   bin/theme material coral  the Hallmark theme "coral" as the material over the layout in place:
+#                             its colors, fonts, corners, build hint (lib/hallmark_material.rb)
 require "pathname"
 require "fileutils"
 
 root = Pathname(__dir__).join("..").expand_path
+
+if ARGV.first == "material"
+  require_relative "../lib/hallmark_material"
+  slug = ARGV[1] or abort "Usage: bin/theme material <slug>. Let Hallmark deal one: node .claude/skills/hallmark/scripts/theme.mjs deal --genre <genre> --prompt \"<the request>\""
+  material = begin
+    HallmarkMaterial.new(root, slug)
+  rescue ArgumentError => error
+    abort error.message
+  end
+  material.apply!
+  puts "#{material.name} is the material: #{material.material}",
+    "  #{HallmarkMaterial::THEME_CSS} (@theme as hex, its tokens and build hint)", "  #{HallmarkMaterial::FONTS} (#{material.families.join(", ").then { |names| names.empty? ? "no web fonts" : names }})",
+    "", "Next: bin/rails tailwindcss:build, then read #{material.file.relative_path_from(root)} and build in it."
+  exit
+end
 themes = root.join("themes").children.select(&:directory?).sort
 files = ->(theme) { theme.glob("**/*").select(&:file?).reject { |file| file.basename.to_s == "README.md" } }
 summary = ->(theme) { theme.join("README.md").read[/\A# [^\n]*\n\n(.+?)\n\n/m, 1].to_s.tr("\n", " ") }
@@ -43,4 +60,7 @@ files.(theme).each do |file|
   FileUtils.cp(file, target)
   puts "  #{target.relative_path_from(root)}"
 end
+# A layout comes with its own colors and fonts: a material put over the last one goes with it.
+fonts = root.join("app/views/layouts/_fonts.html.erb")
+fonts.write("<%# The material's fonts (bin/theme material <slug>); the layout's own are in fonts.css. %>\n")
 puts "", "#{name} is in place. Next: bin/rails tailwindcss:build, then make it this shop's (themes/#{name}/README.md)."

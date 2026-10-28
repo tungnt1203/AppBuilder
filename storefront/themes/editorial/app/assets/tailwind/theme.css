@@ -7,7 +7,7 @@
    Names every page reads:
    - brand-50…950   buttons, links, badges, the announcement bar and the footer (600 is the
                     button; on-brand is the text on it)
-   - accent         a second color; unused here, as on Craft
+   - accent         a second color; unused here, as on Craft (on-accent is the text on it)
    - canvas, surface (cards, fields), surface-muted (photo backgrounds, hovers), ink, muted, line
    - radius-lg      buttons and fields; radius-xl cards, photos, dialogs
    - font-display   headings; font-sans text (families from fonts.css)
@@ -27,6 +27,7 @@
   --color-muted: #5e5c5b;
   --color-line: #d3cecd;
   --color-accent: #8a6d3b;
+  --color-on-accent: #fdfdfb;
   --color-on-brand: #efecec;
 
   --color-brand-50: #eef0ee;

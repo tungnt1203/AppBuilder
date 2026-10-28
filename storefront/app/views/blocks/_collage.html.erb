@@ -14,7 +14,7 @@
   <div class="page-width grid gap-4 md:grid-cols-2">
     <% cards.each do |card| %>
       <%= link_to card[:href], class: "group relative isolate flex aspect-[4/5] items-end overflow-hidden rounded-2xl bg-ink p-6 md:aspect-square md:p-8" do %>
-        <%= image_tag card[:photo], alt: card[:alt], loading: "lazy", class: "absolute inset-0 -z-10 size-full object-cover transition duration-700 group-hover:scale-105" %>
+        <%= image_tag card[:photo], alt: card[:alt], loading: "lazy", class: "absolute inset-0 -z-10 size-full object-cover" %>
         <span class="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 to-transparent"></span>
         <span>
           <span class="block text-sm text-white/80"><%= card[:text] %></span>

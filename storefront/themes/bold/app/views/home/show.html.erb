@@ -11,7 +11,7 @@
 <% collage = nil unless collage&.size == 3 %>
 <section class="page-width max-md:px-0 grid items-center gap-8 pb-12 md:grid-cols-2 md:gap-14 md:pt-6 md:pb-20">
   <% if hero_image %>
-    <%= image_tag hero_image, alt: "", class: "aspect-4/5 w-full bg-surface-muted object-cover max-md:max-h-[44svh] md:order-last", fetchpriority: "high" %>
+    <%= image_tag hero_image, alt: "", class: "photo aspect-4/5 w-full bg-surface-muted object-cover max-md:max-h-[44svh] md:order-last", fetchpriority: "high" %>
   <% elsif collage %>
     <%= render "home/product_collage", photos: collage, class: "aspect-[6/5] px-4 md:order-last md:aspect-square md:px-0" %>
   <% end %>
@@ -27,7 +27,7 @@
 <section class="page-width pt-14 md:pt-20">
   <div class="flex items-end justify-between gap-4">
     <h2 class="text-4xl md:text-5xl"><%= t(".new_arrivals") %></h2>
-    <%= link_to t(".view_all"), products_path, class: "pb-1 text-sm font-semibold tracking-[0.04em] text-ink uppercase underline underline-offset-8 hover:text-brand-600" if @products.any? %>
+    <%= link_to t(".view_all"), products_path, class: "pb-1 text-sm font-semibold text-ink underline underline-offset-8 hover:text-brand-600" if @products.any? %>
   </div>
   <div class="mt-8">
     <% if @products.any? %>
@@ -44,7 +44,7 @@
 
 <% if (story_image = theme_setting(:story_image).presence) %>
   <section class="page-width max-md:px-0 mt-14 grid items-center gap-8 md:mt-20 md:grid-cols-[3fr_2fr] md:gap-16">
-    <%= image_tag story_image, alt: "", loading: "lazy", class: "aspect-[4/3] w-full bg-surface-muted object-cover" %>
+    <%= image_tag story_image, alt: "", loading: "lazy", class: "photo aspect-[4/3] w-full bg-surface-muted object-cover" %>
     <div class="px-4 md:px-0">
       <h2 class="text-4xl text-balance md:text-5xl"><%= theme_setting(:story_title) %></h2>
       <% if (story_text = theme_setting(:story_text).presence) %>
@@ -64,7 +64,7 @@
         <li class="w-[72%] shrink-0 snap-start md:w-auto">
           <%= link_to collection_path(collection), class: "group block" do %>
             <span class="block aspect-4/5 overflow-hidden rounded-xl bg-surface-muted">
-              <%= collection_image collection, class: "size-full transition duration-500 group-hover:scale-[1.04]" %>
+              <%= collection_image collection, class: "size-full transition duration-500" %>
             </span>
             <span class="mt-4 flex items-center justify-between font-display text-2xl text-ink uppercase group-hover:text-brand-600"><%= collection.title %> <%= icon "arrow-right", size: 22 %></span>
           <% end %>

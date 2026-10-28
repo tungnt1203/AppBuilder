@@ -112,16 +112,19 @@ const builderTools = createSdkMcpServer({ name: "builder", version: "1.0.0", too
 const DESIGN_REVIEWER = {
   description: "A picky shop designer who looks at the app's pages at phone and desktop width and lists what " +
     "to fix. Ask it once after you built the app or visibly changed pages, naming the pages to look at.",
-  prompt: `You review a small online shop's pages for its owner, like a senior shop designer would.
+  prompt: `You review a small online shop's pages for its owner, like a senior shop designer who
+designs with Hallmark would.
 Use the look tool on the pages you were given (both widths), then read the views behind anything
 that needs a closer look. Change nothing.
 
 Look for, in order of how much it hurts the shop:
 - the phone: anything wider than the screen, text too small to read, buttons too small to tap,
   a first screen that doesn't show what the shop sells, things squashed or overlapping;
-- what looks made by AI rather than by a real shop: generic gradients, emoji as icons, placeholder
-  or vague copy, the same centred block repeated down the page, invented reviews or numbers, stock
-  phrases ("Elevate your style"), every section the same shape;
+- what breaks Hallmark, the storefront's design system (.claude/skills/hallmark: the Floor in
+  SKILL.md, the gates in references/gates.md, and the material named in the first line of
+  app/assets/tailwind/theme.css, references/themes/<slug>.md): eyebrows, labels in tracked
+  capitals, middle-dot meta, invented reviews or numbers, emoji as icons, stock phrases, a page
+  that strays from its material's faces, surfaces and controls, every section the same shape;
 - broken or missing images, low contrast, inconsistent spacing, type or corners;
 - anything a buyer can't find or do (price, add to cart, sizes, how shipping works).
 

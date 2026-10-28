@@ -45,6 +45,20 @@ class ProjectDesignTest < ActiveSupport::TestCase
     assert_not_includes design.fonts, "JetBrains Mono"
   end
 
+  test "reads a Hallmark material's hex colors and offers its web fonts" do
+    require Rails.root.join("../storefront/lib/hallmark_material").to_s
+    material = HallmarkMaterial.new(Rails.root.join("../storefront"), "coral")
+    @project.path.join(ProjectDesign::FILE).write(material.theme_css("1200px"))
+    @project.path.join(ProjectDesign::WEB_FONTS_FILE).tap { |file| file.dirname.mkpath }.write(material.fonts_partial)
+
+    design = ProjectDesign.for(@project)
+    assert design.available?
+    assert_match(/\A#\h{6}\z/, design.background)
+    assert_equal "General Sans", design.heading_font
+    assert_includes design.fonts, "General Sans"
+    assert_includes design.fonts, "Assistant"
+  end
+
   test "saving writes the theme, rebuilds the styles and keeps a version" do
     design = ProjectDesign.for(@project)
     design.assign_attributes(brand: "#e8643c", heading_font: "Fraunces", corners: "soft")

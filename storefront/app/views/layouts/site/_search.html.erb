@@ -6,7 +6,7 @@
         data: { menu_target: "button", action: "menu#toggle:prevent" } do %>
     <%= icon "search", size: 22, stroke: local_assigns.fetch(:stroke, 1.5) %>
   <% end %>
-  <div data-menu-target="panel" class="absolute inset-x-0 top-full z-30 hidden border-b border-line bg-canvas shadow-[0_12px_24px_-16px_rgb(0_0_0/0.25)]">
+  <div data-menu-target="panel" class="absolute inset-x-0 top-full z-30 hidden border-b border-line bg-canvas shadow-panel">
     <%= form_with url: products_path, method: :get, class: "page-width flex items-center gap-3 py-4" do |form| %>
       <%= icon "search", size: 20, stroke: 1.5, class: "text-muted" %>
       <%# search_field_tag, not the form builder's: no field box, the panel is the box. %>

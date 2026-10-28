@@ -7,7 +7,7 @@
 <% on_sale = saves&.positive? %>
 <%= link_to product_path(product), class: "group block" do %>
   <div class="relative aspect-square overflow-hidden rounded-xl bg-surface-muted">
-    <%= product_image product, size: :card, class: "size-full transition duration-700 group-hover:scale-[1.03]" %>
+    <%= product_image product, size: :card, class: "size-full" %>
     <% if product.second_image %>
       <%= product_image product, size: :card, image: product.second_image, alt: "",
             class: "absolute inset-0 size-full opacity-0 transition duration-700 group-hover:opacity-100 max-md:hidden" %>
@@ -16,7 +16,7 @@
       <% if !product.available? %>
         <span class="rounded-full bg-ink px-3 py-1 text-xs text-canvas"><%= t("products.product.sold_out") %></span>
       <% elsif on_sale %>
-        <span class="rounded-full bg-accent px-3 py-1 text-xs text-white"><%= t("products.product.saves", percent: saves) %></span>
+        <span class="rounded-full bg-accent px-3 py-1 text-xs text-on-accent"><%= t("products.product.saves", percent: saves) %></span>
       <% end %>
       <% if product.personalized? %>
         <span class="rounded-full bg-canvas px-3 py-1 text-xs text-ink"><%= t("products.product.personalize") %></span>

@@ -7,7 +7,7 @@
 <% saves = ((was - low) * 100.0 / was).round if was && low && was > low %>
 <%= link_to product_path(product), class: "group block h-full overflow-hidden rounded-xl border border-line bg-surface transition hover:border-muted" do %>
   <div class="relative aspect-4/5 overflow-hidden bg-surface-muted">
-    <%= product_image product, size: :card, class: "size-full transition duration-700 group-hover:scale-[1.03]" %>
+    <%= product_image product, size: :card, class: "size-full" %>
     <% if product.second_image %>
       <%= product_image product, size: :card, image: product.second_image, alt: "",
             class: "absolute inset-0 size-full opacity-0 transition duration-700 group-hover:opacity-100 max-md:hidden" %>

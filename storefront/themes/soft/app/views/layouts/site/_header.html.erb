@@ -40,7 +40,7 @@
         <%= image_tag logo, alt: current_shop.name, class: "h-8 w-auto max-w-44 object-contain md:h-10" %>
       <% else %>
         <%# A long name wraps onto two balanced lines rather than losing its end. %>
-        <span class="line-clamp-2 text-center text-lg leading-tight font-semibold tracking-[0.08em] text-balance uppercase md:text-xl <%= "max-md:text-sm" if current_shop.name.length > 18 %>"><%= current_shop.name %></span>
+        <span class="line-clamp-2 text-center font-display text-lg leading-tight font-semibold text-balance md:text-xl <%= "max-md:text-sm" if current_shop.name.length > 18 %>"><%= current_shop.name %></span>
       <% end %>
     <% end %>
 

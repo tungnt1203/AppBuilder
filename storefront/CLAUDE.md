@@ -85,7 +85,9 @@ Minitest. Do not add JavaScript frameworks, Node build steps, databases or exter
 - `bin/rubocop`: style, must be clean
 - `bin/rails tailwindcss:build`: after changing views
 - `bin/request "…"`: ask the Platform for data the API doesn't have (above)
-- `bin/theme [name]`: the themes, or put one in place (design skill)
+- `bin/theme [layout]`: the layouts, or put one in place; `bin/theme material <slug>`: a Hallmark
+  theme as the material over it (hallmark skill, STOREFRONT.md)
+- `bin/sloplint [paths]`: Hallmark's sloplint on the running preview's pages and the shop's CSS
 
 ## What's built in (keep it working when you redesign)
 
@@ -123,6 +125,9 @@ these for the brand, but keep each part:
   button and photos (the first screen's and the story's), the benefits strip, the social links. Keep reading each one where it shows
   when you redesign (a new header still shows the logo), and add settings for what else the
   owner should change without you.
+- **Search and lost pages**: the header's magnifier opens a search field under it
+  (`layouts/site/_search`); an address that isn't there is the shop's own 404 with a search and
+  the newest products (`errors/not_found`).
 - **Header and checkout**: the header lists the collections and folds into a menu on phones;
   checkout sets `content_for :focused` so its header has only the logo and the cart.
 - **No products yet**: the shop shows `products/_coming_soon` until the owner's products are in.
@@ -151,15 +156,18 @@ request stays unticked; say so. The owner's words outrank everything else here.
 
 ## Design
 
-Every storefront starts from a theme: a close copy of a Shopify theme that sells well (clean,
-bold, editorial, soft in `themes/`), put in place with `bin/theme <name>`. A new storefront has
-**clean**. Read `DESIGN.md` before touching views; on a new storefront it says "Not decided yet":
-pick the theme and write the direction there with the `design` skill first. Make the theme the
-shop's with its colors and font (`app/assets/tailwind/theme.css`), its photos and its words
-(theme settings), and keep the theme's restraint: no labels over headlines, stickers, hard
-shadows, patterns, puns or gimmicks (the skill lists them). Icons are Lucide via `icon "name"`
-(`bin/icons <word>`); free stock photos come from `bin/images <english words>`; extra sections
-start from `app/views/blocks/` (seen at `/_blocks`). Design at 390px wide first.
+Every look is a **Hallmark** build: use the `hallmark` skill (`.claude/skills/hallmark`), and read
+its `STOREFRONT.md` first. A storefront is a **layout** (clean, bold, editorial, soft in
+`themes/`: the shop's structure, after Shopify themes that sell, put in place with
+`bin/theme <layout>`) under a **material** (a Hallmark theme, dealt by Hallmark's `theme.mjs` and
+put in place with `bin/theme material <slug>`: colors, faces, corners, depth, controls, voice).
+A new storefront has **clean** and no material. Read `DESIGN.md` before touching views; on a new
+storefront it says "Not decided yet": deal the material and write the direction there first.
+Hallmark's Floor binds every page (no eyebrows, no labels in tracked capitals, no invented
+numbers or reviews, every color a token). Icons are Lucide via `icon "name"` (`bin/icons
+<word>`); free stock photos come from `bin/images <english words>`; extra sections start from
+`app/views/blocks/` (seen at `/_blocks`). Design at 390px wide first, and sweep with
+`bin/sloplint` before you finish.
 
 ## Definition of done
 
@@ -167,6 +175,7 @@ start from `app/views/blocks/` (seen at `/_blocks`). Design at 390px wide first.
 - It works end to end in the preview, including empty states (no products, an empty cart).
 - Tests for what you changed (`test/controllers/`), with the Platform in memory; `bin/rails test`
   and `bin/rubocop` pass.
+- `bin/sloplint` shows no FAIL, and every REFLEX is fixed or waived in theme.css's stamp.
 - You looked at every page you changed with `bin/look`, at phone and desktop width, and fixed what
   it reported.
 - Your reply says what changed in plain words, and what's waiting on a Platform request.
