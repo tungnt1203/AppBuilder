@@ -180,6 +180,9 @@ numbers or reviews, every color a token). Icons are Lucide via `icon "name"` (`b
 - Tests for what you changed (`test/controllers/`), with the Platform in memory; `bin/rails test`
   and `bin/rubocop` pass.
 - `bin/sloplint` shows no FAIL, and every REFLEX is fixed or waived in theme.css's stamp.
+- `test/controllers/composition_test.rb` and `themes_test.rb` are the template's checks: make the
+  app pass them, never edit or delete them. When the owner asks to keep a section as the layout
+  has it ("keep the plain product grid"), write `Kept as asked: products` in DESIGN.md.
 - You looked at every page you changed with `bin/look`, at phone and desktop width, and fixed what
   it reported.
 - Your reply says what changed in plain words, and what's waiting on a Platform request.

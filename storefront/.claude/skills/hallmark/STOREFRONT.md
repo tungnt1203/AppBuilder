@@ -95,6 +95,9 @@ several variants that follow the material (all of them at `/_blocks?only=section
 Pick each variant from the draw (a catalogue shape takes `index`, a stage takes `feature`, a
 bento shape takes `bento`), never the same three as the layout's home page, and build the draw's
 other sections (how it's made, the signature, the promise made concrete) in the page itself.
+`test/controllers/composition_test.rb` checks it once DESIGN.md is written: all three sections
+rendered, at most one in its first variant (`grid`, `split`, `tiles`), unless DESIGN.md says
+`Kept as asked: <section>` because the owner asked for it.
 
 **3. Direction.** Deal: `node .claude/skills/hallmark/scripts/theme.mjs deal --genre <genre>
 --prompt "<the owner's request, in English>" --log .hallmark/log.json`. Read the three pictures
