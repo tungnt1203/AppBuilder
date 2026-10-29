@@ -100,9 +100,9 @@ class DemoCatalog::Mockup
         <path d="M600 780 L655 905 L790 915 L690 1000 L725 1135 L600 1060 L475 1135 L510 1000 L410 915 L545 905 Z" fill="#fff"/>
         <path d="M600 815 L645 920 L755 928 L672 998 L700 1105 L600 1045 L500 1105 L528 998 L445 928 L555 920 Z" fill="#f2c25a"/>
       </g>
-      #{text_block(a, x: 430, y: 480, width: 250, ink: "#2f4a3f", size: 52)}
-      #{text_block(b, x: 790, y: 528, width: 250, ink: "#fff", size: 48, rotate: 8)}
-      #{text_block(c, x: 600, y: 985, width: 150, ink: "#3a2a12", size: 34)}
+      #{text_block(a, x: 430, y: 480, width: 250, ink: "#2f4a3f", limit: 9)}
+      #{text_block(b, x: 790, y: 528, width: 230, ink: "#fff", rotate: 8, limit: 8)}
+      #{text_block(c, x: 600, y: 985, width: 130, ink: "#3a2a12", limit: 8)}
     SVG
   end
 
@@ -120,8 +120,8 @@ class DemoCatalog::Mockup
     end
 
     # The words in up to three lines, sized to their longest one; the last line in the accent.
-    def text_block(words, x:, y:, width:, ink:, accent: nil, size: nil, serif: false, rotate: nil)
-      lines = wrap(words.to_s.upcase.squish, serif ? 14 : 12)
+    def text_block(words, x:, y:, width:, ink:, accent: nil, size: nil, serif: false, rotate: nil, limit: nil)
+      lines = wrap(words.to_s.upcase.squish, limit || (serif ? 14 : 12))
       return "" if lines.empty?
 
       size ||= [ (width / ([ lines.map(&:length).max, 4 ].max * 0.62)).floor, 120 ].min
