@@ -28,8 +28,8 @@ Rails.application.routes.draw do
   resource :contact, only: :show
   post "forms/:form_key", to: "form_submissions#create", as: :form_submissions
 
-  # Every page block in this app's theme, to pick from (design skill). Development only.
-  get "_blocks" => "blocks#index", as: :blocks if Rails.env.development?
+  # Every page block and section in this app's theme, to pick from (hallmark skill). Development and tests only.
+  get "_blocks" => "blocks#index", as: :blocks if Rails.env.local?
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # ONCE uses it to decide whether a new version is healthy before switching traffic to it.

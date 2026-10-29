@@ -83,6 +83,19 @@ pictures), redraw once (`--reroll 1`) and say why in the Picks. The blocks in
 `app/views/blocks/` (seen at `/_blocks`) are starting markup for common sections. Mirror test
 (SKILL.md): if a neighbouring shop would get this exact home page, change one decision.
 
+**Sections to compose with.** The shop's own content comes in sections a page renders, each in
+several variants that follow the material (all of them at `/_blocks?only=sections`):
+
+| Section | Variants | Render |
+|---|---|---|
+| products | `grid`, `feature` (one staged large beside rows), `rail` (a row to swipe), `index` (a ruled catalogue) | `render "sections/products", variant: :feature, products: @new_arrivals, title: "New arrivals"` |
+| personalized | `split`, `steps` (how it works, with the products' photos), `band` (on the brand color) | `render "sections/personalized", variant: :steps, products: @personalized` |
+| collections | `tiles`, `index` (names set large in a ruled list), `bento`, `row` (round photos to swipe) | `render "sections/collections", variant: :index, collections: @collections, title: "Shop by collection"` |
+
+Pick each variant from the draw (a catalogue shape takes `index`, a stage takes `feature`, a
+bento shape takes `bento`), never the same three as the layout's home page, and build the draw's
+other sections (how it's made, the signature, the promise made concrete) in the page itself.
+
 **3. Direction.** Deal: `node .claude/skills/hallmark/scripts/theme.mjs deal --genre <genre>
 --prompt "<the owner's request, in English>" --log .hallmark/log.json`. Read the three pictures
 (`references/themes/<slug>.jpg`), pick the material that can carry this shop, say which and why.

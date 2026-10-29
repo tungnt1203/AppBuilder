@@ -5,3 +5,19 @@
   </div>
   <%= render "blocks/#{block}" %>
 <% end %>
+
+<%# The sections, rendered from pages with a variant (render "sections/products", variant: :index, …). %>
+<% if @sections.any? %>
+  <% records = products(per_page: 8).records %>
+  <% shop_collections = collections.select { |collection| collection.product_count.to_i.positive? } %>
+  <% @sections.each do |section, variants| %>
+    <% variants.each do |variant| %>
+      <div class="border-y border-dashed border-line bg-surface-muted px-4 py-1.5 font-mono text-xs text-muted" id="section-<%= section %>-<%= variant %>">
+        render "sections/<%= section %>", variant: :<%= variant %>
+      </div>
+      <% data = { "products" => { products: records, title: "New arrivals" }, "personalized" => { products: records.select(&:personalized?) },
+                  "collections" => { collections: shop_collections, title: "Shop by collection" } } %>
+      <%= render "sections/#{section}", variant:, **data.fetch(section) %>
+    <% end %>
+  <% end %>
+<% end %>

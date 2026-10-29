@@ -1,0 +1,52 @@
+<%# What buyers personalize (their name, their photo, a star map on the product), three ways, for
+    the composition the draw asks for (STOREFRONT.md). Render it from a page with `products:`
+    (the personalized ones, from the controller) and a `variant`:
+    - split  the promise beside the products (as blocks/_personalized)
+    - steps  how it works in three steps, each with one of the products' own photos
+    - band   the brand color across the page, the promise and the products on it
+    Shows nothing without personalized products. %>
+<% variant = local_assigns.fetch(:variant, :split).to_s %>
+<% picks = Array(products).first(4) %>
+<% return if picks.empty? %>
+<% case variant %>
+<% when "steps" %>
+  <section class="page-width py-12 md:py-20" data-section="personalized" data-variant="steps">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h2 class="max-w-xl text-2xl text-ink md:text-[2rem]">Made with your name, your photo, your date</h2>
+      <%= link_to "See what you can personalize", product_path(picks.first), class: "text-sm text-ink underline underline-offset-4 hover:no-underline" %>
+    </div>
+    <ol class="mt-8 grid gap-6 md:grid-cols-3 md:gap-8">
+      <% [ [ "Pick a product", "A tee, a mug, a print: everything here is printed when you order it." ],
+           [ "Make it yours", "Type the name, choose the font, add your photo. It shows on the product as you go." ],
+           [ "We print it for you", "Exactly what you saw, printed and shipped to your door." ] ].each_with_index do |(heading, text), index| %>
+        <% product = picks[index % picks.size] %>
+        <li>
+          <%= link_to product_path(product), class: "block aspect-4/3 overflow-hidden rounded-xl bg-surface-muted", tabindex: -1, aria: { hidden: true } do %>
+            <%= product_image product, size: :card, alt: "", class: "size-full" %>
+          <% end %>
+          <p class="mt-4 font-display text-3xl text-ink tabular-nums"><%= index + 1 %></p>
+          <h3 class="mt-1 text-lg text-ink"><%= heading %></h3>
+          <p class="mt-1 text-sm leading-relaxed text-muted"><%= text %></p>
+        </li>
+      <% end %>
+    </ol>
+  </section>
+<% when "band" %>
+  <section class="bg-brand-600 py-12 text-on-brand md:py-20" data-section="personalized" data-variant="band">
+    <div class="page-width grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-center md:gap-12">
+      <div>
+        <h2 class="text-3xl md:text-[2.5rem]">Make it yours</h2>
+        <p class="mt-4 max-w-md opacity-90">Add a name, a date or your own photo, and see it on the product before you buy.</p>
+        <%= link_to "Start with #{picks.first.title}", product_path(picks.first),
+              class: "mt-6 inline-flex min-h-12 items-center rounded-lg bg-canvas px-6 text-ink transition hover:opacity-90" %>
+      </div>
+      <ul class="grid grid-cols-2 gap-3 md:gap-4 <%= "lg:grid-cols-4" if picks.size > 3 %> <%= "lg:grid-cols-3" if picks.size == 3 %>">
+        <% picks.each do |product| %>
+          <li class="rounded-xl bg-canvas p-2 text-ink"><%= render "products/product", product: %></li>
+        <% end %>
+      </ul>
+    </div>
+  </section>
+<% else %>
+  <%= render "blocks/personalized", products: picks %>
+<% end %>

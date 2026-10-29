@@ -1,0 +1,70 @@
+<%# Products, four ways, for the composition the draw asks for (STOREFRONT.md): render it from a
+    page with `products:` from the controller, a `title`, and a `variant`:
+    - grid     a dense grid of cards (products/_product), 2 on phones, 4 wide
+    - feature  the first product large beside the next ones as rows: one thing staged
+    - rail     a row to swipe, the next card peeking in
+    - index    a ruled catalogue: photo, name, price on one line each, scanned like a list
+    `link` (default all products) and `link_label` for the way to the rest. Real products only. %>
+<% variant = local_assigns.fetch(:variant, :grid).to_s %>
+<% title = local_assigns[:title] %>
+<% link, link_label = local_assigns.fetch(:link, products_path), local_assigns.fetch(:link_label, "Shop all") %>
+<% return if products.blank? %>
+<section class="page-width py-12 md:py-20" data-section="products" data-variant="<%= variant %>">
+  <% if title %>
+    <div class="mb-6 flex items-end justify-between gap-4 md:mb-8">
+      <h2 class="text-2xl text-ink md:text-[2rem]"><%= title %></h2>
+      <%= link_to link_label, link, class: "shrink-0 text-sm text-ink underline underline-offset-4 hover:no-underline" if link %>
+    </div>
+  <% end %>
+
+  <% case variant %>
+  <% when "feature" %>
+    <% lead, *rest = products.first(5) %>
+    <div class="grid gap-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:gap-10">
+      <%= link_to product_path(lead), class: "group block" do %>
+        <span class="block aspect-4/5 overflow-hidden rounded-xl bg-surface-muted"><%= product_image lead, size: :large, class: "size-full" %></span>
+        <span class="mt-4 flex items-baseline justify-between gap-4">
+          <span class="font-display text-2xl text-ink underline-offset-4 group-hover:underline md:text-3xl"><%= lead.title %></span>
+          <span class="shrink-0 text-lg text-ink"><%= price_range(lead) %></span>
+        </span>
+      <% end %>
+      <ul class="divide-y divide-line self-start border-y border-line">
+        <% rest.each do |product| %>
+          <li>
+            <%= link_to product_path(product), class: "group flex items-center gap-4 py-4" do %>
+              <span class="size-20 shrink-0 overflow-hidden rounded-lg bg-surface-muted"><%= product_image product, size: :thumb, class: "size-full" %></span>
+              <span class="min-w-0 flex-1 text-ink underline-offset-4 group-hover:underline"><%= product.title %></span>
+              <span class="shrink-0 text-ink"><%= price_range(product) %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% when "rail" %>
+    <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-3 [scrollbar-width:thin] md:-mx-10 md:scroll-px-10 md:px-10">
+      <% products.each do |product| %>
+        <li class="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-[22%]"><%= render "products/product", product: %></li>
+      <% end %>
+    </ul>
+  <% when "index" %>
+    <ul class="grid border-t border-line md:grid-cols-2 md:gap-x-10">
+      <% products.each do |product| %>
+        <li class="border-b border-line">
+          <%= link_to product_path(product), class: "group flex items-center gap-4 py-3" do %>
+            <span class="size-14 shrink-0 overflow-hidden rounded-lg bg-surface-muted"><%= product_image product, size: :thumb, class: "size-full" %></span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-ink underline-offset-4 group-hover:underline"><%= product.title %></span>
+              <% if product.personalized? %><span class="text-xs text-muted"><%= t("products.product.personalize") %></span><% end %>
+            </span>
+            <span class="shrink-0 tabular-nums text-ink"><%= price_range(product) %></span>
+            <%= icon "arrow-right", size: 16, stroke: 1.5, class: "text-muted transition group-hover:translate-x-0.5 group-hover:text-ink" %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-4 md:gap-x-5 md:gap-y-12">
+      <%= render partial: "products/product", collection: products, as: :product %>
+    </div>
+  <% end %>
+</section>
