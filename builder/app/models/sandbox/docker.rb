@@ -4,6 +4,9 @@
 # The preview's port is published on this machine's loopback only.
 class Sandbox::Docker
   LABEL = "appbuilder.project"
+  # Containers made before the network wall (sandbox/entrypoint.sh) are made again.
+  WALL = "appbuilder.wall"
+  WALL_VERSION = "1"
   RUNNING = "running"
 
   def initialize(project, host: ProjectShell.new(Rails.root))
@@ -19,6 +22,7 @@ class Sandbox::Docker
 
   # Makes the container, or starts it again after it stopped (Docker restarted, say).
   def start
+    rebuild_unwalled
     case state
     when nil then create
     when RUNNING then nil
@@ -80,7 +84,7 @@ class Sandbox::Docker
   # A process of the project's, by its id inside the container (a negative id is a group).
   def kill(pid, signal: "TERM")
     raise Errno::ESRCH unless state == RUNNING
-    _, killed = host.capture("docker", "exec", name, "kill", "-#{signal}", "--", pid.to_s)
+    _, killed = host.capture("docker", "exec", "--user", "dev", name, "kill", "-#{signal}", "--", pid.to_s)
     raise Errno::ESRCH unless killed
   end
 
@@ -89,7 +93,7 @@ class Sandbox::Docker
   def listening?(port)
     return false unless state == RUNNING
 
-    tables, read = host.capture("docker", "exec", name, "cat", "/proc/net/tcp", "/proc/net/tcp6")
+    tables, read = host.capture("docker", "exec", "--user", "dev", name, "cat", "/proc/net/tcp", "/proc/net/tcp6")
     read && self.class.listening_in?(tables, port)
   end
 
@@ -124,7 +128,9 @@ class Sandbox::Docker
       home.mkpath
       config = Rails.configuration.x
       path = @project.path.to_s
-      host.run("docker", "run", "--detach", "--init", "--name", name, "--label", "#{LABEL}=#{@project.slug}",
+      host.run("docker", "run", "--detach", "--init", "--name", name, "--label", "#{LABEL}=#{@project.slug}", "--label", "#{WALL}=#{WALL_VERSION}",
+        # Root and NET_ADMIN for the entrypoint's firewall only; it hands over to dev without either.
+        "--user", "root", "--cap-add", "NET_ADMIN", "--env", "SANDBOX_HOST_PORTS=#{platform_port}",
         "--publish", "127.0.0.1:#{@project.port}:#{@project.port}",
         "--volume", "#{path}:#{path}", "--volume", "#{config.sandbox_gems_volume}:/usr/local/bundle",
         "--volume", "#{home}:/home/dev/.claude", *read_only_blocks(path), "--workdir", path,
@@ -136,6 +142,22 @@ class Sandbox::Docker
       # running without its port; remove it so the next start makes it properly.
       host.capture("docker", "rm", "--force", name)
       raise
+    end
+
+    # The Platform's port on this machine, the one thing there the container may reach.
+    def platform_port
+      URI(Rails.configuration.x.platform_url_from_containers.to_s).port || 3000
+    rescue URI::InvalidURIError
+      3000
+    end
+
+    # A container from before the wall, when no turn is running in it: removed, to be made again
+    # walled (its files are all in mounted folders).
+    def rebuild_unwalled
+      label, found = host.capture("docker", "inspect", "--format", "{{index .Config.Labels \"#{WALL}\"}}", name)
+      return unless found && label.strip != WALL_VERSION && !@project.working?
+
+      host.capture("docker", "rm", "--force", name)
     end
 
     # The blocks (vendor/blocks/storefront_kit) are the same in every app and updated as a whole: inside the
@@ -158,7 +180,7 @@ class Sandbox::Docker
 
     def exec(command, env, interactive: false, detach: false)
       [ "docker", "exec", *("--interactive" if interactive), *("--detach" if detach),
-        *env.compact.keys.flat_map { |key| [ "--env", key ] }, "--workdir", @project.path.to_s, name, *command ]
+        "--user", "dev", *env.compact.keys.flat_map { |key| [ "--env", key ] }, "--workdir", @project.path.to_s, name, *command ]
     end
 
     # The agent's ~/.claude: settings, sessions to resume, plans.

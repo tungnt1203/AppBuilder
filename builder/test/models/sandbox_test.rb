@@ -1,12 +1,12 @@
 require "test_helper"
 
 class SandboxTest < ActiveSupport::TestCase
-  # Records docker commands and answers `docker inspect` with the container's state.
+  # Records docker commands and answers `docker inspect` with the container's state, or its wall label.
   class FakeHost
     attr_reader :commands, :environments
-    attr_accessor :state, :labels
+    attr_accessor :state, :labels, :wall
 
-    def initialize(state, labels: []) = (@state, @labels, @commands, @environments = state, labels, [], [])
+    def initialize(state, labels: [], wall: Sandbox::Docker::WALL_VERSION) = (@state, @labels, @wall, @commands, @environments = state, labels, wall, [], [])
 
     def run(*command, env: {})
       @commands << command
@@ -17,7 +17,7 @@ class SandboxTest < ActiveSupport::TestCase
     def capture(*command, env: {})
       @commands << command
       case command[1]
-      when "inspect" then [ "#{@state}\n", !@state.nil? ]
+      when "inspect" then [ "#{command.join(" ").include?(Sandbox::Docker::WALL) ? @wall : @state}\n", !@state.nil? ]
       when "ps" then [ @labels.map { |label| "#{label}\n" }.join, true ]
       else [ "", true ]
       end
@@ -47,7 +47,30 @@ class SandboxTest < ActiveSupport::TestCase
     assert_includes create.each_cons(2).to_a, [ "--publish", "127.0.0.1:4001:4001" ]
     assert_includes create.each_cons(2).to_a, [ "--volume", "#{path}:#{path}" ]
     assert_includes create.each_cons(2).to_a, [ "--name", "appbuilder-nha-khoa" ]
-    assert_equal [ "docker", "exec", "--workdir", path, "appbuilder-nha-khoa", "bin/rails", "db:prepare" ], host.commands.last
+    assert_equal [ "docker", "exec", "--user", "dev", "--workdir", path, "appbuilder-nha-khoa", "bin/rails", "db:prepare" ], host.commands.last
+  end
+
+  test "the container walls its network off: root and NET_ADMIN only for the entrypoint's firewall, the Platform's port let through" do
+    host = FakeHost.new(nil)
+    Sandbox::Docker.new(@project, host:).run("bin/rails", "db:prepare")
+
+    create = host.commands.find { |command| command[1] == "run" }
+    assert_includes create.each_cons(2).to_a, [ "--cap-add", "NET_ADMIN" ]
+    assert_includes create.each_cons(2).to_a, [ "--user", "root" ]
+    assert_includes create.each_cons(2).to_a, [ "--label", "#{Sandbox::Docker::WALL}=#{Sandbox::Docker::WALL_VERSION}" ]
+    assert create.any? { |argument| argument.match?(/\ASANDBOX_HOST_PORTS=\d+\z/) }
+    assert host.commands.select { |command| command[1] == "exec" }.all? { |command| command[2, 2] == [ "--user", "dev" ] }, "every command runs as dev"
+  end
+
+  test "a container from before the wall is made again, unless a turn is running in it" do
+    host = FakeHost.new("running", wall: "")
+    Sandbox::Docker.new(@project, host:).start
+    assert_includes host.commands, [ "docker", "rm", "--force", "appbuilder-nha-khoa" ]
+
+    @project.status = "working"
+    host = FakeHost.new("running", wall: "")
+    Sandbox::Docker.new(@project, host:).start
+    assert_not_includes host.commands, [ "docker", "rm", "--force", "appbuilder-nha-khoa" ]
   end
 
   test "the agent can read the app's blocks but not change them" do
@@ -108,7 +131,7 @@ class SandboxTest < ActiveSupport::TestCase
 
     host = FakeHost.new("running")
     Sandbox::Docker.new(@project, host:).start
-    assert_equal 1, host.commands.size
+    assert_equal %w[ inspect inspect ], host.commands.map(&:second), "only looks"
   end
 
   test "secrets reach the agent through the environment, never its arguments" do
