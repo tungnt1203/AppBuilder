@@ -6,7 +6,7 @@ class ProjectSetupJob < ApplicationJob
     name(project)
     copy_template(project)
     remember_other_looks(project)
-    project.ensure_shop!
+    project.ensure_shop!(niche: (DemoCatalog::Niche.for(project.messages.user.first&.body) unless project.shop))
     configure(project)
     project.sandbox.run("bundle", "install", "--quiet")
     project.restart_preview(restart: false)

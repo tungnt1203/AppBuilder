@@ -76,7 +76,8 @@ class Project < ApplicationRecord
   end
 
   # The shop this storefront sells for, opened for the owner with the app's name when it has none.
-  def ensure_shop!
+  # `niche` (DemoCatalog::Niche) makes the demo products the shop's own kind.
+  def ensure_shop!(niche: nil)
     return shop if shop
 
     transaction do
@@ -84,7 +85,7 @@ class Project < ApplicationRecord
       opened = Shop.open!(owner:, name: name.delete_suffix("…").first(100), subdomain: shop_subdomain(subdomain), currency: "USD")
       update!(shop: opened, subdomain: opened.subdomain)
       # So the agent sees product grids and pages while it builds; only the preview shows them.
-      ActsAsTenant.with_tenant(opened) { DemoCatalog.add! }
+      ActsAsTenant.with_tenant(opened) { DemoCatalog.add!(niche:) }
       BusinessSyncJob.perform_later(opened, owner) if owner&.business_setting&.configured?
       opened
     end

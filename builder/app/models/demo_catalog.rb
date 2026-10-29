@@ -21,43 +21,48 @@ class DemoCatalog
     Product.where(demo: true).exists?
   end
 
-  # Adds the demo products (once). Returns how many there are.
-  def self.add!
+  # Adds the demo products (once). Returns how many there are. With a `niche` (DemoCatalog::Niche:
+  # the shop's own names, words and collections), the products are the shop's kind and their
+  # photos are drawn with its words on them (DemoCatalog::Mockup); without one, the static set.
+  def self.add!(niche: nil)
     return Product.where(demo: true).count if present?
 
+    copy = Copy.new(niche)
     Product.transaction do
-      tee = product("Good Things Tee", price: "24", cost: "11.50", photos: %w[ classic-tee-black classic-tee-white classic-tee-navy ],
-        description: "Heavyweight 100% cotton tee with a quiet reminder on the front. Printed to order, just for you.",
+      tee = product(copy.title(:tee, "Good Things Tee"), price: "24", cost: "11.50", photos: copy.photos(:tee, %w[ classic-tee-black classic-tee-white classic-tee-navy ], colors: %w[ black white navy ]),
+        description: copy.description(:tee, "Heavyweight 100% cotton tee with a quiet reminder on the front. Printed to order, just for you."),
         option1_name: "Color", option1_values_text: "Black, White, Navy", option2_name: "Size", option2_values_text: "S, M, L, XL, 2XL", size_guide: TEE_SIZES)
       tee.variants.where(option2: "2XL").find_each { |variant| variant.update!(price: "27", cost: "13.50") }
 
-      sunset = product("Stay Golden Tee", price: "26", cost: "11.50", photos: %w[ sunset-tee sunset-tee-detail ],
-        description: "A retro sunset on soft forest-green cotton. Printed to order.",
+      sunset = product(copy.title(:sale_tee, "Stay Golden Tee"), price: "26", cost: "11.50", photos: copy.photos(:sale_tee, %w[ sunset-tee sunset-tee-detail ], colors: %w[ forest heather ], kind: :tee),
+        description: copy.description(:sale_tee, "A retro sunset on soft forest-green cotton. Printed to order."),
         option1_name: "Size", option1_values_text: "S, M, L, XL", size_guide: TEE_SIZES)
       sunset.variants.each { |variant| variant.update!(compare_at_price: "32") }
 
-      hoodie = product("Weekend Mode Hoodie", price: "48", cost: "24", photos: %w[ weekend-hoodie weekend-hoodie-black ],
-        description: "Brushed fleece hoodie for slow Saturdays. Printed to order.",
+      hoodie = product(copy.title(:hoodie, "Weekend Mode Hoodie"), price: "48", cost: "24", photos: copy.photos(:hoodie, %w[ weekend-hoodie weekend-hoodie-black ], colors: %w[ sand black ]),
+        description: copy.description(:hoodie, "Brushed fleece hoodie for slow Saturdays. Printed to order."),
         option1_name: "Color", option1_values_text: "Sand, Black", option2_name: "Size", option2_values_text: "S, M, L, XL")
-      mug = product("But First, Coffee Mug", price: "16", cost: "6", photos: %w[ morning-mug ],
-        description: "Glossy ceramic mug, dishwasher and microwave safe.", option1_name: "Size", option1_values_text: "11 oz, 15 oz")
+      mug = product(copy.title(:mug, "But First, Coffee Mug"), price: "16", cost: "6", photos: copy.photos(:mug, %w[ morning-mug ]),
+        description: copy.description(:mug, "Glossy ceramic mug, dishwasher and microwave safe."), option1_name: "Size", option1_values_text: "11 oz, 15 oz")
       mug.variants.find_by(option1: "15 oz")&.update!(price: "19", cost: "7.50")
-      poster = product("Wander Poster", price: "22", cost: "9", photos: %w[ wander-poster ],
-        description: "Museum-quality matte paper. Frame not included.", option1_name: "Size", option1_values_text: "12 × 16 in, 18 × 24 in")
+      poster = product(copy.title(:poster, "Wander Poster"), price: "22", cost: "9", photos: copy.photos(:poster, %w[ wander-poster ]),
+        description: copy.description(:poster, "Museum-quality matte paper. Frame not included."), option1_name: "Size", option1_values_text: "12 × 16 in, 18 × 24 in")
       poster.variants.find_by(option1: "18 × 24 in")&.update!(price: "29", cost: "12")
-      tote = product("Plant Person Tote", price: "18", cost: "8", photos: %w[ plant-tote ], description: "Sturdy natural canvas tote, 15 × 16 in.")
-      sweatshirt = product("Slow Mornings Sweatshirt", price: "38", cost: "18", photos: %w[ slow-mornings-sweatshirt ],
-        description: "Soft crewneck sweatshirt in sage, for unhurried starts. Printed to order.",
+      tote = product(copy.title(:tote, "Plant Person Tote"), price: "18", cost: "8", photos: copy.photos(:tote, %w[ plant-tote ]),
+        description: copy.description(:tote, "Sturdy natural canvas tote, 15 × 16 in."))
+      sweatshirt = product(copy.title(:sweatshirt, "Slow Mornings Sweatshirt"), price: "38", cost: "18", photos: copy.photos(:sweatshirt, %w[ slow-mornings-sweatshirt ], colors: %w[ sage ]),
+        description: copy.description(:sweatshirt, "Soft crewneck sweatshirt in sage, for unhurried starts. Printed to order."),
         option1_name: "Size", option1_values_text: "S, M, L, XL", size_guide: TEE_SIZES)
-      stickers = product("Good Vibes Sticker Pack", price: "9", cost: "3.50", photos: %w[ good-vibes-stickers ],
-        description: "Three kiss-cut vinyl stickers, waterproof and laptop ready.")
+      stickers = product(copy.title(:stickers, "Good Vibes Sticker Pack"), price: "9", cost: "3.50", photos: copy.photos(:stickers, %w[ good-vibes-stickers ]),
+        description: copy.description(:stickers, "Three kiss-cut vinyl stickers, waterproof and laptop ready."))
 
       personalize(tee, mug, poster)
 
       # Four products each and three collections, so grids and tiles fill their rows.
-      Collection.create!(title: "Apparel", demo: true).arrange_products([ tee.id, sunset.id, hoodie.id, sweatshirt.id ])
-      Collection.create!(title: "Gifts", demo: true).arrange_products([ mug.id, tote.id, poster.id, stickers.id ])
-      Collection.create!(title: "Cozy picks", demo: true).arrange_products([ hoodie.id, sweatshirt.id, mug.id, poster.id ])
+      apparel, gifts, picks = copy.collections
+      Collection.create!(title: apparel, demo: true).arrange_products([ tee.id, sunset.id, hoodie.id, sweatshirt.id ])
+      Collection.create!(title: gifts, demo: true).arrange_products([ mug.id, tote.id, poster.id, stickers.id ])
+      Collection.create!(title: picks, demo: true).arrange_products([ hoodie.id, sweatshirt.id, mug.id, poster.id ])
     end
     Product.where(demo: true).count
   end
@@ -88,12 +93,35 @@ class DemoCatalog
   end
   private_class_method :personalize
 
+  # photos: [ [ filename, an IO ] ], from Copy#photos.
   def self.product(title, price:, cost:, photos:, **attributes)
     product = Product.create!(title:, status: "active", base_price: price, demo: true, **attributes)
     product.variants.each { |variant| variant.update!(cost:) }
-    photos.each { |name| product.images.attach(io: IMAGES.join("#{name}.jpg").open, filename: "#{name}.jpg", content_type: "image/jpeg") }
+    photos.each { |filename, io| product.images.attach(io:, filename:, content_type: "image/jpeg") }
     product.save!
     product
   end
   private_class_method :product
+
+  # Each product's name, description and photos: the niche's when there is one, else the static set's.
+  # A photo keeps the static file's name ("classic-tee-black"), which personalize finds the dark ones by.
+  class Copy
+    def initialize(niche)
+      @niche = niche
+    end
+
+    def title(role, fallback) = @niche&.dig("products", role.to_s, "title") || fallback
+    def description(role, fallback) = @niche&.dig("products", role.to_s, "description") || fallback
+    def collections = @niche&.dig("collections") || [ "Apparel", "Gifts", "Cozy picks" ]
+
+    def photos(role, names, colors: [], kind: role)
+      return names.map { |name| [ "#{name}.jpg", IMAGES.join("#{name}.jpg").open ] } unless @niche
+
+      product = @niche.dig("products", role.to_s)
+      names.each_with_index.map do |name, index|
+        jpeg = Mockup.jpeg(kind, phrase: product["phrase"], phrases: product["phrases"], color: colors[index] || "white", accent: @niche["accent"])
+        [ "#{name}.jpg", StringIO.new(jpeg) ]
+      end
+    end
+  end
 end
