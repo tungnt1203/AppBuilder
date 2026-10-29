@@ -28,6 +28,9 @@ Rails.application.routes.draw do
     resource :design, only: %i[ show update ], module: :projects do
       post :theme
       get "looks/:slug", action: :look, as: :look
+      post "looks/:slug/try", action: :try_look, as: :try_look
+      post :keep_look
+      post :revert_look
       patch :content
       get :photos
       post :photo

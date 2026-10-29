@@ -93,6 +93,36 @@ class Projects::DesignsControllerTest < ActionDispatch::IntegrationTest
     assert_includes @project.path.join("app/views/layouts/_fonts.html.erb").read, "Bowlby One SC"
   end
 
+  test "a look is tried on in seconds without the agent, then kept as a version or taken back" do
+    use_themes
+    require Rails.root.join("../storefront/lib/hallmark_material").to_s
+    @project.path.join(".claude/skills").mkpath
+    FileUtils.ln_s(Rails.root.join("../storefront/.claude/skills/hallmark"), @project.path.join(".claude/skills/hallmark"))
+    HallmarkMaterial.new(@project.path, "sticker").apply!
+    before = @project.path.join(ProjectDesign::FILE).read
+
+    post try_look_project_design_path(@project, "piste")
+    assert_response :success
+    assert_includes @commands, [ "bin/theme", "material", "piste" ]
+    assert_includes @commands, [ "bin/rails", "tailwindcss:build" ]
+    @project.path.join(ProjectDesign::FILE).write("/* piste */") # what bin/theme would have written
+    get project_design_path(@project)
+    assert_select ".look-trying form[action=?]", keep_look_project_design_path(@project)
+
+    post revert_look_project_design_path(@project)
+    assert_equal before, @project.path.join(ProjectDesign::FILE).read
+    assert_not ProjectTheme.new(@project).trying?
+
+    post try_look_project_design_path(@project, "piste")
+    versions = @project.history.versions.size
+    post keep_look_project_design_path(@project)
+    assert_not ProjectTheme.new(@project).trying?
+    assert_equal versions + 1, @project.history.versions.size
+
+    post try_look_project_design_path(@project, "nope")
+    assert_response :not_found
+  end
+
   test "a file changed for this shop is listed before a switch replaces it" do
     use_themes
     @project.path.join("app/views/home/show.html.erb").write("<h1>Our own home page</h1>\n")

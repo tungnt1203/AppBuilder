@@ -425,6 +425,8 @@ class Project < ApplicationRecord
   def ask(request, mode:, files: [], pointed: nil)
     return tell_budget_spent if owner&.over_budget?
 
+    # A look tried on and left on screen is the one the owner goes on with.
+    ProjectTheme.new(self).keep_material if ProjectTheme.new(self).trying?
     request = record_request(request, files:, pointed:)
 
     if working?

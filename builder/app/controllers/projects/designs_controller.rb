@@ -34,6 +34,35 @@ class Projects::DesignsController < ApplicationController
     send_file picture, type: "image/jpeg", disposition: "inline"
   end
 
+  # Trying a look on (ProjectTheme#try_material), then keeping it as a version or going back.
+  def try_look
+    load_panel
+    return busy unless @project.accepts_messages?
+
+    @themes.try_material(params[:slug])
+    saved "Trying it on. Keep it as a version, or go back.", section: :theme
+  rescue ProjectShell::Error => error
+    @theme_error = "The look didn't go on: #{error.message.lines.first}"
+    render :show, status: :unprocessable_entity
+  end
+
+  def keep_look
+    load_panel
+    return busy unless @project.accepts_messages?
+
+    @themes.keep_material
+    saved "Kept, as a version. Undo it from History.", section: :theme
+  end
+
+  def revert_look
+    load_panel
+    @themes.revert_material
+    saved "Back to the look you had.", section: :theme
+  rescue ProjectShell::Error => error
+    @theme_error = "The look didn't go back: #{error.message.lines.first}"
+    render :show, status: :unprocessable_entity
+  end
+
   # Another theme (ProjectTheme); files changed for this shop are listed before they're replaced.
   def theme
     load_panel
@@ -108,6 +137,11 @@ class Projects::DesignsController < ApplicationController
 
     # The studio's own refresh skips the window that saved, so the panel and History are brought
     # up to date here; the preview reloads (preview#designed).
+    def busy
+      @theme_error = "Wait until the current step finishes."
+      render :show, status: :unprocessable_entity
+    end
+
     def saved(notice, section: :look)
       load_panel
       render turbo_stream: [

@@ -80,6 +80,39 @@ class ProjectTheme
     []
   end
 
+  # Trying a look on without the agent: the material's theme.css and fonts go in place (the files
+  # as they were are kept aside), the styles rebuild, and the preview shows it in seconds, at no
+  # cost. Keep makes it a version; Go back puts the files back as they were.
+  def try_material(slug)
+    raise ActiveRecord::RecordNotFound, "No look #{slug}" unless picture(slug)
+
+    unless trying?
+      backup.mkpath
+      [ css, fonts ].each { |file| FileUtils.cp(file, backup.join(file.basename)) if file.file? }
+    end
+    @project.sandbox.run("bin/theme", "material", slug)
+    @project.sandbox.run("bin/rails", "tailwindcss:build")
+    backup.join("slug").write(slug)
+  end
+
+  def trying? = backup.join("slug").file?
+  def trying = (backup.join("slug").read.strip if trying?)
+
+  def keep_material
+    return unless trying?
+
+    @project.history.commit("Look: #{material&.name || trying}")
+    FileUtils.rm_rf(backup)
+  end
+
+  def revert_material
+    return unless trying?
+
+    [ css, fonts ].each { |file| (kept = backup.join(file.basename)).file? ? FileUtils.cp(kept, file) : FileUtils.rm_f(file) }
+    FileUtils.rm_rf(backup)
+    @project.sandbox.run("bin/rails", "tailwindcss:build")
+  end
+
   # A Hallmark material's picture (its finished page, two screens stacked), or nil.
   def picture(slug)
     file = @project.path.join(".claude/skills/hallmark/references/themes/#{slug}.jpg") if slug.to_s.match?(/\A[\w-]+\z/)
@@ -105,6 +138,7 @@ class ProjectTheme
     def first_request = @project.chats.order(:id).first&.messages&.user&.first&.body.presence
 
     def css = @project.path.join(CSS)
+    def backup = @project.path.join("tmp/look-try")
     def fonts = @project.path.join(FONTS)
 
     def root

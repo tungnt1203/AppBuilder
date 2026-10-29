@@ -1172,6 +1172,7 @@
     &[aria-current] { border-color: var(--text); }
   }
   .look-card-small { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; }
+  .look-trying { margin-bottom: 0.6rem; padding: 0.7rem 0.8rem; border-radius: var(--radius-control); background: var(--well); box-shadow: inset 0 0 0 1px var(--glass-edge); }
   .look-picture { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 0.4rem; background: var(--well); }
   .look-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.5rem; }
 

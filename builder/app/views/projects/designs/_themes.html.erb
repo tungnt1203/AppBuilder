@@ -2,6 +2,16 @@
     replaces the header, footer, home page and product card and keeps the material. %>
 <% material = @themes.material %>
 <section class="design-group" aria-labelledby="design_theme">
+  <% if @themes.trying? %>
+    <%# Trying a look on: nothing is saved until Keep. %>
+    <div class="look-trying" role="status">
+      <p class="text-sm"><span class="font-semibold">Trying <%= material&.name || @themes.trying.titleize %> on.</span> <span class="faint">It isn't saved or published until you keep it.</span></p>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <%= button_to "Keep it", keep_look_project_design_path(@project), class: "btn btn-primary h-8 px-3 text-sm", disabled: !@project.accepts_messages? %>
+        <%= button_to "Go back", revert_look_project_design_path(@project), class: "btn btn-ghost h-8 px-3 text-sm" %>
+      </div>
+    </div>
+  <% end %>
   <% if material %>
     <h2 class="design-heading">Look</h2>
     <div class="look-card" aria-current="true">
@@ -12,17 +22,19 @@
       </div>
     </div>
     <% if (looks = @themes.other_looks).any? %>
-      <p class="faint mt-4 mb-2 text-xs">Other looks Hallmark picked for this shop. The agent rebuilds the shop in the one you choose and keeps everything you asked for.</p>
+      <p class="faint mt-4 mb-2 text-xs">Other looks Hallmark picked for this shop. Try one on in seconds, free; the agent can then rebuild the shop in it, keeping everything you asked for.</p>
       <ul class="look-grid">
         <% looks.each do |look| %>
           <li class="look-card look-card-small">
             <%= image_tag look_project_design_path(@project, look["slug"]), alt: "", class: "look-picture", loading: "lazy" %>
             <p class="font-semibold"><%= look["name"] %></p>
             <p class="faint line-clamp-3 text-xs" title="<%= look["summary"].upcase_first %>"><%= look["summary"].upcase_first %>.</p>
+            <%= button_to "Try it on", try_look_project_design_path(@project, look["slug"]), class: "btn btn-primary h-8 w-full text-xs",
+                  disabled: !@project.accepts_messages?, title: "See the shop in it now, free; keep it or go back" %>
             <%= form_with model: [ @project, Message.new ], data: { turbo_frame: "_top" } do |form| %>
               <%= form.hidden_field :body, id: nil, value: "Switch the shop's look to Hallmark's #{look["name"]} material (bin/theme material #{look["slug"]}). Keep the layout, the words and everything I asked for, and update DESIGN.md." %>
               <%= hidden_field_tag "message[plan]", "0", id: nil %>
-              <%= form.button "Try this look", class: "btn btn-ghost h-8 w-full text-xs", disabled: !@project.accepts_messages? %>
+              <%= form.button "Have the agent rebuild in it", class: "btn btn-ghost h-7 w-full text-[0.6875rem]", disabled: !@project.accepts_messages? %>
             <% end %>
           </li>
         <% end %>
