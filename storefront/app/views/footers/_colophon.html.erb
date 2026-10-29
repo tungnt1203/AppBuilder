@@ -1,0 +1,36 @@
+<%# Footer as a colophon: one quiet block, the shop's name and line, then every link in a ruled
+    list, set small like the last page of a book. Keeps the policies, contact, Find my order and
+    the social pages (payment providers and ad networks check them). %>
+<% socials = { "Instagram" => theme_setting(:instagram_url), "TikTok" => theme_setting(:tiktok_url), "Facebook" => theme_setting(:facebook_url) }.compact_blank %>
+<% link = "hover:text-ink hover:underline underline-offset-4" %>
+<footer class="mt-20 border-t border-line bg-canvas md:mt-28" data-footer="colophon">
+  <div class="page-width grid gap-6 py-12 text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-16 md:py-16">
+    <div>
+      <p class="font-display text-lg text-ink"><%= current_shop.name %></p>
+      <p class="mt-2 max-w-xs leading-relaxed text-muted"><%= theme_setting(:hero_text).presence || t("home.show.tagline") %></p>
+    </div>
+    <div class="divide-y divide-line border-y border-line text-muted">
+      <p class="flex flex-wrap gap-x-5 gap-y-2 py-3">
+        <%= link_to t("layouts.site.shop_all"), products_path, class: link %>
+        <% collections.select { |collection| collection.product_count.to_i.positive? }.first(5).each do |collection| %>
+          <%= link_to collection.title, collection_path(collection), class: link %>
+        <% end %>
+        <% shop_menu(:footer)&.items.to_a.each do |item| %><%= shop_menu_link item, class: link %><% end %>
+      </p>
+      <p class="flex flex-wrap gap-x-5 gap-y-2 py-3">
+        <%= link_to t("order_lookups.new.title"), new_order_lookup_path, class: link %>
+        <%= link_to t("contacts.show.title"), contact_path, class: link %>
+        <% current_shop.policies.each do |policy| %><%= link_to policy["title"], policy_path(policy["id"]), class: link %><% end %>
+      </p>
+      <% if socials.any? %>
+        <p class="flex flex-wrap gap-x-5 gap-y-2 py-3" aria-label="<%= t("layouts.site.follow") %>">
+          <% socials.each do |name, url| %><%= link_to name, url, class: link, target: "_blank", rel: "noopener" %><% end %>
+        </p>
+      <% end %>
+      <p class="flex flex-wrap items-center justify-between gap-x-5 gap-y-2 py-3 text-xs">
+        <span>© <%= Date.current.year %>, <%= current_shop.name %></span>
+        <span class="flex items-center gap-1.5"><%= icon "lock", size: 12 %> <%= t("products.show.secure_checkout") %></span>
+      </p>
+    </div>
+  </div>
+</footer>

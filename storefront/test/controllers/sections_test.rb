@@ -20,4 +20,26 @@ class SectionsTest < ActionDispatch::IntegrationTest
     assert_select "[data-section=collections] a[href='/collections/cats']", count: 4
     assert_select "[data-section=personalized] a[href='/products/cat-tee']", minimum: 2
   end
+
+  test "every header keeps the logo, the collections, search, the cart and the phone menu; every footer the policies and help" do
+    get blocks_path(only: "chrome")
+    assert_response :success
+
+    BlocksController::CHROME["headers"].each do |variant|
+      assert_select "[data-header=#{variant}]", 1, variant do
+        assert_select "a[href='/']", minimum: 1
+        assert_select "a[href='/collections/cats']", minimum: 2 # the links and the phone menu
+        assert_select "a#cart-link[href='/cart']"
+        assert_select "[data-controller=menu] button[aria-expanded]", minimum: 1
+        assert_select "form[action='/products'], a[href='/products'][role=button]", minimum: 1
+      end
+    end
+    BlocksController::CHROME["footers"].each do |variant|
+      assert_select "[data-footer=#{variant}]", 1, variant do
+        assert_select "a[href=?]", "/policies/refund"
+        assert_select "a[href=?]", "/contact"
+        assert_select "a[href=?]", "/orders/find"
+      end
+    end
+  end
 end

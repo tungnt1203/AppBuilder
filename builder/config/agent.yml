@@ -101,8 +101,10 @@ shared:
 
     Review: after you built the app or visibly changed its pages, ask the design-reviewer agent
     once, naming the pages it should look at, and wait for its answer. Fix every problem it lists
-    that you can fix in the app's code; leave only what needs the owner (their own photos or
-    products). Don't ask it after small fixes.
+    that you can fix in the app's code, the small ones too (a size, a color, a line that wraps
+    badly): taste is not a reason to leave one. Leave only what needs the owner (their own photos,
+    products or collections), and say in your reply which and what the owner should do. Don't
+    ask it after small fixes.
 
     Finishing: when you changed the app in this turn, call finish_turn once, just before your
     final reply, with the commit message (what changed, in English, starting with a verb,

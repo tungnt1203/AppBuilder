@@ -92,6 +92,16 @@ several variants that follow the material (all of them at `/_blocks?only=section
 | personalized | `split`, `steps` (how it works, with the products' photos), `band` (on the brand color) | `render "sections/personalized", variant: :steps, products: @personalized` |
 | collections | `tiles`, `index` (names set large in a ruled list), `bento`, `row` (round photos to swipe) | `render "sections/collections", variant: :index, collections: @collections, title: "Shop by collection"` |
 
+The header and footer the draw names come the same way: make `layouts/site/_header.html.erb` or
+`_footer.html.erb` render one of these (they keep the logo, the collections, search, the cart, the
+phone menu, checkout's focused header; the policies, contact, Find my order, the social pages),
+or keep the layout's own when it is the draw's:
+
+| Chrome | Variants | Render |
+|---|---|---|
+| header | `centered` (logo over its links), `search` (a search field across the middle), `pill` (a floating rounded bar) | `<%= render "headers/pill" %>` |
+| footer | `mast` (the shop's name set as wide as the page), `colophon` (one ruled block, set small) | `<%= render "footers/mast" %>` |
+
 Pick each variant from the draw (a catalogue shape takes `index`, a stage takes `feature`, a
 bento shape takes `bento`), never the same three as the layout's home page, and build the draw's
 other sections (how it's made, the signature, the promise made concrete) in the page itself.

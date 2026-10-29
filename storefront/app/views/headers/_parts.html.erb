@@ -1,0 +1,61 @@
+<%# A piece every header has, by `part`: the phone menu (the button and its panel), the logo or the
+    shop's name, the desktop links (the collections, Shop all, the owner's "header" menu, what a
+    page adds with content_for :site_nav), or the cart with its count. The headers in this folder
+    are made of them, so each keeps what a header must do (STOREFRONT.md, the shop contract). %>
+<% menu_items = shop_menu(:header)&.items.to_a %>
+<% shop_collections = collections.select { |collection| collection.product_count.to_i.positive? }.first(6) %>
+<% case part %>
+<% when :menu %>
+  <div class="<%= local_assigns.fetch(:class, "md:hidden") %>" data-controller="menu" data-action="click@window->menu#close keydown@window->menu#escape turbo:before-cache@document->menu#hide">
+    <button type="button" class="group -ml-2 grid size-10 place-items-center text-ink" data-menu-target="button" data-action="menu#toggle" aria-expanded="false" aria-label="<%= t("ui.menu") %>">
+      <%= icon "menu", size: 22, stroke: 1.5, class: "group-aria-expanded:hidden" %>
+      <%= icon "x", size: 22, stroke: 1.5, class: "hidden group-aria-expanded:block" %>
+    </button>
+    <nav data-menu-target="panel" class="absolute inset-x-0 top-full hidden max-h-[calc(100svh-4rem)] overflow-y-auto border-b border-line bg-canvas px-4 pt-2 pb-6" aria-label="<%= t("ui.navigation") %>">
+      <ul>
+        <li><%= link_to t("layouts.site.shop_all"), products_path, class: "block py-3 text-lg text-ink" %></li>
+        <% shop_collections.each do |collection| %>
+          <li>
+            <%= link_to collection_path(collection), class: "flex items-center justify-between py-3 text-lg text-ink" do %>
+              <%= collection.title %> <%= icon "chevron-right", size: 18, stroke: 1.5, class: "text-muted" %>
+            <% end %>
+          </li>
+        <% end %>
+        <% menu_items.each do |item| %>
+          <li><%= shop_menu_link item, class: "block py-3 text-lg text-ink" %></li>
+        <% end %>
+      </ul>
+      <ul class="mt-4 space-y-1 border-t border-line pt-4 text-sm text-muted">
+        <li><%= link_to t("order_lookups.new.title"), new_order_lookup_path, class: "block py-2 hover:text-ink" %></li>
+        <li><%= link_to t("contacts.show.title"), contact_path, class: "block py-2 hover:text-ink" %></li>
+      </ul>
+    </nav>
+  </div>
+<% when :logo %>
+  <%= link_to root_path, class: "flex min-w-0 shrink items-center text-ink #{local_assigns[:class]}" do %>
+    <% if (logo = theme_setting(:logo).presence) %>
+      <%= image_tag logo, alt: current_shop.name, class: "h-8 w-auto max-w-40 object-contain md:h-9" %>
+    <% else %>
+      <span class="line-clamp-2 font-display leading-tight font-semibold text-balance <%= local_assigns.fetch(:size, "text-xl") %> <%= "max-md:text-sm" if current_shop.name.length > 18 %>"><%= current_shop.name %></span>
+    <% end %>
+  <% end %>
+<% when :links %>
+  <% link = "py-2 text-sm whitespace-nowrap text-muted underline-offset-4 hover:text-ink hover:underline aria-[current=page]:text-ink aria-[current=page]:underline" %>
+  <nav class="hidden items-center gap-6 md:flex <%= local_assigns[:class] %>" aria-label="<%= t("ui.navigation") %>">
+    <% shop_collections.first(4).each do |collection| %>
+      <%= link_to collection.title, collection_path(collection), class: link, aria: { current: ("page" if current_page?(collection_path(collection))) } %>
+    <% end %>
+    <%= link_to t("layouts.site.shop_all"), products_path, class: link, aria: { current: ("page" if current_page?(products_path)) } %>
+    <% menu_items.each do |item| %>
+      <%= shop_menu_link item, class: link %>
+    <% end %>
+    <%= yield :site_nav %>
+  </nav>
+<% when :cart %>
+  <%= link_to cart_path, class: "relative -mr-2 grid size-10 shrink-0 place-items-center text-ink", id: "cart-link", aria: { label: t("layouts.site.cart_with_count", count: cart_item_count) } do %>
+    <%= icon "shopping-bag", size: 22, stroke: 1.5 %>
+    <% if cart_item_count.positive? %>
+      <span class="absolute right-0.5 bottom-0.5 grid min-w-[1.125rem] place-items-center rounded-full bg-brand-600 px-1 text-[0.625rem] leading-[1.125rem] text-on-brand"><%= cart_item_count %></span>
+    <% end %>
+  <% end %>
+<% end %>

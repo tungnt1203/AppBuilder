@@ -1,0 +1,27 @@
+<%# Footer as a mast: the links in rows across the top, then the shop's name set as large as the
+    page is wide, closing the page like a masthead. Keeps the policies, contact, Find my order and
+    the social pages (payment providers and ad networks check them). %>
+<% socials = { "Instagram" => theme_setting(:instagram_url), "TikTok" => theme_setting(:tiktok_url), "Facebook" => theme_setting(:facebook_url) }.compact_blank %>
+<% shop_collections = collections.select { |collection| collection.product_count.to_i.positive? }.first(5) %>
+<% link = "text-sm text-muted hover:text-ink hover:underline underline-offset-4" %>
+<footer class="mt-20 overflow-hidden border-t border-line bg-canvas md:mt-28" data-footer="mast">
+  <div class="page-width grid gap-8 py-10 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:py-14">
+    <p class="max-w-sm leading-relaxed text-muted"><%= theme_setting(:hero_text).presence || t("home.show.tagline") %></p>
+    <nav class="flex flex-wrap gap-x-6 gap-y-3 md:justify-end" aria-label="<%= t("layouts.site.footer_navigation") %>">
+      <%= link_to t("layouts.site.shop_all"), products_path, class: link %>
+      <% shop_collections.each do |collection| %><%= link_to collection.title, collection_path(collection), class: link %><% end %>
+      <%= link_to t("order_lookups.new.title"), new_order_lookup_path, class: link %>
+      <%= link_to t("contacts.show.title"), contact_path, class: link %>
+      <% current_shop.policies.each do |policy| %><%= link_to policy["title"], policy_path(policy["id"]), class: link %><% end %>
+      <% shop_menu(:footer)&.items.to_a.each do |item| %><%= shop_menu_link item, class: link %><% end %>
+      <% socials.each do |name, url| %><%= link_to name, url, class: link, target: "_blank", rel: "noopener" %><% end %>
+    </nav>
+  </div>
+  <div class="page-width">
+    <p class="font-display leading-[0.85] text-ink [font-size:clamp(3rem,14vw,12rem)] [overflow-wrap:anywhere]" aria-hidden="true"><%= current_shop.name %></p>
+  </div>
+  <div class="page-width flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-line py-5 text-xs text-muted">
+    <p>© <%= Date.current.year %>, <%= current_shop.name %></p>
+    <p class="flex items-center gap-1.5"><%= icon "lock", size: 12 %> <%= t("products.show.secure_checkout") %></p>
+  </div>
+</footer>

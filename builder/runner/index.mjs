@@ -166,8 +166,9 @@ async function checkBeforeStopping() {
       decision: "block",
       reason: "Before you finish: ask the design-reviewer agent to look at the pages you built or changed (the home " +
         "page, a product page and any others), and wait for its answer. Then fix every problem it lists that you " +
-        "can fix in the app's code (layout, sizes, spacing, wording, what shows on the phone's first screen); leave " +
-        "only what needs the owner, like their own photos or products. Call finish_turn again and write one short " +
+        "can fix in the app's code (layout, sizes, spacing, wording, what shows on the phone's first screen), the small " +
+        "ones too: taste is not a reason to leave one. Leave only what needs the owner (their own photos, products or " +
+        "collections) and say which, with what the owner should do. Call finish_turn again and write one short " +
         "final reply that says what the app does now and what you improved after the review."
     }
   }

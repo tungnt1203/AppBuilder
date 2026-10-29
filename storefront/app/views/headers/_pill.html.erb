@@ -1,0 +1,18 @@
+<%# Header as a floating pill: the logo, the links, search and the cart in one rounded bar that
+    floats over the page with room around it, as the draw's "floating pill" nav. On a phone the
+    menu, the logo, search and the cart in the same pill. Checkout keeps the logo and the cart. %>
+<header class="sticky top-0 z-20 pt-3 md:pt-4" data-header="pill">
+  <div class="page-width">
+    <div class="flex h-14 items-center gap-4 rounded-full border border-line bg-canvas/95 pr-3 pl-5 shadow-panel backdrop-blur md:h-16 md:gap-6 md:pl-7">
+      <% unless content_for?(:focused) %><%= render "headers/parts", part: :menu %><% end %>
+      <%= render "headers/parts", part: :logo, class: "max-md:flex-1 max-md:justify-center", size: "text-lg" %>
+      <% if content_for?(:focused) %>
+        <span class="flex-1"></span>
+      <% else %>
+        <%= render "headers/parts", part: :links, class: "flex-1 justify-center" %>
+        <%= render "layouts/site/search" %>
+      <% end %>
+      <%= render "headers/parts", part: :cart %>
+    </div>
+  </div>
+</header>

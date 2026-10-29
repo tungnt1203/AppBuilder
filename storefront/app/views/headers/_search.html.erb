@@ -1,0 +1,33 @@
+<%# Header led by search: the logo, a search field across the middle (a catalog buyers look up
+    by name, a state, a breed), the cart; the links on a row under it on wide screens. On a phone
+    the menu, the logo, the cart and the field under them. Checkout keeps the logo and the cart. %>
+<header class="sticky top-0 z-20 border-b border-line bg-canvas" data-header="search">
+  <div class="page-width flex h-16 items-center gap-4 md:h-20 md:gap-8">
+    <% unless content_for?(:focused) %><%= render "headers/parts", part: :menu %><% end %>
+    <%= render "headers/parts", part: :logo, class: "max-md:flex-1 max-md:justify-center" %>
+    <% if content_for?(:focused) %>
+      <span class="flex-1"></span>
+    <% else %>
+      <%= form_with url: products_path, method: :get, class: "hidden flex-1 md:block", role: "search" do %>
+        <label class="flex h-11 items-center gap-2 rounded-lg border border-line bg-surface px-3 focus-within:border-ink">
+          <%= icon "search", size: 18, stroke: 1.5, class: "text-muted" %>
+          <%= search_field_tag :q, params[:q], id: nil, placeholder: t("products.index.search"), aria: { label: t("products.index.search") },
+                autocomplete: "off", class: "min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none" %>
+        </label>
+      <% end %>
+    <% end %>
+    <%= render "headers/parts", part: :cart %>
+  </div>
+  <% unless content_for?(:focused) %>
+    <div class="page-width pb-3 md:hidden">
+      <%= form_with url: products_path, method: :get, role: "search" do %>
+        <label class="flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-3">
+          <%= icon "search", size: 16, stroke: 1.5, class: "text-muted" %>
+          <%= search_field_tag :q, params[:q], id: nil, placeholder: t("products.index.search"), aria: { label: t("products.index.search") },
+                autocomplete: "off", class: "min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none" %>
+        </label>
+      <% end %>
+    </div>
+    <div class="page-width hidden border-t border-line md:block"><%= render "headers/parts", part: :links, class: "h-11" %></div>
+  <% end %>
+</header>

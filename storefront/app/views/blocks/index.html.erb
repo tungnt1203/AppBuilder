@@ -21,3 +21,13 @@
     <% end %>
   <% end %>
 <% end %>
+
+<%# The headers and footers, rendered from layouts/site/_header and _footer (render "headers/pill"). %>
+<% @chrome.each do |folder, variants| %>
+  <% variants.each do |variant| %>
+    <div class="border-y border-dashed border-line bg-surface-muted px-4 py-1.5 font-mono text-xs text-muted" id="<%= folder %>-<%= variant %>">
+      render "<%= folder %>/<%= variant %>"
+    </div>
+    <div class="relative"><%= render "#{folder}/#{variant}" %></div>
+  <% end %>
+<% end %>

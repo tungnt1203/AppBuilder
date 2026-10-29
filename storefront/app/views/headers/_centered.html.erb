@@ -1,0 +1,21 @@
+<%# Header: the logo centered over its links, search on the left and the cart on the right; on a
+    phone the menu, the logo and the cart. Checkout (content_for :focused) keeps the logo and the
+    cart. Render it from layouts/site/_header (STOREFRONT.md, "Sections to compose with"). %>
+<header class="sticky top-0 z-20 border-b border-line bg-canvas" data-header="centered">
+  <div class="page-width grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4 md:h-20">
+    <div class="flex items-center">
+      <% unless content_for?(:focused) %>
+        <%= render "headers/parts", part: :menu %>
+        <%= render "layouts/site/search", class: "-ml-2 hidden md:block" %>
+      <% end %>
+    </div>
+    <%= render "headers/parts", part: :logo, class: "justify-center text-center", size: "text-xl md:text-2xl" %>
+    <div class="flex items-center justify-end">
+      <% unless content_for?(:focused) %><%= render "layouts/site/search", class: "md:hidden" %><% end %>
+      <%= render "headers/parts", part: :cart %>
+    </div>
+  </div>
+  <% unless content_for?(:focused) %>
+    <div class="page-width hidden justify-center pb-3 md:flex"><%= render "headers/parts", part: :links %></div>
+  <% end %>
+</header>

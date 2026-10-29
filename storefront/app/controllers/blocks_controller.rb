@@ -9,7 +9,11 @@ class BlocksController < ApplicationController
       .sort_by { |block| [ ORDER.index(block) || ORDER.size, block ] }
     @blocks &= [ params[:only] ] if params[:only]
     @sections = SECTIONS.select { |name, _| params[:only].blank? || params[:only] == "sections" || params[:only] == name }
+    @chrome = CHROME.select { |name, _| params[:only].blank? || params[:only] == "chrome" || params[:only] == name }
   end
+
+  # The headers and footers a layout's header and footer can render instead (app/views/headers, footers).
+  CHROME = { "headers" => %w[ centered search pill ], "footers" => %w[ mast colophon ] }.freeze
 
   # The sections a page renders, each in every variant (app/views/sections; STOREFRONT.md).
   SECTIONS = { "products" => %w[ grid feature rail index ], "personalized" => %w[ split steps band ], "collections" => %w[ tiles index bento row ] }.freeze
