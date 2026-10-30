@@ -24,21 +24,27 @@
       <aside class="admin-side" aria-label="Admin">
         <div class="admin-brand"><%= icon :store, size: 18 %> Admin</div>
         <%= render "layouts/admin/shop_switcher", shop: @current_membership&.shop %>
-        <% if @current_membership %>
-          <%= render "layouts/admin/shop_navigation" %>
-        <% else %>
-          <% [ [ "Orders", admin_root_path, :history ], [ "Products", admin_products_path, :store ], [ "Settings", admin_settings_path, :sliders ],
-               ([ "Accounts", admin_users_path, :users ] if Current.user.administrator?) ].compact.each do |label, path, icon_name| %>
-            <%= link_to path, class: "admin-link", "aria-current": (current_page?(path) ? "page" : nil) do %><%= icon icon_name, size: 17 %> <%= label %><% end %>
+        <%# On a phone the links fold behind Menu (no script: the checkbox opens them). %>
+        <label for="admin-menu" class="admin-menu-button"><%= icon "menu", size: 18 %> <span class="sr-only">Menu</span></label>
+        <input type="checkbox" id="admin-menu" class="admin-menu-toggle sr-only">
+        <nav class="admin-nav" aria-label="Admin">
+          <% if @current_membership %>
+            <%= render "layouts/admin/shop_navigation" %>
+          <% else %>
+            <% [ [ "Orders", admin_root_path, :history ], [ "Products", admin_products_path, :store ], [ "Settings", admin_settings_path, :sliders ],
+                 ([ "Accounts", admin_users_path, :users ] if Current.user.administrator?) ].compact.each do |label, path, icon_name| %>
+              <%= link_to path, class: "admin-link", "aria-current": (current_page?(path) ? "page" : nil) do %><%= icon icon_name, size: 17 %> <%= label %><% end %>
+            <% end %>
           <% end %>
-        <% end %>
-        <div class="admin-side-foot">
-          <%= link_to root_path(shop_id: nil), class: "admin-link" do %><%= icon :back, size: 17 %> Apps<% end %>
-          <%= button_to session_path(shop_id: nil), method: :delete, class: "admin-link w-full", form: { class: "contents" } do %>
-            <%= icon :logout, size: 17 %> <span class="truncate">Sign out <%= Current.user.name %></span>
-          <% end %>
-        </div>
+          <div class="admin-side-foot">
+            <%= link_to root_path(shop_id: nil), class: "admin-link" do %><%= icon :back, size: 17 %> Apps<% end %>
+            <%= button_to session_path(shop_id: nil), method: :delete, class: "admin-link w-full", form: { class: "contents" } do %>
+              <%= icon :logout, size: 17 %> <span class="truncate">Sign out <%= Current.user.name %></span>
+            <% end %>
+          </div>
+        </nav>
       </aside>
+      <%= render "layouts/admin/tabs" if @current_membership %>
       <main class="admin-main">
         <% if notice = flash[:notice] %><p class="admin-flash mb-4 w-fit" role="status"><%= notice %></p><% end %>
         <% if alert = flash[:alert] %><p class="admin-alert mb-4 w-fit" role="alert"><%= alert %></p><% end %>
