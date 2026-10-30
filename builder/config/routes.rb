@@ -76,6 +76,7 @@ Rails.application.routes.draw do
     resources :customers, only: %i[ index show ]
     resource :search, only: :show
     resources :ad_spends, only: %i[ index create destroy ], path: "ad-spend"
+    patch "orders/batch", to: "order_batches#update", as: :order_batch
     resources :orders, only: %i[ index show update ] do
       scope module: :orders do
         resource :payment, only: :create

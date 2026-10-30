@@ -172,6 +172,24 @@ en:
         orders: Orders
         customers: Customers
         products: Products
+    order_batches:
+      update:
+        nothing: Tick some orders first, then pick what to do with them.
+        paid:
+          zero: No order was marked paid.
+          one: 1 order marked paid.
+          other: "%{count} orders marked paid."
+        in_production:
+          zero: No order went into production.
+          one: 1 order is in production.
+          other: "%{count} orders are in production."
+        delivered:
+          zero: No order was marked delivered.
+          one: 1 order marked delivered.
+          other: "%{count} orders marked delivered."
+        left:
+          one: 1 couldn't take that step and is as it was.
+          other: "%{count} couldn't take that step and are as they were."
     product_batches:
       update:
         nothing: Tick some products first, then pick what to do with them.
@@ -250,6 +268,12 @@ en:
         search: Number, email or name
         search_button: Search
         export: Export CSV
+        select_all: Select all
+        selected: "%{count} selected"
+        batch:
+          paid: Mark paid
+          in_production: Start production
+          delivered: Mark delivered
         empty_title: No orders yet
         empty_description: Orders show up here as soon as someone checks out.
         no_results: Nothing matches "%{query}".

@@ -15,6 +15,24 @@ class ShopAdmin::OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "ticked orders take a step together, and those that can't are counted and left" do
+    get shop_admin_orders_path
+    assert_select "input[type=checkbox][name='order_tokens[]'][value=?]", orders(:paid).token
+
+    patch shop_admin_order_batch_path, params: { order_tokens: [ orders(:paid).token, orders(:shipped).token ], batch_action: "in_production" }
+    assert_redirected_to shop_admin_orders_path
+    assert_equal "1 order is in production. 1 couldn't take that step and is as it was.", flash[:notice]
+    assert orders(:paid).reload.in_production?
+    assert orders(:shipped).reload.shipped?
+
+    patch shop_admin_order_batch_path, params: { order_tokens: [ orders(:shipped).token ], batch_action: "delivered" }
+    assert orders(:shipped).reload.delivered?
+    assert_equal users(:cats_staff), orders(:shipped).events.last.user
+
+    patch shop_admin_order_batch_path, params: { order_tokens: [ orders(:pending).token ], batch_action: "refund" }
+    assert orders(:pending).reload.pending?
+  end
+
   test "lists, filters and searches orders" do
     get shop_admin_orders_path
     assert_select "a[href=?]", shop_admin_order_path(orders(:shipped))

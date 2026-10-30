@@ -20,10 +20,31 @@
 <% end %>
 
 <% if @page.records.any? %>
-  <%= card padded: false do %>
-    <ul class="divide-y divide-line">
-      <%= render partial: "shop_admin/orders/order", collection: @page.records %>
-    </ul>
+  <%= form_with url: shop_admin_order_batch_path, method: :patch, data: { controller: "check-all" } do %>
+    <%= card padded: false do %>
+      <div class="flex min-h-12 flex-wrap items-center gap-3 border-b border-line px-4 py-2 sm:px-6">
+        <label class="flex items-center gap-3 text-xs text-muted">
+          <input type="checkbox" class="size-4 rounded border-line accent-brand-600" data-check-all-target="all" data-action="check-all#toggle" aria-label="<%= t(".select_all") %>">
+          <span data-check-all-target="count" data-template="<%= t(".selected") %>"><%= t(".select_all") %></span>
+        </label>
+        <div class="ml-auto flex flex-wrap gap-2" data-check-all-target="bar" hidden>
+          <% ShopAdmin::OrderBatchesController::STEPS.each_key do |step| %>
+            <%= button_tag t(".batch.#{step}"), name: "batch_action", value: step, class: button_classes(:secondary, size: :sm) %>
+          <% end %>
+        </div>
+      </div>
+      <ul class="divide-y divide-line">
+        <% @page.records.each do |order| %>
+          <li class="flex items-center">
+            <label class="grid place-items-center self-stretch pl-4 sm:pl-6">
+              <input type="checkbox" name="order_tokens[]" value="<%= order.token %>" class="size-4 rounded border-line accent-brand-600"
+                     data-check-all-target="item" data-action="check-all#sync" aria-label="<%= order.name %>">
+            </label>
+            <ul class="min-w-0 flex-1"><%= render "shop_admin/orders/order", order: %></ul>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
   <% end %>
   <%= render "ui/pagination", page: @page %>
 <% else %>

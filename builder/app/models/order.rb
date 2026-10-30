@@ -104,13 +104,13 @@ class Order < ApplicationRecord
     total_cents - tax_cents - refunded_cents - fulfillment_cost_cents if fulfillment_cost_cents && !cancelled?
   end
 
-  # Staff mark manual payments; card payments are confirmed by Stripe.
   # Where the buyer came from: what the storefront saw on their way in (attribution "source": a
   # Meta, TikTok or Google ad click, or utm_source), else a Meta click in its cookie, else direct.
   def source
     attribution.to_h["source"].presence || (attribution.to_h["fbc"].present? ? "facebook" : "direct")
   end
 
+  # Staff mark manual payments; card payments are confirmed by Stripe.
   def can_mark_paid? = pending? && !card?
   def can_start_production? = paid?
   def can_ship? = paid? || in_production?
