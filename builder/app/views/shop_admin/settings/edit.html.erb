@@ -125,6 +125,12 @@
         </label>
         <%= form.field :meta_test_event_code, placeholder: "TEST12345", hint: t(".ads.meta_test_code_hint") %>
       <% end %>
+      <%= form.field :meta_ad_account_id, placeholder: "act_123456789012345", hint: t(".ads.meta_ad_account_hint") %>
+      <% if @store.meta_ad_spend_error.present? %>
+        <%= alert @store.meta_ad_spend_error, tone: :warning %>
+      <% elsif @store.meta_ad_spend_synced_at %>
+        <p class="-mt-2 text-xs text-muted"><%= t(".ads.meta_ad_spend_synced", time: time_ago_in_words(@store.meta_ad_spend_synced_at)) %></p>
+      <% end %>
       <%= form.field :tiktok_pixel_id, placeholder: "C4ABCDEFGHIJ1234567", class: "uppercase", hint: t(".ads.tiktok_hint") %>
       <%= form.field :google_tag_id, placeholder: "G-XXXXXXXXXX", class: "uppercase", hint: t(".ads.google_hint") %>
       <div class="space-y-1.5">

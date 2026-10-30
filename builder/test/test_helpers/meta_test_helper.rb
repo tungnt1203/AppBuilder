@@ -1,11 +1,18 @@
-# Meta's Conversions API without the network: `meta = connect_fake_meta` sets a pixel and an
-# access token, and FakeMetaGateway records the events the app sends.
+# Meta without the network: `meta = connect_fake_meta` sets a pixel and an access token, and
+# FakeMetaGateway records the events the app sends and answers the ad account's spend with
+# `spend` ({ Date => "12.34" }) in `currency`.
 class FakeMetaGateway
-  attr_reader :sent
-  attr_accessor :error
+  attr_reader :sent, :asked
+  attr_accessor :error, :spend, :currency
 
   def initialize
-    @sent = []
+    @sent, @asked, @spend, @currency = [], [], {}, "USD"
+  end
+
+  def daily_spend(account_id, since:, till:)
+    raise error if error
+    @asked << { account_id:, since:, till: }
+    [ spend.select { |date, _| date.between?(since, till) }, currency ]
   end
 
   def send_events(pixel_id, events, test_event_code: nil)

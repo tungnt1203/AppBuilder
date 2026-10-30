@@ -26,6 +26,9 @@ shared: &shared
   request_reviews:
     class: Order::RequestReviewsJob
     schedule: every day at 10am
+  bring_in_meta_ad_spend:
+    class: AdSpend::MetaImportJob
+    schedule: every 3 hours at minute 35
   remind_left_carts:
     class: Cart::RecoveryJob
     schedule: every hour at minute 15

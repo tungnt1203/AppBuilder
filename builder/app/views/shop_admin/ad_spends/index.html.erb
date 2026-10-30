@@ -1,5 +1,14 @@
 <%= page_header t(".title"), t(".description") %>
 
+<% store = Store.current %>
+<%= alert class: "mb-6" do %>
+  <% if store.meta_ad_spend? %>
+    <%= t(".meta_connected") %>
+  <% else %>
+    <%= t(".meta_lead") %> <%= link_to t(".meta_connect"), edit_shop_admin_settings_path(anchor: "ads"), class: link_classes if shop_administrator? %>
+  <% end %>
+<% end %>
+
 <%= form_with model: [ :shop_admin, @ad_spend ], class: "mb-6" do |form| %>
   <%= card do %>
     <%= form.errors %>

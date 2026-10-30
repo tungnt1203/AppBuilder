@@ -39,12 +39,14 @@ class Store < ApplicationRecord
   validates :tiktok_pixel_id, format: { with: /\A[A-Z0-9]{8,32}\z/ }, allow_blank: true
   validates :google_tag_id, format: { with: /\A(G|AW)-[A-Z0-9]{4,20}\z/ }, allow_blank: true
   validates :meta_access_token, format: { with: /\A[A-Za-z0-9]{20,1000}\z/ }, allow_blank: true, if: :meta_access_token_changed?
+  validates :meta_ad_account_id, format: { with: /\A\d{5,20}\z/ }, allow_blank: true
   validates :meta_test_event_code, format: { with: /\A[A-Za-z0-9]{3,32}\z/ }, allow_blank: true
   validates :delivery_days_min, :delivery_days_max, numericality: { only_integer: true, in: 1..90 }, allow_nil: true
   validate :countries_are_known
   validate :delivery_days_in_order
 
   normalizes :meta_pixel_id, :tiktok_pixel_id, :google_tag_id, with: ->(id) { id.strip.upcase.presence }
+  normalizes :meta_ad_account_id, with: ->(id) { id.strip.delete_prefix("act_").presence }
   normalizes :meta_access_token, :meta_test_event_code, :stripe_publishable_key, with: ->(value) { value.strip.presence }
   normalizes :ship_to_countries, with: ->(codes) { Array(codes).map { |code| code.to_s.strip.upcase }.compact_blank.uniq.sort }
 
@@ -97,6 +99,16 @@ class Store < ApplicationRecord
 
   def meta
     MetaGateway.build(meta_token) if meta_conversions?
+  end
+
+  # The ad account's daily spend comes into Ad spend (AdSpend::MetaImportJob) once the owner gave
+  # its ID and the access token can read it (ads_read).
+  def meta_ad_spend?
+    meta_ad_account_id.present? && meta_token.present?
+  end
+
+  def meta_ads
+    MetaGateway.build(meta_token) if meta_ad_spend?
   end
 
   # Empty means anywhere.

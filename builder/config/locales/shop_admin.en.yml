@@ -212,6 +212,9 @@ en:
         description: What you spent on ads each day, from your ad accounts, to see what they bring back on the dashboard.
         save: Save
         hint: "Where: facebook, tiktok, google, or the utm_source your links carry. Saving a day and place again replaces it."
+        meta_connected: Facebook's spend comes in from your Meta ad account every few hours, for the last week's days. Enter the others here.
+        meta_lead: Facebook's spend can come in by itself from your Meta ad account.
+        meta_connect: Give its ID in Settings
         delete: Remove
         empty_title: No ad spend yet
         empty_description: Enter a day's spend from Meta, TikTok or Google Ads above.
@@ -711,6 +714,8 @@ en:
           meta_test_code_hint: To check it works, paste the code from Events Manager
             › Test events and place an order; empty it afterwards, or Meta won't count
             purchases.
+          meta_ad_account_hint: Your ad account's ID (in Ads Manager, top left), to bring in what you spend each day under Ad spend. The access token above needs the ads_read permission on it.
+          meta_ad_spend_synced: "Spend brought in from Meta %{time} ago."
           tiktok_hint: In TikTok Ads Manager, under Assets › Events › Web events.
           google_hint: A Google Analytics 4 measurement ID (G-…) or a Google Ads tag
             (AW-…).

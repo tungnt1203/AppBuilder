@@ -75,6 +75,7 @@ en:
         meta_pixel_id: Meta Pixel ID
         meta_access_token: Meta Conversions API access token
         meta_test_event_code: Meta test event code
+        meta_ad_account_id: Meta ad account ID
         tiktok_pixel_id: TikTok Pixel ID
         google_tag_id: Google tag ID
       discount:
