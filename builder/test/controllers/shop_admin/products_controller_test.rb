@@ -62,6 +62,21 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, Product.count
   end
 
+  test "an admin of a shop the builder made has its demo products redrawn for it, in the background" do
+    sign_in_as users(:member)
+    Product.where.not(demo: true).destroy_all
+    DemoCatalog.add!
+    projects(:shop).update!(shop: shops(:cats))
+
+    get shop_admin_products_path
+    assert_select "button", "Redraw for this shop"
+
+    assert_enqueued_with(job: DemoCatalog::RefreshJob, args: [ shops(:cats) ]) do
+      patch shop_admin_demo_products_path
+    end
+    assert_redirected_to shop_admin_products_path
+  end
+
   test "the owner draws a print area per side and sees each side's sample print file in its shape" do
     tee = products(:tee)
     tee.images.attach(io: file_fixture("product.png").open, filename: "front.png", content_type: "image/png")

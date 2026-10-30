@@ -413,6 +413,8 @@ en:
           notice:
             one: 1 demo product is in the shop.
             other: "%{count} demo products are in the shop."
+        update:
+          notice: The demo products are being made again for your shop, with its words on their photos. They're back in about a minute.
         destroy:
           notice:
             one: Removed 1 demo product.
@@ -459,6 +461,8 @@ en:
           present: Your shop has demo products. Only the builder's preview shows them,
             until your own products are in; visitors never see them.
           remove: Remove demo products
+          redraw: Redraw for this shop
+          redraw_hint: Make the demo products again with your shop's own names and words on their photos
           confirm_remove: Remove the demo products and their collections? Your own
             products stay.
           badge: Demo

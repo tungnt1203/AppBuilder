@@ -10,8 +10,14 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
       <p><%= t(".demo.present") %></p>
       <% if shop_administrator? %>
-        <%= button_to t(".demo.remove"), shop_admin_demo_products_path, method: :delete, class: button_classes(:secondary, size: :sm),
-              form: { data: { turbo_confirm: t(".demo.confirm_remove") } } %>
+        <div class="flex flex-wrap gap-2">
+          <% if current_shop.project %>
+            <%= button_to t(".demo.redraw"), shop_admin_demo_products_path, method: :patch, class: button_classes(:secondary, size: :sm),
+                  title: t(".demo.redraw_hint") %>
+          <% end %>
+          <%= button_to t(".demo.remove"), shop_admin_demo_products_path, method: :delete, class: button_classes(:secondary, size: :sm),
+                form: { data: { turbo_confirm: t(".demo.confirm_remove") } } %>
+        </div>
       <% end %>
     </div>
   <% end %>

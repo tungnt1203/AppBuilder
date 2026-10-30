@@ -98,7 +98,7 @@ class DemoCatalog::Mockup
       <path d="M862 600 C1020 600 1020 930 862 930" fill="none" stroke="#000" stroke-opacity="0.08" stroke-width="58" stroke-linecap="round" transform="translate(6 6)"/>
       <path d="M870 625 C985 630 985 900 870 905" fill="none" stroke="#fff" stroke-opacity="0.6" stroke-width="8"/>
       <path d="#{body}" fill="#f7f5f1"/>
-      #{text_block(@phrase, x: 600, y: 790, width: 360, ink: @accent, serif: true, filter: true)}
+      #{text_block(@phrase, x: 600, y: 790, width: 360, ink: accent_on_light, serif: true, filter: true)}
       <path d="#{body}" fill="url(#cylinder)"/>
       <ellipse cx="600" cy="480" rx="270" ry="36" fill="#f3f0ea"/>
       <ellipse cx="600" cy="484" rx="252" ry="27" fill="#2d241e"/>
@@ -162,6 +162,8 @@ class DemoCatalog::Mockup
 
   private
     def fabric = GARMENTS.fetch(@color, GARMENTS["white"])
+    # A light accent (lime, yellow) darkened enough to read on white cloth or china.
+    def accent_on_light = luminance(@accent) > 0.5 ? shade(@accent, -0.45) : @accent
     def light? = luminance(fabric) > 0.55
 
     # The garment laid flat: the cloth with its weave, soft folds, side shading, a ribbed collar
@@ -181,7 +183,7 @@ class DemoCatalog::Mockup
         <path d="M#{ribbed ? 340 : 342} #{ribbed ? 1150 : 1166} L#{ribbed ? 860 : 858} #{ribbed ? 1150 : 1166}" stroke="#{seam}" stroke-width="#{ribbed ? 58 : 4}" stroke-opacity="#{ribbed ? 0.35 : 1}" stroke-dasharray="#{ribbed ? "3 5" : "8 7"}"/>
         #{collar ? %(<path d="#{collar}" fill="none" stroke="#{shade(fabric, -0.22)}" stroke-width="24" stroke-linecap="round"/><path d="#{collar}" fill="none" stroke="#{seam}" stroke-width="3" stroke-dasharray="7 6" transform="translate(0 20)"/>) : ""}
         #{extra}
-        #{text_block(@phrase, x: 600, y: text_y, width: 400, ink:, accent: @accent, filter: true)}
+        #{text_block(@phrase, x: 600, y: text_y, width: 400, ink:, accent: light? ? accent_on_light : @accent, filter: true)}
         <path d="#{path}" fill="url(#sheen)"/>
         <path d="#{path}" fill="url(#drop)"/>
       SVG
