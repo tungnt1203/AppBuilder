@@ -1,0 +1,19 @@
+<%# Quick search (⌘K or Ctrl+K, or the button): orders, customers, products and screens as the
+    owner types (ShopAdmin::SearchesController), up and down to pick, Enter to open. %>
+<div class="admin-search" data-controller="admin-search" data-admin-search-url-value="<%= shop_admin_search_path %>"
+     data-action="keydown.meta+k@window->admin-search#open keydown.ctrl+k@window->admin-search#open">
+  <button type="button" class="admin-link admin-search-button" data-action="admin-search#open">
+    <%= icon "search", size: 17 %> <span class="flex-1 text-left"><%= t("shop_admin.layout.search") %></span>
+    <kbd class="admin-kbd">⌘K</kbd>
+  </button>
+  <dialog class="admin-search-dialog" data-admin-search-target="dialog" data-action="click->admin-search#backdrop keydown->admin-search#navigate" aria-label="<%= t("shop_admin.layout.search") %>">
+    <div class="flex items-center gap-3 border-b border-line px-4">
+      <%= icon "search", size: 18, class: "text-muted" %>
+      <input type="search" class="h-14 min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-muted"
+             placeholder="<%= t("shop_admin.layout.search_placeholder") %>" autocomplete="off" spellcheck="false"
+             data-admin-search-target="input" data-action="input->admin-search#search" aria-label="<%= t("shop_admin.layout.search") %>">
+      <kbd class="admin-kbd">Esc</kbd>
+    </div>
+    <%= turbo_frame_tag "admin_search_results", class: "block max-h-[60vh] overflow-y-auto pb-2", data: { admin_search_target: "frame" } %>
+  </dialog>
+</div>

@@ -164,6 +164,14 @@ en:
         day: Day
         sales: Sales
         orders_header: Orders
+    searches:
+      show:
+        hint: Type an order number (1042), a buyer's email or name, a product, or a screen like Discounts.
+        nothing: Nothing matches "%{query}".
+        screens: Screens
+        orders: Orders
+        customers: Customers
+        products: Products
     product_batches:
       update:
         nothing: Tick some products first, then pick what to do with them.
@@ -1025,6 +1033,8 @@ en:
       customers: Customers
       ad_spends: Ad spend
       shortcuts: Shortcuts
+      search: Search
+      search_placeholder: An order number, an email, a name, a product, a screen
       products: Products
       collections: Collections
       discounts: Discounts

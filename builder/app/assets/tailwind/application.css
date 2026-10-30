@@ -1994,6 +1994,19 @@
   }
   .admin-side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 0.25rem; border-top: 1px solid var(--admin-side-line); padding-top: 0.75rem; }
   .admin-nav { display: flex; flex: 1; flex-direction: column; gap: 0.25rem; }
+  .admin-search { margin: -0.25rem 0 0.5rem; }
+  .admin-search-button { width: 100%; color: var(--admin-side-text); }
+  .admin-kbd { border: 1px solid currentColor; border-radius: 4px; padding: 0 0.3rem; font: inherit; font-size: 0.6875rem; opacity: 0.6; }
+  .admin-search-dialog {
+    width: min(40rem, calc(100% - 2rem)); margin: 12vh auto auto; padding: 0;
+    border: 1px solid var(--line); border-radius: 0.875rem; background: var(--admin-card); color: var(--text);
+    box-shadow: 0 24px 60px -12px rgb(20 12 8 / 0.35);
+    &::backdrop { background: rgb(20 12 8 / 0.4); }
+  }
+  .admin-search-result {
+    display: flex; align-items: center; gap: 0.75rem; margin: 0 0.5rem; padding: 0.55rem 0.75rem; border-radius: 6px; outline: none;
+    &:hover, &:focus-visible { background: var(--admin-muted); }
+  }
   .admin-menu-button { display: none; }
   .admin-tabs { display: none; }
   .admin-main { padding: 2rem clamp(1rem, 4vw, 3rem) 4rem; max-width: 72rem; width: 100%; }
@@ -2033,12 +2046,15 @@
     .admin-side { position: sticky; top: 0; z-index: 30; height: auto; overflow: visible; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; }
     .admin-brand { padding: 0.25rem; font-size: 0; gap: 0; }
     .admin-switcher { position: relative; flex: 1; min-width: 0; margin: 0; }
+    .admin-search { order: 1; margin: 0; }
+    .admin-search-button { width: 2.5rem; height: 2.5rem; justify-content: center; padding: 0; & > span, & > kbd { display: none; } }
+    .admin-menu-button { order: 2; }
     .admin-switcher-menu { position: absolute; inset-inline: 0; top: 100%; z-index: 40; margin-top: 0.25rem; border: 1px solid var(--admin-side-line); border-radius: var(--radius-control); background: var(--admin-side); }
     .admin-menu-button { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: var(--radius-control); color: var(--admin-side-ink); cursor: pointer;
       &:hover { background: var(--admin-side-hover); }
     }
     .admin-side:has(.admin-menu-toggle:focus-visible) .admin-menu-button { outline: 2px solid var(--admin-side-ink); }
-    .admin-nav { display: none; flex-basis: 100%; max-height: calc(100dvh - 8rem); overflow-y: auto; padding: 0.25rem 0 0.5rem; }
+    .admin-nav { order: 3; display: none; flex-basis: 100%; max-height: calc(100dvh - 8rem); overflow-y: auto; padding: 0.25rem 0 0.5rem; }
     .admin-menu-toggle:checked ~ .admin-nav { display: flex; }
     .admin-side-foot { margin-top: 0.5rem; }
     .admin-main { padding-top: 1.25rem; padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }

@@ -6,6 +6,7 @@ export default class extends Controller {
   static targets = [ "all", "item", "bar", "count" ]
 
   connect() {
+    if (this.hasCountTarget) this.emptyText = this.countTarget.textContent
     this.sync()
   }
 
@@ -21,6 +22,6 @@ export default class extends Controller {
       this.allTarget.indeterminate = ticked > 0 && ticked < this.itemTargets.length
     }
     if (this.hasBarTarget) this.barTarget.hidden = ticked === 0
-    if (this.hasCountTarget) this.countTarget.textContent = this.countTarget.dataset.template.replace("%{count}", ticked)
+    if (this.hasCountTarget) this.countTarget.textContent = ticked ? this.countTarget.dataset.template.replace("%{count}", ticked) : this.emptyText
   }
 }

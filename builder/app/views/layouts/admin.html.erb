@@ -24,6 +24,7 @@
       <aside class="admin-side" aria-label="Admin">
         <div class="admin-brand"><%= icon :store, size: 18 %> Admin</div>
         <%= render "layouts/admin/shop_switcher", shop: @current_membership&.shop %>
+        <%= render "layouts/admin/search" if @current_membership %>
         <%# On a phone the links fold behind Menu (no script: the checkbox opens them). %>
         <label for="admin-menu" class="admin-menu-button"><%= icon "menu", size: 18 %> <span class="sr-only">Menu</span></label>
         <input type="checkbox" id="admin-menu" class="admin-menu-toggle sr-only">

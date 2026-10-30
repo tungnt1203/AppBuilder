@@ -1,5 +1,30 @@
 # Pieces of a shop's admin (ShopAdmin::*) about its catalog and orders.
 module ShopAdminHelper
+  # The picked shop's screens, as [label, path, icon, the paths under it]: settings are for its
+  # owners and admins, its people for its owners. The sidebar lists them; quick search finds them.
+  def admin_screens
+    base = shop_admin_root_path
+    [
+      [ t("shop_admin.layout.dashboard"), base, :history, nil ],
+      [ t("shop_admin.layout.orders"), shop_admin_orders_path, "package", "#{base}/orders" ],
+      [ t("shop_admin.layout.customers"), shop_admin_customers_path, "users", "#{base}/customers" ],
+      [ t("shop_admin.layout.products"), shop_admin_products_path, "shirt", "#{base}/products" ],
+      [ t("shop_admin.layout.collections"), shop_admin_collections_path, :steps, "#{base}/collections" ],
+      [ t("shop_admin.layout.clipart"), shop_admin_clipart_sets_path, :images, "#{base}/clipart" ],
+      [ t("shop_admin.layout.discounts"), shop_admin_discounts_path, :target, "#{base}/discounts" ],
+      [ t("shop_admin.layout.promotions"), shop_admin_promotions_path, :sun, "#{base}/promotions" ],
+      [ t("shop_admin.layout.ad_spends"), shop_admin_ad_spends_path, "megaphone", "#{base}/ad-spend" ],
+      [ t("shop_admin.layout.reviews"), shop_admin_product_reviews_path, "star", "#{base}/reviews" ],
+      *([
+        [ t("shop_admin.layout.pages"), shop_admin_pages_path, :file, "#{base}/pages" ],
+        [ t("shop_admin.layout.menus"), shop_admin_menus_path, "menu", "#{base}/menus" ],
+        [ t("shop_admin.layout.forms"), shop_admin_forms_path, :send, "#{base}/forms" ],
+        [ t("shop_admin.layout.platform_requests"), shop_admin_platform_requests_path, :help, "#{base}/requests" ],
+        [ t("shop_admin.layout.settings"), edit_shop_admin_settings_path, :sliders, "#{base}/settings" ]
+      ] if shop_administrator?),
+      *([ [ t("shop_admin.layout.people"), shop_admin_memberships_path, :users, "#{base}/people" ] ] if current_membership.owner?)
+    ]
+  end
   # An address on the shop's storefront: storefront_url("/products/#{product.slug}").
   def storefront_url(path = "/")
     current_shop.storefront_url(path)

@@ -1,0 +1,28 @@
+<%= turbo_frame_tag "admin_search_results" do %>
+  <% screens = admin_screens.select { |label, _| @query.present? && label.downcase.include?(@query.downcase) } %>
+  <% groups = [ [ t(".screens"), screens.map { |label, path, icon_name| [ path, icon_name, label, nil ] } ],
+                [ t(".orders"), Array(@orders).map { |order| [ shop_admin_order_path(order), "package", "#{order.name} · #{order.shipping_name}", "#{order.email} · #{money(order.total_cents, order.currency)}" ] } ],
+                [ t(".customers"), Array(@customers).map { |buyer| [ shop_admin_customer_path(buyer.latest_token), "users", buyer.customer_name, buyer.email ] } ],
+                [ t(".products"), Array(@products).map { |product| [ edit_shop_admin_product_path(product), "shirt", product.title, t("products.statuses.#{product.status}") ] } ] ]
+              .reject { |_, rows| rows.empty? } %>
+  <% if @query.blank? %>
+    <p class="px-4 py-6 text-center text-sm text-muted"><%= t(".hint") %></p>
+  <% elsif groups.empty? %>
+    <p class="px-4 py-6 text-center text-sm text-muted"><%= t(".nothing", query: @query) %></p>
+  <% else %>
+    <% groups.each do |heading, rows| %>
+      <p class="px-4 pt-3 pb-1 text-xs text-muted"><%= heading %></p>
+      <ul>
+        <% rows.each do |path, icon_name, title, detail| %>
+          <li>
+            <%= link_to path, class: "admin-search-result", data: { turbo_frame: "_top", admin_search_target: "result", action: "admin-search#close" } do %>
+              <%= icon icon_name, size: 16, class: "text-muted" %>
+              <span class="min-w-0 flex-1 truncate text-sm text-ink"><%= title %></span>
+              <% if detail %><span class="hidden truncate text-xs text-muted sm:block"><%= detail %></span><% end %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  <% end %>
+<% end %>
