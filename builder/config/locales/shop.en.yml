@@ -104,6 +104,10 @@ en:
       form:
         title: Title
         key: Key
+      ad_spend:
+        date: Day
+        source: Where
+        amount: Spent
       product_review:
         rating: Rating
         body: Review
@@ -157,6 +161,12 @@ en:
             base:
               no_items: Choose at least one product
               overlaps: "%{product} is already in another sale at that time"
+        ad_spend:
+          attributes:
+            date:
+              in_future: can't be a day still to come
+            source:
+              invalid: is a name like facebook, tiktok or newsletter
         product_review:
           attributes:
             product:

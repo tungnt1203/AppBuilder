@@ -27,12 +27,21 @@ class ShopReport
   end
 
   def totals = @totals ||= totals_for(@from..@to)
+
+  # What the owner entered they spent on ads in the period (AdSpend), in all and per source.
+  def ad_spend = @ad_spend ||= spends.sum(:amount_cents)
+  def previous_ad_spend = @previous_ad_spend ||= AdSpend.where(date: (@from - @days.days).to_date..(@from - 1.day).to_date).sum(:amount_cents)
+  def ad_spend_by_source = @ad_spend_by_source ||= spends.group(:source).sum(:amount_cents)
+
+  # Sales for each dollar of ads, and what's left after printing and ads; nil without ad spend.
+  def return_on_ad_spend = (totals.sales_cents.fdiv(ad_spend) if ad_spend.positive?)
+  def profit_cents = totals.left_cents - ad_spend
   def previous = @previous ||= totals_for((@from - @days.days)..(@from - 1.second))
 
   # Change against the period before, as a fraction (0.25 is 25% up); nil when there was nothing.
   def change(measure)
-    before = previous.public_send(measure)
-    (totals.public_send(measure) - before).fdiv(before) unless before.zero?
+    now, before = measure == :profit_cents ? [ profit_cents, previous.left_cents - previous_ad_spend ] : [ totals, previous ].map { |sums| sums.public_send(measure) }
+    (now - before).fdiv(before.abs) unless before.zero?
   end
 
   def by_day
@@ -51,17 +60,24 @@ class ShopReport
       .map { |title, quantity, sales| Line.new(title, quantity.to_i, sales.to_i) }
   end
 
-  # Sales by where the buyer came from (Order#source), most first.
+  Source = Data.define(:name, :sales_cents, :orders, :spent_cents) do
+    def return_on_ad_spend = (sales_cents.fdiv(spent_cents) if spent_cents.positive?)
+  end
+
+  # Sales by where the buyer came from (Order#source), with what was spent on ads there (a source
+  # with spend and no sales too), most sales first.
   def sources
-    orders.select(:id, :attribution, :total_cents, :refunded_cents).group_by(&:source)
-      .map { |source, placed| [ source, placed.sum { |order| order.total_cents - order.refunded_cents }, placed.size ] }
-      .sort_by { |_, sales, _| -sales }
+    sales = orders.select(:id, :attribution, :total_cents, :refunded_cents).group_by(&:source)
+      .transform_values { |placed| [ placed.sum { |order| order.total_cents - order.refunded_cents }, placed.size ] }
+    (sales.keys | ad_spend_by_source.keys).map { |name| Source.new(name, *sales.fetch(name, [ 0, 0 ]), ad_spend_by_source.fetch(name, 0)) }
+      .sort_by { |source| [ -source.sales_cents, -source.spent_cents ] }
   end
 
   private
     SALES = "SUM(orders.total_cents - orders.refunded_cents)"
 
     def orders = Order.counted_in_sales.where(created_at: @from..@to)
+    def spends = AdSpend.where(date: @from.to_date..@to.to_date)
 
     def totals_for(range)
       sums = Order.counted_in_sales.where(created_at: range)

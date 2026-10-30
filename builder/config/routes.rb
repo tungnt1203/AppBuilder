@@ -73,6 +73,7 @@ Rails.application.routes.draw do
       resource :cancellation, only: :create, module: :promotions
     end
     resources :customers, only: %i[ index show ]
+    resources :ad_spends, only: %i[ index create destroy ], path: "ad-spend"
     resources :orders, only: %i[ index show update ] do
       scope module: :orders do
         resource :payment, only: :create

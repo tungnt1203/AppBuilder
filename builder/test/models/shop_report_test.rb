@@ -32,8 +32,22 @@ class ShopReportTest < ActiveSupport::TestCase
   test "best sellers by sales, and sales by where buyers came from" do
     report = ShopReport.new(period: "90")
 
-    assert_equal [ [ "facebook", 4800, 1 ], [ "tiktok", 2000, 1 ] ], report.sources
+    assert_equal [ [ "facebook", 4800, 1, 0 ], [ "tiktok", 2000, 1, 0 ] ], report.sources.map(&:to_h).map(&:values)
     assert_equal [ [ "Cat Mom Tee", 2, 4800 ], [ "Morning Mug", 1, 1500 ] ], report.top_products.map { |line| [ line.title, line.quantity, line.sales_cents ] }
+  end
+
+  test "ad spend gives the return on it and the profit after it, per source too" do
+    AdSpend.create!(date: 3.days.ago.to_date, source: "tiktok", amount_cents: 800)
+    AdSpend.create!(date: 1.day.ago.to_date, source: "google", amount_cents: 200)
+    AdSpend.create!(date: 50.days.ago.to_date, source: "tiktok", amount_cents: 999)
+    report = ShopReport.new(period: "30")
+
+    assert_equal 1000, report.ad_spend
+    assert_in_delta 2.0, report.return_on_ad_spend
+    assert_equal 0, report.profit_cents, "left 1000 after tax and printing, less 1000 on ads"
+    tiktok, google = report.sources
+    assert_equal [ "tiktok", 2000, 800, 2.5 ], [ tiktok.name, tiktok.sales_cents, tiktok.spent_cents, tiktok.return_on_ad_spend ]
+    assert_equal [ "google", 0, 200 ], [ google.name, google.sales_cents, google.spent_cents ], "spend with no sales still shows"
   end
 
   test "an unknown period is thirty days" do

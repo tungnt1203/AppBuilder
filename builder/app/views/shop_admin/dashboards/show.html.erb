@@ -52,12 +52,18 @@
 </div>
 
 <% totals = @report.totals %>
+<% kpis = [ [ :sales, money(totals.sales_cents, @store.currency), :sales_cents ],
+            [ :orders, number_with_delimiter(totals.orders), :orders ],
+            [ :average, money(totals.average_cents, @store.currency), :average_cents ],
+            [ :left, money(totals.left_cents, @store.currency), :left_cents ] ] %>
+<% if @report.ad_spend.positive? %>
+  <% kpis += [ [ :ad_spend, money(@report.ad_spend, @store.currency), nil ],
+               [ :roas, t(".roas_value", times: number_with_precision(@report.return_on_ad_spend, precision: 2)), nil ],
+               [ :profit, money(@report.profit_cents, @store.currency), :profit_cents ] ] %>
+<% end %>
 <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-  <% [ [ :sales, money(totals.sales_cents, @store.currency), :sales_cents ],
-       [ :orders, number_with_delimiter(totals.orders), :orders ],
-       [ :average, money(totals.average_cents, @store.currency), :average_cents ],
-       [ :left, money(totals.left_cents, @store.currency), :left_cents ] ].each do |key, value, measure| %>
-    <% change = @report.change(measure) %>
+  <% kpis.each do |key, value, measure| %>
+    <% change = measure && @report.change(measure) %>
     <div class="rounded-xl border border-line bg-surface p-5">
       <p class="text-sm text-muted"><%= t(".kpi.#{key}") %></p>
       <p class="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums"><%= value %></p>
@@ -65,8 +71,8 @@
         <% if change %>
           <%= icon change.negative? ? "arrow-down-right" : "arrow-up-right", size: 13, class: "text-ink" %>
           <span><%= change >= 4 ? t(".times", times: (change + 1).round, count: @report.days) : t(".change", percent: number_to_percentage(change.abs * 100, precision: 0), count: @report.days) %></span>
-        <% elsif key == :left %>
-          <%= t(".kpi.left_hint") %>
+        <% elsif t(".kpi.#{key}_hint", default: "").present? %>
+          <%= t(".kpi.#{key}_hint") %>
         <% elsif key == :orders %>
           <%= t(".today", count: @orders_today) %>
         <% else %>
@@ -76,6 +82,11 @@
     </div>
   <% end %>
 </div>
+<% if @report.ad_spend.zero? %>
+  <p class="-mt-2 mb-6 text-sm text-muted">
+    <%= t(".add_ad_spend_lead") %> <%= link_to t(".add_ad_spend"), shop_admin_ad_spends_path, class: link_classes %>
+  </p>
+<% end %>
 
 <%= render "shop_admin/dashboards/sales_chart", report: @report, currency: @store.currency %>
 
@@ -108,18 +119,21 @@
     <h2 class="text-sm font-semibold text-ink"><%= t(".sources") %></h2>
     <% sources = @report.sources %>
     <% if sources.any? %>
-      <% most = sources.first[1].nonzero? || 1 %>
+      <% most = sources.map(&:sales_cents).max.nonzero? || 1 %>
       <ul class="mt-4 space-y-3">
-        <% sources.each do |source, sales, count| %>
+        <% sources.each do |source| %>
           <li>
             <div class="flex items-baseline justify-between gap-4 text-sm">
-              <span class="min-w-0 truncate text-ink"><%= t(".source_names.#{source}", default: source.humanize) %></span>
-              <span class="shrink-0 tabular-nums text-ink"><%= money(sales, @store.currency) %></span>
+              <span class="min-w-0 truncate text-ink"><%= t(".source_names.#{source.name}", default: source.name.humanize) %></span>
+              <span class="shrink-0 tabular-nums text-ink"><%= money(source.sales_cents, @store.currency) %></span>
             </div>
             <div class="mt-1.5 flex items-center gap-3">
-              <span class="h-1.5 flex-1 rounded-full bg-surface-muted"><span class="block h-full rounded-full bg-ink" style="width: <%= (sales * 100.0 / most).round(1) %>%"></span></span>
-              <span class="w-16 shrink-0 text-right text-xs text-muted"><%= t(".source_orders", count:) %></span>
+              <span class="h-1.5 flex-1 rounded-full bg-surface-muted"><span class="block h-full rounded-full bg-ink" style="width: <%= (source.sales_cents * 100.0 / most).round(1) %>%"></span></span>
+              <span class="w-16 shrink-0 text-right text-xs text-muted"><%= t(".source_orders", count: source.orders) %></span>
             </div>
+            <% if source.spent_cents.positive? %>
+              <p class="mt-1 text-xs text-muted"><%= t(".source_spend", spent: money(source.spent_cents, @store.currency), times: number_with_precision(source.return_on_ad_spend, precision: 2)) %></p>
+            <% end %>
           </li>
         <% end %>
       </ul>

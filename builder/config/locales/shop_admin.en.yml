@@ -83,6 +83,15 @@ en:
           average: Average order
           left: Left after printing
           left_hint: Less tax and Printify's bills; payment fees aside
+          ad_spend: Ad spend
+          ad_spend_hint: As entered under Ad spend
+          roas: Return on ad spend
+          roas_hint: Sales for each dollar of ads
+          profit: Profit after ads
+        roas_value: "%{times}×"
+        add_ad_spend_lead: Enter what you spend on ads to see your return on them and your profit after ads.
+        add_ad_spend: Enter ad spend
+        source_spend: "%{spent} on ads, %{times}× back"
         change: "%{percent} on the %{count} days before"
         times: "%{times}× the %{count} days before"
         no_before: Nothing in the %{count} days before
@@ -131,6 +140,19 @@ en:
         day: Day
         sales: Sales
         orders_header: Orders
+    ad_spends:
+      index:
+        title: Ad spend
+        description: What you spent on ads each day, from your ad accounts, to see what they bring back on the dashboard.
+        save: Save
+        hint: "Where: facebook, tiktok, google, or the utm_source your links carry. Saving a day and place again replaces it."
+        delete: Remove
+        empty_title: No ad spend yet
+        empty_description: Enter a day's spend from Meta, TikTok or Google Ads above.
+      create:
+        notice: "%{amount} on %{source} for %{date} saved."
+      destroy:
+        notice: Removed.
     customers:
       index:
         title: Customers
@@ -953,6 +975,7 @@ en:
       shop: Shop
       orders: Orders
       customers: Customers
+      ad_spends: Ad spend
       products: Products
       collections: Collections
       discounts: Discounts

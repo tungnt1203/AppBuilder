@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_28_035038) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_035038) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "ad_spends", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.date "date", null: false
+    t.string "source", null: false
+    t.integer "amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "date", "source"], name: "index_ad_spends_on_shop_id_and_date_and_source", unique: true
+    t.index ["shop_id"], name: "index_ad_spends_on_shop_id"
   end
 
   create_table "agent_commands", force: :cascade do |t|
@@ -663,6 +674,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_035038) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "ad_spends", "shops"
   add_foreign_key "agent_commands", "projects"
   add_foreign_key "api_idempotency_keys", "shops"
   add_foreign_key "business_settings", "users"

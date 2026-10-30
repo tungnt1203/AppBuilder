@@ -1,0 +1,36 @@
+<%= page_header t(".title"), t(".description") %>
+
+<%= form_with model: [ :shop_admin, @ad_spend ], class: "mb-6" do |form| %>
+  <%= card do %>
+    <%= form.errors %>
+    <div class="grid items-end gap-4 sm:grid-cols-[10rem_minmax(0,1fr)_9rem_auto]">
+      <%= form.field :date, :date_field, max: Time.current.in_time_zone(current_shop.time_zone).to_date, required: true %>
+      <div class="space-y-1.5">
+        <%= form.label :source %>
+        <%= form.text_field :source, list: "ad-sources", required: true, autocomplete: "off" %>
+        <datalist id="ad-sources"><% AdSpend.sources.each do |source| %><option value="<%= source %>"><% end %></datalist>
+      </div>
+      <%= form.field :amount, :number_field, step: 0.01, min: 0, required: true %>
+      <%= form.submit t(".save") %>
+    </div>
+    <p class="mt-3 text-xs text-muted"><%= t(".hint") %></p>
+  <% end %>
+<% end %>
+
+<% if @page.records.any? %>
+  <%= card padded: false do %>
+    <ul class="divide-y divide-line">
+      <% @page.records.each do |spend| %>
+        <li class="flex items-center gap-4 px-4 py-3 sm:px-6">
+          <span class="w-28 shrink-0 text-sm text-muted"><%= l(spend.date, format: :short) %></span>
+          <span class="min-w-0 flex-1 truncate text-sm text-ink"><%= t("shop_admin.dashboards.show.source_names.#{spend.source}", default: spend.source.humanize) %></span>
+          <span class="shrink-0 text-sm tabular-nums text-ink"><%= money(spend.amount_cents) %></span>
+          <%= button_to shop_admin_ad_spend_path(spend), method: :delete, class: "rounded-md p-1 text-muted hover:text-ink", aria: { label: t(".delete") } do %><%= icon "x", size: 16 %><% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+  <%= render "ui/pagination", page: @page %>
+<% else %>
+  <%= empty_state t(".empty_title"), t(".empty_description") %>
+<% end %>
