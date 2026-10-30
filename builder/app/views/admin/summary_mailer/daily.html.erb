@@ -1,0 +1,34 @@
+<% totals = @report.totals %>
+<p><%= t(".intro", shop: @shop.name, date: l(@date, format: :long)) %></p>
+
+<table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+  <% rows = [ [ t(".sales"), money(totals.sales_cents, @store.currency), t(".day_before", amount: money(@report.previous.sales_cents, @store.currency)) ],
+              [ t(".orders"), totals.orders, nil ],
+              [ t(".left"), money(totals.left_cents, @store.currency), nil ] ] %>
+  <% if @report.ad_spend.positive? %>
+    <% rows += [ [ t(".ad_spend"), money(@report.ad_spend, @store.currency), t(".roas", times: number_with_precision(@report.return_on_ad_spend, precision: 2)) ],
+                 [ t(".profit"), money(@report.profit_cents, @store.currency), nil ] ] %>
+  <% end %>
+  <% rows.each do |label, value, note| %>
+    <tr>
+      <td style="padding: 6px 0; border-bottom: 1px solid #e8e1dd;"><%= label %></td>
+      <td style="padding: 6px 0; border-bottom: 1px solid #e8e1dd; text-align: right; font-weight: 600;"><%= value %><% if note %> <span style="font-weight: 400; color: #615955;">(<%= note %>)</span><% end %></td>
+    </tr>
+  <% end %>
+</table>
+
+<% funnel = @report.funnel %>
+<% if funnel["visit"].positive? %>
+  <p><%= t(".funnel", visitors: funnel["visit"], carts: funnel["cart"], orders: funnel["purchase"]) %></p>
+<% end %>
+
+<% if (top = @report.top_products(limit: 3)).any? %>
+  <p><strong><%= t(".best_sellers") %></strong></p>
+  <ul>
+    <% top.each do |line| %><li><%= line.title %>: <%= t(".sold", count: line.quantity) %>, <%= money(line.sales_cents, @store.currency) %></li><% end %>
+  </ul>
+<% end %>
+
+<% if @to_ship.positive? %><p><%= t(".to_ship", count: @to_ship) %></p><% end %>
+
+<p><%= link_to t(".open"), shop_admin_root_url(@shop) %></p>

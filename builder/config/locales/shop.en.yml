@@ -258,6 +258,29 @@ en:
         subject: New order %{number} (%{total})
         intro: New order %{number} from %{name} (%{email}).
         open: Open the order
+    summary_mailer:
+      daily:
+        subject:
+          zero: "%{shop} yesterday: no orders"
+          one: "%{shop} yesterday: 1 order, %{sales}"
+          other: "%{shop} yesterday: %{count} orders, %{sales}"
+        intro: "%{shop} on %{date}:"
+        sales: Sales
+        day_before: "%{amount} the day before"
+        orders: Orders
+        left: Left after printing
+        ad_spend: Ad spend
+        roas: "%{times}× back"
+        profit: Profit after ads
+        funnel: "%{visitors} visitors, %{carts} added to cart, %{orders} ordered."
+        best_sellers: Best sellers
+        sold:
+          one: 1 sold
+          other: "%{count} sold"
+        to_ship:
+          one: 1 order is waiting to ship.
+          other: "%{count} orders are waiting to ship."
+        open: Open the dashboard
     form_mailer:
       submission:
         subject: New message — %{title}

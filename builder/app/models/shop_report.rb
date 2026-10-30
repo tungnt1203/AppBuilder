@@ -2,7 +2,7 @@
 # before, what's left after Printify's costs, the products that sold most and where the buyers
 # came from. Sales are paid orders that aren't tests (Order.counted_in_sales), less refunds.
 class ShopReport
-  PERIODS = { "7" => 7, "30" => 30, "90" => 90 }.freeze
+  PERIODS = { "1" => 1, "7" => 7, "30" => 30, "90" => 90 }.freeze
   DEFAULT_PERIOD = "30"
 
   # What's left is Order#margin_cents over the period: sales less tax and Printify's bills (those

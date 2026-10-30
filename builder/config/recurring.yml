@@ -32,6 +32,10 @@ shared: &shared
   find_print_sizes:
     class: Product::PrintPixelsJob
     schedule: every day at 4:30am
+  # Each shop's at 8 in the morning in its time zone.
+  email_daily_summaries:
+    class: Shop::DailySummaryJob
+    schedule: every hour at minute 5
 
 development:
   <<: *shared

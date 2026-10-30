@@ -1,0 +1,27 @@
+<% totals = @report.totals -%>
+<%= t(".intro", shop: @shop.name, date: l(@date, format: :long)) %>
+
+<%= t(".sales") %>: <%= money(totals.sales_cents, @store.currency) %> (<%= t(".day_before", amount: money(@report.previous.sales_cents, @store.currency)) %>)
+<%= t(".orders") %>: <%= totals.orders %>
+<%= t(".left") %>: <%= money(totals.left_cents, @store.currency) %>
+<% if @report.ad_spend.positive? -%>
+<%= t(".ad_spend") %>: <%= money(@report.ad_spend, @store.currency) %>, <%= t(".roas", times: number_with_precision(@report.return_on_ad_spend, precision: 2)) %>
+<%= t(".profit") %>: <%= money(@report.profit_cents, @store.currency) %>
+<% end -%>
+<% funnel = @report.funnel -%>
+<% if funnel["visit"].positive? -%>
+<%= t(".funnel", visitors: funnel["visit"], carts: funnel["cart"], orders: funnel["purchase"]) %>
+<% end -%>
+<% if (top = @report.top_products(limit: 3)).any? -%>
+
+<%= t(".best_sellers") %>:
+<% top.each do |line| -%>
+- <%= line.title %>: <%= t(".sold", count: line.quantity) %>, <%= money(line.sales_cents, @store.currency) %>
+<% end -%>
+<% end -%>
+<% if @to_ship.positive? -%>
+
+<%= t(".to_ship", count: @to_ship) %>
+<% end -%>
+
+<%= t(".open") %>: <%= shop_admin_root_url(@shop) %>

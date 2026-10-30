@@ -75,7 +75,7 @@ en:
           one: Today
           other: Last %{count} days
         days:
-          one: 1 day
+          one: Today
           other: "%{count} days"
         kpi:
           sales: Sales
@@ -92,9 +92,15 @@ en:
         add_ad_spend_lead: Enter what you spend on ads to see your return on them and your profit after ads.
         add_ad_spend: Enter ad spend
         source_spend: "%{spent} on ads, %{times}× back"
-        change: "%{percent} on the %{count} days before"
-        times: "%{times}× the %{count} days before"
-        no_before: Nothing in the %{count} days before
+        change:
+          one: "%{percent} on the day before"
+          other: "%{percent} on the %{count} days before"
+        times:
+          one: "%{times}× the day before"
+          other: "%{times}× the %{count} days before"
+        no_before:
+          one: Nothing the day before
+          other: Nothing in the %{count} days before
         top_products: Best sellers
         sold:
           one: 1 sold
@@ -148,7 +154,9 @@ en:
       sales_chart:
         title: Sales by day
         best: "Best day %{amount}"
-        empty: No sales in the last %{count} days yet. Each day's sales show here.
+        empty:
+          one: No sales today yet.
+          other: No sales in the last %{count} days yet. Each day's sales show here.
         orders:
           one: 1 order
           other: "%{count} orders"
