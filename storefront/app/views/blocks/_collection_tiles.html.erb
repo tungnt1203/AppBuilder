@@ -13,23 +13,26 @@
     </div>
 
     <% if tiles.any? %>
-      <ul class="-mx-4 mt-8 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:gap-4 md:overflow-visible md:px-0 <%= tiles.size == 3 ? "md:grid-cols-3" : "md:grid-cols-4" %>">
-        <% tiles.each do |collection| %>
-          <li class="w-[70%] shrink-0 snap-start md:w-auto">
-            <%= link_to collection_path(collection), class: "group relative block aspect-[3/4] overflow-hidden rounded-xl bg-surface-muted" do %>
-              <%= collection_image collection, size: :card, class: "absolute inset-0 size-full" %>
-              <span class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent"></span>
-              <span class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4">
-                <span>
-                  <span class="block text-lg leading-tight font-bold text-white md:text-xl"><%= collection.title %></span>
-                  <span class="text-sm text-white/80"><%= pluralize(collection.product_count, "design") %></span>
+      <div data-controller="rail">
+        <ul class="-mx-4 mt-8 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:gap-4 md:overflow-visible md:px-0 <%= tiles.size == 3 ? "md:grid-cols-3" : "md:grid-cols-4" %>" data-rail-target="list" data-action="scroll->rail#update">
+          <% tiles.each do |collection| %>
+            <li class="w-[70%] shrink-0 snap-start md:w-auto">
+              <%= link_to collection_path(collection), class: "group relative block aspect-[3/4] overflow-hidden rounded-xl bg-surface-muted" do %>
+                <%= collection_image collection, size: :card, class: "absolute inset-0 size-full" %>
+                <span class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent"></span>
+                <span class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4">
+                  <span>
+                    <span class="block text-lg leading-tight font-bold text-white md:text-xl"><%= collection.title %></span>
+                    <span class="text-sm text-white/80"><%= pluralize(collection.product_count, "design") %></span>
+                  </span>
+                  <span class="grid size-9 shrink-0 place-items-center rounded-full bg-white text-ink transition group-hover:translate-x-0.5"><%= icon "arrow-up-right", size: 16 %></span>
                 </span>
-                <span class="grid size-9 shrink-0 place-items-center rounded-full bg-white text-ink transition group-hover:translate-x-0.5"><%= icon "arrow-up-right", size: 16 %></span>
-              </span>
-            <% end %>
-          </li>
-        <% end %>
-      </ul>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+        <%= render "ui/rail_controls" %>
+      </div>
     <% elsif current_shop.preview? %>
       <p class="mt-8 rounded-xl border border-dashed border-line px-6 py-10 text-center text-sm text-muted">The shop's collections show here once the owner makes them in the admin.</p>
     <% end %>

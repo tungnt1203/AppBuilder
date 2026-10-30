@@ -1,0 +1,14 @@
+<%# Under a row to swipe (the rail controller on a wrapper, the row its "list" target): a track
+    showing how much is seen and where, and arrows a card at a time, so a row running past the
+    edge reads as more to see. Hidden when every card fits (a row that becomes a grid on desktop). %>
+<div class="mt-5 flex items-center gap-4" data-rail-target="controls" hidden>
+  <span class="relative h-0.5 flex-1 overflow-hidden rounded-full bg-line" aria-hidden="true">
+    <span class="absolute inset-y-0 left-0 rounded-full bg-ink transition-transform duration-150" data-rail-target="thumb"></span>
+  </span>
+  <% { "previous" => "chevron-left", "next" => "chevron-right" }.each do |direction, glyph| %>
+    <button type="button" class="grid size-9 place-items-center rounded-full border border-line text-ink transition hover:border-ink disabled:opacity-35 disabled:hover:border-line"
+            data-rail-target="<%= direction %>" data-action="rail#<%= direction %>" aria-label="<%= direction.capitalize %>">
+      <%= icon glyph, size: 16, stroke: 1.5 %>
+    </button>
+  <% end %>
+</div>

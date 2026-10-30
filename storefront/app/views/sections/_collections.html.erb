@@ -55,15 +55,18 @@
       <% end %>
     </ul>
   <% else %>
-    <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0">
-      <% collections.each do |collection| %>
-        <li class="w-[72%] shrink-0 snap-start md:w-auto">
-          <%= link_to collection_path(collection), class: "group block" do %>
-            <span class="block aspect-4/5 overflow-hidden rounded-xl bg-surface-muted"><%= collection_image collection, class: "size-full" %></span>
-            <span class="mt-3 flex items-center gap-1.5 text-lg text-ink group-hover:underline"><%= collection.title %> <%= icon "arrow-right", size: 16, stroke: 1.5 %></span>
-          <% end %>
-        </li>
-      <% end %>
-    </ul>
+    <div data-controller="rail">
+      <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0" data-rail-target="list" data-action="scroll->rail#update">
+        <% collections.each do |collection| %>
+          <li class="w-[72%] shrink-0 snap-start md:w-auto">
+            <%= link_to collection_path(collection), class: "group block" do %>
+              <span class="block aspect-4/5 overflow-hidden rounded-xl bg-surface-muted"><%= collection_image collection, class: "size-full" %></span>
+              <span class="mt-3 flex items-center gap-1.5 text-lg text-ink group-hover:underline"><%= collection.title %> <%= icon "arrow-right", size: 16, stroke: 1.5 %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+      <%= render "ui/rail_controls" %>
+    </div>
   <% end %>
 </section>

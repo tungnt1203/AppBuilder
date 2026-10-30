@@ -16,11 +16,14 @@
     </div>
     <% if picks.any? %>
       <%# On phones a row to swipe (the next card peeking in), so three never leave one on its own. %>
-      <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-2 md:gap-y-8 md:overflow-visible md:px-0 <%= "lg:grid-cols-4" if picks.size > 3 %> <%= "lg:grid-cols-3" if picks.size == 3 %>">
-        <% picks.each do |product| %>
-          <li class="w-[44%] shrink-0 snap-start md:w-auto"><%= render "products/product", product: %></li>
-        <% end %>
-      </ul>
+      <div data-controller="rail">
+        <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-2 md:gap-y-8 md:overflow-visible md:px-0 <%= "lg:grid-cols-4" if picks.size > 3 %> <%= "lg:grid-cols-3" if picks.size == 3 %>" data-rail-target="list" data-action="scroll->rail#update">
+          <% picks.each do |product| %>
+            <li class="w-[44%] shrink-0 snap-start md:w-auto"><%= render "products/product", product: %></li>
+          <% end %>
+        </ul>
+        <%= render "ui/rail_controls" %>
+      </div>
     <% elsif current_shop.preview? %>
       <p class="rounded-xl border border-dashed border-line px-6 py-10 text-center text-sm text-muted">Products buyers personalize show here once the owner adds a field to them in the admin.</p>
     <% end %>

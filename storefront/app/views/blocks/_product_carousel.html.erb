@@ -14,13 +14,16 @@
   </div>
 
   <% if arrivals.any? %>
-    <ul class="page-width mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto pb-4 [scrollbar-width:none]">
-      <% arrivals.each do |product| %>
-        <li class="w-[68%] shrink-0 snap-start sm:w-[40%] md:w-[calc((100%-3rem)/4)]">
-          <%= render "products/product", product: %>
-        </li>
-      <% end %>
-    </ul>
+    <div data-controller="rail">
+      <ul class="page-width mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto pb-4 [scrollbar-width:none]" data-rail-target="list" data-action="scroll->rail#update">
+        <% arrivals.each do |product| %>
+          <li class="w-[68%] shrink-0 snap-start sm:w-[40%] md:w-[calc((100%-3rem)/4)]">
+            <%= render "products/product", product: %>
+          </li>
+        <% end %>
+      </ul>
+      <div class="page-width"><%= render "ui/rail_controls" %></div>
+    </div>
   <% else %>
     <div class="page-width mt-8"><%= render "products/coming_soon" %></div>
   <% end %>

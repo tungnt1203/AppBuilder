@@ -2,7 +2,7 @@
     page with `products:` from the controller, a `title`, and a `variant`:
     - grid     a dense grid of cards (products/_product), 2 on phones, 4 wide
     - feature  the first product large beside the next ones as rows: one thing staged
-    - rail     a row to swipe, the next card peeking in
+    - rail     a row to swipe, the next card peeking in, a track and arrows (rail controller)
     - index    a ruled catalogue: photo, name, price on one line each, scanned like a list
     `link` (default all products) and `link_label` for the way to the rest. Real products only. %>
 <% variant = local_assigns.fetch(:variant, :grid).to_s %>
@@ -41,11 +41,15 @@
       </ul>
     </div>
   <% when "rail" %>
-    <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-3 [scrollbar-width:thin] md:-mx-10 md:scroll-px-10 md:px-10">
-      <% products.each do |product| %>
-        <li class="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-[22%]"><%= render "products/product", product: %></li>
-      <% end %>
-    </ul>
+    <div data-controller="rail">
+      <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:-mx-10 md:scroll-px-10 md:px-10 [&::-webkit-scrollbar]:hidden"
+          data-rail-target="list" data-action="scroll->rail#update">
+        <% products.each do |product| %>
+          <li class="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-[22%]"><%= render "products/product", product: %></li>
+        <% end %>
+      </ul>
+      <%= render "ui/rail_controls" %>
+    </div>
   <% when "index" %>
     <ul class="grid border-t border-line md:grid-cols-2 md:gap-x-10">
       <% products.each do |product| %>
