@@ -10,6 +10,22 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path(shop_id: nil)
   end
 
+  test "ticked products are archived, put on sale or deleted together" do
+    get shop_admin_products_path
+    assert_select "input[type=checkbox][name='product_slugs[]'][value=cat-mom-tee]"
+
+    patch shop_admin_product_batch_path, params: { product_slugs: %w[ cat-mom-tee morning-mug ], batch_action: "archived" }
+    assert_redirected_to shop_admin_products_path
+    assert_equal %w[ archived archived ], [ products(:tee), products(:mug) ].map { |product| product.reload.status }
+    assert_equal "2 products archived.", flash[:notice]
+
+    patch shop_admin_product_batch_path, params: { product_slugs: %w[ draft-hoodie ], batch_action: "delete" }
+    assert_not Product.exists?(slug: "draft-hoodie")
+
+    patch shop_admin_product_batch_path, params: { product_slugs: %w[ cat-mom-tee ], batch_action: "explode" }
+    assert_equal "archived", products(:tee).reload.status
+  end
+
   test "duplicating a product makes a draft with its options, prices, photos and collections, not its Printify link" do
     tee = products(:tee)
     tee.images.attach(io: file_fixture("product.png").open, filename: "white.png", content_type: "image/png")

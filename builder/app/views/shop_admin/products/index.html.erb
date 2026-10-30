@@ -33,24 +33,42 @@
 <% end %>
 
 <% if @page.records.any? %>
-  <%= card padded: false do %>
-    <ul class="divide-y divide-line">
-      <% @page.records.each do |product| %>
-        <li>
-          <%= link_to edit_shop_admin_product_path(product), class: "flex items-center gap-4 px-6 py-3 hover:bg-surface-muted" do %>
-            <%= product_image product, size: :thumb, class: "size-12 shrink-0 rounded-lg" %>
-            <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-medium text-ink"><%= product.title %></span>
-              <span class="block truncate text-xs text-muted"><%= t(".variants", count: product.variants.size) %></span>
-            </span>
-            <span class="hidden text-sm text-ink sm:block"><%= price_range(product) %></span>
-            <% if product.demo? %><%= badge t(".demo.badge"), tone: :yellow %><% end %>
-            <% if product.buyer_inputs.any? %><%= badge t(".personalized"), tone: :brand %><% end %>
-            <span class="w-20 text-right"><%= product_status_badge product %></span>
+  <%= form_with url: shop_admin_product_batch_path, method: :patch, data: { controller: "check-all" } do %>
+    <%= card padded: false do %>
+      <div class="flex min-h-12 flex-wrap items-center gap-3 border-b border-line px-4 py-2 sm:px-6">
+        <label class="flex items-center gap-3 text-xs text-muted">
+          <input type="checkbox" class="size-4 rounded border-line accent-brand-600" data-check-all-target="all" data-action="check-all#toggle" aria-label="<%= t(".select_all") %>">
+          <span data-check-all-target="count" data-template="<%= t(".selected") %>"><%= t(".select_all") %></span>
+        </label>
+        <div class="ml-auto flex flex-wrap gap-2" data-check-all-target="bar" hidden>
+          <% %w[ active draft archived ].each do |status| %>
+            <%= button_tag t(".batch.#{status}"), name: "batch_action", value: status, class: button_classes(:secondary, size: :sm) %>
           <% end %>
-        </li>
-      <% end %>
-    </ul>
+          <%= button_tag t(".batch.delete"), name: "batch_action", value: "delete", class: button_classes(:danger, size: :sm), data: { turbo_confirm: t(".batch.confirm_delete") } %>
+        </div>
+      </div>
+      <ul class="divide-y divide-line">
+        <% @page.records.each do |product| %>
+          <li class="flex items-center hover:bg-surface-muted">
+            <label class="grid place-items-center self-stretch pl-4 sm:pl-6">
+              <input type="checkbox" name="product_slugs[]" value="<%= product.slug %>" class="size-4 rounded border-line accent-brand-600"
+                     data-check-all-target="item" data-action="check-all#sync" aria-label="<%= product.title %>">
+            </label>
+            <%= link_to edit_shop_admin_product_path(product), class: "flex min-w-0 flex-1 items-center gap-4 py-3 pr-4 pl-3 sm:pr-6 sm:pl-4" do %>
+              <%= product_image product, size: :thumb, class: "size-12 shrink-0 rounded-lg" %>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-medium text-ink"><%= product.title %></span>
+                <span class="block truncate text-xs text-muted"><%= t(".variants", count: product.variants.size) %></span>
+              </span>
+              <span class="hidden text-sm text-ink sm:block"><%= price_range(product) %></span>
+              <% if product.demo? %><%= badge t(".demo.badge"), tone: :yellow %><% end %>
+              <% if product.buyer_inputs.any? %><%= badge t(".personalized"), tone: :brand %><% end %>
+              <span class="w-20 text-right"><%= product_status_badge product %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
   <% end %>
   <%= render "ui/pagination", page: @page %>
 <% elsif params[:q].present? || @status %>

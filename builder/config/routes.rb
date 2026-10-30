@@ -55,6 +55,7 @@ Rails.application.routes.draw do
   scope "admin/shops/:shop_id", module: :shop_admin, as: :shop_admin do
     root "dashboards#show"
 
+    patch "products/batch", to: "product_batches#update", as: :product_batch
     resources :products do
       resources :images, only: :destroy, module: :products
       resources :artwork, only: :destroy, module: :products

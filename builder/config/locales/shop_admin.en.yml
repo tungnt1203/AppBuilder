@@ -156,6 +156,22 @@ en:
         day: Day
         sales: Sales
         orders_header: Orders
+    product_batches:
+      update:
+        nothing: Tick some products first, then pick what to do with them.
+        failed: "%{title} couldn't be changed: %{problem}"
+        active:
+          one: 1 product is on sale.
+          other: "%{count} products are on sale."
+        draft:
+          one: 1 product is back to draft.
+          other: "%{count} products are back to draft."
+        archived:
+          one: 1 product archived.
+          other: "%{count} products archived."
+        delete:
+          one: 1 product deleted.
+          other: "%{count} products deleted."
     ad_spends:
       index:
         title: Ad spend
@@ -407,6 +423,14 @@ en:
             products stay.
           badge: Demo
         no_results: No products match.
+        select_all: Select all
+        selected: "%{count} selected"
+        batch:
+          active: Put on sale
+          draft: Back to draft
+          archived: Archive
+          delete: Delete
+          confirm_delete: Delete the selected products? Orders that have them keep their copy.
       new:
         title: Add product
       edit:
