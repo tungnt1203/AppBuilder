@@ -105,7 +105,30 @@ const finishTurn = tool(
   }
 )
 
-const builderTools = createSdkMcpServer({ name: "builder", version: "1.0.0", tools: [ look, finishTurn ], alwaysLoad: true })
+// In plan mode: the plan as a card the owner approves with a button, its parts named so the studio
+// can show the look's picture and the pages in order (the builder reads them from this call).
+const proposePlan = tool(
+  "propose_plan",
+  "In plan mode, call once with the plan before your short final reply: the studio shows it to the owner as " +
+    "a card (the look's picture, the home page in order, the other pages, what you chose) with a button to build it.",
+  {
+    summary: z.string().min(10).max(400).describe("What the owner will have, in one or two plain sentences, in their language"),
+    look: z.object({
+      slug: z.string().max(40).describe("The Hallmark theme's slug, as in references/themes/<slug>.md"),
+      why: z.string().max(200).describe("Why it suits this shop, in the owner's language")
+    }).optional(),
+    layout: z.string().max(40).optional().describe("The layout it starts from: clean, bold, editorial or soft"),
+    composition: z.string().max(200).optional().describe("The draw's shape, hero, nav and footer, in a few words"),
+    home: z.array(z.string().min(2).max(160)).max(10).optional().describe("The home page's sections, top to bottom, each in a few words"),
+    pages: z.array(z.string().min(2).max(160)).max(8).optional().describe("What changes on the other pages (product page, cart…), one line each"),
+    chosen: z.array(z.string().min(2).max(160)).max(8).optional().describe("What you chose where the owner said nothing, one line each"),
+    owner: z.array(z.string().min(2).max(160)).max(6).optional().describe("What the owner will need to do or add (their products, photos, a Platform request), one line each")
+  },
+  async () => ({ content: [ { type: "text", text: "The plan is shown as a card. Write two or three sentences for the owner and end your turn." } ] }),
+  { annotations: { readOnlyHint: true } }
+)
+
+const builderTools = createSdkMcpServer({ name: "builder", version: "1.0.0", tools: [ look, finishTurn, proposePlan ], alwaysLoad: true })
 
 // A second pair of eyes on the app, asked once after building: it looks and lists what to fix,
 // and changes nothing itself.

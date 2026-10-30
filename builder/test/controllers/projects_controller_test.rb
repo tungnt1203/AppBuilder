@@ -26,6 +26,22 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[name=sha][value=ccc3333]", 0
   end
 
+  test "a plan shows as a card with its look, the home page in order and what the owner adds, above the build button" do
+    project = projects(:clinic)
+    project.messages.create!(role: :assistant, body: "Here is the plan.", data: { "proposal" => true, "plan_card" => {
+      "summary" => "A cheerful cat tee shop.", "look" => { "slug" => "hum", "why" => "Soft and playful" }, "layout" => "soft",
+      "home" => [ "Hero with the newest tees", "Make it yours as steps" ], "owner" => [ "Your own tee photos" ] } })
+
+    get project_path(project)
+    assert_select ".plan-card" do
+      assert_select ".plan-card-summary", "A cheerful cat tee shop."
+      assert_select "img[src=?]", look_project_design_path(project, "hum")
+      assert_select ".plan-card-steps li", 2
+      assert_select ".plan-card-list li", "Your own tee photos"
+    end
+    assert_select ".plan-card + .proposal form[action=?]", project_build_path(project)
+  end
+
   test "draws the studio in the theme the owner chose" do
     get root_path
     assert_select "html:not([data-theme])"

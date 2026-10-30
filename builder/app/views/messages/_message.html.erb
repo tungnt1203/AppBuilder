@@ -36,6 +36,9 @@
       </div>
     <% end %>
   <% end %>
+  <% if message.data["plan_card"].present? %>
+    <%= render "messages/plan_card", plan: message.data["plan_card"], project: message.project %>
+  <% end %>
   <% if message.data["questions"].present? && message == message.project.open_reply %>
     <%= render "messages/questions", message: message %>
   <% elsif message.data["proposal"] && message == message.project.latest_proposal %>

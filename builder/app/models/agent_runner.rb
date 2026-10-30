@@ -11,7 +11,7 @@ class AgentRunner
 
   COMMAND_POLL = 0.3 # seconds
   # The runner's own tools and its design reviewer (runner/index.mjs), for the SDK backend.
-  SDK_TOOLS = %w[ mcp__builder__look mcp__builder__finish_turn Agent ].freeze
+  SDK_TOOLS = %w[ mcp__builder__look mcp__builder__finish_turn mcp__builder__propose_plan Agent ].freeze
   # mode "plan" reads and proposes without changing anything; "build" makes the changes.
   def initialize(project, mode: "build", backend: Rails.configuration.x.agent_backend, config: Rails.configuration.x.agent)
     @project, @mode, @backend, @config = project, mode, backend, config

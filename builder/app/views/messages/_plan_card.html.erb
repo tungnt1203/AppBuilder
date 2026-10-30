@@ -1,0 +1,47 @@
+<%# The agent's plan (propose_plan, AgentTranscript#plan_card) as a card above the button that
+    builds it: the look with its picture, the home page top to bottom, the other pages, what it
+    chose, and what the owner will need to add. %>
+<% look = plan["look"] %>
+<article class="plan-card stock" aria-label="The plan">
+  <% if plan["summary"].present? %><p class="plan-card-summary"><%= plan["summary"] %></p><% end %>
+
+  <% if look %>
+    <figure class="plan-card-look">
+      <%= image_tag look_project_design_path(project, look["slug"]), alt: "", loading: "lazy", class: "plan-card-art" %>
+      <figcaption class="min-w-0">
+        <p class="faint text-xs">The look</p>
+        <p class="font-semibold"><%= look["slug"].titleize %><%= tag.span(" · #{plan["layout"]} layout", class: "faint font-normal") if plan["layout"] %></p>
+        <% if look["why"].present? %><p class="muted text-sm"><%= look["why"] %></p><% end %>
+        <% if plan["composition"].present? %><p class="faint mt-1 text-xs"><%= plan["composition"] %></p><% end %>
+      </figcaption>
+    </figure>
+  <% end %>
+
+  <div class="plan-card-grid">
+    <% if plan["home"].present? %>
+      <section>
+        <h3 class="plan-card-heading">Home page, top to bottom</h3>
+        <ol class="plan-card-steps"><% plan["home"].each do |line| %><li><%= line %></li><% end %></ol>
+      </section>
+    <% end %>
+    <% if plan["pages"].present? %>
+      <section>
+        <h3 class="plan-card-heading">Other pages</h3>
+        <ul class="plan-card-list"><% plan["pages"].each do |line| %><li><%= line %></li><% end %></ul>
+      </section>
+    <% end %>
+  </div>
+
+  <% if plan["chosen"].present? %>
+    <section>
+      <h3 class="plan-card-heading">Chosen for you</h3>
+      <ul class="plan-card-chips"><% plan["chosen"].each do |line| %><li><%= line %></li><% end %></ul>
+    </section>
+  <% end %>
+  <% if plan["owner"].present? %>
+    <section>
+      <h3 class="plan-card-heading">You'll add</h3>
+      <ul class="plan-card-list"><% plan["owner"].each do |line| %><li><%= line %></li><% end %></ul>
+    </section>
+  <% end %>
+</article>

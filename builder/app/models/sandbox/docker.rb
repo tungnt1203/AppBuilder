@@ -151,13 +151,19 @@ class Sandbox::Docker
       3000
     end
 
-    # A container from before the wall, when no turn is running in it: removed, to be made again
-    # walled (its files are all in mounted folders).
+    # A container from before the wall, or from an older build of the image (the agent's runner is
+    # copied into it), when no agent turn is running in it: removed, to be made again from the image as
+    # it is now (its files are all in mounted folders).
     def rebuild_unwalled
-      label, found = host.capture("docker", "inspect", "--format", "{{index .Config.Labels \"#{WALL}\"}}", name)
-      return unless found && label.strip != WALL_VERSION && !@project.working?
+      details, found = host.capture("docker", "inspect", "--format", "{{index .Config.Labels \"#{WALL}\"}} {{.Image}}", name)
+      # A turn checking in is using the container; one just starting (its status already "working",
+      # no check-in yet) is the right moment to make it again.
+      return unless found && !@project.turn_running?
 
-      host.capture("docker", "rm", "--force", name)
+      label, image = details.split
+      current, known = host.capture("docker", "image", "inspect", "--format", "{{.Id}}", Rails.configuration.x.sandbox_image)
+      stale = known && image.present? && current.strip.present? && image != current.strip
+      host.capture("docker", "rm", "--force", name) if label != WALL_VERSION || stale
     end
 
     # The blocks (vendor/blocks/storefront_kit) are the same in every app and updated as a whole: inside the

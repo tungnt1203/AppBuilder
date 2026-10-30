@@ -278,4 +278,18 @@ class AgentTranscriptTest < ActiveSupport::TestCase
       Rails.configuration.x.projects_root = original
     end
   end
+
+  test "a plan named with propose_plan goes on the reply as a card, cleaned up" do
+    transcript = AgentTranscript.new(@project)
+    plan = { "summary" => "A cheerful cat tee shop that sells from ads.", "look" => { "slug" => "hum", "why" => "Soft and playful" },
+             "layout" => "soft", "home" => [ "Hero with the newest tees", "", "Make it yours as steps" ], "owner" => [ "Your own tee photos" ],
+             "extra" => "dropped" }
+    transcript.record("type" => "assistant", "message" => { "content" => [ { "type" => "tool_use", "id" => "p-1", "name" => "mcp__builder__propose_plan", "input" => plan } ] })
+    transcript.record("type" => "assistant", "message" => { "content" => [ { "type" => "text", "text" => "Here is the plan." } ] })
+    transcript.finish
+
+    card = @project.messages.assistant.last.data["plan_card"]
+    assert_equal [ "hum", [ "Hero with the newest tees", "Make it yours as steps" ], "soft" ], [ card.dig("look", "slug"), card["home"], card["layout"] ]
+    assert_not card.key?("extra")
+  end
 end

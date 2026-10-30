@@ -35,6 +35,7 @@ class AgentTranscript
     "TaskUpdate" => ->(_) { "Updating the plan" },
     "mcp__builder__look" => ->(_) { "Looking at the app" },
     "mcp__builder__finish_turn" => ->(_) { "Wrapping up" },
+    "mcp__builder__propose_plan" => ->(_) { "Writing the plan" },
     "Agent" => ->(input) { input["subagent_type"] == "design-reviewer" ? "The design reviewer is looking at the app" : "A helper is working" }
   }
 
@@ -101,6 +102,7 @@ class AgentTranscript
     show_activity(nil)
     clear_draft
     offer_next_steps
+    show_plan_card
   end
 
   # The agent asked the owner something, which ends the turn until they answer.
@@ -215,6 +217,25 @@ class AgentTranscript
       @next_steps = nil
     end
 
+    # The plan the agent named with propose_plan goes on its last reply, which the studio shows as
+    # a card (messages/_plan_card) above the button that builds it.
+    def show_plan_card
+      return unless @plan_card
+
+      reply = @project.messages.assistant.last
+      reply&.update!(data: reply.data.merge("plan_card" => @plan_card))
+      @plan_card = nil
+    end
+
+    def plan_card(input)
+      lines = ->(key) { Array(input[key]).map { |line| line.to_s.squish.truncate(160) }.compact_blank.first(10) }
+      look = input["look"].to_h.slice("slug", "why").transform_values { |value| value.to_s.squish.truncate(200) }
+      look = nil unless look["slug"].to_s.match?(/\A[\w-]+\z/)
+      { "summary" => input["summary"].to_s.squish.truncate(400), "look" => look, "layout" => input["layout"].to_s.squish.presence,
+        "composition" => input["composition"].to_s.squish.truncate(200).presence,
+        "home" => lines.("home"), "pages" => lines.("pages"), "chosen" => lines.("chosen"), "owner" => lines.("owner") }.compact_blank
+    end
+
     # The builder ran the app's tests before letting the turn end.
     def record_check(event)
       summary = event["summary"].to_s.presence
@@ -260,6 +281,7 @@ class AgentTranscript
 
       case name
       when "mcp__builder__finish_turn" then @next_steps = parse_next_steps(Array(input["next_steps"]).to_json)
+      when "mcp__builder__propose_plan" then @plan_card = plan_card(input)
       when "TaskCreate" then @pending_tasks[block["id"]] = input["subject"].to_s
       when "TaskUpdate" then update_task(input["taskId"].to_s, input["status"])
       else

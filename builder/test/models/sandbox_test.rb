@@ -4,9 +4,11 @@ class SandboxTest < ActiveSupport::TestCase
   # Records docker commands and answers `docker inspect` with the container's state, or its wall label.
   class FakeHost
     attr_reader :commands, :environments
-    attr_accessor :state, :labels, :wall
+    attr_accessor :state, :labels, :wall, :image
 
-    def initialize(state, labels: [], wall: Sandbox::Docker::WALL_VERSION) = (@state, @labels, @wall, @commands, @environments = state, labels, wall, [], [])
+    def initialize(state, labels: [], wall: Sandbox::Docker::WALL_VERSION, image: "sha256:now")
+      @state, @labels, @wall, @image, @commands, @environments = state, labels, wall, image, [], []
+    end
 
     def run(*command, env: {})
       @commands << command
@@ -17,7 +19,8 @@ class SandboxTest < ActiveSupport::TestCase
     def capture(*command, env: {})
       @commands << command
       case command[1]
-      when "inspect" then [ "#{command.join(" ").include?(Sandbox::Docker::WALL) ? @wall : @state}\n", !@state.nil? ]
+      when "inspect" then [ "#{command.join(" ").include?(Sandbox::Docker::WALL) ? "#{@wall} #{@image}" : @state}\n", !@state.nil? ]
+      when "image" then [ "sha256:now\n", true ]
       when "ps" then [ @labels.map { |label| "#{label}\n" }.join, true ]
       else [ "", true ]
       end
@@ -62,12 +65,18 @@ class SandboxTest < ActiveSupport::TestCase
     assert host.commands.select { |command| command[1] == "exec" }.all? { |command| command[2, 2] == [ "--user", "dev" ] }, "every command runs as dev"
   end
 
+  test "a container from an older build of the image is made again, so the agent gets the runner as it is now" do
+    host = FakeHost.new("running", image: "sha256:before")
+    Sandbox::Docker.new(@project, host:).start
+    assert_includes host.commands, [ "docker", "rm", "--force", "appbuilder-nha-khoa" ]
+  end
+
   test "a container from before the wall is made again, unless a turn is running in it" do
     host = FakeHost.new("running", wall: "")
     Sandbox::Docker.new(@project, host:).start
     assert_includes host.commands, [ "docker", "rm", "--force", "appbuilder-nha-khoa" ]
 
-    @project.status = "working"
+    @project.assign_attributes(status: "working", turn_heartbeat_at: Time.current)
     host = FakeHost.new("running", wall: "")
     Sandbox::Docker.new(@project, host:).start
     assert_not_includes host.commands, [ "docker", "rm", "--force", "appbuilder-nha-khoa" ]
@@ -131,7 +140,7 @@ class SandboxTest < ActiveSupport::TestCase
 
     host = FakeHost.new("running")
     Sandbox::Docker.new(@project, host:).start
-    assert_equal %w[ inspect inspect ], host.commands.map(&:second), "only looks"
+    assert_equal %w[ inspect image inspect ], host.commands.map(&:second), "only looks"
   end
 
   test "secrets reach the agent through the environment, never its arguments" do
