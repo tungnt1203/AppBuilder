@@ -40,11 +40,16 @@
         <%= link_to "Start with #{picks.first.title}", product_path(picks.first),
               class: "mt-6 inline-flex min-h-12 items-center rounded-lg bg-canvas px-6 text-ink transition hover:opacity-90" %>
       </div>
-      <ul class="grid grid-cols-2 gap-3 md:gap-4 <%= "lg:grid-cols-4" if picks.size > 3 %> <%= "lg:grid-cols-3" if picks.size == 3 %>">
-        <% picks.each do |product| %>
-          <li class="rounded-xl bg-canvas p-2 text-ink"><%= render "products/product", product: %></li>
-        <% end %>
-      </ul>
+      <%# A row to swipe on phones, so an odd count never leaves a card on its own. %>
+      <div class="min-w-0" data-controller="rail">
+        <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-0 <%= "lg:grid-cols-4" if picks.size > 3 %> <%= "lg:grid-cols-3" if picks.size == 3 %>"
+            data-rail-target="list" data-action="scroll->rail#update">
+          <% picks.each do |product| %>
+            <li class="w-[62%] shrink-0 snap-start rounded-xl bg-canvas p-2 text-ink md:w-auto"><%= render "products/product", product: %></li>
+          <% end %>
+        </ul>
+        <%= render "ui/rail_controls", on_color: true %>
+      </div>
     </div>
   </section>
 <% else %>

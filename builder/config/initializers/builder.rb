@@ -14,6 +14,11 @@ Rails.application.configure do
   config.x.platform_url_from_containers = ENV.fetch("PLATFORM_URL_FROM_CONTAINERS") do
     config.x.platform_url&.sub(%r{//(localhost|127\.0\.0\.1)\b}, "//host.docker.internal")
   end
+  # Emails' links (a new order, the morning's summary, invitations) go to the same address.
+  if (url = config.x.platform_url)
+    uri = URI(url)
+    config.action_mailer.default_url_options = { host: uri.host, port: (uri.port unless uri.port == uri.default_port), protocol: uri.scheme }.compact
+  end
   # Development only lets in localhost; storefronts in containers call it by their name for it,
   # and Stripe and Printify by its public one (a tunnel's). (An empty list lets every host in, so
   # production's is left alone.)
