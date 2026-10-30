@@ -22,11 +22,12 @@ class CheckoutsController < ApplicationController
     render :new, status: :unprocessable_entity
   end
 
-  # The totals again for the address being filled in (Printify's shipping depends on it).
+  # The totals again for the address being filled in (Printify's shipping depends on it), with the
+  # email typed so far: the shop keeps it on the cart for one reminder if the buyer leaves.
   def shipping
     return redirect_to(new_checkout_path) unless turbo_frame_request?
 
-    quote = storefront.quote(current_cart.token, **params.permit(*SHIPPING_FIELDS).to_h.symbolize_keys.compact_blank)
+    quote = storefront.quote(current_cart.token, **params.permit(*SHIPPING_FIELDS, :email).to_h.symbolize_keys.compact_blank)
     render partial: "checkouts/totals", locals: { quote:, payment_method: params[:payment_method] }
   end
 

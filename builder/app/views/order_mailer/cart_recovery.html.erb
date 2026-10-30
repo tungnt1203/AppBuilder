@@ -1,0 +1,13 @@
+<h1><%= t(".heading") %></h1>
+<p><%= t(".intro") %></p>
+
+<ul>
+  <% @items.each do |item| %>
+    <li><%= item.quantity %> × <%= [ item.variant.product.title, item.variant.title ].compact_blank.join(" – ") %></li>
+  <% end %>
+</ul>
+
+<p><%= email_button t(".finish"), @url %></p>
+<% if @store.contact_email.present? %>
+  <p><%= t(".questions", email: @store.contact_email) %></p>
+<% end %>

@@ -1,5 +1,6 @@
 # A buyer's cart in a shop, which the storefront keeps by its token (the Storefront API's carts).
-# Carts nobody has touched for a while are cleared by Cart::CleanupJob.
+# Carts nobody has touched for a while are cleared by Cart::CleanupJob. The email the buyer types at
+# checkout is kept on it, for one reminder when they leave without ordering (Cart::RecoveryJob).
 class Cart < ApplicationRecord
   acts_as_tenant :shop
 
@@ -9,6 +10,19 @@ class Cart < ApplicationRecord
   has_secure_token :token, length: 32
 
   scope :abandoned, -> { where(updated_at: ...30.days.ago) }
+  # Left at checkout a while ago, with the buyer's email, not reminded yet and not ordered.
+  scope :to_remind, ->(after: 2.hours, within: 1.day) {
+    where.not(email: nil).where(recovery_sent_at: nil, updated_at: within.ago..after.ago)
+      .where.not(id: Order.where.not(cart_id: nil).select(:cart_id))
+  }
+
+  normalizes :email, with: ->(email) { email.strip.downcase }
+
+  # The email typed at checkout, when it is one.
+  def remember_email(email)
+    email = email.to_s.strip.downcase
+    update_columns(email:) if email.match?(EMAIL_FORMAT) && email.length <= 254 && email != self.email
+  end
 
   # Adds up to what's in stock: the cart never asks for more of a variant than it has, across
   # all its lines. The same variant with different text the buyer typed (properties) is its own line.

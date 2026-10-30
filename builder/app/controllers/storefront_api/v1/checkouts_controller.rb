@@ -8,8 +8,11 @@ class StorefrontApi::V1::CheckoutsController < StorefrontApi::V1::BaseController
   FIELDS = %i[ email phone shipping_name shipping_address1 shipping_address2 shipping_city shipping_region
     shipping_postal_code shipping_country note payment_method ].freeze
 
+  # The email typed so far stays on the cart, for one reminder if the buyer leaves (not from the
+  # builder's preview).
   def quote
     checkout = build_checkout
+    checkout.cart.remember_email(params[:email]) unless api_key.preview?
     checkout.validate
     render json: { checkout: json.checkout(checkout), problems: field_errors(checkout).presence }
   end

@@ -26,6 +26,9 @@ shared: &shared
   request_reviews:
     class: Order::RequestReviewsJob
     schedule: every day at 10am
+  remind_left_carts:
+    class: Cart::RecoveryJob
+    schedule: every hour at minute 15
   clear_abandoned_carts:
     class: Cart::CleanupJob
     schedule: every day at 4am

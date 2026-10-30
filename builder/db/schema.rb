@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -123,6 +123,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_110000) do
     t.string "discount_code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "email"
+    t.datetime "recovery_sent_at"
     t.index ["shop_id", "updated_at"], name: "index_carts_on_shop_id_and_updated_at"
     t.index ["shop_id"], name: "index_carts_on_shop_id"
     t.index ["token"], name: "index_carts_on_token", unique: true

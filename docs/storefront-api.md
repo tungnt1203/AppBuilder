@@ -59,7 +59,7 @@ What a shop's storefront calls to show the shop and take its orders. It runs on 
 | `DELETE /v1/carts/:token/items/:id` | Take a line out |
 | `POST /v1/carts/:token/discount` | Apply `{ code }` |
 | `DELETE /v1/carts/:token/discount` | Remove the code |
-| `POST /v1/checkouts/quote` | What the cart comes to for the address so far: `{ checkout, problems }` |
+| `POST /v1/checkouts/quote` | What the cart comes to for the address so far: `{ checkout, problems }`. An `email` sent with it stays on the cart, for one reminder email if the buyer leaves without ordering (link: the storefront's `/cart/restore/:token`) |
 | `POST /v1/checkouts` | Place the order (Idempotency-Key) |
 | `GET /v1/orders/:token` | The buyer's order. A card order not paid yet is checked with Stripe first |
 | `POST /v1/orders/:token/payment` | The card payment for the Payment Element (Idempotency-Key) |

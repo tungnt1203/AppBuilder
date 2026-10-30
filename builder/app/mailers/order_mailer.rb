@@ -28,6 +28,16 @@ class OrderMailer < ApplicationMailer
       subject: t(".subject", app: order.shop.name)
   end
 
+  # A buyer left at checkout with their email typed (Cart::RecoveryJob): their cart, and a link
+  # that opens it again in the storefront.
+  def cart_recovery(cart)
+    @cart, @store = cart, Store.current
+    @items = cart.buyable_items
+    @url = cart.shop.storefront_url("/cart/restore/#{cart.token}")
+    mail to: cart.email, from: from_shop(cart.shop), reply_to: @store.contact_email.presence,
+      subject: t(".subject", app: cart.shop.name)
+  end
+
   # A few days after the order arrived (Order::RequestReviewsJob): how do they like it? Links to
   # the order's review page.
   def review_request(order)

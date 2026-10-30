@@ -197,6 +197,8 @@ en:
     products:
       description: Everything %{app} sells.
   carts:
+    restore:
+      gone: That cart isn't kept any more. Here's what's in yours now.
     show:
       title: Your cart
       quantity: Quantity
@@ -228,7 +230,7 @@ en:
     new:
       title: Checkout
       contact: Contact
-      email_hint: For your order confirmation and shipping updates.
+      email_hint: For your order confirmation and shipping updates (and one reminder if you leave before ordering).
       phone_hint: Optional, for the delivery driver.
       phone_required_hint: The carrier needs it to deliver your order.
       choose_region: Choose…

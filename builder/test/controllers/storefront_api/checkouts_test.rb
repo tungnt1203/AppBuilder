@@ -12,6 +12,35 @@ class StorefrontApi::CheckoutsTest < ActionDispatch::IntegrationTest
     api :post, storefront_api_cart_items_path(@cart), params: { variant_id: variants(:tee_black_s).id, quantity: 2 }
   end
 
+  test "a buyer who typed their email and left gets one reminder of their cart, unless they ordered" do
+    api :post, quote_storefront_api_checkouts_path, params: { cart_token: @cart, email: " Jo@Example.com ", shipping_country: "US" }
+    cart = ActsAsTenant.with_tenant(shops(:cats)) { Cart.find_by!(token: @cart) }
+    assert_equal "jo@example.com", cart.email
+
+    travel 3.hours do
+      assert_enqueued_emails(1) { Cart::RecoveryJob.perform_now }
+      assert_no_enqueued_emails { Cart::RecoveryJob.perform_now }
+    end
+    mail = ActsAsTenant.with_tenant(shops(:cats)) { OrderMailer.cart_recovery(cart.reload).message }
+    assert_equal [ "jo@example.com" ], mail.to
+    assert_includes mail.text_part.body.to_s, "2 × Cat Mom Tee – Black / S"
+    assert_includes mail.text_part.body.to_s, "/cart/restore/#{@cart}"
+
+    ordered = api(:post, storefront_api_carts_path)["cart"]["token"]
+    api :post, storefront_api_cart_items_path(ordered), params: { variant_id: variants(:tee_black_s).id }
+    api :post, quote_storefront_api_checkouts_path, params: { cart_token: ordered, email: "jo@example.com" }
+    api :post, storefront_api_checkouts_path, params: ADDRESS.merge(cart_token: ordered, payment_method: "manual"), headers: { "Idempotency-Key" => "k1" }
+    travel(3.hours) { Cart::RecoveryJob.perform_now }
+    assert_nil ActsAsTenant.with_tenant(shops(:cats)) { Cart.find_by!(token: ordered).recovery_sent_at }, "it became an order"
+  end
+
+  test "the preview's carts are never reminded" do
+    @api_key = api_key_for(kind: "preview")
+    cart = api(:post, storefront_api_carts_path)["cart"]["token"]
+    api :post, quote_storefront_api_checkouts_path, params: { cart_token: cart, email: "jo@example.com" }
+    assert_nil ActsAsTenant.with_tenant(shops(:cats)) { Cart.find_by!(token: cart).email }
+  end
+
   test "quotes what the cart comes to, and what's missing" do
     body = api(:post, quote_storefront_api_checkouts_path, params: { cart_token: @cart, shipping_country: "US" })
     assert_response :success

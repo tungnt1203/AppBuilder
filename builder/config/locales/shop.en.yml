@@ -225,6 +225,12 @@ en:
       intro: You left before paying, so we kept your order for you. It's here whenever you're ready, for the next day.
       finish: Finish your order (%{total})
       questions: Questions? Write to %{email}.
+    cart_recovery:
+      subject: "%{app}: you left something in your cart"
+      heading: Still thinking it over?
+      intro: You were nearly done. Your cart is kept as you left it, with what you added to each item.
+      finish: Back to your cart
+      questions: Questions? Write to %{email}.
     lookup:
       subject: "%{app}: your orders"
       heading: Your orders at %{app}

@@ -246,6 +246,23 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_equal %w[ facebook ], steps.map { |step| step[:source] }.uniq
   end
 
+  test "the email typed at checkout goes with the totals, and the reminder's link brings the cart back" do
+    post cart_items_path, params: { variant_id: 101 }
+    get shipping_checkout_path(email: "robin@example.com", shipping_country: "US"), headers: { "Turbo-Frame" => "totals" }
+    assert_equal "robin@example.com", @platform.requests.select { |name, _| name == :quote }.last.last[:email]
+
+    token = @platform.requests.find { |name, _| name == :add_to_cart }.last[:token]
+    reset!
+    get cart_restore_path(token)
+    assert_redirected_to cart_path
+    follow_redirect!
+    assert_select "a[href=?]", new_checkout_path
+
+    get cart_restore_path("nope")
+    follow_redirect!
+    assert_select "#alert", /isn't kept any more/
+  end
+
   test "crawlers aren't visitors" do
     get root_path, headers: { "User-Agent" => "facebookexternalhit/1.1" }
     assert_empty @platform.requests.select { |name, _| name == :record_visit }

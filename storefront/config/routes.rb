@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   resource :cart, only: :show do
     resource :discount, only: %i[ create destroy ], module: :carts
   end
+  get "cart/restore/:token", to: "carts/restores#show", as: :cart_restore
   resources :cart_items, only: %i[ create update destroy ]
   resources :uploads, only: :create
   resource :checkout, only: %i[ new create ] do

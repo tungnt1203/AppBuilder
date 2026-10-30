@@ -1,11 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Reloads the checkout's totals when the address or the way to pay changes: shipping from
-// Printify depends on where the order goes.
+// Reloads the checkout's totals when the address or the way to pay changes (shipping from
+// Printify depends on where the order goes), or the email (kept on the cart for one reminder).
 export default class extends Controller {
   static targets = [ "frame" ]
   static values = { url: String }
-  static fields = [ "shipping_country", "shipping_region", "shipping_postal_code", "payment_method" ]
+  static fields = [ "email", "shipping_country", "shipping_region", "shipping_postal_code", "payment_method" ]
 
   refresh(event) {
     const name = event.target.name?.match(/^checkout\[(\w+)\]$/)?.[1]
