@@ -1,4 +1,8 @@
-<%= page_header t(".title") %>
+<%= page_header t(".title") do %>
+  <%= link_to shop_admin_orders_path(format: :csv, filter: @filter, q: params[:q].presence), class: button_classes(:secondary), data: { turbo: false } do %>
+    <%= icon "download", size: 16 %> <%= t(".export") %>
+  <% end %>
+<% end %>
 
 <%= tabs do %>
   <%= tab_to t(".all"), shop_admin_orders_path(q: params[:q].presence) %>

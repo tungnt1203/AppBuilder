@@ -1,0 +1,45 @@
+<%# Sales by day over the report's period: one bar a day from the baseline, the day's sales and
+    orders on hover or focus, the highest day marked on the scale, and the same as a table. %>
+<% days = report.by_day %>
+<% top = days.map(&:sales_cents).max %>
+<%= card class: "mb-6" do %>
+  <div class="flex items-baseline justify-between gap-4">
+    <h2 class="text-sm font-semibold text-ink"><%= t(".title") %></h2>
+    <% if top.positive? %><p class="text-xs text-muted"><%= t(".best", amount: money(top, currency)) %></p><% end %>
+  </div>
+  <% if top.zero? %>
+    <p class="mt-4 text-sm text-muted"><%= t(".empty", count: report.days) %></p>
+  <% else %>
+    <div class="relative mt-6">
+      <span class="absolute inset-x-0 top-0 border-t border-dashed border-line" aria-hidden="true"></span>
+      <ol class="relative flex h-40 items-end <%= days.size > 40 ? "gap-px" : "gap-0.5" %>" aria-hidden="true">
+        <% days.each_with_index do |day, index| %>
+          <li class="group relative flex h-full flex-1 items-end justify-center">
+            <span class="block w-full max-w-6 rounded-t-[4px] <%= day.sales_cents.positive? ? "bg-ink group-hover:opacity-80" : "bg-line" %>"
+                  style="height: <%= day.sales_cents.positive? ? [ day.sales_cents * 100.0 / top, 2 ].max.round(1) : 0.75 %>%"></span>
+            <span class="pointer-events-none absolute bottom-full z-10 mb-2 hidden w-max <%= "left-0" if index < days.size / 5 %> <%= "right-0" if index >= days.size * 4 / 5 %> rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs shadow-md group-hover:block">
+              <span class="block text-muted"><%= l(day.date, format: :long) %></span>
+              <span class="block font-semibold text-ink tabular-nums"><%= money(day.sales_cents, currency) %> · <%= t(".orders", count: day.orders) %></span>
+            </span>
+          </li>
+        <% end %>
+      </ol>
+    </div>
+    <div class="mt-2 flex justify-between text-xs text-muted" aria-hidden="true">
+      <span><%= l(days.first.date, format: :short) %></span>
+      <span><%= l(days.last.date, format: :short) %></span>
+    </div>
+    <details class="mt-4 text-sm">
+      <summary class="cursor-pointer text-xs text-muted hover:text-ink"><%= t(".as_table") %></summary>
+      <table class="mt-3 w-full text-left text-sm">
+        <thead class="text-xs text-muted"><tr><th class="py-1 font-medium"><%= t(".day") %></th><th class="py-1 text-right font-medium"><%= t(".sales") %></th><th class="py-1 text-right font-medium"><%= t(".orders_header") %></th></tr></thead>
+        <tbody class="divide-y divide-line">
+          <% days.reverse_each do |day| %>
+            <% next if day.orders.zero? %>
+            <tr><td class="py-1.5 text-ink"><%= l(day.date, format: :long) %></td><td class="py-1.5 text-right tabular-nums text-ink"><%= money(day.sales_cents, currency) %></td><td class="py-1.5 text-right tabular-nums text-muted"><%= day.orders %></td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </details>
+  <% end %>
+<% end %>

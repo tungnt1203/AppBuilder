@@ -60,6 +60,7 @@ Rails.application.routes.draw do
       resources :artwork, only: :destroy, module: :products
       resource :print_file, only: :show, module: :products
       resource :print_area, only: :create, module: :products
+      resource :duplicate, only: :create, module: :products
     end
     resource :demo_products, only: %i[ create destroy ]
     resources :clipart_sets, path: "clipart" do
@@ -71,6 +72,7 @@ Rails.application.routes.draw do
     resources :promotions, only: %i[ index new create ] do
       resource :cancellation, only: :create, module: :promotions
     end
+    resources :customers, only: %i[ index show ]
     resources :orders, only: %i[ index show update ] do
       scope module: :orders do
         resource :payment, only: :create

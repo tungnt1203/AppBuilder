@@ -10,7 +10,7 @@ module Pagination
 
   private
     def paginate(scope, per: 24)
-      total = scope.count
+      total = scope.count(:all) # :all, as a scope may select more than its columns
       total = total.size if total.is_a?(Hash) # grouped scopes count per group
       number = params[:page].to_i.clamp(1, [ (total.to_f / per).ceil, 1 ].max)
       Page.new(records: scope.limit(per).offset((number - 1) * per), number:, per:, total:)

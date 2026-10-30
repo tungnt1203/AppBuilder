@@ -2,6 +2,7 @@
   <% if @product.active? %>
     <%= link_to t(".view"), storefront_url("/products/#{@product.slug}"), class: button_classes(:secondary), target: "_blank" %>
   <% end %>
+  <%= button_to shop_admin_product_duplicate_path(@product), class: button_classes(:secondary) do %><%= icon "copy", size: 16 %> <%= t(".duplicate") %><% end %>
   <%= button_to t(".delete"), shop_admin_product_path(@product), method: :delete, class: button_classes(:danger),
         form: { data: { turbo_confirm: t(".confirm_delete", title: @product.title) } } %>
 <% end %>

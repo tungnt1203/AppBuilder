@@ -10,6 +10,25 @@ class ShopAdmin::ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path(shop_id: nil)
   end
 
+  test "duplicating a product makes a draft with its options, prices, photos and collections, not its Printify link" do
+    tee = products(:tee)
+    tee.images.attach(io: file_fixture("product.png").open, filename: "white.png", content_type: "image/png")
+    tee.update!(printify_product_id: "pf-1", option_images: { "White" => tee.images.last.id })
+    variants(:tee_white_m).update!(price_cents: 2900, inventory_quantity: 7)
+
+    assert_difference -> { Product.count } do
+      post shop_admin_product_duplicate_path(tee)
+    end
+    copy = Product.order(:id).last
+    assert_redirected_to edit_shop_admin_product_path(copy)
+    assert_equal [ "Cat Mom Tee (copy)", "cat-mom-tee-copy", "draft", nil ], [ copy.title, copy.slug, copy.status, copy.printify_product_id ]
+    assert_equal tee.variants.map { |variant| [ variant.option_values, variant.price_cents ] }, copy.variants.map { |variant| [ variant.option_values, variant.price_cents ] }
+    assert_equal 0, copy.variants.find_by(option1: "White", option2: "M").inventory_quantity
+    assert_equal tee.images.map(&:blob_id), copy.images.map(&:blob_id)
+    assert_equal({ "White" => copy.images.last.id }, copy.option_images)
+    assert_equal tee.collection_ids, copy.collection_ids
+  end
+
   test "an admin adds demo products to an empty shop, sees they're there, and removes them" do
     sign_in_as users(:member)
     Product.destroy_all

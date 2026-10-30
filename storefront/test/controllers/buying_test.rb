@@ -222,6 +222,15 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_no_match(/"name":"purchase"/, css_select("#tracking-events").text)
   end
 
+  test "the order says where the buyer came from: the last ad click or utm_source, with or without pixels" do
+    get root_path(utm_source: "Newsletter")
+    get root_path(ttclid: "abc123")
+    post cart_items_path, params: { variant_id: 101 }
+    post checkout_path, params: { checkout: ADDRESS.merge(payment_method: "manual") }
+    sent = @platform.requests.find { |name, _| name == :place_order }.last
+    assert_equal({ source: "tiktok" }, sent[:attribution].to_h.symbolize_keys)
+  end
+
   test "a buyer reviews what they got once it shipped" do
     post cart_items_path, params: { variant_id: 101 }
     post checkout_path, params: { checkout: ADDRESS.merge(payment_method: "manual") }

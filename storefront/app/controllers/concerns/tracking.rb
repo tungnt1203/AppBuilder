@@ -9,7 +9,11 @@ module Tracking
   included do
     helper_method :tracking_events
     before_action :remember_meta_click, if: -> { params[:fbclid].present? }
+    before_action :remember_source, if: -> { params.values_at(*SOURCE_CLICKS.keys, :utm_source).any?(&:present?) }
   end
+
+  # An ad network's click id in the address, for where the buyer came from.
+  SOURCE_CLICKS = { fbclid: "facebook", ttclid: "tiktok", gclid: "google" }.freeze
 
   private
     # A visit from a Meta ad (?fbclid=…) keeps the click in Meta's _fbc cookie, as the pixel does,
@@ -22,12 +26,21 @@ module Tracking
       cookies[:_fbc] = { value: "fb.1.#{(Time.current.to_f * 1000).to_i}.#{fbclid}", expires: 90.days, same_site: :lax }
     end
 
-    # The buyer's browser, kept on the order at checkout for Meta to match the purchase to an ad.
+    # Where the visit came from (the last ad or link with utm_source), for the owner's sales by
+    # source in the admin: kept 30 days, as ad networks count a click.
+    def remember_source
+      source = SOURCE_CLICKS.find { |key, _| params[key].present? }&.last || params[:utm_source].to_s.downcase.first(40)
+      cookies[:_src] = { value: source, expires: 30.days, same_site: :lax } if source.match?(/\A[\w.-]+\z/)
+    end
+
+    # Kept on the order at checkout: where the buyer came from, and their browser for Meta to match
+    # the purchase to an ad.
     def tracking_attribution
-      return {} unless current_shop.pixels&.meta
+      source = { source: cookies[:_src] }.compact_blank
+      return source unless current_shop.pixels&.meta
 
       { fbp: cookies[:_fbp], fbc: cookies[:_fbc], ip: request.remote_ip,
-        user_agent: request.user_agent.to_s.first(500), url: request.referer.to_s.first(500) }.compact_blank
+        user_agent: request.user_agent.to_s.first(500), url: request.referer.to_s.first(500), **source }.compact_blank
     end
 
     # track :add_to_cart, items: [ tracked_variant(product, variant, 2) ], redirect: true

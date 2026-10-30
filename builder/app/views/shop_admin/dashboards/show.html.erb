@@ -28,14 +28,105 @@
   <% end %>
 <% end %>
 
+<%# What's waiting on someone, only when something is. %>
+<% if @pending_count.positive? || @to_ship_count.positive? %>
+  <div class="mb-6 flex flex-wrap gap-3">
+    <% { "to_ship" => @to_ship_count, "pending" => @pending_count }.each do |filter, count| %>
+      <% next if count.zero? %>
+      <%= link_to shop_admin_orders_path(filter:), class: "inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink hover:border-ink" do %>
+        <%= icon filter == "to_ship" ? "package" : "clock", size: 16 %> <%= t(".waiting.#{filter}", count:) %> <%= icon "arrow-right", size: 14, class: "text-muted" %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+  <h2 class="text-sm font-semibold text-ink"><%= t(".period_title", count: @report.days) %></h2>
+  <nav class="flex gap-1 rounded-full border border-line bg-surface p-1 text-sm" aria-label="<%= t(".period") %>">
+    <% ShopReport::PERIODS.each do |key, days| %>
+      <%= link_to t(".days", count: days), shop_admin_root_path(period: key),
+            class: class_names("rounded-full px-3 py-1", key == @report.period ? "bg-ink text-canvas" : "text-muted hover:text-ink"),
+            "aria-current": (key == @report.period ? "page" : nil) %>
+    <% end %>
+  </nav>
+</div>
+
+<% totals = @report.totals %>
 <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-  <%= stat money(@sales_30_days, @store.currency), t(".sales"), hint: t(".last_30_days") %>
-  <%= stat @orders_30_days, t(".orders"), hint: t(".today", count: @orders_today) %>
-  <%= link_to shop_admin_orders_path(filter: "pending"), class: "block" do %>
-    <%= stat @pending_count, t(".awaiting_payment") %>
+  <% [ [ :sales, money(totals.sales_cents, @store.currency), :sales_cents ],
+       [ :orders, number_with_delimiter(totals.orders), :orders ],
+       [ :average, money(totals.average_cents, @store.currency), :average_cents ],
+       [ :left, money(totals.left_cents, @store.currency), :left_cents ] ].each do |key, value, measure| %>
+    <% change = @report.change(measure) %>
+    <div class="rounded-xl border border-line bg-surface p-5">
+      <p class="text-sm text-muted"><%= t(".kpi.#{key}") %></p>
+      <p class="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums"><%= value %></p>
+      <p class="mt-1 flex items-center gap-1 text-xs text-muted">
+        <% if change %>
+          <%= icon change.negative? ? "arrow-down-right" : "arrow-up-right", size: 13, class: "text-ink" %>
+          <span><%= change >= 4 ? t(".times", times: (change + 1).round, count: @report.days) : t(".change", percent: number_to_percentage(change.abs * 100, precision: 0), count: @report.days) %></span>
+        <% elsif key == :left %>
+          <%= t(".kpi.left_hint") %>
+        <% elsif key == :orders %>
+          <%= t(".today", count: @orders_today) %>
+        <% else %>
+          <%= t(".no_before", count: @report.days) %>
+        <% end %>
+      </p>
+    </div>
   <% end %>
-  <%= link_to shop_admin_orders_path(filter: "to_ship"), class: "block" do %>
-    <%= stat @to_ship_count, t(".to_ship") %>
+</div>
+
+<%= render "shop_admin/dashboards/sales_chart", report: @report, currency: @store.currency %>
+
+<div class="mb-6 grid gap-6 lg:grid-cols-2">
+  <%= card do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".top_products") %></h2>
+    <% top = @report.top_products %>
+    <% if top.any? %>
+      <% most = top.first.sales_cents.nonzero? || 1 %>
+      <ol class="mt-4 space-y-3">
+        <% top.each do |line| %>
+          <li>
+            <div class="flex items-baseline justify-between gap-4 text-sm">
+              <span class="min-w-0 truncate text-ink"><%= line.title %></span>
+              <span class="shrink-0 tabular-nums text-ink"><%= money(line.sales_cents, @store.currency) %></span>
+            </div>
+            <div class="mt-1.5 flex items-center gap-3">
+              <span class="h-1.5 flex-1 rounded-full bg-surface-muted"><span class="block h-full rounded-full bg-ink" style="width: <%= (line.sales_cents * 100.0 / most).round(1) %>%"></span></span>
+              <span class="w-16 shrink-0 text-right text-xs text-muted"><%= t(".sold", count: line.quantity) %></span>
+            </div>
+          </li>
+        <% end %>
+      </ol>
+    <% else %>
+      <p class="mt-4 text-sm text-muted"><%= t(".nothing_sold") %></p>
+    <% end %>
+  <% end %>
+
+  <%= card do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".sources") %></h2>
+    <% sources = @report.sources %>
+    <% if sources.any? %>
+      <% most = sources.first[1].nonzero? || 1 %>
+      <ul class="mt-4 space-y-3">
+        <% sources.each do |source, sales, count| %>
+          <li>
+            <div class="flex items-baseline justify-between gap-4 text-sm">
+              <span class="min-w-0 truncate text-ink"><%= t(".source_names.#{source}", default: source.humanize) %></span>
+              <span class="shrink-0 tabular-nums text-ink"><%= money(sales, @store.currency) %></span>
+            </div>
+            <div class="mt-1.5 flex items-center gap-3">
+              <span class="h-1.5 flex-1 rounded-full bg-surface-muted"><span class="block h-full rounded-full bg-ink" style="width: <%= (sales * 100.0 / most).round(1) %>%"></span></span>
+              <span class="w-16 shrink-0 text-right text-xs text-muted"><%= t(".source_orders", count:) %></span>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+      <p class="mt-4 text-xs text-muted"><%= t(".sources_hint") %></p>
+    <% else %>
+      <p class="mt-4 text-sm text-muted"><%= t(".sources_empty") %></p>
+    <% end %>
   <% end %>
 </div>
 

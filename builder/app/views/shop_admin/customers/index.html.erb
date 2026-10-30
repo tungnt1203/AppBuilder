@@ -1,0 +1,49 @@
+<%= page_header t(".title"), t(".description") do %>
+  <% if @page.total.positive? %>
+    <%= link_to shop_admin_customers_path(format: :csv, sort: @sort, q: params[:q].presence), class: button_classes(:secondary), data: { turbo: false } do %>
+      <%= icon "download", size: 16 %> <%= t(".export") %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= toolbar do %>
+  <%= form_with url: shop_admin_customers_path, method: :get, class: "flex w-full max-w-sm gap-2" do |form| %>
+    <%= form.hidden_field :sort, value: @sort %>
+    <%= form.search_field :q, value: params[:q], placeholder: t(".search"), aria: { label: t(".search") } %>
+    <%= form.button t(".search_button"), type: "submit", name: nil, class: button_classes(:secondary) %>
+  <% end %>
+  <nav class="flex gap-1 rounded-full border border-line bg-surface p-1 text-sm" aria-label="<%= t(".sort") %>">
+    <% Buyer::SORTS.each_key do |sort| %>
+      <%= link_to t(".sorts.#{sort}"), shop_admin_customers_path(sort:, q: params[:q].presence),
+            class: class_names("rounded-full px-3 py-1", sort == @sort ? "bg-ink text-canvas" : "text-muted hover:text-ink"),
+            "aria-current": (sort == @sort ? "page" : nil) %>
+    <% end %>
+  </nav>
+<% end %>
+
+<% if @page.records.any? %>
+  <%= card padded: false do %>
+    <div class="hidden grid-cols-[minmax(0,1fr)_6rem_7rem_8rem] gap-4 border-b border-line px-6 py-3 text-xs text-muted sm:grid">
+      <span><%= t(".columns.customer") %></span><span class="text-right"><%= t(".columns.orders") %></span>
+      <span class="text-right"><%= t(".columns.spent") %></span><span class="text-right"><%= t(".columns.last_order") %></span>
+    </div>
+    <ul class="divide-y divide-line">
+      <% @page.records.each do |buyer| %>
+        <li>
+          <%= link_to shop_admin_customer_path(buyer.latest_token), class: "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-4 py-3.5 hover:bg-surface-muted sm:grid-cols-[minmax(0,1fr)_6rem_7rem_8rem] sm:px-6" do %>
+            <span class="min-w-0">
+              <span class="block truncate text-sm font-medium text-ink"><%= buyer.customer_name %></span>
+              <span class="block truncate text-xs text-muted"><%= buyer.email %></span>
+            </span>
+            <span class="text-right text-sm tabular-nums text-ink sm:order-none"><span class="sm:hidden text-muted"><%= t(".orders_short", count: buyer.orders_count) %></span><span class="hidden sm:inline"><%= buyer.orders_count %></span></span>
+            <span class="text-sm tabular-nums text-ink sm:text-right"><%= money(buyer.spent_cents) %></span>
+            <span class="text-right text-xs text-muted sm:text-sm"><%= l(buyer.last_order_at.to_date, format: :short) %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+  <%= render "ui/pagination", page: @page %>
+<% else %>
+  <%= empty_state t(".empty_title"), params[:q].present? ? t(".no_results", query: params[:q]) : t(".empty_description") %>
+<% end %>

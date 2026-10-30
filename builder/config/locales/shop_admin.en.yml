@@ -63,15 +63,49 @@ en:
       show:
         title: Dashboard
         welcome: Welcome back, %{name}.
-        sales: Sales
-        last_30_days: Last 30 days, paid orders
-        orders: Orders
+        waiting:
+          to_ship:
+            one: 1 order to ship
+            other: "%{count} orders to ship"
+          pending:
+            one: 1 order awaiting payment
+            other: "%{count} orders awaiting payment"
+        period: Period
+        period_title:
+          one: Today
+          other: Last %{count} days
+        days:
+          one: 1 day
+          other: "%{count} days"
+        kpi:
+          sales: Sales
+          orders: Orders
+          average: Average order
+          left: Left after printing
+          left_hint: Less tax and Printify's bills; payment fees aside
+        change: "%{percent} on the %{count} days before"
+        times: "%{times}× the %{count} days before"
+        no_before: Nothing in the %{count} days before
+        top_products: Best sellers
+        sold:
+          one: 1 sold
+          other: "%{count} sold"
+        nothing_sold: Products show up here once they sell.
+        sources: Where buyers came from
+        source_names:
+          facebook: Facebook & Instagram ads
+          tiktok: TikTok ads
+          google: Google ads
+          direct: Direct & other
+        source_orders:
+          one: 1 order
+          other: "%{count} orders"
+        sources_hint: From the ad or link (utm_source) the buyer last clicked to reach the shop.
+        sources_empty: Sales show up here by the ad or link that brought each buyer.
         today:
           zero: None today
           one: 1 today
           other: "%{count} today"
-        awaiting_payment: Awaiting payment
-        to_ship: To ship
         recent_orders: Recent orders
         all_orders: All orders
         no_orders: No orders yet. They show up here as soon as someone checks out.
@@ -86,6 +120,52 @@ en:
           printify: Connect Printify to import products and print orders (if Printify prints them)
           printify_done: Printify connected
           view: Look at your shop
+      sales_chart:
+        title: Sales by day
+        best: "Best day %{amount}"
+        empty: No sales in the last %{count} days yet. Each day's sales show here.
+        orders:
+          one: 1 order
+          other: "%{count} orders"
+        as_table: Show as a table
+        day: Day
+        sales: Sales
+        orders_header: Orders
+    customers:
+      index:
+        title: Customers
+        description: Everyone who ordered, by the email on their orders.
+        export: Export CSV
+        search: Email or name
+        search_button: Search
+        sort: Sort
+        sorts:
+          recent: Recent
+          spent: Top spenders
+          orders: Most orders
+        columns:
+          customer: Customer
+          orders: Orders
+          spent: Spent
+          last_order: Last order
+        orders_short:
+          one: 1 order
+          other: "%{count} orders"
+        empty_title: No customers yet
+        empty_description: Buyers show up here with their first order.
+        no_results: Nothing matches "%{query}".
+      show:
+        email: Email
+        spent: Spent
+        spent_hint: Paid orders, less refunds
+        orders: Orders
+        average: "%{amount} an order"
+        since: First order
+        last: "Last on %{date}"
+        order_history: Orders
+        contact: Contact
+        ships_to: Ships to
+        from_latest: From their latest order
     orders:
       invalid_transition: Order %{number} is %{status} now, so that can't be done.
       index:
@@ -99,6 +179,7 @@ en:
           closed: Closed
         search: Number, email or name
         search_button: Search
+        export: Export CSV
         empty_title: No orders yet
         empty_description: Orders show up here as soon as someone checks out.
         no_results: Nothing matches "%{query}".
@@ -292,6 +373,7 @@ en:
         title: Add product
       edit:
         view: View on site
+        duplicate: Duplicate
         delete: Delete
         confirm_delete: Delete %{title}? Orders that have it keep their copy.
       form:
@@ -453,6 +535,9 @@ en:
       images:
         destroy:
           notice: The photo was removed.
+      duplicates:
+        create:
+          notice: A draft copy, with the same photos, options and prices. Rename it and put it on sale when it's ready.
       artwork:
         destroy:
           notice: The picture was removed.
@@ -867,6 +952,7 @@ en:
       dashboard: Dashboard
       shop: Shop
       orders: Orders
+      customers: Customers
       products: Products
       collections: Collections
       discounts: Discounts

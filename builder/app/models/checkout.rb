@@ -21,7 +21,8 @@ class Checkout
   attribute :payment_method, :string
 
   attr_reader :cart, :order
-  # The buyer's browser, for Meta (see Order#attribution): { "fbp", "fbc", "ip", "user_agent", "url" }.
+  # Where the buyer came from and their browser, for Meta (see Order#attribution, #source):
+  # { "source", "fbp", "fbc", "ip", "user_agent", "url" }.
   attr_accessor :customer, :attribution
   # Placed in a storefront's preview: a test order (Order.real leaves it out).
   attr_accessor :test

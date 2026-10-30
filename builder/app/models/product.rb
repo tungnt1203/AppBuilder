@@ -174,6 +174,26 @@ class Product < ApplicationRecord
     self.option_images = map.to_h.each_with_object({}) { |(id, value), images| images[value.to_s] = id.to_i if value.present? }
   end
 
+  # A draft to start a product like this one from: the same options, prices, photos (each still
+  # showing its option value), pictures to pick from, fields buyers fill in and collections. Not
+  # its Printify link (Printify prints the original), its stock count or its reviews.
+  VARIANT_COPIED = %w[ sku price_cents compare_at_price_cents cost_cents available track_inventory ].freeze
+
+  def duplicate!
+    copy = dup
+    copy.assign_attributes(title: "#{title} (copy)", slug: nil, status: "draft", published_at: nil, printify_product_id: nil, demo: false)
+    transaction do
+      copy.save!
+      originals = variants.index_by(&:option_values)
+      copy.variants.each { |variant| originals[variant.option_values]&.then { |original| variant.update!(original.attributes.slice(*VARIANT_COPIED)) } }
+      photo_ids = images.to_h { |image| [ image.id, copy.images.attach(image.blob).attachments.last.id ] }
+      copy.update!(option_images: option_images.transform_values { |id| photo_ids[id.to_i] }.compact)
+      artwork.each { |picture| copy.artwork.attach(picture.blob) }
+      copy.collection_ids = collection_ids
+    end
+    copy
+  end
+
   # The size option's name when the product has one ("Size"), where a size guide goes.
   def size_option_name
     option_names.find { |name| name.match?(/\bsize\b/i) }

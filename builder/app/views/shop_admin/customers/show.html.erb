@@ -1,0 +1,30 @@
+<%= page_header @buyer.customer_name, breadcrumbs: [ [ t("shop_admin.customers.index.title"), shop_admin_customers_path ], [ @buyer.customer_name, nil ] ] do %>
+  <%= mail_to @buyer.email, class: button_classes(:secondary) do %><%= icon "mail", size: 16 %> <%= t(".email") %><% end %>
+<% end %>
+
+<div class="mb-6 grid gap-4 sm:grid-cols-3">
+  <%= stat money(@buyer.spent_cents), t(".spent"), hint: t(".spent_hint") %>
+  <%= stat @buyer.orders_count, t(".orders"), hint: (t(".average", amount: money(@buyer.spent_cents / @buyer.orders_count)) if @buyer.orders_count > 1) %>
+  <%= stat l(@buyer.first_order_at.to_date, format: :long), t(".since"), hint: t(".last", date: l(@buyer.last_order_at.to_date, format: :long)) %>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+  <%= card padded: false do %>
+    <h2 class="border-b border-line px-6 py-4 text-sm font-semibold text-ink"><%= t(".order_history") %></h2>
+    <ul class="divide-y divide-line">
+      <%= render partial: "shop_admin/orders/order", collection: @orders %>
+    </ul>
+  <% end %>
+
+  <% latest = @orders.first %>
+  <%= card do %>
+    <h2 class="text-sm font-semibold text-ink"><%= t(".contact") %></h2>
+    <p class="mt-3 text-sm text-ink"><%= mail_to @buyer.email, nil, class: link_classes %></p>
+    <% if latest.phone.present? %><p class="mt-1 text-sm text-ink"><%= latest.phone %></p><% end %>
+    <h2 class="mt-6 text-sm font-semibold text-ink"><%= t(".ships_to") %></h2>
+    <address class="mt-3 text-sm not-italic leading-relaxed text-muted">
+      <%= safe_join(latest.shipping_address_lines, tag.br) %>
+    </address>
+    <p class="mt-1 text-xs text-muted"><%= t(".from_latest") %></p>
+  <% end %>
+</div>

@@ -37,6 +37,6 @@ class StorefrontApi::V1::CheckoutsController < StorefrontApi::V1::BaseController
     # The buyer's browser, which the storefront passes on for Meta's Conversions API (it calls
     # from its server, so the request's own address isn't the buyer's).
     def attribution
-      params.fetch(:attribution, {}).permit(:fbp, :fbc, :ip, :user_agent, :url).to_h.compact_blank
+      params.fetch(:attribution, {}).permit(:fbp, :fbc, :ip, :user_agent, :url, :source).to_h.compact_blank
     end
 end

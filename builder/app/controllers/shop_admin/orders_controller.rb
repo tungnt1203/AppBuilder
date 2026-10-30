@@ -14,8 +14,16 @@ class ShopAdmin::OrdersController < ShopAdmin::BaseController
     @filter = FILTERS.key?(params[:filter]) ? params[:filter] : nil
     scope = Order.search(params[:q]).newest_first.includes(:line_items)
     scope = scope.merge(FILTERS[@filter].call) if @filter
-    @page = paginate(scope, per: 50)
-    @counts = FILTERS.transform_values { |filter| filter.call.count }
+
+    respond_to do |format|
+      format.html do
+        @page = paginate(scope, per: 50)
+        @counts = FILTERS.transform_values { |filter| filter.call.count }
+      end
+      format.csv do
+        send_data Spreadsheet.orders(scope.real), filename: "#{current_shop.subdomain}-orders-#{Date.current}.csv", type: "text/csv"
+      end
+    end
   end
 
   def show
