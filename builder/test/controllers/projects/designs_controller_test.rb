@@ -164,6 +164,30 @@ class Projects::DesignsControllerTest < ActionDispatch::IntegrationTest
     assert_empty setting.reload.values
   end
 
+  test "a choice shows with its options in plain words, and the owner's pick becomes the shop's value" do
+    @project.update!(shop: shops(:cats))
+    @project.path.join("config").mkpath
+    @project.path.join("config/theme_settings.yml").write(<<~YAML)
+      - key: product_layout
+        type: select
+        label: Product page layout
+        options: [ split, flip ]
+        option_labels: { split: "Photos on the left" }
+        default: split
+    YAML
+
+    get project_design_path(@project)
+    assert_select "select[name='content[texts][product_layout]']" do
+      assert_select "option[value=split][selected]", "Photos on the left"
+      assert_select "option[value=flip]", "Flip"
+    end
+
+    patch content_project_design_path(@project), params: { content: { texts: { product_layout: "flip" } } }
+    assert_equal({ "product_layout" => "flip" }, ActsAsTenant.with_tenant(shops(:cats)) { ThemeSetting.current.values })
+    patch content_project_design_path(@project), params: { content: { texts: { product_layout: "sideways" } } }
+    assert_select "p.alert", /pick one of the choices/
+  end
+
   test "finding a stock photo and using it: the theme's default, a credit and a version" do
     @project.update!(shop: shops(:cats))
     @project.path.join("config").mkpath

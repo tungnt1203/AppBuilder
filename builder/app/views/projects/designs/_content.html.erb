@@ -1,4 +1,4 @@
-<%# Words and photos: the shop's text and image settings, as Settings → Theme keeps them. %>
+<%# Words, photos and choices: the shop's text, image and select settings, as Settings → Theme keeps them. %>
 <%= form_with scope: :content, url: content_project_design_path(@project), method: :patch, multipart: true, class: "design-group",
       data: { controller: "design-content", action: "design:picked@window->design-content#find" } do |form| %>
   <h2 class="design-heading">Words and photos</h2>
@@ -26,6 +26,11 @@
         <button type="submit" form="photo_search_<%= field.key %>" class="btn btn-ghost h-8 px-3 text-sm">Find</button>
       </div>
       <%= turbo_frame_tag "photos_#{field.key}" %>
+    <% elsif field.type == "select" %>
+      <label class="design-field">
+        <span class="design-label"><%= field.label %></span>
+        <%= select_tag "content[texts][#{field.key}]", options_for_select(field.options, @content.text(field)), id: "content_text_#{field.key}", class: "field h-9 text-sm" %>
+      </label>
     <% else %>
       <label class="design-field">
         <span class="design-label"><%= field.label %></span>

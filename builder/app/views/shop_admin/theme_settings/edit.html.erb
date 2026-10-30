@@ -37,7 +37,7 @@
             <%= file_field_tag "theme_setting[images][#{key}]", accept: "image/*", class: field_classes %>
           <% elsif field["type"] == "select" %>
             <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
-            <%= select_tag "theme_setting[values][#{key}]", options_for_select(field["options"], @theme_setting.resolved[key]), class: field_classes %>
+            <%= select_tag "theme_setting[values][#{key}]", options_for_select(field["options"].map { |option| [ field.dig("option_labels", option) || option.humanize, option ] }, @theme_setting.resolved[key]), class: field_classes %>
           <% elsif field["type"] == "color" %>
             <%= label_tag key, field["label"], class: "block text-sm font-medium text-ink" %>
             <div class="flex items-center gap-2" data-controller="color-field">

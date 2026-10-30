@@ -96,14 +96,14 @@ class ThemeSetting < ApplicationRecord
     true
   end
 
-  # Some text fields and photos only, the others as they are (the studio's Design tab). A blank
+  # Some text fields, choices and photos only, the others as they are (the studio's Design tab). A blank
   # text goes back to the theme's default.
   def change_values(changes, uploads: {})
     errors.clear
     proposed = values.stringify_keys
     changes.to_h.each do |key, raw|
       field = schema_field(key.to_s)
-      next unless field && %w[ text richtext ].include?(field["type"])
+      next unless field && %w[ text richtext select ].include?(field["type"])
 
       if raw.blank?
         proposed.delete(key.to_s)
@@ -151,6 +151,15 @@ class ThemeSetting < ApplicationRecord
     end
   end
 
+  # A select's options as [label, value] pairs, labelled by option_labels when the file has them
+  # ({ split: "Photos on the left" }); nil for other types.
+  def self.labelled_options(raw)
+    return unless raw["type"].to_s == "select"
+
+    labels = raw["option_labels"].is_a?(Hash) ? raw["option_labels"].transform_keys(&:to_s) : {}
+    Array(raw["options"]).map { |option| option.to_s.strip }.compact_blank.uniq.map { |option| [ labels[option].to_s.presence || option.humanize, option ] }
+  end
+
   def self.field_from(raw)
     key = raw["key"].to_s
     type = raw["type"].to_s
@@ -162,6 +171,7 @@ class ThemeSetting < ApplicationRecord
       return if options.empty?
 
       field["options"] = options
+      field["option_labels"] = labelled_options(raw).to_h.invert
     end
     default = default_for(type, raw["default"], field["options"])
     field["default"] = default unless default.nil?

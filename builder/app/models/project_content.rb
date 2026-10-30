@@ -1,11 +1,12 @@
-# The storefront's words and photos the owner changes in the studio's Design tab: its text and
-# image settings (config/theme_settings.yml), saved as the shop's values, the same ones Settings
+# The storefront's words, photos and choices the owner changes in the studio's Design tab: its
+# text, image and select settings (config/theme_settings.yml), saved as the shop's values, the same ones Settings
 # → Theme in the admin keeps. The preview reads them at once; so does the live shop.
 class ProjectContent
   FILE = "config/theme_settings.yml"
-  TYPES = %w[ text richtext image ]
+  TYPES = %w[ text richtext image select ]
 
-  Field = Data.define(:key, :type, :label, :default)
+  # options: a select's [label, value] pairs (option_labels in the file names them).
+  Field = Data.define(:key, :type, :label, :default, :options)
 
   attr_reader :errors
 
@@ -25,7 +26,8 @@ class ProjectContent
       definitions.filter_map do |raw|
         next unless raw.is_a?(Hash) && TYPES.include?(raw["type"].to_s) && raw["key"].to_s.match?(ThemeSetting::KEY)
 
-        Field.new(key: raw["key"].to_s, type: raw["type"].to_s, label: raw["label"].to_s.presence || raw["key"].to_s.humanize, default: raw["default"])
+        Field.new(key: raw["key"].to_s, type: raw["type"].to_s, label: raw["label"].to_s.presence || raw["key"].to_s.humanize, default: raw["default"],
+          options: ThemeSetting.labelled_options(raw))
       end
     end
   rescue Psych::Exception

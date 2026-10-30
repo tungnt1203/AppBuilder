@@ -33,6 +33,7 @@
   type: select
   label: Product page layout on wide screens
   options: [ split, flip, thumbs ]
+  option_labels: { split: "Photos on the left", flip: "Photos on the right", thumbs: "Thumbnails beside the photo" }
   default: split
 - key: show_benefits
   type: boolean

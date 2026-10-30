@@ -54,7 +54,8 @@ in, but build the storefront in English (see "Language").
 
 - `config/theme_settings.yml` declares what the owner can change in the admin (Settings → Theme):
   `- { key: hero_title, type: text, label: Home page headline, default: "…" }`. Types: `text`,
-  `richtext`, `image`, `color`, `url`, `boolean`, `select` (with `options`). Read them with
+  `richtext`, `image`, `color`, `url`, `boolean`, `select` (with `options`, and `option_labels`
+  naming each in plain words). The Design tab shows the text, image and select ones. Read them with
   `theme_setting(:hero_title)`. Give every one a sensible default (the preview shows the defaults
   until the storefront is published); a key you rename loses what the owner set. When you tell
   the owner where to change them, say the studio's **Design tab** (it works before publishing;
