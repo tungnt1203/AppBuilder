@@ -34,7 +34,7 @@
         <%= render "layouts/theme_toggle", class: "btn btn-ghost btn-icon h-8 w-8 @max-[30rem]:hidden" %>
         <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="history">
           <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Version history" aria-label="Version history"
-                   data-tour-step="5" data-tour-title="Nothing is lost"
+                   data-tour-step="6" data-tour-title="Nothing is lost"
                    data-tour-text="Every change is saved as a version. Open this to go back to any of them."><%= icon :history %></summary>
           <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-xl p-2 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[26rem] lg:right-auto lg:left-0">
             <div id="versions"><%= render "projects/versions", project: @project %></div>
@@ -47,7 +47,9 @@
           </div>
         </details>
         <details class="relative" data-controller="keep-open" data-keep-open-dismissible-value="true" id="share">
-          <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Share" aria-label="Share"><%= icon :share %></summary>
+          <summary class="btn btn-ghost btn-icon h-8 w-8 list-none" title="Share" aria-label="Share"
+                   data-tour-step="7" data-tour-title="See it on your phone"
+                   data-tour-text="Make a preview link here: it comes with a QR code, so you can open the shop on your phone the way buyers from ads will."><%= icon :share %></summary>
           <div class="popover glass glass-frost fixed inset-x-3 top-16 z-30 rounded-xl p-4 sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[24rem] lg:right-auto lg:left-0">
             <%= render "projects/share", project: @project %>
           </div>
@@ -57,7 +59,7 @@
         <% end %>
         <%= button_to "Publish", project_deployments_path(@project), disabled: !@project.publishable?, class: "btn btn-primary h-8 px-3.5",
               title: publish_hint(@project),
-              form: { data: { tour_step: 6, tour_title: "Put it online",
+              form: { data: { tour_step: 8, tour_title: "Put it online",
                               tour_text: "Once the first build is done, Publish gives your app its own address. Publish again whenever you want the latest changes live." } } %>
       </header>
 
@@ -148,7 +150,9 @@
           <button type="button" role="tab" aria-selected="true" data-preview-target="tab" data-preview-tab-param="preview" data-action="preview#showTab"><%= icon :play, size: 13 %>Preview</button>
           <button type="button" role="tab" aria-selected="false" data-preview-target="tab" data-preview-tab-param="code" data-action="preview#showTab"><%= icon :code, size: 14 %>Code</button>
           <button type="button" role="tab" aria-selected="false" data-preview-target="tab" data-preview-tab-param="design" data-action="preview#showTab"
-                  title="Colors, fonts and shape, without a turn of the agent"><%= icon :contrast, size: 14 %>Design</button>
+                  title="The look, colors, fonts, words and photos, without a turn of the agent"
+                  data-tour-step="5" data-tour-title="Try on a look"
+                  data-tour-text="The shop's look, its colors and fonts, words and photos. Try another look on in seconds, for free, and keep it or go back."><%= icon :contrast, size: 14 %>Design</button>
         </div>
         <div class="hidden md:block"><%= render "projects/devices" %></div>
         <span class="url ml-1 hidden min-w-0 flex-1 truncate md:block"><%= @project.preview_url %></span>

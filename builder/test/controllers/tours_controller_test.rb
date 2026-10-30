@@ -6,7 +6,9 @@ class ToursControllerTest < ActionDispatch::IntegrationTest
   test "the tour starts by itself until it has been seen once" do
     get project_path(projects(:shop))
     assert_select "[data-tour-auto-value=true]"
-    assert_select "[data-tour-step]", 6
+    assert_equal (1..8).map(&:to_s), css_select("[data-tour-step]").map { |stop| stop["data-tour-step"] }.sort_by(&:to_i), "each stop once, in order"
+    assert_select "[data-tour-step='5'][data-tour-title='Try on a look']"
+    assert_select "[data-tour-step='7'][data-tour-title='See it on your phone']"
 
     post tour_path
     assert_response :no_content
