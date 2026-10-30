@@ -20,6 +20,10 @@
     the buyer goes down the options and types what they add. %>
 <%# Where the buyer is: the shop, the product's first collection, the product (one line, clipped on phones). %>
 <% collection = @product.collections.first %>
+<%# How the page is laid out on wide screens (theme setting product_layout): split, the photos on
+    the left as Shopify's themes have them; flip, the words first and the photos on the right;
+    thumbs, the thumbnails in a column beside the photo. Phones stack them all the same. %>
+<% layout = theme_setting(:product_layout).presence_in(%w[ split flip thumbs ]) || "split" %>
 <nav class="page-width pt-4 md:pt-6" aria-label="<%= t("ui.breadcrumbs") %>">
   <ol class="flex min-w-0 items-center gap-1.5 text-xs text-muted">
     <li class="shrink-0"><%= link_to t(".home"), root_path, class: "hover:text-ink hover:underline" %></li>
@@ -29,9 +33,9 @@
     <li class="truncate text-ink" aria-current="page"><%= @product.title %></li>
   </ol>
 </nav>
-<div class="page-width grid gap-6 pt-4 pb-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:gap-14 md:pt-6 md:pb-10" data-controller="sticky-buy<%= " personalize" if personalized %>" <%= tag.attributes(data: { personalize_upload_url: (uploads_path if personalized) }) %> data-action="variant-picker:change->sticky-buy#select">
-  <div class="min-w-0 md:sticky md:top-28 md:self-start" data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
-    <div class="relative aspect-4/5 overflow-hidden rounded-xl" data-personalize-frame>
+<div class="page-width grid gap-6 pt-4 pb-6 <%= layout == "flip" ? "md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]" : "md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]" %> md:gap-14 md:pt-6 md:pb-10" data-layout="<%= layout %>" data-controller="sticky-buy<%= " personalize" if personalized %>" <%= tag.attributes(data: { personalize_upload_url: (uploads_path if personalized) }) %> data-action="variant-picker:change->sticky-buy#select">
+  <div class="min-w-0 md:sticky md:top-28 md:self-start <%= "md:order-2" if layout == "flip" %> <%= "md:flex md:flex-row-reverse md:items-start md:gap-3" if layout == "thumbs" && images.many? %>" data-controller="gallery" data-action="variant-picker:image@window->gallery#showImage">
+    <div class="relative aspect-4/5 overflow-hidden rounded-xl md:min-w-0 md:flex-1" data-personalize-frame>
       <% if images.any? %>
         <button type="button" class="block size-full cursor-zoom-in" data-action="gallery#zoom" aria-label="<%= t(".zoom") %>">
           <%= image_tag @product.image_for(@variant).url(:large), alt: @product.title, class: "size-full bg-surface-muted object-cover", data: { gallery_target: "main", personalize_target: ("photo" if placed.any?) } %>
@@ -58,7 +62,7 @@
       <% end %>
     </div>
     <% if images.many? %>
-      <div class="relative mt-3 flex gap-2 overflow-x-auto p-1 [scrollbar-width:none]">
+      <div class="relative mt-3 flex gap-2 overflow-x-auto p-1 [scrollbar-width:none] <%= "md:mt-0 md:max-h-[min(70vh,44rem)] md:shrink-0 md:flex-col md:overflow-x-visible md:overflow-y-auto" if layout == "thumbs" %>">
         <% images.each_with_index do |image, index| %>
           <button type="button" class="size-16 shrink-0 overflow-hidden rounded-lg bg-surface-muted opacity-70 ring-ink ring-offset-2 ring-offset-canvas transition hover:opacity-100 aria-[current=true]:opacity-100 aria-[current=true]:ring-1 md:size-20"
                   aria-current="<%= index.zero? %>" aria-label="<%= t(".photo", number: index + 1) %>"

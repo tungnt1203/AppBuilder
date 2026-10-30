@@ -55,6 +55,22 @@ class CatalogTest < ActionDispatch::IntegrationTest
     assert_select "#buy [data-controller=quantity] input[name=quantity][value='1'][min='1']"
   end
 
+  test "the product page's layout is the theme's, the photo frame and its personalization the same in each" do
+    get product_path("cat-tee")
+    assert_select "[data-layout=split] [data-personalize-frame]"
+
+    %w[ flip thumbs ].each do |layout|
+      @platform.shop_data["theme_settings"] = { "product_layout" => layout }
+      get product_path("cat-tee")
+      assert_select "[data-layout=#{layout}] [data-personalize-frame] img[data-gallery-target=main]"
+      assert_select "[data-layout=#{layout}] form#buy"
+    end
+
+    @platform.shop_data["theme_settings"] = { "product_layout" => "sideways" }
+    get product_path("cat-tee")
+    assert_select "[data-layout=split]"
+  end
+
   test "what the owner sets in the theme: logo, brand color, button, socials; benefits they can turn off" do
     @platform.shop_data["theme_settings"] = { "logo" => "https://cdn.example/logo.png", "brand_color" => "#7a1f2b", "hero_button" => "See the cats",
       "instagram_url" => "https://instagram.com/chubbycat", "show_benefits" => false }

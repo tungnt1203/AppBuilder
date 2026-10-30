@@ -101,6 +101,7 @@ or keep the layout's own when it is the draw's:
 |---|---|---|
 | header | `centered` (logo over its links), `search` (a search field across the middle), `pill` (a floating rounded bar) | `<%= render "headers/pill" %>` |
 | footer | `mast` (the shop's name set as wide as the page), `colophon` (one ruled block, set small) | `<%= render "footers/mast" %>` |
+| product page | `split` (photos left, the layout's), `flip` (the words first, photos right), `thumbs` (thumbnails in a column beside the photo) | the `product_layout` default in `config/theme_settings.yml` (the owner can change it) |
 
 Pick each variant from the draw (a catalogue shape takes `index`, a stage takes `feature`, a
 bento shape takes `bento`), never the same three as the layout's home page, and build the draw's

@@ -29,6 +29,11 @@
 - key: story_image
   type: image
   label: Home page story photo (the story shows when there is one)
+- key: product_layout
+  type: select
+  label: Product page layout on wide screens
+  options: [ split, flip, thumbs ]
+  default: split
 - key: show_benefits
   type: boolean
   label: Show free shipping, delivery and secure checkout under the home page photo
