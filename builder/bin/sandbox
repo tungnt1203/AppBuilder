@@ -1,16 +1,34 @@
 #!/usr/bin/env bash
 # The Docker sandbox projects run in when SANDBOX=docker (see sandbox/Dockerfile).
 #
-#   bin/sandbox build     build (or rebuild) the image
+#   bin/sandbox build     build (or rebuild) the image, then fill the shared gems
+#   bin/sandbox gems      install the storefront template's gems in the shared volume (the only
+#                         way in: projects' containers read it, and add gems to their own)
 #   bin/sandbox list      the projects' containers
 #   bin/sandbox prune     remove every project container (they're made again when needed)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 image="${SANDBOX_IMAGE:-appbuilder-sandbox}"
 
+volume="${SANDBOX_GEMS_VOLUME:-appbuilder-gems}"
+repo="$(cd .. && pwd)"
+
+# The template's Gemfile in a scratch copy (its lockfile gains Linux, the container's platform),
+# its blocks beside it as in an app.
+gems() {
+  docker run --rm --entrypoint sh --user dev --volume "$volume:/usr/local/bundle" --volume "$repo:/repo:ro" "$image" -c '
+    set -e
+    mkdir -p /tmp/w/storefront/vendor/blocks && cd /tmp/w/storefront
+    cp /repo/storefront/Gemfile /repo/storefront/Gemfile.lock .
+    cp -R /repo/blocks/storefront_kit vendor/blocks/
+    bundle lock --add-platform aarch64-linux x86_64-linux > /dev/null
+    bundle install --quiet'
+}
+
 case "${1:-}" in
-  build) docker build --file sandbox/Dockerfile --build-arg "UID=$(id -u)" --tag "$image" . ;;
+  build) docker build --file sandbox/Dockerfile --build-arg "UID=$(id -u)" --tag "$image" . && gems ;;
+  gems)  gems ;;
   list)  docker ps --all --filter label=appbuilder.project --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' ;;
   prune) docker ps --all --quiet --filter label=appbuilder.project | xargs -r docker rm --force ;;
-  *)     sed -n '2,7p' "$0"; exit 1 ;;
+  *)     sed -n '2,9p' "$0"; exit 1 ;;
 esac

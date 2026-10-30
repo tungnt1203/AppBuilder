@@ -36,4 +36,7 @@ done
 ip6tables -P OUTPUT DROP 2>/dev/null || true
 ip6tables -A OUTPUT -o lo -j ACCEPT 2>/dev/null || true
 
+# The project's own gems volume (Sandbox::Docker) starts out root's.
+mkdir -p /home/dev/gems && chown dev:dev /home/dev/gems
+
 exec setpriv --reuid=dev --regid=dev --init-groups --inh-caps=-all --bounding-set=-all -- "$@"

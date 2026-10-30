@@ -23,8 +23,8 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY runner/index.mjs ./
 
 # A plain user with the host user's id, so files it writes in the mounted project
-# belong to the owner of the folder. Gems are shared by every project through a volume
-# mounted at /usr/local/bundle, so it owns that too.
+# belong to the owner of the folder. The gems every project uses are in a volume at
+# /usr/local/bundle that bin/sandbox gems fills as dev, read-only in the projects' containers.
 ARG UID=1000
 RUN useradd --create-home --uid $UID --shell /bin/bash dev && \
     mkdir -p /home/dev/.claude && chown -R dev:dev /home/dev /usr/local/bundle

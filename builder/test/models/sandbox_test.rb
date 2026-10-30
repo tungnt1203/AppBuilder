@@ -50,7 +50,21 @@ class SandboxTest < ActiveSupport::TestCase
     assert_includes create.each_cons(2).to_a, [ "--publish", "127.0.0.1:4001:4001" ]
     assert_includes create.each_cons(2).to_a, [ "--volume", "#{path}:#{path}" ]
     assert_includes create.each_cons(2).to_a, [ "--name", "appbuilder-nha-khoa" ]
-    assert_equal [ "docker", "exec", "--user", "dev", "--workdir", path, "appbuilder-nha-khoa", "bin/rails", "db:prepare" ], host.commands.last
+    assert_equal [ "docker", "exec", "--user", "dev", "--workdir", path, "appbuilder-nha-khoa", "env", "-u", "BUNDLE_PATH", "bin/rails", "db:prepare" ], host.commands.last
+  end
+
+  test "the shared gems are read-only to a project, the gems it adds go to a volume of its own" do
+    host = FakeHost.new(nil)
+    sandbox = Sandbox::Docker.new(@project, host:)
+    sandbox.run("bin/rails", "db:prepare")
+
+    create = host.commands.find { |command| command[1] == "run" }
+    assert_includes create.each_cons(2).to_a, [ "--volume", "#{Rails.configuration.x.sandbox_gems_volume}:/usr/local/bundle:ro" ]
+    assert_includes create.each_cons(2).to_a, [ "--volume", "appbuilder-gems-nha-khoa:/home/dev/gems" ]
+    assert_includes create.each_cons(2).to_a, [ "--env", "GEM_HOME=/home/dev/gems" ]
+
+    sandbox.remove
+    assert_includes host.commands, [ "docker", "volume", "rm", "--force", "appbuilder-gems-nha-khoa" ]
   end
 
   test "the container walls its network off: root and NET_ADMIN only for the entrypoint's firewall, the Platform's port let through" do
@@ -101,7 +115,7 @@ class SandboxTest < ActiveSupport::TestCase
 
     Sandbox::Docker.new(@project, host:).remove
 
-    assert_equal [ "docker", "rm", "--force", "appbuilder-nha-khoa" ], host.commands.last
+    assert_includes host.commands, [ "docker", "rm", "--force", "appbuilder-nha-khoa" ]
     assert_not home.dirname.exist?
   end
 

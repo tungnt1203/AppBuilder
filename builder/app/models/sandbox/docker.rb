@@ -1,12 +1,16 @@
 # Runs a project's code in a container of its own (see Sandbox): the project's folder is
-# mounted at the same path, gems are shared by all projects through a volume, and the
+# mounted at the same path, the gems every project uses come from a shared volume it can read but
+# not change (bin/sandbox gems fills it), the gems it adds go to a volume of its own, and the
 # agent's Claude settings and sessions are kept on the host so they outlive the container.
 # The preview's port is published on this machine's loopback only.
 class Sandbox::Docker
   LABEL = "appbuilder.project"
   # Containers made before the network wall (sandbox/entrypoint.sh) are made again.
   WALL = "appbuilder.wall"
-  WALL_VERSION = "1"
+  WALL_VERSION = "2" # 2: the shared gems read-only, a gems volume per project
+  # The shared volume's gems (installed there with BUNDLE_PATH=/usr/local/bundle, for Ruby 3.3).
+  SHARED_GEMS = "/usr/local/bundle/ruby/3.3.0"
+  OWN_GEMS = "/home/dev/gems"
   RUNNING = "running"
 
   def initialize(project, host: ProjectShell.new(Rails.root))
@@ -34,6 +38,7 @@ class Sandbox::Docker
 
   def remove
     host.capture("docker", "rm", "--force", name)
+    host.capture("docker", "volume", "rm", "--force", gems_volume)
     FileUtils.rm_rf(home.dirname)
   end
 
@@ -132,7 +137,11 @@ class Sandbox::Docker
         # Root and NET_ADMIN for the entrypoint's firewall only; it hands over to dev without either.
         "--user", "root", "--cap-add", "NET_ADMIN", "--env", "SANDBOX_HOST_PORTS=#{platform_port}",
         "--publish", "127.0.0.1:#{@project.port}:#{@project.port}",
-        "--volume", "#{path}:#{path}", "--volume", "#{config.sandbox_gems_volume}:/usr/local/bundle",
+        "--volume", "#{path}:#{path}", "--volume", "#{config.sandbox_gems_volume}:/usr/local/bundle:ro", "--volume", "#{gems_volume}:#{OWN_GEMS}",
+        # Rubygems finds the shared gems and installs new ones in the project's own (Bundler too,
+        # once each command runs without the image's BUNDLE_PATH: see #exec).
+        "--env", "GEM_HOME=#{OWN_GEMS}", "--env", "GEM_PATH=#{OWN_GEMS}:#{SHARED_GEMS}", "--env", "BUNDLE_APP_CONFIG=#{OWN_GEMS}/.bundle",
+        "--env", "PATH=#{OWN_GEMS}/bin:/usr/local/bundle/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
         "--volume", "#{home}:/home/dev/.claude", *read_only_blocks(path), "--workdir", path,
         "--add-host", "host.docker.internal:host-gateway", # the Platform, for a storefront's preview
         "--cpus", config.sandbox_cpus.to_s, "--memory", config.sandbox_memory, "--pids-limit", "1024",
@@ -184,10 +193,15 @@ class Sandbox::Docker
       orphans.each { |slug| host.capture("docker", "rm", "--force", "appbuilder-#{slug}") }
     end
 
+    # Each command without the image's BUNDLE_PATH (Bundler then uses GEM_HOME and GEM_PATH; an
+    # environment variable can't be taken away when the container is made).
     def exec(command, env, interactive: false, detach: false)
       [ "docker", "exec", *("--interactive" if interactive), *("--detach" if detach),
-        "--user", "dev", *env.compact.keys.flat_map { |key| [ "--env", key ] }, "--workdir", @project.path.to_s, name, *command ]
+        "--user", "dev", *env.compact.keys.flat_map { |key| [ "--env", key ] }, "--workdir", @project.path.to_s, name,
+        "env", "-u", "BUNDLE_PATH", *command ]
     end
+
+    def gems_volume = "appbuilder-gems-#{@project.slug}"
 
     # The agent's ~/.claude: settings, sessions to resume, plans.
     def home
