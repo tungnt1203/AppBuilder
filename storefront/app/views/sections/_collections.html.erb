@@ -44,16 +44,19 @@
       <% end %>
     </ul>
   <% when "row" %>
-    <ul class="-mx-4 flex snap-x gap-5 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:flex-wrap md:justify-center md:gap-8 md:px-0">
-      <% collections.each do |collection| %>
-        <li class="shrink-0 snap-start">
-          <%= link_to collection_path(collection), class: "group flex w-24 flex-col items-center gap-2 text-center md:w-32" do %>
-            <span class="size-24 overflow-hidden rounded-full bg-surface-muted ring-1 ring-line md:size-32"><%= collection_image collection, class: "size-full" %></span>
-            <span class="text-sm text-ink underline-offset-4 group-hover:underline"><%= collection.title %></span>
-          <% end %>
-        </li>
-      <% end %>
-    </ul>
+    <div data-controller="rail">
+      <ul class="-mx-4 flex snap-x gap-5 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:flex-wrap md:justify-center md:gap-8 md:px-0" data-rail-target="list" data-action="scroll->rail#update">
+        <% collections.each do |collection| %>
+          <li class="shrink-0 snap-start">
+            <%= link_to collection_path(collection), class: "group flex w-24 flex-col items-center gap-2 text-center md:w-32" do %>
+              <span class="size-24 overflow-hidden rounded-full bg-surface-muted ring-1 ring-line md:size-32"><%= collection_image collection, class: "size-full" %></span>
+              <span class="text-sm text-ink underline-offset-4 group-hover:underline"><%= collection.title %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+      <%= render "ui/rail_controls" %>
+    </div>
   <% else %>
     <div data-controller="rail">
       <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0" data-rail-target="list" data-action="scroll->rail#update">

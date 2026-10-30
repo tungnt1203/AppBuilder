@@ -103,6 +103,10 @@ or keep the layout's own when it is the draw's:
 | footer | `mast` (the shop's name set as wide as the page), `colophon` (one ruled block, set small) | `<%= render "footers/mast" %>` |
 | product page | `split` (photos left, the layout's), `flip` (the words first, photos right), `thumbs` (thumbnails in a column beside the photo) | the `product_layout` default in `config/theme_settings.yml` (the owner can change it) |
 
+A row that runs past the edge on a phone (a rail, a carousel, tiles that become a grid on desktop)
+keeps its `rail` controller and `ui/rail_controls` under it when you restyle it, so it reads as
+more to swipe, not as cut off; a new row of cards gets them too.
+
 Pick each variant from the draw (a catalogue shape takes `index`, a stage takes `feature`, a
 bento shape takes `bento`), never the same three as the layout's home page, and build the draw's
 other sections (how it's made, the signature, the promise made concrete) in the page itself.
