@@ -44,7 +44,9 @@ module Tracking
     end
 
     # track :add_to_cart, items: [ tracked_variant(product, variant, 2) ], redirect: true
+    # Each event is also a step of the shop's funnel (Funnel), pixels or not.
     def track(name, items:, value_cents: nil, order: nil, redirect: false)
+      reach Funnel::EVENT_STEPS[name] if Funnel::EVENT_STEPS.key?(name)
       return unless current_shop.ad_tracking?
 
       value_cents ||= items.sum { |item| (item["price"] * 100).round * item["quantity"] }

@@ -231,6 +231,26 @@ class BuyingTest < ActionDispatch::IntegrationTest
     assert_equal({ source: "tiktok" }, sent[:attribution].to_h.symbolize_keys)
   end
 
+  test "the funnel hears each step once a day, as the visitor gets further, with where they came from" do
+    get root_path(fbclid: "abc")
+    get products_path
+    get product_path("cat-tee")
+    get product_path("cat-tee")
+    post cart_items_path, params: { variant_id: 101 }
+    get new_checkout_path
+
+    steps = @platform.requests.select { |name, _| name == :record_visit }.map(&:last)
+    assert_equal %w[ visit product cart checkout ], steps.map { |step| step[:step] }
+    assert_equal 1, steps.map { |step| step[:visitor] }.uniq.size
+    assert_match(/\A\h{32}\z/, steps.first[:visitor])
+    assert_equal %w[ facebook ], steps.map { |step| step[:source] }.uniq
+  end
+
+  test "crawlers aren't visitors" do
+    get root_path, headers: { "User-Agent" => "facebookexternalhit/1.1" }
+    assert_empty @platform.requests.select { |name, _| name == :record_visit }
+  end
+
   test "a buyer reviews what they got once it shipped" do
     post cart_items_path, params: { variant_id: 101 }
     post checkout_path, params: { checkout: ADDRESS.merge(payment_method: "manual") }

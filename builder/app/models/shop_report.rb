@@ -60,6 +60,15 @@ class ShopReport
       .map { |title, quantity, sales| Line.new(title, quantity.to_i, sales.to_i) }
   end
 
+  # How many visitors reached each step of the shop (Visit::STEPS) in the period, from a source
+  # or from all: { "visit" => 1200, "product" => 640, … }. A visitor counts once a day.
+  def funnel(source: nil)
+    visits = Visit.where(date: @from.to_date..@to.to_date)
+    visits = visits.where(source:) if source
+    reached = visits.group(:step).count
+    Visit::STEPS.each_with_index.to_h { |step, index| [ step, reached.sum { |number, count| number > index ? count : 0 } ] }
+  end
+
   Source = Data.define(:name, :sales_cents, :orders, :spent_cents) do
     def return_on_ad_spend = (sales_cents.fdiv(spent_cents) if spent_cents.positive?)
   end

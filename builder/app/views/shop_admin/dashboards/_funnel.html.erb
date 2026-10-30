@@ -1,0 +1,37 @@
+<%# From a visit to an order over the period: how many visitors reached each step, the share of
+    the step before that went on, and the biggest drop named, so the owner sees where buyers stop. %>
+<% funnel = report.funnel %>
+<%= card class: "mb-6" do %>
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <h2 class="text-sm font-semibold text-ink"><%= t(".title") %></h2>
+    <% if funnel["visit"].positive? %>
+      <p class="text-xs text-muted"><%= t(".overall", percent: number_to_percentage(funnel["purchase"] * 100.0 / funnel["visit"], precision: 1)) %></p>
+    <% end %>
+  </div>
+  <% if funnel["visit"].zero? %>
+    <p class="mt-4 text-sm text-muted"><%= t(".empty") %></p>
+  <% else %>
+    <% steps = funnel.to_a %>
+    <% drops = steps.each_cons(2).map { |(_, before), (step, count)| [ step, before.zero? ? 0 : 1 - count.fdiv(before) ] } %>
+    <% worst = drops.max_by(&:last) %>
+    <ol class="mt-5 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-5">
+      <% steps.each_with_index do |(step, count), index| %>
+        <li class="bg-surface p-4">
+          <p class="text-xs text-muted"><%= t(".steps.#{step}") %></p>
+          <p class="mt-1 text-xl font-semibold tabular-nums text-ink"><%= number_with_delimiter(count) %></p>
+          <div class="mt-2 h-1.5 rounded-full bg-surface-muted"><div class="h-full rounded-full bg-ink" style="width: <%= (count * 100.0 / funnel["visit"]).round(1) %>%"></div></div>
+          <% if index.positive? %>
+            <% before = steps[index - 1].last %>
+            <p class="mt-2 text-xs text-muted"><%= t(".went_on", percent: number_to_percentage(before.zero? ? 0 : count * 100.0 / before, precision: 0)) %></p>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+    <% if worst && worst.last.positive? %>
+      <p class="mt-4 flex items-start gap-2 text-sm text-ink">
+        <%= icon "circle-alert", size: 16, class: "mt-0.5 shrink-0 text-muted" %>
+        <span><%= t(".worst.#{worst.first}", percent: number_to_percentage(worst.last * 100, precision: 0)) %></span>
+      </p>
+    <% end %>
+  <% end %>
+<% end %>

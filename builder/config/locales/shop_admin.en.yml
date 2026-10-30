@@ -129,6 +129,22 @@ en:
           printify: Connect Printify to import products and print orders (if Printify prints them)
           printify_done: Printify connected
           view: Look at your shop
+      funnel:
+        title: From visit to order
+        overall: "%{percent} of visitors ordered"
+        empty: Visitors show up here, step by step, once your published shop has some (shops built from now on count them; the preview doesn't).
+        steps:
+          visit: Visited
+          product: Viewed a product
+          cart: Added to cart
+          checkout: Reached checkout
+          purchase: Ordered
+        went_on: "%{percent} of the step before"
+        worst:
+          product: "Most visitors leave before opening a product (%{percent}): the first screen and the photos are where to look."
+          cart: "Most product views don't go to the cart (%{percent}): look at the product page's price, photos and personalization."
+          checkout: "Many carts don't reach checkout (%{percent}): look at shipping costs and the free-shipping bar in the cart."
+          purchase: "Many checkouts don't end in an order (%{percent}): look at the shipping price at checkout and the ways to pay."
       sales_chart:
         title: Sales by day
         best: "Best day %{amount}"

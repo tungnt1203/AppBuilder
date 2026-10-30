@@ -51,6 +51,7 @@ What a shop's storefront calls to show the shop and take its orders. It runs on 
 | `GET /v1/pages/:slug` | A published page: text and questions |
 | `GET /v1/menus/:key` | A menu, such as `header`: its links |
 | `GET /v1/zip_codes/:zip` | A US ZIP code's city and state, to fill in checkout |
+| `POST /v1/visits` | A visitor got further today: `{ visitor, step, source }`, `step` one of `visit`, `product`, `cart`, `checkout`, `purchase`, `visitor` the storefront's random cookie id, `source` as in an order's attribution. 204; the admin's funnel counts each visitor's furthest step a day (not from the preview) |
 | `POST /v1/carts` | A new cart. Keep its `token` in the buyer's session |
 | `GET /v1/carts/:token` | The cart |
 | `POST /v1/carts/:token/items` | Add `{ variant_id, quantity, properties }`. `properties` is what the buyer typed for the product's buyer inputs (`{ "print_name": "Ada" }`). The same variant with different properties is its own line |
@@ -144,7 +145,7 @@ Only lines that can still be bought are there.
   `shipping_postal_code`, `shipping_country`
 - `note`
 - `payment_method` (`stripe` or `manual`)
-- `attribution: { fbp, fbc, ip, user_agent, url }` (the buyer's browser, for Meta's Conversions API)
+- `attribution: { source, fbp, fbc, ip, user_agent, url }` (where the buyer came from: `facebook`, `tiktok`, `google` or a utm_source, for the admin's sales by source; and the buyer's browser, for Meta's Conversions API)
 
 Answers `201 { order }` or `422` with `fields`.
 

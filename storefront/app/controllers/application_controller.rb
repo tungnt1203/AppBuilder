@@ -2,6 +2,7 @@
 # from the Platform through storefront_kit (Storefront: current_shop, current_cart, storefront).
 class ApplicationController < ActionController::Base
   include Storefront, Tracking
+  include Funnel # after Tracking, which remembers where the visit came from first
   # Every browser gets the site, older phones and in-app browsers (Facebook's, Instagram's) too:
   # a buyer from an ad on an iPhone a few years old must see the product, not a 406. Don't add
   # allow_browser here.

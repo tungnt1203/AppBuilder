@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -655,6 +655,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_100000) do
     t.index ["shop_id"], name: "index_variants_on_shop_id"
   end
 
+  create_table "visits", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.date "date", null: false
+    t.string "visitor", null: false
+    t.string "source", default: "direct", null: false
+    t.integer "step", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "date", "visitor"], name: "index_visits_on_shop_id_and_date_and_visitor", unique: true
+  end
+
   create_table "webhook_events", force: :cascade do |t|
     t.bigint "shop_id", null: false
     t.string "provider", null: false
@@ -734,6 +745,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_100000) do
   add_foreign_key "usages", "users"
   add_foreign_key "variants", "products"
   add_foreign_key "variants", "shops"
+  add_foreign_key "visits", "shops"
   add_foreign_key "webhook_events", "orders", on_delete: :nullify
   add_foreign_key "webhook_events", "shops"
 end

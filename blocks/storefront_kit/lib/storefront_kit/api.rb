@@ -83,6 +83,16 @@ module StorefrontKit
     # The buyer's orders by the emailed link's token; NotFound once it's expired.
     def order_lookup(token) = OrderLookup.new(client.get("order_lookups/#{escape(token)}")["order_lookup"])
 
+    # The visitor got further in the shop today, for the admin's funnel: step is "visit",
+    # "product", "cart", "checkout" or "purchase"; visitor a random id kept in a cookie. Never
+    # raises: counting mustn't stop a sale.
+    def record_visit(visitor:, step:, source: nil)
+      client.post("visits", { visitor:, step:, source: }.compact)
+      nil
+    rescue StandardError
+      nil
+    end
+
     # reviews: [{ product_slug:, rating:, body: }]
     def review_order(order_token, reviews:, author_name: nil)
       Review.wrap(client.post("orders/#{escape(order_token)}/reviews", { reviews:, author_name: }.compact)["reviews"])

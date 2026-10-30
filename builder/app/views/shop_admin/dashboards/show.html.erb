@@ -90,6 +90,8 @@
 
 <%= render "shop_admin/dashboards/sales_chart", report: @report, currency: @store.currency %>
 
+<%= render "shop_admin/dashboards/funnel", report: @report %>
+
 <div class="mb-6 grid gap-6 lg:grid-cols-2">
   <%= card do %>
     <h2 class="text-sm font-semibold text-ink"><%= t(".top_products") %></h2>

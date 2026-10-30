@@ -205,6 +205,11 @@ module StorefrontKit
         Record.new("id" => @form_submissions.size)
       end
 
+      def record_visit(visitor:, step:, source: nil)
+        record(:record_visit, { visitor:, step:, source: })
+        nil
+      end
+
       def variant(id) = Variant.new(find_variant(id).last)
 
       private
